@@ -6,6 +6,7 @@ import uvicorn
 from tienxuly import load_and_preprocess_data
 from constraint_based import generate_meal_plan
 from content_based import recommend_workout_routine
+from progressive_overload import suggest_progressive_overload
 from calorie_calculator import calculate_target_calories
 
 app = FastAPI(title="Gym & Diet Recommender API")
@@ -41,6 +42,15 @@ class WorkoutRequest(BaseModel):
     target_split: str
     target_level: str
     available_time_mins: int = 45
+
+
+class ProgressiveOverloadRequest(BaseModel):
+    exercise_name: str
+    current_weight: float
+    set_1_reps: int
+    set_2_reps: int
+    set_3_reps: int
+    difficulty: str
 
 
 @app.get("/api/health")
@@ -100,14 +110,42 @@ def get_workout_plan(req: WorkoutRequest):
 
         routine_list = routine_df.to_dict("records")
 
+        remaining_time = max(0, req.available_time_mins - total_time)
+
         return {
             "status": "success",
             "message": "Workout plan generated successfully!",
             "target_time": req.available_time_mins,
             "estimated_time": total_time,
+            "remaining_time": remaining_time,
             "total_exercises": len(routine_list),
+            "exercise_limit": {"Beginner": 5, "Intermediate": 7, "Pro": 9}.get(req.target_level, 7),
+            "note": (
+                "Remaining time can be used for warm-up, rest between sets, "
+                "cool-down or cardio."
+            ) if remaining_time > 0 else "",
             "data": routine_list,
         }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/progressive-overload")
+def get_progressive_overload(req: ProgressiveOverloadRequest):
+    try:
+        recommendation = suggest_progressive_overload(
+            current_weight=req.current_weight,
+            reps_per_set=[req.set_1_reps, req.set_2_reps, req.set_3_reps],
+            difficulty=req.difficulty,
+        )
+        return {
+            "status": "success",
+            "message": "Progressive overload recommendation generated.",
+            "exercise_name": req.exercise_name,
+            "data": recommendation,
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 

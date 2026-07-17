@@ -55,6 +55,27 @@ class ApiService {
     );
   }
 
+  Future<Map<String, dynamic>> recommendProgressiveOverload({
+    required String exerciseName,
+    required double currentWeight,
+    required int set1Reps,
+    required int set2Reps,
+    required int set3Reps,
+    required String difficulty,
+  }) {
+    return _post(
+      '/api/progressive-overload',
+      {
+        'exercise_name': exerciseName,
+        'current_weight': currentWeight,
+        'set_1_reps': set1Reps,
+        'set_2_reps': set2Reps,
+        'set_3_reps': set3Reps,
+        'difficulty': difficulty,
+      },
+    );
+  }
+
   Future<Map<String, dynamic>> _post(
     String path,
     Map<String, dynamic> body,

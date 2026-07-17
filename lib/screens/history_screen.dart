@@ -13,6 +13,7 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool loading = true;
   List<Map<String, dynamic>> meals = [];
   List<Map<String, dynamic>> workouts = [];
+  List<Map<String, dynamic>> workoutLogs = [];
 
   @override
   void initState() {
@@ -23,10 +24,12 @@ class HistoryScreenState extends State<HistoryScreen> {
   Future<void> refresh() async {
     final mealRows = await db.getMealHistory();
     final workoutRows = await db.getWorkoutHistory();
+    final logRows = await db.getWorkoutLogs();
     if (!mounted) return;
     setState(() {
       meals = mealRows;
       workouts = workoutRows;
+      workoutLogs = logRows;
       loading = false;
     });
   }
@@ -136,7 +139,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           Row(children: [
             Expanded(child: Text('HISTORY ARCHIVE', style: Theme.of(context).textTheme.headlineSmall)),
             IconButton(
-              onPressed: meals.isEmpty && workouts.isEmpty ? null : () async {
+              onPressed: meals.isEmpty && workouts.isEmpty && workoutLogs.isEmpty ? null : () async {
                 await db.clearAllHistory();
                 await refresh();
               },
@@ -179,6 +182,56 @@ class HistoryScreenState extends State<HistoryScreen> {
                   await refresh();
                 },
               ),
+            ),
+          )),
+
+          const SizedBox(height: 18),
+          const Text(
+            'PROGRESSIVE OVERLOAD LOGS',
+            style: TextStyle(
+              color: CyberColors.lime,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (workoutLogs.isEmpty)
+            const Text('No exercise logs yet.'),
+          ...workoutLogs.map((row) => Card(
+            child: ListTile(
+              leading: const Icon(
+                Icons.trending_up_rounded,
+                color: CyberColors.lime,
+              ),
+              title: Text('${row['exercise_name']}'),
+              subtitle: Text(
+                '${row['weight_kg']}kg • '
+                '${row['set_1_reps']}/${row['set_2_reps']}/${row['set_3_reps']} reps'
+                'Next: ${row['suggested_weight']}kg • target ${row['suggested_reps']} reps'
+                '${dateText(row['performed_at'] as String)}',
+              ),
+              isThreeLine: true,
+              trailing: IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () async {
+                  await db.deleteWorkoutLog(row['id'] as int);
+                  await refresh();
+                },
+              ),
+              onTap: () async {
+                await showDialog<void>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('${row['exercise_name']}'),
+                    content: Text('${row['suggestion_message']}'),
+                    actions: [
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           )),
         ],
