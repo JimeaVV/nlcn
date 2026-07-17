@@ -1,0 +1,97 @@
+name	muscle_group	equipment
+Barbell Bench Press	Chest	Barbell
+Incline bench press	Chest	Barbell
+Decline barbell bench press	Chest	Barbell
+Dumbbell Bench Press	Chest	Dumbbell
+Incline dumbbell bench press	Chest	Dumbbell
+Dumbbell Flyes	Chest	Dumbbell
+Incline Dumbbell Flyes	Chest	Dumbbell
+Cable Crossover	Chest	Cable
+Pushups	Chest	Body Only
+Chest dip	Chest	Other
+Machine chest press	Chest	Machine
+Machine chest fly	Chest	Machine
+Pullups	Lats	Body Only
+Chin-Up	Lats	Body Only
+Lat pull-down	Lats	Cable
+Close-grip pull-down	Lats	Cable
+Straight-Arm Pulldown	Lats	Cable
+Bent Over Barbell Row	Middle Back	Barbell
+One-Arm Dumbbell Row	Middle Back	Dumbbell
+T-Bar Row	Middle Back	Other
+Seated Cable Rows	Middle Back	Cable
+Machine seated row	Lats	Machine
+Barbell deadlift	Lower Back	Barbell
+Back extension	Lower Back	Body Only
+Military press	Shoulders	Barbell
+Barbell Shoulder Press	Shoulders	Barbell
+Seated Dumbbell Press	Shoulders	Dumbbell
+Arnold press	Shoulders	Dumbbell
+Dumbbell front raise	Shoulders	Dumbbell
+Dumbbell lateral raise	Shoulders	Dumbbell
+Side Lateral Raise	Shoulders	Dumbbell
+Seated rear delt fly	Shoulders	Dumbbell
+Standing face pull	Shoulders	Cable
+Barbell upright row	Shoulders	Barbell
+Machine shoulder press	Shoulders	Machine
+Barbell shrug	Traps	Barbell
+Standing dumbbell shrug	Traps	Dumbbell
+Barbell Curl	Biceps	Barbell
+EZ-Bar Curl	Biceps	E-Z Curl Bar
+Dumbbell Bicep Curl	Biceps	Dumbbell
+Hammer Curls	Biceps	Dumbbell
+Alternate Incline Dumbbell Curl	Biceps	Dumbbell
+Preacher Curl	Biceps	Barbell
+Concentration curl	Biceps	Dumbbell
+Standing Biceps Cable Curl	Biceps	Cable
+Cable rope hammer curl	Biceps	Cable
+Machine Bicep Curl	Biceps	Machine
+Close-grip bench press	Triceps	Barbell
+EZ-Bar Skullcrusher	Triceps	E-Z Curl Bar
+Seated triceps press	Triceps	Dumbbell
+Tricep Dumbbell Kickback	Triceps	Dumbbell
+Triceps Pushdown	Triceps	Cable
+Cable V-bar push-down	Triceps	Cable
+Rope overhead triceps extension	Triceps	Cable
+Parallel Bar Dip	Triceps	Body Only
+Bench Dips	Triceps	Body Only
+Machine Triceps Extension	Triceps	Machine
+Barbell back squat	Quadriceps	Barbell
+Barbell front squat	Quadriceps	Barbell
+Leg Press	Quadriceps	Machine
+Hack Squat	Quadriceps	Barbell
+Barbell walking lunge	Quadriceps	Barbell
+Dumbbell split squat	Quadriceps	Dumbbell
+Barbell Bulgarian split squat	Quadriceps	Barbell
+Goblet Squat	Quadriceps	Kettlebells
+Leg Extensions	Quadriceps	Machine
+Romanian Deadlift	Hamstrings	Barbell
+Stiff-Legged Deadlift	Hamstrings	Barbell
+Lying Leg Curls	Hamstrings	Machine
+Seated Leg Curl	Hamstrings	Machine
+Glute Ham Raise	Hamstrings	Machine
+Barbell Hip Thrust	Glutes	Barbell
+Glute bridge	Glutes	Body Only
+Cable Pull-Through	Glutes	Cable
+Thigh adductor	Adductors	Machine
+Thigh abductor	Abductors	Machine
+Kettlebell swing	Abdominals*	Kettlebells
+Standing barbell calf raise	Calves	Barbell
+Seated Calf Raise	Calves	Machine
+Calf Press On The Leg Press Machine	Calves	Machine
+Machine seated calf raise	Calves	Machine
+Crunch	Abdominals	Body Only
+Sit-up	Abdominals	Body Only
+Elbow plank	Abdominals	Body Only
+Hanging leg raise	Abdominals	Body Only
+Ab Roller	Abdominals	Other
+Standing cable crunch	Abdominals	Cable
+Russian twist	Abdominals	Body Only
+Decline Crunch	Abdominals	Body Only
+Mountain climber	Abdominals	Body Only
+Ab bicycle	Abdominals	Body Only
+V-up	Abdominals	Body Only
+Palms-up wrist curl over bench	Forearms	Barbell
+Palms-down wrist curl over bench	Forearms	Barbell
+Dumbbell farmer's walk	Forearms	Other
+Cable Wrist Curl	Forearms	Cable

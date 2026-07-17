@@ -1,0 +1,162 @@
+name	category	calories_per_100g	protein_g	carb_g	fat_g	max_amount_g	suggested_prep
+chicken breast raw	Protein	120	22.5	0	2.6	400	"Boil, Grill, Air-fry"
+chicken drumstick raw	Protein	120	19	0	4	300	"Bake, Air-fry, Steam"
+ground turkey raw	Protein	150	20	0	8	300	"Pan-fry, Bake"
+beef flank steak raw	Protein	165	21	0	8	250	"Grill, Pan-fry"
+beef tenderloin steak raw	Protein	153	22	0	7	250	"Pan-fry, Grill"
+pork tenderloin raw	Protein	120	21	0	3.5	300	"Bake, Grill"
+egg white raw	Protein	52	10.9	0.7	0.2	300	"Boil, Pan-fry"
+egg raw	Protein	143	12.6	0.7	9.5	150	"Boil, Pan-fry"
+tilapia raw	Protein	96	20.1	0	1.7	300	"Steam, Pan-fry"
+cod raw	Protein	82	17.8	0	0.7	300	"Bake, Steam"
+shrimp raw	Protein	85	20.1	0	0.5	300	"Boil, Steam, Stir-fry"
+clams raw	Protein	74	12.8	2.6	1	200	"Boil, Steam"
+squid raw	Protein	92	15.6	3.1	1.4	250	"Grill, Steam, Boil"
+goat meat raw	Protein	109	20.6	0	2.3	200	"Stew, Boil"
+ground veal raw	Protein	143	19	0	7	200	"Pan-fry, Bake"
+pheasant breast raw	Protein	133	23.6	0	3.6	200	"Grill, Bake"
+cottage cheese nonfat	Protein	72	10.3	6.7	0.3	200	Raw
+cottage cheese low fat	Protein	82	11	4	2	200	Raw
+greek yogurt	Protein	59	10.2	3.6	0.4	200	Raw
+ricotta cheese	Protein/Fat	174	11.3	3	13	100	Raw
+tofu raw	Protein	76	8.1	1.9	4.8	200	"Boil, Steam"
+tempeh	Protein	192	18.5	9.4	10.8	150	"Pan-fry, Bake"
+oats	Carb	389	16.9	66.3	6.9	100	"Boil, Soak"
+brown rice raw	Carb	367	7.5	76.2	3.2	150	"Boil, Steam"
+quinoa dry	Carb	368	14.1	64.2	6.1	100	Boil
+sweet potato raw	Carb	86	1.6	20.1	0.1	300	"Steam, Bake, Boil"
+potato raw	Carb	77	2	17.5	0.1	300	"Boil, Bake"
+russet potato raw	Carb	79	2.1	18.1	0.1	300	"Bake, Boil"
+red potato raw	Carb	70	1.9	15.9	0.1	300	"Boil, Bake"
+broccoli raw	Veggie	34	2.8	6.6	0.4	400	"Boil, Steam"
+spinach raw	Veggie	23	2.9	3.6	0.4	300	"Raw, Boil"
+asparagus raw	Veggie	20	2.2	3.9	0.1	300	"Steam, Grill"
+cauliflower raw	Veggie	25	1.9	5	0.3	400	"Steam, Boil"
+cabbage raw	Veggie	25	1.3	5.8	0.1	400	"Raw, Boil"
+cucumber	Veggie	15	0.6	3.6	0.1	400	Raw
+zucchini raw	Veggie	17	1.2	3.1	0.3	400	"Grill, Stir-fry"
+celery raw	Veggie	14	0.7	3	0.2	300	"Raw, Boil"
+green peppers raw	Veggie	20	0.9	4.6	0.2	300	"Raw, Stir-fry"
+sweet red peppers raw	Veggie	31	1	6	0.3	300	"Raw, Stir-fry"
+carrots raw	Veggie	41	0.9	9.6	0.2	300	"Raw, Steam"
+eggplant raw	Veggie	25	1	5.9	0.2	300	"Bake, Grill"
+onion raw	Veggie	40	1.1	9.3	0.1	200	"Raw, Stir-fry"
+mushrooms raw	Veggie	22	3.1	3.3	0.3	300	"Stir-fry, Grill"
+portabella mushrooms raw	Veggie	22	2.1	3.9	0.3	300	"Grill, Bake"
+iceberg lettuce	Veggie	14	0.9	3	0.1	400	Raw
+romaine lettuce	Veggie	17	1.2	3.3	0.3	400	Raw
+green lettuce	Veggie	15	1.4	2.9	0.2	400	Raw
+strawberries	Carb	32	0.7	7.7	0.3	300	Raw
+blueberries	Carb	57	0.7	14.5	0.3	200	Raw
+raspberries	Carb	52	1.2	11.9	0.7	200	Raw
+blackberries raw	Carb	43	1.4	9.6	0.5	200	Raw
+watermelon	Carb	30	0.6	7.6	0.2	400	Raw
+cantaloupe melon	Carb	34	0.8	8.2	0.2	300	Raw
+honeydew melon	Carb	36	0.5	9.1	0.1	300	Raw
+apple	Carb	52	0.3	13.8	0.2	200	Raw
+pear	Carb	57	0.4	15.2	0.1	200	Raw
+peach	Carb	39	0.9	9.5	0.3	200	Raw
+grapefruit	Carb	32	0.6	8.1	0.1	300	Raw
+orange	Carb	47	0.9	11.8	0.1	200	Raw
+tangerine	Carb	53	0.8	13.3	0.3	200	Raw
+banana	Carb	89	1.1	22.8	0.3	150	Raw
+kiwifruit green	Carb	61	1.1	14.7	0.5	200	Raw
+pineapple	Carb	50	0.5	13.1	0.1	200	Raw
+mango	Carb	60	0.8	15	0.4	200	Raw
+papaya	Carb	43	0.5	10.8	0.3	200	Raw
+guava	Carb	68	2.6	14.3	1	200	Raw
+cherries	Carb	50	1	12.2	0.3	200	Raw
+almonds raw	Fat	579	21.1	21.6	49.9	40	Raw
+walnut	Fat	654	15.2	13.7	65.2	30	Raw
+cashew nuts raw	Fat	553	18.2	30.2	43.8	40	Raw
+peanuts raw	Fat	567	25.8	16.1	49.2	40	Raw
+pistachio nuts raw	Fat	562	20.2	27.2	45.3	40	Raw
+sunflower seeds dried	Fat	584	20.8	20	51.5	30	Raw
+chia seeds dried	Fat	486	16.5	42.1	30.7	30	"Soak, Raw"
+flaxseeds	Fat	534	18.3	28.9	42.2	30	Raw
+olive oil	Fat	884	0	0	100	20	"Raw, Pan-fry"
+avocado oil	Fat	884	0	0	100	20	"Raw, Pan-fry"
+goat cheese soft	Protein/Fat	268	18.5	0.9	21.1	50	Raw
+parmesan cheese	Protein/Fat	392	35.8	3.2	25.8	30	Raw
+camembert cheese	Protein/Fat	300	19.8	0.5	24.3	50	Raw
+swiss cheese	Protein/Fat	380	26.9	1.4	27.8	50	Raw
+gouda cheese	Protein/Fat	356	25	2.2	27.4	50	Raw
+egg yolk raw	Fat/Protein	322	15.9	3.6	26.5	50	"Boil, Pan-fry"
+anchovy raw	Protein	131	20.1	0	4.8	150	"Grill, Bake"
+herring raw	Protein/Fat	158	18	0	9	200	"Grill, Bake"
+mullet raw	Protein	117	19.3	0	3.8	200	"Steam, Grill"
+lingcod raw	Protein	85	17.7	0	1.1	250	"Bake, Steam"
+ocean perch raw	Protein	94	18.6	0	1.6	250	"Bake, Grill"
+flounder raw	Protein	91	18.8	0	1.2	250	"Bake, Steam"
+bluefish raw	Protein	124	20	0	4.2	200	"Grill, Bake"
+beef round steak raw	Protein	155	22.4	0	6.5	250	"Grill, Pan-fry"
+squab meat raw	Protein	142	17.5	0	7.5	200	"Roast, Grill"
+sprouted soybean raw	Protein/Carb	122	13.1	9.5	6.7	150	Boil
+oat bran raw	Carb	246	17.3	66.2	7	100	"Boil, Soak"
+nectarine	Carb	43	1.1	10.5	0.3	200	Raw
+kiwifruit gold	Carb	63	1.2	15.8	0.6	200	Raw
+apricot	Carb	48	1.4	11.1	0.4	200	Raw
+clementine	Carb	47	0.9	12	0.1	200	Raw
+bartlett pear	Carb	63	0.4	15	0.1	200	Raw
+plum	Carb	46	0.7	11.4	0.3	200	Raw
+lime	Carb	30	0.7	10.5	0.2	100	Raw
+pomegranate	Carb	83	1.7	18.7	1.2	200	Raw
+cranberries	Carb	46	0.4	12.2	0.1	100	Raw
+grapes	Carb	69	0.7	18.1	0.2	200	Raw
+avocado	Fat	160	2	8.5	14.7	100	Raw
+red cabbage raw	Veggie	31	1.4	7.4	0.2	300	"Raw, Boil"
+shallots raw	Veggie	72	2.5	16.8	0.1	100	"Raw, Stir-fry"
+bamboo shoots raw	Veggie	27	2.6	5.2	0.3	200	"Boil, Stir-fry"
+red lettuce	Veggie	16	1.3	3	0.2	400	Raw
+romanesco raw	Veggie	31	2.8	6.6	0.4	300	"Steam, Boil"
+parsnips raw	Veggie	75	1.2	18	0.3	200	"Bake, Steam"
+turnip greens raw	Veggie	32	1.5	7.1	0.3	300	"Boil, Steam"
+acorn squash raw	Veggie	40	0.8	10.4	0.1	300	"Bake, Boil"
+watercress	Veggie	11	2.3	1.3	0.1	200	"Raw, Boil"
+beet greens raw	Veggie	22	2.2	4.3	0.1	300	"Boil, Steam"
+swiss chard raw	Veggie	19	1.8	3.7	0.2	300	"Boil, Steam"
+chicory greens	Veggie	23	1.7	4.7	0.3	300	"Raw, Boil"
+kohlrabi raw	Veggie	27	1.7	6.2	0.1	300	"Raw, Steam"
+lentil sprouts	Veggie/Protein	106	9	22.1	0.5	150	"Raw, Boil"
+yellow tomato	Veggie	15	1	3	0.3	300	Raw
+sweet green peppers raw	Veggie	20	0.9	4.6	0.2	300	"Raw, Stir-fry"
+green tomato	Veggie	23	1.2	5.1	0.2	300	"Raw, Pan-fry"
+crimini mushrooms	Veggie	22	2.5	4.3	0.1	300	"Grill, Stir-fry"
+enoki mushrooms	Veggie	37	2.7	7.8	0.2	300	"Boil, Stir-fry"
+oyster mushroom	Veggie	33	3.3	6.1	0.4	300	"Stir-fry, Steam"
+mustard greens raw	Veggie	27	2.9	4.7	0.4	300	"Boil, Stir-fry"
+seaweed dry	Veggie	45	3	8.1	0.6	20	"Soak, Soup"
+radish raw	Veggie	16	0.7	3.4	0.1	300	Raw
+hazelnuts raw	Fat	628	15	16.7	60.8	40	Raw
+macadamia nuts raw	Fat	718	7.9	13.8	75.8	30	Raw
+pecans raw	Fat	691	9.2	13.9	72	30	Raw
+brazilnuts dried	Fat	659	14.3	11.7	67.1	30	Raw
+chestnuts raw	Carb	196	1.6	44.3	1.3	100	"Roast, Boil"
+beef top sirloin steak raw	Protein	132	23	0	4	250	"Grill, Pan-fry"
+beef round steak raw	Protein	155	22	0	7	250	"Grill, Pan-fry"
+beef shoulder steak raw	Protein	131	21	0	5	250	"Stew, Pan-fry"
+t bone steak raw	Protein/Fat	254	19	0	19	200	"Grill, Pan-fry"
+rib eye steak raw	Protein/Fat	291	19	0	24	150	"Grill, Pan-fry"
+beef brisket raw	Fat/Protein	283	20	0	22	150	"Stew, Roast"
+ground beef raw	Protein/Fat	250	17	0	20	200	"Pan-fry, Bake"
+pork sirloin chops raw	Protein	143	22	0	5	250	"Grill, Bake"
+pork loin raw	Protein	143	21	0	6	250	"Roast, Pan-fry"
+pork shoulder raw	Protein/Fat	236	16	0	19	200	"Stew, Slow-cook"
+pork belly raw	Fat/Protein	518	9	0	53	100	"Roast, Air-fry"
+pork spareribs raw	Fat/Protein	277	15	0	23	200	"Grill, Roast"
+ground pork raw	Protein/Fat	263	16	0	21	200	"Pan-fry, Stir-fry"
+turkey breast raw	Protein	114	24	0	1	300	"Bake, Grill"
+duck meat raw	Fat/Protein	337	11	0	33	150	"Roast, Pan-fry"
+goose meat raw	Fat/Protein	371	16	0	33	150	Roast
+lamb leg raw	Protein	191	20	0	12	200	"Roast, Grill"
+lamb shoulder raw	Fat/Protein	282	16	0	24	150	"Stew, Roast"
+ground lamb raw	Fat/Protein	282	16	0	23	150	Pan-fry
+salmon raw	Protein/Fat	208	20	0	13	200	"Grill, Raw"
+halibut raw	Protein	91	19	0	1	250	"Bake, Pan-fry"
+haddock raw	Protein	74	16	0	0.5	300	"Bake, Steam"
+swordfish raw	Protein	121	20	0	4	200	Grill
+snapper raw	Protein	100	20	0	1	250	"Bake, Steam"
+grouper raw	Protein	92	19	0	1	250	"Grill, Bake"
+trout raw	Protein	148	21	0	6	200	"Bake, Pan-fry"
+mackerel raw	Fat/Protein	205	14	0	14	150	"Grill, Bake"
+bluefin tuna raw	Protein	144	23	0	5	200	"Raw, Sear"

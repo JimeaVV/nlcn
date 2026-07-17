@@ -1,0 +1,233 @@
+,Unnamed: 0,food,Caloric Value,Fat,Carbohydrates,Protein
+0,0,chocolate pudding fat free,105,0.3,23.6,2.2
+1,1,tapioca pudding,143,4.3,23.9,2.1
+2,2,tapioca pudding fat free,105,0.4,23.9,1.6
+3,3,rice pudding,122,2.4,20.8,3.6
+4,4,corn pudding,328,12.6,42.4,11.1
+5,5,chocolate pudding,213,6.9,34.5,3.1
+6,6,lemon pudding,173,4.4,30.2,4.1
+7,7,vanilla pudding,195,5.7,33.9,2.2
+8,8,profeel proteiinirahka valio,140,0.4,19.3,175
+9,9,cottage cheese creamed,20,0.9,0.7,2.2
+10,10,zaziki milfina,51,4.4,0,0
+11,11,cottage cheese low fat,163,2.3,6.1,28
+12,12,cottage cheese nonfat,104,0.4,9.7,15
+13,13,vanilla yogurt low fat,208,3.1,33.8,12.1
+14,14,classique yogurt plain 2 liberte,30,1.2,1.7,3.3
+15,15,yoplait light strawberry yogurt yoplait,79,0,0.074,0
+16,16,vanilla yogurt,145,2.1,23.5,8.4
+17,17,chocolate yogurt,168,0,35.3,5.3
+18,18,yogurt parfait,125,1.5,23.6,5
+19,19,yogurt,92,4.9,7,5.2
+20,20,chocolate frozen yogurt,221,6.3,37.6,5.2
+21,21,frozen yogurt,221,6.3,37.6,5.2
+22,22,yogurt low fat,154,3.8,17.2,12.9
+23,23,vanilla yoghurt oikos,120,1.8,0,0
+24,24,fruit yogurt,149,1.7,28,6
+25,25,danone low fat alsafi,88,1.7,0.089,0
+26,26,fruit n yogurt parfait mcdonalds,156,1.9,30.9,4.1
+27,27,triple zero greek yogurt dannon oikos,120,0,22.5,0.038
+28,28,greek yogurt,100,0.7,6.1,17.3
+29,29,chocolate rasberry protein mini proteinfx,102,2.9,0,0
+30,30,gushers fruit gushers,360,6,0.2,0
+31,31,egg fried,90,6.8,0.4,6.3
+32,32,glucerna abbott,1010,35.6,120.9,0
+33,33,sports drink,26,0,7.2,0
+34,34,peanut butter cookie protein syntha 6,200,6,5,0
+35,35,hanfprotein pulver rohkostqualitat veganz,107,3.1,14.2,0
+36,36,smoothie high protein creamy chocolate slimfast,110,3.5,2.1,12
+37,37,egg large,138,9.3,0,0
+38,38,boysenberries frozen,66,0.3,16.1,1.5
+39,39,malt beverage,88,0.3,19.1,0.5
+40,40,chocolate powder for milk,88,0.5,19.9,1
+41,41,vegetable fruit juice,9,0.017,2.2,0.071
+42,42,cocoa powder unsweetened,12,0.7,3.1,1.1
+43,43,coconut milk,35,3.6,0.8,0.3
+44,44,cocoa powder,28,0.3,5.9,0.5
+45,45,rice drink,113,2.3,22,0.7
+46,46,coconut water,46,0.5,8.9,1.7
+47,47,caramel med iced coffee dunkin donuts,268,9,0,0
+48,48,instant coffee with water decaffeinated,4,0,0.8,0.2
+49,49,instant coffee powder,353,0.5,75.4,12.2
+50,50,instant coffee powder decaffeinated,6,0.069,1.4,0.2
+51,51,instant cappuccino powder,53,0.7,11.2,0.4
+52,52,coffee decaffeinated,0,0,0,0.2
+53,53,espresso decaffeinated,3,0.011,0.5,0.065
+54,54,instant coffee with water,4,0,0.6,0.2
+55,55,coffee,2,0.069,0,0.3
+56,56,espresso,3,0.086,0.5,0.021
+57,57,whey protein powder vanilla eas,108,1.7,0,0
+58,58,energy drink sugar free red bull,13,0.2,1.8,0.6
+59,59,powerade coca cola,9,0.009,2.3,0
+60,60,amp energy pepsi,110,0.2,29,0.6
+61,61,gatorade g2 pepsi,2,0.052,0.6,0.069
+62,62,amp energy sugar free pepsi,5,0,2.5,0
+63,63,energy drink red bull,111,0,26.4,1.2
+64,64,powerade zero ion4 coca cola,0,0,0,0
+65,65,full throttle coca cola,110,0.2,29,0.6
+66,66,passion fruit juice purple,148,0.4,35.7,1.7
+67,67,pomegranate juice,134,0.7,32.7,0.4
+68,68,cranberry apricot juice,157,0,39.7,0.5
+69,69,pineapple juice,133,0.3,32.2,0.9
+70,70,passion fruit juice yellow,126,0.1,33.6,1
+71,71,orange apricot juice,128,0.3,31.8,0.8
+72,72,tangerine juice,106,0.5,24.9,1.2
+73,73,orange juice,90,0.4,20.8,1.4
+74,74,grapefruit juice,96,0.2,22.7,1.2
+75,75,pineapple grapefruit juice,118,0.3,29,0.5
+76,76,tamarind nectar,143,0.3,37,0.2
+77,77,apple juice,114,0.3,28,0.2
+78,78,limeade,128,0,34.1,0
+79,79,guava nectar,158,0.2,40.8,0.2
+80,80,orange grapefruit juice,106,0.2,25.4,1.5
+81,81,orange juice sainsburys,14,0.088,0,0
+82,82,cranberry apple juice,154,0.3,38.8,0
+83,83,pineapple orange juice,125,0,29.5,3.3
+84,84,pear nectar,150,0.062,39.4,0.3
+85,85,blackberry juice,95,1.5,19.5,0.8
+86,86,lemon juice,54,0.6,16.6,0.9
+87,87,cranberry grape juice,137,0.2,34.3,0.5
+88,88,citrus fruit juice,114,0.057,28.3,0.8
+89,89,prune juice,182,0.006,44.7,1.6
+90,90,guanabana nectar,148,0.4,37.5,0.3
+91,91,fruit juice,108,0.1,26.3,0.3
+92,92,horchata,15,0.2,3.3,0.1
+93,93,fruit punch,98,0.4,24.4,0.2
+94,94,apricot nectar,139,0.2,35.7,0.9
+95,95,orangensaft ja,86,0,1.4,0
+96,96,fruchtcocktail granini,102,0.4,1,0
+97,97,peach nectar,125,1.3,29.7,0.5
+98,98,orange pineapple juice,15,0.08,3.6,0.1
+99,99,cranberry juice,92,0.3,24.4,0.8
+100,100,white grapefruit juice,96,0.2,22.7,1.2
+101,101,mango nectar,128,0.2,32.9,0.3
+102,102,acerola cherry juice,56,0.7,11.6,1
+103,103,apple juice concentrate,350,0.8,86.5,1.1
+104,104,papaya nectar,143,0.4,36.3,0.4
+105,105,apple juice martinellis,122,0,0,0
+106,106,lime juice,61,0.2,20.4,1
+107,107,grape juice,152,0.3,37.4,0.9
+108,108,water dannon,0,0,0,0
+109,109,tap water,0,0,0,0
+110,110,table water,0,0,0,0
+111,111,fruit flavored water,52,0,13,0
+112,112,water,0,0,0,0
+113,113,cola light coca cola,0,0,0,0
+114,114,lemon lime soda,151,0,38.4,0.3
+115,115,tonic water,114,0,29.6,0
+116,116,lemonade low calorie,7,0,1.6,0.092
+117,117,ginger ale,68,0,17.5,0
+118,118,ice tea lemon flavor nestle,88,0,22.3,0
+119,119,sprite coca cola,80,0.063,20.3,0.1
+120,120,cola coca cola,151,0,38.9,0
+121,121,cola,74,0.07,19.1,0.1
+122,122,cream soda,252,0,65.7,0
+123,123,club soda,0,0,0,0
+124,124,pink lemonade,86,0.3,21.6,0.1
+125,125,grape soda,160,0,41.7,0
+126,126,cola without caffeine coca cola,151,0,38.9,0
+127,127,white lemonade,80,0.003,20.8,0.1
+128,128,chocolate soda,207,0,52.6,0
+129,129,sweet tea lipton,130,0,35,0
+130,130,hibiscus tea,74,1.3,14.8,0.9
+131,131,instant lemon tea,2,0,0.3,0.1
+132,132,pesca tea santal,116,0,0,0
+133,133,instant lemon tea sweetened,91,0.2,22.3,0.071
+134,134,tea with milk and sugar yorkshire,15,0.5,0.4,0
+135,135,tea blueberry muffin tekanne,4,0.2,0.4,0
+136,136,chamomile tea,2,0,0.4,0
+137,137,black tea,2,0,0.7,0
+138,138,herb tea,2,0,0.4,0
+139,139,clam tomato juice,80,0.3,18.2,1
+140,140,tomato juice,41,0.7,8.6,2.1
+141,141,vegetable juice,53,0.2,11.1,1.5
+142,142,tomato vegetable juice,53,0.2,11.1,1.5
+143,143,carrot juice,80,0.3,18.6,1.9
+144,144,acorn dried,144,8.9,15.2,2.3
+145,145,fenugreek seeds,36,0.7,6.5,2.6
+146,146,peanut topping mcdonalds,181,15,4.6,7.9
+147,147,beechnuts dried,173,15,10.1,1.9
+148,148,breadnut tree seeds raw,61,0.3,13.1,1.7
+149,149,cumin seeds,8,0.5,0.9,0.4
+150,150,pili nuts dried,863,95.5,4.8,13
+151,151,hazelnuts roasted,194,18.7,5.3,4.5
+152,152,lupins cooked,193,4.8,15.4,25.8
+153,153,hazelnuts blanched,178,17.3,4.8,3.9
+154,154,brazilnuts dried,33,3.3,0.6,0.7
+155,155,sunflower seeds dry roasted,47,4,1.9,1.5
+156,156,ginkgo nuts canned,172,2.5,34.3,3.5
+157,157,peanuts cooked,572,39.6,38.3,24.3
+158,158,pumpkin squash seeds dried,721,63.3,13.8,39
+159,159,cashew nuts raw,156,12.4,8.5,5.2
+160,160,sunflower seeds dried,269,23.7,9.2,9.6
+161,161,lotus seeds dried,106,0.6,20.6,4.9
+162,162,butternuts dried,734,68.4,14.5,29.9
+163,163,sesame seeds dried,52,4.5,2.1,1.6
+164,164,breadfruit seeds,57,1.7,8.8,2.2
+165,165,pinyon pine nuts dried,1,0.073,0.01,0.083
+166,166,pine nuts dried,909,92.3,17.7,18.5
+167,167,flaxseeds,55,4.3,3,1.9
+168,168,safflower seed kernels dried,146,10.9,9.7,4.6
+169,169,pistachio nuts raw,691,55.8,33.8,24.9
+170,170,peanuts raw,828,71.9,23.5,37.7
+171,171,poppy seeds,46,3.7,2.5,1.6
+172,172,valencia peanuts raw,832,69.5,30.5,36.6
+173,173,spanish peanuts,832,72.4,23.1,38.2
+174,174,dill seeds,20,1,3.6,1.1
+175,175,caraway seeds,22,1,3.3,1.3
+176,176,acorn raw,110,6.8,11.5,1.7
+177,177,almonds roasted,182,16.6,5.3,6.4
+178,178,lotus seeds raw,25,0.1,4.9,1.2
+179,179,chestnuts cooked,37,0.4,7.9,0.6
+180,180,alfalfa seeds,1,0.075,0.002,0.1
+181,181,virginia peanuts roasted,173,14.6,6,7.8
+182,182,hazelnuts raw,471,45.6,12.5,11.2
+183,183,anise seeds,7,0.3,1.1,0.4
+184,184,macadamia nuts roasted,215,22.8,4,2.3
+185,185,studentenfutter alnatura,139,7.8,13.2,3.1
+186,186,pumpkin squash seeds roasted,46,3.9,1.2,2.4
+187,187,water chestnut raw,120,0.1,29.7,1.7
+188,188,chestnuts roasted,37,0.3,7.9,0.5
+189,189,ginkgo nuts raw,52,0.5,10.6,1.2
+190,190,almonds raw,9,0.7,0.3,0.3
+191,191,peanuts roasted,180,15.8,4.6,8.4
+192,192,sunflower seeds toasted,829,76.1,27.6,23.1
+193,193,sisymbrium seeds,235,3.4,43.1,9
+194,194,breadnut tree seeds dried,587,2.7,127,13.8
+195,195,pecans raw,753,78.4,15.1,10
+196,196,chia seeds dried,138,8.7,11.9,4.7
+197,197,japanese chestnuts roasted,57,0.2,12.8,0.8
+198,198,sesame seeds toasted,45,3.8,2.1,1.4
+199,199,cashew nuts roasted,174,14.3,9,5.1
+200,200,lupins raw,668,17.5,72.7,65.1
+201,201,mustard seeds ground,10,0.7,0.6,0.5
+202,202,mixed nuts roasted,178,15.4,7.6,5.2
+203,203,salat mix alestro,61,5.2,2.4,0
+204,204,chestnuts raw,309,3.3,66,3.5
+205,205,pistachio nuts roasted,172,13.7,8.5,6.3
+206,206,walnut,33,3.3,0.7,0.8
+207,207,celery seeds,25,1.6,2.7,1.2
+208,208,hickorynuts dried,788,77.2,21.9,15.3
+209,209,spanish peanuts roasted,851,72.1,25.7,41.2
+210,210,woca seeds dried,102,0.3,22.6,2.2
+211,211,pecans roasted,215,22.6,3.9,2.8
+212,212,fennel seeds,7,0.3,1,0.3
+213,213,chinese chestnuts roasted,68,0.3,14.8,1.3
+214,214,watermelon seed kernels dried,602,51.2,16.5,30.6
+215,215,macadamia nuts raw,38,4,0.7,0.4
+216,216,pectin,163,0.2,45.2,0.2
+217,217,black walnut dried,31,3,0.5,1.2
+218,218,water chestnut canned,70,0.015,17.2,1.2
+219,219,ginkgo nuts dried,98,0.6,20.5,2.9
+220,220,virginia peanuts raw,822,71.2,24.1,36.8
+221,221,valencia peanuts roasted,177,15.4,4.9,8.1
+222,222,nesfit diet cereal nestle,75,0,0,0
+223,223,corn grits cooked,182,1.2,37.9,4.4
+224,224,amaranth flakes,134,2.7,27,5.9
+225,225,granola,293,14.6,32.3,8.2
+226,226,muesli with fruit nuts,231,3.4,45.7,4.3
+227,227,muesli master crumble,124,2.4,4.5,2.4
+228,228,bran flakes,131,0.8,32.2,4
+229,229,nut cereal,245,5.9,46.2,4
+230,230,corn flakes,108,0.3,24.6,1.7
+231,231,corn grits dry,36,0.2,7.7,0.7

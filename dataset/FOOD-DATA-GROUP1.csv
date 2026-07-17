@@ -1,0 +1,552 @@
+,Unnamed: 0,food,Caloric Value,Fat,Carbohydrates,Protein
+0,0,cream cheese,51,5,0.8,0.9
+1,1,neufchatel cheese,215,19.4,3.1,7.8
+2,2,requeijao cremoso light catupiry,49,3.6,0.9,0.8
+3,3,ricotta cheese,30,2,1.5,1.5
+4,4,cream cheese low fat,30,2.3,1.2,1.2
+5,5,cream cheese fat free,19,0.2,1.4,2.8
+6,6,gruyere cheese,116,9.1,0.1,8.3
+7,7,cheddar cheese,113,9.3,0.9,6.4
+8,8,parmesan cheese,71,4.5,0.6,6.4
+9,9,romano cheese,19,1.3,0.2,1.6
+10,10,parmesan cheese grated,21,1.4,0.7,1.4
+11,11,port salut cheese,465,37.2,0.8,31.4
+12,12,swiss cheese,98,7.7,0.4,6.7
+13,13,goat cheese hard,128,10.1,0.6,8.6
+14,14,gouda cheese,100,7.7,0.6,7
+15,15,pepper jack cheese lucerne,75,6,0,5
+16,16,caraway cheese,106,8.3,0.9,7.1
+17,17,gjetost cheese,1058,67,96.8,21.9
+18,18,tilsit cheese,136,10.4,0.8,9.8
+19,19,goat cheese,103,8.4,0.009,6.1
+20,20,brick cheese,111,8.9,0.8,7
+21,21,asadero cheese,402,31.9,3.2,25.5
+22,22,camembert cheese,90,7.3,0.1,5.9
+23,23,provolone cheese reduced fat,310,19.9,4,27.9
+24,24,roquefort cheese,314,26,1.7,18.3
+25,25,queso blanco cheese,366,28.7,3,24
+26,26,queso seco cheese,315,23.6,2,23.8
+27,27,goat cheese soft,75,6,0,5.2
+28,28,mozzarella cheese,90,6.6,0.7,6.7
+29,29,chihuahua cheese,494,39.2,7.3,28.5
+30,30,limburger cheese,98,8.2,0.1,6
+31,31,muenster cheese,486,39.7,1.5,30.9
+32,32,queso fresco cheese,365,29.1,3.6,22.1
+33,33,brie cheese,100,8.3,0.1,6.2
+34,34,pimento cheese,525,43.7,2.4,31
+35,35,mexican cheese,316,21.7,3.8,27.7
+36,36,feta cheese,80,6.4,1.2,4.3
+37,37,mozzarella cheese fat free,159,0,4,35.8
+38,38,provolone cheese,463,35.1,2.8,33.8
+39,39,anejo cheese,492,39.6,6.1,28.3
+40,40,honey,64,0,17.3,0.08
+41,41,apple butter,35,0.063,8.5,0.045
+42,42,fruit jam,56,0.095,13.8,0
+43,43,chocolate hazelnut spread,100,5.5,11.5,1
+44,44,peanut butter,88,7.4,3.6,3.3
+45,45,peanut spread,101,8.5,2.2,3.8
+46,46,chicken spread,88,9.8,2.3,10.1
+47,47,cheese spread,708,68.6,8.4,17
+48,48,tahini,86,7.2,3.9,2.7
+49,49,orange marmalade,49,0,13.3,0.014
+50,50,american cheese spread,46,3.4,1.4,2.6
+51,51,apricot jam,48,0.01,12.9,0.1
+52,52,chunky peanut butter,94,8,3.5,3.8
+53,53,ham and cheese spread,37,2.8,0.3,2.4
+54,54,chicken and rice casserole homade,27,1,2.4,2
+55,55,picnic loaf,65,4.7,1.3,4.2
+56,56,corn tamale,309,12,44.3,5.8
+57,57,baked potato with cheese sauce bacon,451,25.9,44.4,18.4
+58,58,chinese egg roll,223,10.6,24.3,7.4
+59,59,butter croissant,231,12,26.1,4.7
+60,60,enchilada with cheese beef,323,17.6,30.5,11.9
+61,61,corned beef hash with potatoes,387,24.2,21.9,20.6
+62,62,biscuit with egg cheese bacon,436,25.3,35.4,17.4
+63,63,bagel with ham egg cheese,483,18.5,52.4,26.7
+64,64,quesadilla with chicken,529,27.5,43.3,27.1
+65,65,corn rice,110,0.3,25.2,1.8
+66,66,kung pao chicken,779,42.2,41.5,59
+67,67,beef empanada,298,16.3,27.8,10.1
+68,68,frijoles with cheese,225,7.8,28.7,11.4
+69,69,burrito with beef,285,8.1,43.9,9.1
+70,70,crispy chicken sandwich,350,17.6,33.2,14.8
+71,71,enchilada with cheese,374,25.3,21.2,15.4
+72,72,pork egg roll,189,6.1,25.1,8.4
+73,73,corn on the cob with butter,155,3.4,31.9,4.5
+74,74,pancakes with butter syrup,260,7,45.4,4.1
+75,75,burrito with beans,224,6.7,35.7,7
+76,76,scrambled eggs,100,7.6,1,6.5
+77,77,baked potato with sour cream,393,22.3,50,6.7
+78,78,turkey and gravy,161,6.3,11.1,14.1
+79,79,chicken egg roll,158,3.6,22.8,8.4
+80,80,vegetable egg roll,153,3.6,25,5.2
+81,81,ham cheese roll,67,5.2,1.1,3.8
+82,82,biscuit with ham,386,18.4,43.8,13.4
+83,83,lemon chicken,1440,74.9,122,68.6
+84,84,hummus,435,21.1,49.5,12
+85,85,croissant with egg cheese,368,24.7,24.3,12.8
+86,86,enchirito with cheese beef beans,344,16.1,33.8,17.9
+87,87,sweet sour pork,38,2.2,3.3,1.2
+88,88,crab cake,160,10.4,5.1,11.3
+89,89,egg dinner roll,107,2.2,18.2,3.3
+90,90,english muffin with egg cheese sausage,472,29.9,28.8,22.1
+91,91,buttermilk pancakes,86,3.5,10.9,2.6
+92,92,omelet,94,7.1,0.4,6.4
+93,93,taco with chicken cheese lettuce,185,6.2,19.3,13
+94,94,spinach souffle,230,17.6,8,10.7
+95,95,english muffin with cheese sausage,365,22.3,27.3,14.3
+96,96,potato gratin,328,18.6,27.6,12.4
+97,97,biscuit with egg,436,25.3,35.4,17.4
+98,98,french fries deep fried,222,10.5,29.4,2.4
+99,99,sweet sour chicken,46,2.3,4.4,1.8
+100,100,burrito with beans beef,460,18,47,27.8
+101,101,nachos with cinnamon sugar,592,36,63.4,7.2
+102,102,arroz con grandules,209,5.7,35.4,4
+103,103,chili con carne,271,8.8,33.1,14.7
+104,104,arroz con abichuelas,223,5.4,37.3,6.2
+105,105,biscuit with sausage,412,27.1,33.3,10.7
+106,106,vegetarian stew,304,7.4,17.3,42
+107,107,chicken sandwich with cheese,632,38.8,41.6,29.4
+108,108,biscuit with egg steak,410,28.4,21.3,17.9
+109,109,taco salad,212,11.2,17.9,10
+110,110,succotash,213,1.5,46.8,9.7
+111,111,nachos with cheese jalapeno peppers,608,34.1,60.1,16.8
+112,112,biscuit with egg ham,442,27,31.4,20.4
+113,113,ladyfingers,103,2.6,16.9,3
+114,114,mozzarella steak fried,102,5.9,7.7,4.6
+115,115,tamale navajo,285,11.4,33.7,11.7
+116,116,blueberry pancakes,84,3.5,11,2.3
+117,117,chimichanga with beef cheese,443,23.4,39.3,20.1
+118,118,egg cheese sandwich,340,19.4,25.9,15.6
+119,119,biscuit with egg bacon,458,31.1,28.6,17
+120,120,pupusas con queso,300,15.5,26.2,13.7
+121,121,apple croissant,145,5,21.1,4.2
+122,122,refried red beans,336,16.1,36,11.7
+123,123,tostada with guacamole,180,11.6,16,6.2
+124,124,chicken sandwich,468,20.9,39.1,30.4
+125,125,fried rice,228,3.2,43.4,6.5
+126,126,pupusas del cerdo,283,12.7,28.1,14
+127,127,turkey pot pie,699,34.9,70.3,25.8
+128,128,cheese croissant,331,16.7,37.6,7.4
+129,129,chimichanga with beef,425,19.7,42.8,19.6
+130,130,french toast with butter,178,9.4,18,5.2
+131,131,ham egg cheese sandwich,347,16.3,30.9,19.2
+132,132,english muffin with butter,189,5.8,30.4,4.9
+133,133,savoury noodle one pan dinner tandaco,172,1.2,5.5,0
+134,134,ham cheese sandwich,352,15.5,33.3,20.7
+135,135,sweet gefilte fish,35,0.7,3.1,3.8
+136,136,poached egg,72,4.7,0.4,6.3
+137,137,tostada with beef cheese,315,16.3,22.8,19
+138,138,tostada with beans cheese,223,9.9,26.5,9.6
+139,139,pork tamale,247,12.8,22.4,10.4
+140,140,nachos with cheese,274,17.2,27.9,3.5
+141,141,pulled pork in barbecue sauce,418,11,46.7,32.8
+142,142,baked potato with cheese sauce,474,28.7,46.5,14.6
+143,143,baked beans,310,10.3,43.3,11.1
+144,144,arroz con frijoles,220,5.6,35.6,6.8
+145,145,taco with beef cheese lettuce,156,8.8,13.7,6.1
+146,146,burrito with beans cheese beef,165,6.6,19.8,7.3
+147,147,egg mix,30,2.2,0.098,2.4
+148,148,falafel,57,3,5.4,2.3
+149,149,taco salad with chili con carne,193,8.8,17.7,11.6
+150,150,wonton wrappers,93,0.5,18.5,3.1
+151,151,hushpuppies,512,20.5,69.9,11.7
+152,152,chicken pot pie,598,34.6,57.3,14.6
+153,153,general tsos chicken,1578,87.5,128.3,69
+154,154,burrito with beans cheese,379,11.2,57.8,13.6
+155,155,vegetarian fillets,247,15.3,7.7,19.6
+156,156,biscuit with egg sausage,505,33.6,34.1,18
+157,157,chicken chow mein,513,16.9,50.1,40.8
+158,158,fruit burrito,231,9.5,35,2.5
+159,159,arroz con leche,369,9.3,63,8.1
+160,160,caramel custard flan,444,12.3,69.7,13.9
+161,161,gelatin dessert,167,0,38.3,3.3
+162,162,chocolate milk dessert,229,1.4,51.6,5.9
+163,163,chocolate mousse,338,24,24.1,6.2
+164,164,dulce de leche,60,1.4,10.5,1.3
+165,165,apple crisp,454,9.7,87,4.9
+166,166,spinach spaghetti cooked,182,0.9,36.6,6.4
+167,167,corn pasta cooked,176,1,39.1,3.7
+168,168,spaghetti with meat sauce,255,2.9,43.1,14.3
+169,169,pasta with meatballs in tomato sauce,273,13,28.3,10.6
+170,170,cheese tortellini,332,7.8,50.8,14.6
+171,171,pasta with sliced franks in tomato sauce,227,6,32,11
+172,172,lasagna,166,6.1,18.9,9
+173,173,macaroni cheese,310,9.4,43.7,12.6
+174,174,vegetable lasagna,316,13.7,32.2,15.6
+175,175,spinach egg noodles cooked,211,2.5,38.8,8.1
+176,176,cheese lasagna,316,13,33.6,15.9
+177,177,pasta with tomato sauce,176,1.8,35.1,5.6
+178,178,spinach pasta cooked,37,0.3,7.1,1.4
+179,179,vegetable chicken soup,166,4.8,21.1,12.3
+180,180,bean ham soup,198,2.5,33.5,10.3
+181,181,cream of chicken soup,227,14.5,18,6
+182,182,tomato soup canned,139,3.3,22.6,6.3
+183,183,egg drop soup,65,1.5,10.3,2.8
+184,184,scotch broth,197,6.4,23,12.1
+185,185,cream of onion soup,268,12.8,31.7,6.7
+186,186,chicken broth dry,10,0.2,1.1,0.7
+187,187,vegetable soup with beef broth,162,3.8,26.3,6
+188,188,chili with beans canned,287,14.1,30.5,14.6
+189,189,beef noodle soup,168,6.2,17.9,9.6
+190,190,consomme dry,17,0.2,1.9,2.2
+191,191,chicken mushroom soup,126,6.1,15.1,2
+192,192,beef vegetable soup,120,2.9,15.4,8
+193,193,black bean soup,234,3.4,39.6,12.4
+194,194,split pea soup with ham bacon,189,3.1,28.6,11.6
+195,195,cream of mushroom soup,199,13.4,17.1,3.4
+196,196,green pea soup,320,5.7,51.7,16.7
+197,197,chicken broth soup,78,2.6,1.9,11.1
+198,198,chicken mushroom chowder soup,431,23.7,38.3,16.2
+199,199,chicken dumplings soup,235,13.4,14.7,13.6
+200,200,chicken vegetable soup,148,5.6,17,7.1
+201,201,turkey vegetable soup,72,3,8.6,3.1
+202,202,wonton soup,71,0.6,11.7,4.6
+203,203,beef stock,31,0.2,2.9,4.7
+204,204,mushroom barley soup,186,5.5,29.3,4.6
+205,205,gazpacho soup,70,0.4,6.6,10.7
+206,206,beef mushroom soup,186,7.3,15.9,14
+207,207,chicken rice soup,127,3.2,13,12.3
+208,208,pepperpot soup,100,4.5,9.1,6.2
+209,209,vegetable soup,149,4,24.6,4.3
+210,210,chili beef soup,308,6.7,49.6,13.4
+211,211,chicken soup,174,6.5,16.9,12.4
+212,212,bean with frankfurters soup,188,7,22,10
+213,213,pea soup,161,2.8,25.6,8.3
+214,214,turkey soup,135,4.4,14.1,10.2
+215,215,stockpot soup,201,7.8,23.1,9.8
+216,216,hot sour soup,91,2.8,10.1,6
+217,217,cheese soup,203,9.7,28,2
+218,218,cream of potato soup,186,4.7,32.2,3.8
+219,219,bean with bacon soup,106,2.1,16.4,5.5
+220,220,fish stock,40,1.9,0,5.3
+221,221,split pea soup with ham,381,8.9,56.2,20.7
+222,222,beef broth soup,17,0.5,0.01,2.7
+223,223,lentil soup with ham,139,2.8,20.2,9.3
+224,224,tomato soup,98,0.7,22.5,2.2
+225,225,fish broth,39,1.5,1,4.9
+226,226,chili without beans canned,283,17,14.6,18.1
+227,227,minestrone soup,167,5,22.6,8.6
+228,228,clam chowder soup,154,4.4,24.5,4.4
+229,229,tomato vegetable soup,54,0.8,9.9,1.9
+230,230,cream of rice coup,127,0.2,28.1,2.2
+231,231,cream of celery soup,181,11.2,17.7,3.3
+232,232,chicken gravy,188,13.6,12.9,4.6
+233,233,tomato rice soup,240,5.5,44.1,4.2
+234,234,vegetable beef soup,128,2,9.6,18.1
+235,235,tomato beef noodle soup,281,8.6,42.3,8.9
+236,236,oyster stew soup,118,7.7,8.2,4.2
+237,237,ramen noodle soup dry,371,13.3,53.9,8.9
+238,238,chicken noodle soup,145,4.7,18.4,7.2
+239,239,chicken bouillon dry,11,0.6,0.7,0.7
+240,240,cream of asparagus soup,174,8.2,21.5,4.6
+241,241,turkey noodle soup,139,4,17.3,7.8
+242,242,cream of shrimp soup,181,10.4,16.5,5.6
+243,243,bean with pork soup,335,11.5,44.1,15.3
+244,244,chicken broth,12,0.5,1,1
+245,245,beef broth powder,8,0.3,0.6,0.6
+246,246,split pea soup,180,2.3,29.9,9.7
+247,247,escarole soup,61,4,4,3.4
+248,248,chicken stock,86,2.9,8.5,6
+249,249,tomato bisque soup,248,5,47.7,4.5
+250,250,shark fin soup,99,4.3,8.2,6.9
+251,251,onion soup,113,3.5,16.4,7.5
+252,252,chicken gumbo soup,113,2.9,16.8,5.3
+253,253,crab soup,95,0.8,12.5,10.4
+254,254,tripe soup,148,5.2,8.1,17.2
+255,255,little india little lunch,164,10.6,2,0
+256,256,original chicken sandwich chick fil a,125,5.1,0,0
+257,257,sausage mcmuffin mcdonalds,383,24.2,28.2,14.6
+258,258,sausage mcgriddles mcdonalds,421,24,42.2,11.4
+259,259,crispy chicken drumstick kentucky fried chicken,70,3,0,10.6
+260,260,chicken crispy drumsticks kentucky fried chicken,156,10.1,4.5,11.8
+261,261,biscuit kentucky fried chicken,185,9.1,22.1,3.8
+262,262,english muffin mcdonalds,97,2.3,2.9,5.7
+263,263,french fries mcdonalds,378,18.1,49.8,4
+264,264,hotdog,383,23,28.5,16.4
+265,265,french fries burger king,207,9.2,28.6,2.4
+266,266,original taco with beef cheese lettuce taco bell,158,8.8,13.7,6.1
+267,267,hotdog with chili,296,13.4,31.3,13.5
+268,268,chicken crispy wings kentucky fried chicken,148,10.1,5.1,9.2
+269,269,egg white delight mcdonalds,250,16,0,0
+270,270,french toast sticks burger king,73,3.7,8.7,1.3
+271,271,mcchicken mcdonalds,358,17.3,36.6,13.7
+272,272,nachos supreme taco bell,480,26.6,45,14.8
+273,273,crispy chicken wing kentucky fried chicken,104,5.3,1.3,12.6
+274,274,chicken strips burger king,105,5.5,7.4,6.6
+275,275,crispy chicken breast kentucky fried chicken,214,6.7,0.4,38.2
+276,276,sausage biscuit mcdonalds,440,29.7,31.8,11.3
+277,277,sausage burrito mcdonalds,339,17.1,24.2,13
+278,278,onion rings fried,27,1.6,2.8,0.3
+279,279,onion rings burger king,379,23,39.7,3.5
+280,280,turkey patty fried,79,5,4.4,3.9
+281,281,hotcakes with syrup mcdonalds,601,17.8,101.8,9
+282,282,crispy chicken thigh kentucky fried chicken,163,9.1,0,20.4
+283,283,corn dog,195,9.4,21,6.7
+284,284,chicken box mcdonalds,70,4,5.5,0.2
+285,285,potato wedges kentucky fried chicken,379,19.8,45,5.4
+286,286,scrambled eggs mcdonalds,98,7.5,0.9,7.7
+287,287,egg mcmuffin mcdonalds,287,12.2,27.3,17.2
+288,288,nachos taco bell,362,21.9,36,5.1
+289,289,biscuit large mcdonalds,310,14.4,39.4,5.5
+290,290,crispy chicken strips kentucky fried chicken,129,7.2,6.4,9.5
+291,291,hotcakes mcdonalds,113,2.9,19,3
+292,292,chicken crispy breast kentucky fried chicken,375,23.2,11.9,29.7
+293,293,hotcakes sausage mcdonalds,776,34.9,102.4,15.5
+294,294,chicken mcnuggets mcdonalds,48,3.2,2.4,2.5
+295,295,chips chipotle,151,7.1,2.1,0.2
+296,296,biscuit mcdonalds,261,12.2,33.3,4.7
+297,297,rice bowl with chicken,36,0.4,6.4,1.6
+298,298,spaghetti with meatballs,200,8.2,22.9,8.7
+299,299,meat ravioli canned,259,8.9,36,8.9
+300,300,cheese ravioli canned,186,3.5,33,6
+301,301,premium crispy chicken ranch blt sandwich mcdonalds,586,22.9,59.8,35.3
+302,302,steak sandwich,459,14.1,52,30.3
+303,303,cheeseburger burger king,380,19.7,31.5,19.4
+304,304,cheeseburger mcdonalds,313,14,33.1,15.4
+305,305,double cheeseburger,643,36.9,41,37
+306,306,double hamburger,942,58.6,51.4,52.1
+307,307,premium grilled chicken classic sandwich mcdonalds,366,8.6,44.6,28.3
+308,308,big n tasty with cheese mcdonalds,573,36,39.7,27.2
+309,309,premium grilled chicken club sandwich mcdonalds,493,18,44.3,38.3
+310,310,quarter pounder mcdonalds,417,19.8,37.9,24.1
+311,311,premium crispy chicken classic sandwich mcdonalds,524,20,58.6,27.8
+312,312,veggie burger,124,4.4,10,11
+313,313,quarter pounder with cheese mcdonalds,513,28.3,39.7,29
+314,314,beef sandwich steak raw,173,15.1,0,9.2
+315,315,cheeseburger,292,13.2,28.7,15
+316,316,premium grilled chicken ranch blt sandwich mcdonalds,412,10.9,44.3,33.7
+317,317,double whopper with cheese burger king,1061,68.1,53.9,57.7
+318,318,big mac mcdonalds,563,32.8,44,25.9
+319,319,sandwich with cold cuts,833,39.3,79.9,41.1
+320,320,filet o fish mcdonalds,378,19.6,35.4,15.1
+321,321,hand breaded chicken tenders carls jr,57,2.9,0.2,0
+322,322,grilled chicken sandwich wendys,370,8,0,0
+323,323,sandwich with roast beef,410,13,44.3,28.6
+324,324,hamburger burger king,258,10.4,26.5,14.7
+325,325,big n tasty mcdonalds,524,31.7,38.5,24.7
+326,326,roast beef sandwich,364,15.3,33.1,22.6
+327,327,roast beef sandwich with cheese,473,18,45.4,32.2
+328,328,hamburger,255,9.9,28.7,12.9
+329,329,premium fish sandwich burger king,572,27.4,58.7,22.6
+330,330,whopper burger king,790,48.4,52.8,35.4
+331,331,sandwich with tuna salad,584,28,55.4,29.7
+332,332,original chicken sandwich burger king,569,29.2,52.2,24.2
+333,333,double whopper burger king,942,58.6,51.4,52.1
+334,334,premium crispy chicken club sandwich mcdonalds,635,29.9,57.4,39.1
+335,335,hamburger mcdonalds,251,9.6,28.8,12.3
+336,336,pepperoni pizza dominos,308,12.6,36,12.7
+337,337,sausage pizza,325,14.3,35.5,13.3
+338,338,pepperoni pizza,313,13.2,35.5,13
+339,339,pepperoni pizza pizza hut,269,10.9,30.3,12.3
+340,340,cheese pizza pizza hut,260,10.5,30,11.5
+341,341,cheese pizza,285,10.4,35.7,12.2
+342,342,cheese pizza dominos,278,9.7,35.9,11.7
+343,343,meat vegetable pizza,332,14.8,34.5,15
+344,344,sucker raw,146,3.7,0,26.6
+345,345,northern pike raw,348,2.7,0,76.3
+346,346,haddock cooked,135,0.8,0,30
+347,347,burbot cooked,104,0.9,0,22.3
+348,348,pollock cooked,356,3.8,0,75.3
+349,349,rainbow smelt raw,27,0.7,0,5
+350,350,whitefish cooked,265,11.6,0,37.7
+351,351,walleye pike raw,148,1.9,0,30.4
+352,352,carp cooked,275,12.2,0,38.9
+353,353,wolffish cooked,293,7.3,0,53.4
+354,354,snapper cooked,218,2.9,0,44.7
+355,355,roe cooked,58,2.3,0.5,8.1
+356,356,anchovy raw,37,1.4,0,5.8
+357,357,herring raw,291,16.6,0,33
+358,358,cod raw,189,1.5,0,41.1
+359,359,tilapia raw,111,2,0,23.3
+360,360,whiting cooked,84,1.2,0,16.9
+361,361,skipjack tuna cooked,407,4,0,86.9
+362,362,salmon cooked,733,44,0,78.7
+363,363,chum salmon cooked,474,14.9,0,79.5
+364,364,american shad cooked,363,25.4,0,31.3
+365,365,shark cooked,65,3.9,1.8,5.3
+366,366,trout cooked,118,5.3,0,16.5
+367,367,swordfish raw,196,9,0,26.7
+368,368,rainbow trout cooked,119,5.2,0,16.9
+369,369,fish sandwich with cheese,374,19.6,35.4,15.1
+370,370,jellyfish dried,21,0.8,0,3.2
+371,371,mullet raw,139,4.5,0,23
+372,372,halibut cooked,353,5.1,0,71.7
+373,373,lingcod raw,213,2.7,0,44.2
+374,374,orange roughy cooked,30,0.3,0,6.4
+375,375,cisco raw,77,1.5,0,15
+376,376,florida pompano cooked,186,10.7,0,20.8
+377,377,snapper raw,218,2.9,0,44.7
+378,378,fish sandwich,565,27.4,58.7,22.6
+379,379,haddock raw,143,0.9,0,31.5
+380,380,ocean perch raw,51,1,0,9.8
+381,381,cuttlefish cooked,45,0.4,0.5,9.2
+382,382,cod cooked,189,1.5,0,41.1
+383,383,seatrout raw,248,8.6,0,39.8
+384,384,flounder raw,114,3.1,0,20.2
+385,385,spot cooked,79,3.1,0,11.9
+386,386,walleye pike cooked,148,1.9,0,30.4
+387,387,perch raw,55,0.6,0,11.6
+388,388,pumpkin seed sunfish raw,43,0.3,0,9.3
+389,389,salt mackerel,415,34.1,0,25.2
+390,390,mackerel cooked,231,15.7,0,21
+391,391,tilapia cooked,111,2.3,0,22.8
+392,392,drum raw,236,9.8,0,34.7
+393,393,atlantic croaker fried,192,11,6.6,15.8
+394,394,pumpkin seed sunfish cooked,42,0.3,0,9.2
+395,395,wolffish raw,294,7.3,0,53.6
+396,396,bluefin tuna cooked,276,9.4,0,44.9
+397,397,scup cooked,68,1.8,0,12.1
+398,398,herring cooked,290,16.6,0,32.9
+399,399,bluefish raw,186,6.4,0,30.1
+400,400,sheepshead cooked,234,3,0,48.4
+401,401,bass cooked,91,2.9,0,15
+402,402,pout cooked,279,3.2,0,58.4
+403,403,chinook salmon raw,709,41.3,0,78.9
+404,404,rockfish raw,172,2.6,0,35.1
+405,405,tilefish raw,371,8.9,0,67.6
+406,406,scup raw,174,4.5,0,31.3
+407,407,sablefish cooked,755,59.3,0,51.9
+408,408,tuna salad,383,19,19.3,32.9
+409,409,coho salmon cooked,255,11.8,0,34.7
+410,410,roe raw,20,0.9,0.2,3.1
+411,411,sea bass raw,125,2.6,0,23.8
+412,412,pink salmon cooked,349,12,0,56
+413,413,sockeye salmon cooked,493,17.3,0,82.1
+414,414,whitefish raw,265,11.6,0,37.8
+415,415,greenland halibut cooked,760,56.4,0,58.6
+416,416,northern pike cooked,350,2.7,0,76.5
+417,417,salmon raw,824,53.1,0,80.9
+418,418,turbot cooked,388,12,0,65.4
+419,419,surimi,28,0.3,1.9,4.3
+420,420,chinook salmon cooked,711,41.2,0,79.2
+421,421,mullet cooked,140,4.5,0,23.1
+422,422,chum salmon raw,3,0.1,0,0.6
+423,423,butterfish raw,47,2.6,0,5.5
+424,424,sea bass cooked,125,2.6,0,23.9
+425,425,greenland halibut raw,759,56.5,0,58.6
+426,426,halibut raw,371,5.4,0,75.7
+427,427,sturgeon cooked,184,7,0,28.2
+428,428,fish fillet fried,211,11.2,15.4,13.3
+429,429,rainbow trout raw,111,4.9,0,15.8
+430,430,pout raw,278,3.2,0,58.6
+431,431,rainbow smelt cooked,35,0.9,0,6.4
+432,432,monkfish raw,22,0.4,0,4.1
+433,433,trout raw,117,5.2,0,16.4
+434,434,shark raw,37,1.3,0,5.9
+435,435,burbot raw,104,0.9,0,22.4
+436,436,dolphinfish cooked,173,1.4,0,37.7
+437,437,crayfish cooked,25,0.4,0,5
+438,438,dolphinfish raw,173,1.4,0,37.7
+439,439,perch cooked,54,0.5,0,11.4
+440,440,cusk raw,106,0.8,0,23.2
+441,441,bluefin tuna raw,41,1.4,0,6.6
+442,442,milkfish cooked,54,2.4,0,7.4
+443,443,carp raw,277,12.2,0,38.9
+444,444,sturgeon raw,30,1.1,0,4.6
+445,445,orange roughy raw,22,0.2,0,4.6
+446,446,catfish fried,199,11.6,7,15.7
+447,447,cuttlefish raw,22,0.2,0.2,4.6
+448,448,bass raw,90,2.9,0,14.9
+449,449,flounder cooked,109,3,0,19.4
+450,450,milkfish raw,42,1.9,0,5.8
+451,451,eel raw,375,23.8,0,37.6
+452,452,catfish raw,189,9.4,0,24.2
+453,453,fish sticks,78,4.5,6.1,3.1
+454,454,coho salmon raw,254,12.2,0,33.8
+455,455,monkfish cooked,27,0.6,0,5.3
+456,456,yellowtail cooked,546,19.6,0,86.6
+457,457,yellowfin tuna cooked,37,0.2,0,8.2
+458,458,ling cooked,168,1.2,0,36.8
+459,459,eel cooked,67,4.2,0,6.7
+460,460,sablefish raw,753,59.1,0,51.8
+461,461,salmon nuggets,60,3.3,4,3.6
+462,462,yellowtail raw,546,19.6,0,86.5
+463,463,butterfish cooked,47,2.6,0,5.5
+464,464,caviar,42,2.9,0.6,3.9
+465,465,pollock raw,355,3.8,0,75
+466,466,catfish cooked,206,10.3,0,26.4
+467,467,whiting raw,83,1.2,0,16.8
+468,468,pink salmon raw,404,14,0,65.2
+469,469,yellowfin tuna raw,31,0.1,0,6.9
+470,470,mackerel raw,230,15.6,0,20.8
+471,471,turbot raw,388,12,0,65.5
+472,472,cusk cooked,106,0.8,0,23.1
+473,473,atlantic croaker raw,82,2.5,0,14
+474,474,sucker cooked,148,3.7,0,26.6
+475,475,spot raw,79,3.1,0,11.8
+476,476,drum cooked,236,9.7,0,34.6
+477,477,crayfish raw,3,0.048,0,0.6
+478,478,tilefish cooked,441,14.1,0,73.5
+479,479,bluefish cooked,186,6.4,0,30.1
+480,480,grouper cooked,238,2.6,0,50.2
+481,481,sheepshead raw,257,5.7,0,48.1
+482,482,herring kippered,87,4.9,0,9.8
+483,483,grouper raw,238,2.6,0,50.2
+484,484,ocean perch cooked,48,0.9,0,9.3
+485,485,ling raw,168,1.2,0,36.7
+486,486,lingcod cooked,329,4.1,0,68.4
+487,487,florida pompano raw,184,10.6,0,20.7
+488,488,rockfish cooked,162,2.4,0,33.1
+489,489,seatrout cooked,247,8.6,0,39.9
+490,490,sockeye salmon raw,562,22.2,0,84.4
+491,491,swordfish cooked,182,8.4,0,24.9
+492,492,american shad raw,362,25.3,0,31.2
+493,493,sardine canned in oil,310,17.1,0,36.7
+494,494,anchovy canned in oil,8,0.4,0,1.2
+495,495,salmon canned,520,20.3,0,79.1
+496,496,sardines in tomato sauce canned,165,9.3,0.5,18.6
+497,497,sockeye salmon canned,563,24.9,0,79.5
+498,498,tuna canned,102,2.4,0,18.9
+499,499,pink salmon canned,530,20.4,0,80.9
+500,500,cod canned,328,2.7,0,71
+501,501,eastern oyster canned,110,4,6.3,11.4
+502,502,chum salmon canned,520,20.3,0,79.1
+503,503,tuna canned in oil,331,14.4,0,47.2
+504,504,wild pink salmon oceans,320,16,0,0
+505,505,shrimp canned,128,1.7,0,26.1
+506,506,alaska king crab raw,144,1,0,31.5
+507,507,scallops fried,64,3.2,6.4,2.6
+508,508,shrimp cooked,7,0.092,0.013,1.3
+509,509,clams fried,19,1,1,1.3
+510,510,alaska king crab cooked,130,2.1,0,25.9
+511,511,scallops cooked,11,0.058,0.5,2.1
+512,512,squid fried,140,6,6.2,14.4
+513,513,oyster raw,41,1.2,2.5,4.7
+514,514,abalone,89,0.6,5.1,14.5
+515,515,queen crab raw,25,0.3,0,5.2
+516,516,whelk cooked,78,0.2,4.4,13.5
+517,517,oyster cooked,41,1.2,2.5,4.7
+518,518,eastern oyster cooked,8,0.2,0.7,0.7
+519,519,blue mussels cooked,344,9,14.8,47.6
+520,520,octopus raw,23,0.3,0.6,4.2
+521,521,spiny lobster cooked,233,3.2,5.1,43
+522,522,blue mussels raw,129,3.4,5.5,17.9
+523,523,queen crab cooked,98,1.3,0,20.2
+524,524,dungeness crab cooked,140,1.6,1.2,28.3
+525,525,dungeness crab raw,140,1.6,1.2,28.4
+526,526,shrimp fried,52,3.2,4.8,1.3
+527,527,shrimp raw,4,0.023,0.041,0.7
+528,528,blue crab cooked,71,0.6,0,15.2
+529,529,shrimp imitation,29,0.4,2.6,3.5
+530,530,conch baked,165,1.5,2.2,33.4
+531,531,squid raw,26,0.4,0.9,4.4
+532,532,scallop raw,10,0.091,0.5,1.8
+533,533,lobster raw,116,1.1,0,24.8
+534,534,scallop imitation,28,0.1,3,3.6
+535,535,blue crab raw,18,0.2,0.018,3.8
+536,536,whelk raw,39,0.1,2.2,6.7
+537,537,spiny lobster raw,234,3.2,5.1,43.1
+538,538,clams canned,227,2.5,9.4,38.8
+539,539,lobster cooked,134,1.3,0,28.5
+540,540,eastern oyster fried,29,1.8,1.7,1.3
+541,541,clams raw,195,2.2,8.1,33.3
+542,542,octopus cooked,139,1.8,3.7,25.3
+543,543,eastern oyster raw,8,0.2,0.8,0.7
+544,544,oyster fried,61,3,6.7,2.1
+545,545,sturgeon smoked,49,1.2,0,8.8
+546,546,chinook salmon smoked,159,5.9,0,24.9
+547,547,cisco smoked,50,3.4,0,4.6
+548,548,haddock smoked,33,0.3,0,7.1
+549,549,whitefish smoked,147,1.3,0,31.8
+550,550,red salmon sockeye filets smoked,373,12.3,0,65.5

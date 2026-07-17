@@ -1,0 +1,97 @@
+name,muscle_group,equipment,level
+Barbell Bench Press,Chest,Barbell,Intermediate
+Incline bench press,Chest,Barbell,Intermediate
+Decline barbell bench press,Chest,Barbell,Intermediate
+Dumbbell Bench Press,Chest,Dumbbell,Intermediate
+Incline dumbbell bench press,Chest,Dumbbell,Intermediate
+Dumbbell Flyes,Chest,Dumbbell,Intermediate
+Incline Dumbbell Flyes,Chest,Dumbbell,Intermediate
+Cable Crossover,Chest,Cable,Intermediate
+Pushups,Chest,Body Only,Intermediate
+Chest dip,Chest,Other,Intermediate
+Machine chest press,Chest,Machine,Intermediate
+Machine chest fly,Chest,Machine,Intermediate
+Pullups,Lats,Body Only,Intermediate
+Chin-Up,Lats,Body Only,Intermediate
+Lat pull-down,Lats,Cable,Intermediate
+Close-grip pull-down,Lats,Cable,Intermediate
+Straight-Arm Pulldown,Lats,Cable,Intermediate
+Bent Over Barbell Row,Middle Back,Barbell,Intermediate
+One-Arm Dumbbell Row,Middle Back,Dumbbell,Intermediate
+T-Bar Row,Middle Back,Other,Intermediate
+Seated Cable Rows,Middle Back,Cable,Intermediate
+Machine seated row,Lats,Machine,Beginner
+Barbell deadlift,Lower Back,Barbell,Intermediate
+Back extension,Lower Back,Body Only,Intermediate
+Military press,Shoulders,Barbell,Intermediate
+Barbell Shoulder Press,Shoulders,Barbell,Intermediate
+Seated Dumbbell Press,Shoulders,Dumbbell,Intermediate
+Arnold press,Shoulders,Dumbbell,Intermediate
+Dumbbell front raise,Shoulders,Dumbbell,Intermediate
+Dumbbell lateral raise,Shoulders,Dumbbell,Intermediate
+Side Lateral Raise,Shoulders,Dumbbell,Intermediate
+Seated rear delt fly,Shoulders,Dumbbell,Intermediate
+Standing face pull,Shoulders,Cable,Intermediate
+Barbell upright row,Shoulders,Barbell,Intermediate
+Machine shoulder press,Shoulders,Machine,Intermediate
+Barbell shrug,Traps,Barbell,Intermediate
+Standing dumbbell shrug,Traps,Dumbbell,Intermediate
+Barbell Curl,Biceps,Barbell,Intermediate
+EZ-Bar Curl,Biceps,E-Z Curl Bar,Intermediate
+Dumbbell Bicep Curl,Biceps,Dumbbell,Intermediate
+Hammer Curls,Biceps,Dumbbell,Intermediate
+Alternate Incline Dumbbell Curl,Biceps,Dumbbell,Intermediate
+Preacher Curl,Biceps,Barbell,Intermediate
+Concentration curl,Biceps,Dumbbell,Intermediate
+Standing Biceps Cable Curl,Biceps,Cable,Intermediate
+Cable rope hammer curl,Biceps,Cable,Intermediate
+Machine Bicep Curl,Biceps,Machine,Beginner
+Close-grip bench press,Triceps,Barbell,Intermediate
+EZ-Bar Skullcrusher,Triceps,E-Z Curl Bar,Intermediate
+Seated triceps press,Triceps,Dumbbell,Intermediate
+Tricep Dumbbell Kickback,Triceps,Dumbbell,Intermediate
+Triceps Pushdown,Triceps,Cable,Intermediate
+Cable V-bar push-down,Triceps,Cable,Intermediate
+Rope overhead triceps extension,Triceps,Cable,Intermediate
+Parallel Bar Dip,Triceps,Body Only,Intermediate
+Bench Dips,Triceps,Body Only,Intermediate
+Machine Triceps Extension,Triceps,Machine,Intermediate
+Barbell back squat,Quadriceps,Barbell,Intermediate
+Barbell front squat,Quadriceps,Barbell,Intermediate
+Leg Press,Quadriceps,Machine,Intermediate
+Hack Squat,Quadriceps,Barbell,Intermediate
+Barbell walking lunge,Quadriceps,Barbell,Intermediate
+Dumbbell split squat,Quadriceps,Dumbbell,Intermediate
+Barbell Bulgarian split squat,Quadriceps,Barbell,Intermediate
+Goblet Squat,Quadriceps,Kettlebells,Intermediate
+Leg Extensions,Quadriceps,Machine,Intermediate
+Romanian Deadlift,Hamstrings,Barbell,Intermediate
+Stiff-Legged Deadlift,Hamstrings,Barbell,Beginner
+Lying Leg Curls,Hamstrings,Machine,Beginner
+Seated Leg Curl,Hamstrings,Machine,Intermediate
+Glute Ham Raise,Hamstrings,Machine,Intermediate
+Barbell Hip Thrust,Glutes,Barbell,Intermediate
+Glute bridge,Glutes,Body Only,Intermediate
+Cable Pull-Through,Glutes,Cable,Beginner
+Thigh adductor,Adductors,Machine,Intermediate
+Thigh abductor,Abductors,Machine,Intermediate
+Kettlebell swing,Abdominals,Kettlebells,Intermediate
+Standing barbell calf raise,Calves,Barbell,Beginner
+Seated Calf Raise,Calves,Machine,Intermediate
+Calf Press On The Leg Press Machine,Calves,Machine,Intermediate
+Machine seated calf raise,Calves,Machine,Intermediate
+Crunch,Abdominals,Body Only,Intermediate
+Sit-up,Abdominals,Body Only,Intermediate
+Elbow plank,Abdominals,Body Only,Intermediate
+Hanging leg raise,Abdominals,Body Only,Intermediate
+Ab Roller,Abdominals,Other,Intermediate
+Standing cable crunch,Abdominals,Cable,Intermediate
+Russian twist,Abdominals,Body Only,Intermediate
+Decline Crunch,Abdominals,Body Only,Intermediate
+Mountain climber,Abdominals,Body Only,Intermediate
+Ab bicycle,Abdominals,Body Only,Intermediate
+V-up,Abdominals,Body Only,Intermediate
+Palms-up wrist curl over bench,Forearms,Barbell,Intermediate
+Palms-down wrist curl over bench,Forearms,Barbell,Intermediate
+Dumbbell farmer's walk,Forearms,Other,Intermediate
+Cable Wrist Curl,Forearms,Cable,Beginner

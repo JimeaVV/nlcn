@@ -1,0 +1,161 @@
+name,category,macro_group,calories_per_100g,protein_g,carb_g,fat_g,max_amount_g,suggested_prep
+chicken breast raw,Protein,Meat,120,22.5,0,2.6,400,Boil
+chicken drumstick raw,Protein,Meat,120,19,0,4,300,Bake
+ground turkey raw,Protein,Meat,150,20,0,8,300,Pan-fry
+beef flank steak raw,Protein,Meat,165,21,0,8,250,Grill
+beef tenderloin steak raw,Protein,Meat,153,22,0,7,250,Pan-fry
+pork tenderloin raw,Protein,Meat,120,21,0,3.5,300,Bake
+egg white raw,Protein,DairyEgg,52,10.9,0.7,0.2,300,Boil
+egg raw,Protein,DairyEgg,143,12.6,0.7,9.5,150,Boil
+tilapia raw,Protein,Meat,96,20.1,0,1.7,300,Steam
+cod raw,Protein,Meat,82,17.8,0,0.7,300,Bake
+shrimp raw,Protein,Meat,85,20.1,0,0.5,300,Boil
+clams raw,Protein,Meat,74,12.8,2.6,1,200,Boil
+squid raw,Protein,Meat,92,15.6,3.1,1.4,250,Grill
+goat meat raw,Protein,Meat,109,20.6,0,2.3,200,Stew
+ground veal raw,Protein,Meat,143,19,0,7,200,Pan-fry
+pheasant breast raw,Protein,Meat,133,23.6,0,3.6,200,Grill
+cottage cheese nonfat,Protein,DairyEgg,72,10.3,6.7,0.3,200,Raw
+cottage cheese low fat,Protein,DairyEgg,82,11,4,2,200,Raw
+greek yogurt,Protein,DairyEgg,59,10.2,3.6,0.4,200,Raw
+ricotta cheese,Protein/Fat,DairyEgg,174,11.3,3,13,100,Raw
+tofu raw,Protein,Meat,76,8.1,1.9,4.8,200,Boil
+tempeh,Protein,Meat,192,18.5,9.4,10.8,150,Pan-fry
+oats,Carb,Starch,389,16.9,66.3,6.9,100,Boil
+brown rice raw,Carb,Starch,367,7.5,76.2,3.2,150,Boil
+quinoa dry,Carb,Starch,368,14.1,64.2,6.1,100,Boil
+sweet potato raw,Carb,Starch,86,1.6,20.1,0.1,300,Steam
+potato raw,Carb,Starch,77,2,17.5,0.1,300,Boil
+russet potato raw,Carb,Starch,79,2.1,18.1,0.1,300,Bake
+red potato raw,Carb,Starch,70,1.9,15.9,0.1,300,Boil
+broccoli raw,Veggie,Veggie,34,2.8,6.6,0.4,400,Boil
+spinach raw,Veggie,Veggie,23,2.9,3.6,0.4,300,Raw
+asparagus raw,Veggie,Veggie,20,2.2,3.9,0.1,300,Steam
+cauliflower raw,Veggie,Veggie,25,1.9,5,0.3,400,Steam
+cabbage raw,Veggie,Veggie,25,1.3,5.8,0.1,400,Raw
+cucumber,Veggie,Veggie,15,0.6,3.6,0.1,400,Raw
+zucchini raw,Veggie,Veggie,17,1.2,3.1,0.3,400,Grill
+celery raw,Veggie,Veggie,14,0.7,3,0.2,300,Raw
+green peppers raw,Veggie,Veggie,20,0.9,4.6,0.2,300,Raw
+sweet red peppers raw,Veggie,Veggie,31,1,6,0.3,300,Raw
+carrots raw,Veggie,Veggie,41,0.9,9.6,0.2,300,Raw
+eggplant raw,Veggie,Veggie,25,1,5.9,0.2,300,Bake
+onion raw,Veggie,Veggie,40,1.1,9.3,0.1,200,Raw
+mushrooms raw,Veggie,Veggie,22,3.1,3.3,0.3,300,Stir-fry
+portabella mushrooms raw,Veggie,Veggie,22,2.1,3.9,0.3,300,Grill
+iceberg lettuce,Veggie,Veggie,14,0.9,3,0.1,400,Raw
+romaine lettuce,Veggie,Veggie,17,1.2,3.3,0.3,400,Raw
+green lettuce,Veggie,Veggie,15,1.4,2.9,0.2,400,Raw
+strawberries,Carb,Fruit,32,0.7,7.7,0.3,300,Raw
+blueberries,Carb,Fruit,57,0.7,14.5,0.3,200,Raw
+raspberries,Carb,Fruit,52,1.2,11.9,0.7,200,Raw
+blackberries raw,Carb,Fruit,43,1.4,9.6,0.5,200,Raw
+watermelon,Carb,Fruit,30,0.6,7.6,0.2,400,Raw
+cantaloupe melon,Carb,Fruit,34,0.8,8.2,0.2,300,Raw
+honeydew melon,Carb,Fruit,36,0.5,9.1,0.1,300,Raw
+apple,Carb,Fruit,52,0.3,13.8,0.2,200,Raw
+pear,Carb,Fruit,57,0.4,15.2,0.1,200,Raw
+peach,Carb,Fruit,39,0.9,9.5,0.3,200,Raw
+grapefruit,Carb,Fruit,32,0.6,8.1,0.1,300,Raw
+orange,Carb,Fruit,47,0.9,11.8,0.1,200,Raw
+tangerine,Carb,Fruit,53,0.8,13.3,0.3,200,Raw
+banana,Carb,Fruit,89,1.1,22.8,0.3,150,Raw
+kiwifruit green,Carb,Fruit,61,1.1,14.7,0.5,200,Raw
+pineapple,Carb,Fruit,50,0.5,13.1,0.1,200,Raw
+mango,Carb,Fruit,60,0.8,15,0.4,200,Raw
+papaya,Carb,Fruit,43,0.5,10.8,0.3,200,Raw
+guava,Carb,Fruit,68,2.6,14.3,1,200,Raw
+cherries,Carb,Fruit,50,1,12.2,0.3,200,Raw
+almonds raw,Fat,Fat,579,21.1,21.6,49.9,40,Raw
+walnut,Fat,Fat,654,15.2,13.7,65.2,30,Raw
+cashew nuts raw,Fat,Fat,553,18.2,30.2,43.8,40,Raw
+peanuts raw,Fat,Fat,567,25.8,16.1,49.2,40,Raw
+pistachio nuts raw,Fat,Fat,562,20.2,27.2,45.3,40,Raw
+sunflower seeds dried,Fat,Fat,584,20.8,20,51.5,30,Raw
+chia seeds dried,Fat,Fat,486,16.5,42.1,30.7,30,Soak
+flaxseeds,Fat,Fat,534,18.3,28.9,42.2,30,Raw
+olive oil,Fat,Fat,884,0,0,100,20,Raw
+avocado oil,Fat,Fat,884,0,0,100,20,Raw
+goat cheese soft,Protein/Fat,DairyEgg,268,18.5,0.9,21.1,50,Raw
+parmesan cheese,Protein/Fat,DairyEgg,392,35.8,3.2,25.8,30,Raw
+camembert cheese,Protein/Fat,DairyEgg,300,19.8,0.5,24.3,50,Raw
+swiss cheese,Protein/Fat,DairyEgg,380,26.9,1.4,27.8,50,Raw
+gouda cheese,Protein/Fat,DairyEgg,356,25,2.2,27.4,50,Raw
+egg yolk raw,Fat/Protein,DairyEgg,322,15.9,3.6,26.5,50,Boil
+anchovy raw,Protein,Meat,131,20.1,0,4.8,150,Grill
+herring raw,Protein/Fat,Meat,158,18,0,9,200,Grill
+mullet raw,Protein,Meat,117,19.3,0,3.8,200,Steam
+lingcod raw,Protein,Meat,85,17.7,0,1.1,250,Bake
+ocean perch raw,Protein,Meat,94,18.6,0,1.6,250,Bake
+flounder raw,Protein,Meat,91,18.8,0,1.2,250,Bake
+bluefish raw,Protein,Meat,124,20,0,4.2,200,Grill
+squab meat raw,Protein,Meat,142,17.5,0,7.5,200,Roast
+sprouted soybean raw,Protein/Carb,Veggie,122,13.1,9.5,6.7,150,Boil
+oat bran raw,Carb,Starch,246,17.3,66.2,7,100,Boil
+nectarine,Carb,Fruit,43,1.1,10.5,0.3,200,Raw
+kiwifruit gold,Carb,Fruit,63,1.2,15.8,0.6,200,Raw
+apricot,Carb,Fruit,48,1.4,11.1,0.4,200,Raw
+clementine,Carb,Fruit,47,0.9,12,0.1,200,Raw
+bartlett pear,Carb,Fruit,63,0.4,15,0.1,200,Raw
+plum,Carb,Fruit,46,0.7,11.4,0.3,200,Raw
+lime,Carb,Fruit,30,0.7,10.5,0.2,100,Raw
+pomegranate,Carb,Fruit,83,1.7,18.7,1.2,200,Raw
+cranberries,Carb,Fruit,46,0.4,12.2,0.1,100,Raw
+grapes,Carb,Fruit,69,0.7,18.1,0.2,200,Raw
+avocado,Fat,Fat,160,2,8.5,14.7,100,Raw
+red cabbage raw,Veggie,Veggie,31,1.4,7.4,0.2,300,Raw
+shallots raw,Veggie,Veggie,72,2.5,16.8,0.1,100,Raw
+bamboo shoots raw,Veggie,Veggie,27,2.6,5.2,0.3,200,Boil
+red lettuce,Veggie,Veggie,16,1.3,3,0.2,400,Raw
+romanesco raw,Veggie,Veggie,31,2.8,6.6,0.4,300,Steam
+parsnips raw,Veggie,Veggie,75,1.2,18,0.3,200,Bake
+turnip greens raw,Veggie,Veggie,32,1.5,7.1,0.3,300,Boil
+acorn squash raw,Veggie,Veggie,40,0.8,10.4,0.1,300,Bake
+watercress,Veggie,Veggie,11,2.3,1.3,0.1,200,Raw
+beet greens raw,Veggie,Veggie,22,2.2,4.3,0.1,300,Boil
+swiss chard raw,Veggie,Veggie,19,1.8,3.7,0.2,300,Boil
+chicory greens,Veggie,Veggie,23,1.7,4.7,0.3,300,Raw
+kohlrabi raw,Veggie,Veggie,27,1.7,6.2,0.1,300,Raw
+lentil sprouts,Veggie/Protein,Veggie,106,9,22.1,0.5,150,Raw
+yellow tomato,Veggie,Veggie,15,1,3,0.3,300,Raw
+sweet green peppers raw,Veggie,Veggie,20,0.9,4.6,0.2,300,Raw
+green tomato,Veggie,Veggie,23,1.2,5.1,0.2,300,Raw
+crimini mushrooms,Veggie,Veggie,22,2.5,4.3,0.1,300,Grill
+enoki mushrooms,Veggie,Veggie,37,2.7,7.8,0.2,300,Boil
+oyster mushroom,Veggie,Veggie,33,3.3,6.1,0.4,300,Stir-fry
+mustard greens raw,Veggie,Veggie,27,2.9,4.7,0.4,300,Boil
+seaweed dry,Veggie,Veggie,45,3,8.1,0.6,20,Soak
+radish raw,Veggie,Veggie,16,0.7,3.4,0.1,300,Raw
+hazelnuts raw,Fat,Fat,628,15,16.7,60.8,40,Raw
+macadamia nuts raw,Fat,Fat,718,7.9,13.8,75.8,30,Raw
+pecans raw,Fat,Fat,691,9.2,13.9,72,30,Raw
+brazilnuts dried,Fat,Fat,659,14.3,11.7,67.1,30,Raw
+chestnuts raw,Carb,Starch,196,1.6,44.3,1.3,100,Roast
+beef top sirloin steak raw,Protein,Meat,132,23,0,4,250,Grill
+beef round steak raw,Protein,Meat,155,22,0,7,250,Grill
+beef shoulder steak raw,Protein,Meat,131,21,0,5,250,Stew
+t bone steak raw,Protein/Fat,Meat,254,19,0,19,200,Grill
+rib eye steak raw,Protein/Fat,Meat,291,19,0,24,150,Grill
+beef brisket raw,Fat/Protein,Meat,283,20,0,22,150,Stew
+ground beef raw,Protein/Fat,Meat,250,17,0,20,200,Pan-fry
+pork sirloin chops raw,Protein,Meat,143,22,0,5,250,Grill
+pork loin raw,Protein,Meat,143,21,0,6,250,Roast
+pork shoulder raw,Protein/Fat,Meat,236,16,0,19,200,Stew
+pork belly raw,Fat/Protein,Meat,518,9,0,53,100,Roast
+pork spareribs raw,Fat/Protein,Meat,277,15,0,23,200,Grill
+ground pork raw,Protein/Fat,Meat,263,16,0,21,200,Pan-fry
+turkey breast raw,Protein,Meat,114,24,0,1,300,Bake
+duck meat raw,Fat/Protein,Meat,337,11,0,33,150,Roast
+goose meat raw,Fat/Protein,Meat,371,16,0,33,150,Roast
+lamb leg raw,Protein,Meat,191,20,0,12,200,Roast
+lamb shoulder raw,Fat/Protein,Meat,282,16,0,24,150,Stew
+ground lamb raw,Fat/Protein,Meat,282,16,0,23,150,Pan-fry
+salmon raw,Protein/Fat,Meat,208,20,0,13,200,Grill
+halibut raw,Protein,Meat,91,19,0,1,250,Bake
+haddock raw,Protein,Meat,74,16,0,0.5,300,Bake
+swordfish raw,Protein,Meat,121,20,0,4,200,Grill
+snapper raw,Protein,Meat,100,20,0,1,250,Bake
+grouper raw,Protein,Meat,92,19,0,1,250,Grill
+trout raw,Protein,Meat,148,21,0,6,200,Bake
+mackerel raw,Fat/Protein,Meat,205,14,0,14,150,Grill
+bluefin tuna raw,Protein,Meat,144,23,0,5,200,Raw
