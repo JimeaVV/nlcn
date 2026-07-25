@@ -9,17 +9,18 @@ class NeonButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.loading = false,
-    this.color = CyberColors.cyan,
+    this.color,
   });
 
   final String label;
   final IconData icon;
   final VoidCallback? onPressed;
   final bool loading;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedColor = color ?? CyberColors.cyan;
     return SizedBox(
       width: double.infinity,
       height: 52,
@@ -31,16 +32,16 @@ class NeonButton extends StatelessWidget {
                 height: 19,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.3,
-                  color: color,
+                  color: resolvedColor,
                 ),
               )
             : Icon(icon),
         label: Text(loading ? 'PROCESSING...' : label),
         style: FilledButton.styleFrom(
-          backgroundColor: color,
+          backgroundColor: resolvedColor,
           foregroundColor: CyberColors.background,
           disabledBackgroundColor: CyberColors.surfaceAlt,
-          disabledForegroundColor: color,
+          disabledForegroundColor: resolvedColor,
           textStyle: const TextStyle(
             fontWeight: FontWeight.w900,
             letterSpacing: 0.7,

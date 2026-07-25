@@ -22,7 +22,7 @@ class MetricTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: CyberColors.surfaceAlt,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFF273653)),
+          border: Border.all(color: CyberColors.border),
         ),
         child: Column(
           children: [
@@ -37,7 +37,7 @@ class MetricTile extends StatelessWidget {
             FittedBox(
               child: Text(
                 '$value $unit'.trim(),
-                style: const TextStyle(
+                style: TextStyle(
                   color: CyberColors.cyan,
                   fontWeight: FontWeight.w900,
                   fontSize: 17,

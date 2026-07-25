@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+
 import '../core/cyber_theme.dart';
 import '../services/api_service.dart';
 import 'history_screen.dart';
 import 'meal_screen.dart';
+import 'settings_screen.dart';
 import 'workout_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.themeController});
+
+  final ThemeController themeController;
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -22,15 +27,25 @@ class _HomeScreenState extends State<HomeScreen> {
       MealScreen(api: api),
       WorkoutScreen(api: api),
       HistoryScreen(key: historyKey),
+      SettingsScreen(themeController: widget.themeController),
     ];
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CyberColors.background,
-        title: const Row(children: [
-          Icon(Icons.bolt_rounded,color: CyberColors.lime),
-          SizedBox(width: 8),
-          Text('OPTIFIT',style: TextStyle(fontWeight: FontWeight.w900,letterSpacing: 2)),
-        ]),
+        title: Row(
+          children: [
+            Icon(Icons.bolt_rounded, color: CyberColors.lime),
+            const SizedBox(width: 8),
+            Text(
+              'OPTIFIT',
+              style: TextStyle(
+                color: CyberColors.text,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+              ),
+            ),
+          ],
+        ),
       ),
       body: IndexedStack(index: index, children: pages),
       bottomNavigationBar: NavigationBar(
@@ -40,9 +55,22 @@ class _HomeScreenState extends State<HomeScreen> {
           if (value == 2) historyKey.currentState?.refresh();
         },
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.restaurant_menu_rounded),label: 'Meal'),
-          NavigationDestination(icon: Icon(Icons.fitness_center_rounded),label: 'Workout'),
-          NavigationDestination(icon: Icon(Icons.history_rounded),label: 'History'),
+          NavigationDestination(
+            icon: Icon(Icons.restaurant_menu_rounded),
+            label: 'Meal',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.fitness_center_rounded),
+            label: 'Workout',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.history_rounded),
+            label: 'History',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_rounded),
+            label: 'Settings',
+          ),
         ],
       ),
     );

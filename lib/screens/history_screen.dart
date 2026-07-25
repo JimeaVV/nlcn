@@ -13,7 +13,6 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool loading = true;
   List<Map<String, dynamic>> meals = [];
   List<Map<String, dynamic>> workouts = [];
-  List<Map<String, dynamic>> workoutLogs = [];
 
   @override
   void initState() {
@@ -24,12 +23,10 @@ class HistoryScreenState extends State<HistoryScreen> {
   Future<void> refresh() async {
     final mealRows = await db.getMealHistory();
     final workoutRows = await db.getWorkoutHistory();
-    final logRows = await db.getWorkoutLogs();
     if (!mounted) return;
     setState(() {
       meals = mealRows;
       workouts = workoutRows;
-      workoutLogs = logRows;
       loading = false;
     });
   }
@@ -58,7 +55,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           controller: controller,
           padding: const EdgeInsets.all(18),
           children: [
-            const Text('SAVED MEAL PLAN',
+            Text('SAVED MEAL PLAN',
               style: TextStyle(color: CyberColors.cyan,fontSize: 20,fontWeight: FontWeight.w900)),
             const SizedBox(height: 12),
             ...data.entries.map((entry) {
@@ -71,7 +68,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                   padding: const EdgeInsets.all(14),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(entry.key.toUpperCase(),
-                      style: const TextStyle(color: CyberColors.magenta,fontWeight: FontWeight.w900)),
+                      style: TextStyle(color: CyberColors.magenta,fontWeight: FontWeight.w900)),
                     const SizedBox(height: 8),
                     ...items.map((item) {
                       final m = item as Map<String, dynamic>;
@@ -108,7 +105,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           controller: controller,
           padding: const EdgeInsets.all(18),
           children: [
-            const Text('SAVED WORKOUT',
+            Text('SAVED WORKOUT',
               style: TextStyle(color: CyberColors.magenta,fontSize: 20,fontWeight: FontWeight.w900)),
             const SizedBox(height: 12),
             ...List.generate(items.length, (i) {
@@ -139,7 +136,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           Row(children: [
             Expanded(child: Text('HISTORY ARCHIVE', style: Theme.of(context).textTheme.headlineSmall)),
             IconButton(
-              onPressed: meals.isEmpty && workouts.isEmpty && workoutLogs.isEmpty ? null : () async {
+              onPressed: meals.isEmpty && workouts.isEmpty ? null : () async {
                 await db.clearAllHistory();
                 await refresh();
               },
@@ -147,13 +144,13 @@ class HistoryScreenState extends State<HistoryScreen> {
             ),
           ]),
           const SizedBox(height: 16),
-          const Text('MEAL PLANS', style: TextStyle(color: CyberColors.cyan,fontWeight: FontWeight.w900)),
+          Text('MEAL PLANS', style: TextStyle(color: CyberColors.cyan,fontWeight: FontWeight.w900)),
           const SizedBox(height: 8),
           if (meals.isEmpty) const Text('No saved meal plans yet.'),
           ...meals.map((row) => Card(
             child: ListTile(
               onTap: () => showMeal(row),
-              leading: const Icon(Icons.restaurant_menu_rounded,color: CyberColors.cyan),
+              leading: Icon(Icons.restaurant_menu_rounded,color: CyberColors.cyan),
               title: Text('${(row['total_calories'] as num).round()} kcal • ${(row['total_protein'] as num).toStringAsFixed(1)}g protein'),
               subtitle: Text(dateText(row['created_at'] as String)),
               trailing: IconButton(
@@ -166,13 +163,13 @@ class HistoryScreenState extends State<HistoryScreen> {
             ),
           )),
           const SizedBox(height: 18),
-          const Text('WORKOUT PLANS', style: TextStyle(color: CyberColors.magenta,fontWeight: FontWeight.w900)),
+          Text('WORKOUT PLANS', style: TextStyle(color: CyberColors.magenta,fontWeight: FontWeight.w900)),
           const SizedBox(height: 8),
           if (workouts.isEmpty) const Text('No saved workout plans yet.'),
           ...workouts.map((row) => Card(
             child: ListTile(
               onTap: () => showWorkout(row),
-              leading: const Icon(Icons.fitness_center_rounded,color: CyberColors.magenta),
+              leading: Icon(Icons.fitness_center_rounded,color: CyberColors.magenta),
               title: Text('${row['split']} • ${row['level']}'),
               subtitle: Text('${row['estimated_time']} min • ${dateText(row['created_at'] as String)}'),
               trailing: IconButton(
@@ -182,56 +179,6 @@ class HistoryScreenState extends State<HistoryScreen> {
                   await refresh();
                 },
               ),
-            ),
-          )),
-
-          const SizedBox(height: 18),
-          const Text(
-            'PROGRESSIVE OVERLOAD LOGS',
-            style: TextStyle(
-              color: CyberColors.lime,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (workoutLogs.isEmpty)
-            const Text('No exercise logs yet.'),
-          ...workoutLogs.map((row) => Card(
-            child: ListTile(
-              leading: const Icon(
-                Icons.trending_up_rounded,
-                color: CyberColors.lime,
-              ),
-              title: Text('${row['exercise_name']}'),
-              subtitle: Text(
-                '${row['weight_kg']}kg • '
-                '${row['set_1_reps']}/${row['set_2_reps']}/${row['set_3_reps']} reps'
-                'Next: ${row['suggested_weight']}kg • target ${row['suggested_reps']} reps'
-                '${dateText(row['performed_at'] as String)}',
-              ),
-              isThreeLine: true,
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () async {
-                  await db.deleteWorkoutLog(row['id'] as int);
-                  await refresh();
-                },
-              ),
-              onTap: () async {
-                await showDialog<void>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('${row['exercise_name']}'),
-                    content: Text('${row['suggestion_message']}'),
-                    actions: [
-                      FilledButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
           )),
         ],

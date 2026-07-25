@@ -116,7 +116,7 @@ class _MealScreenState extends State<MealScreen> {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Enter your body metrics to calculate BMR, TDEE and a suggested daily meal plan.',
             style: TextStyle(color: CyberColors.muted),
           ),
@@ -329,7 +329,7 @@ class _DietResult extends StatelessWidget {
                           children: [
                             Text(
                               entry.key.toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: CyberColors.magenta,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1,
@@ -344,7 +344,7 @@ class _DietResult extends StatelessWidget {
                                 padding: const EdgeInsets.only(bottom: 5),
                                 child: Text(
                                   '• ${map['display_name'] ?? map['name'] ?? 'Food item'}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: CyberColors.text,
                                   ),
                                 ),
@@ -383,11 +383,11 @@ class _Chip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF344665)),
+        border: Border.all(color: Color(0xFF344665)),
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           color: CyberColors.muted,
           fontSize: 12,
           fontWeight: FontWeight.w700,
@@ -412,7 +412,7 @@ class _ErrorBox extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: CyberColors.danger),
+          Icon(Icons.error_outline_rounded, color: CyberColors.danger),
           const SizedBox(width: 10),
           Expanded(child: Text(message)),
         ],
