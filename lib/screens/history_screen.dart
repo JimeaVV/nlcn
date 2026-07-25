@@ -13,6 +13,7 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool loading = true;
   List<Map<String, dynamic>> meals = [];
   List<Map<String, dynamic>> workouts = [];
+  List<Map<String, dynamic>> workoutLogs = [];
 
   @override
   void initState() {
@@ -23,10 +24,12 @@ class HistoryScreenState extends State<HistoryScreen> {
   Future<void> refresh() async {
     final mealRows = await db.getMealHistory();
     final workoutRows = await db.getWorkoutHistory();
+    final logRows = await db.getWorkoutLogs();
     if (!mounted) return;
     setState(() {
       meals = mealRows;
       workouts = workoutRows;
+      workoutLogs = logRows;
       loading = false;
     });
   }
@@ -56,7 +59,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           padding: const EdgeInsets.all(18),
           children: [
             Text('SAVED MEAL PLAN',
-              style: TextStyle(color: CyberColors.cyan,fontSize: 20,fontWeight: FontWeight.w900)),
+                style: TextStyle(color: CyberColors.cyan,fontSize: 20,fontWeight: FontWeight.w900)),
             const SizedBox(height: 12),
             ...data.entries.map((entry) {
               final meal = entry.value as Map<String, dynamic>;
@@ -68,7 +71,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                   padding: const EdgeInsets.all(14),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(entry.key.toUpperCase(),
-                      style: TextStyle(color: CyberColors.magenta,fontWeight: FontWeight.w900)),
+                        style: TextStyle(color: CyberColors.magenta,fontWeight: FontWeight.w900)),
                     const SizedBox(height: 8),
                     ...items.map((item) {
                       final m = item as Map<String, dynamic>;
@@ -76,7 +79,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 7),
                         child: Text('• ${m['display_name'] ?? m['name']}'
-                          '${prep.isEmpty ? '' : '\n  Prep: $prep'}'),
+                            '${prep.isEmpty ? '' : '\n  Prep: $prep'}'),
                       );
                     }),
                   ]),
@@ -106,7 +109,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           padding: const EdgeInsets.all(18),
           children: [
             Text('SAVED WORKOUT',
-              style: TextStyle(color: CyberColors.magenta,fontSize: 20,fontWeight: FontWeight.w900)),
+                style: TextStyle(color: CyberColors.magenta,fontSize: 20,fontWeight: FontWeight.w900)),
             const SizedBox(height: 12),
             ...List.generate(items.length, (i) {
               final item = items[i] as Map<String, dynamic>;
@@ -136,7 +139,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           Row(children: [
             Expanded(child: Text('HISTORY ARCHIVE', style: Theme.of(context).textTheme.headlineSmall)),
             IconButton(
-              onPressed: meals.isEmpty && workouts.isEmpty ? null : () async {
+              onPressed: meals.isEmpty && workouts.isEmpty && workoutLogs.isEmpty ? null : () async {
                 await db.clearAllHistory();
                 await refresh();
               },
@@ -179,6 +182,57 @@ class HistoryScreenState extends State<HistoryScreen> {
                   await refresh();
                 },
               ),
+            ),
+          )),
+
+          const SizedBox(height: 18),
+          Text(
+            'PROGRESSIVE OVERLOAD LOGS',
+            style: TextStyle(
+              color: CyberColors.lime,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (workoutLogs.isEmpty)
+            const Text('No exercise logs yet.'),
+          ...workoutLogs.map((row) => Card(
+            child: ListTile(
+              leading: Icon(
+                Icons.trending_up_rounded,
+                color: CyberColors.lime,
+              ),
+              title: Text('${row['exercise_name']}'),
+              subtitle: Text(
+                '${row['weight_kg']}kg • '
+                    '${row['set_1_reps']}/${row['set_2_reps']}/${row['set_3_reps']} reps\n'
+                    'Next: ${row['suggested_weight']}kg • '
+                    'target ${row['suggested_reps']} reps\n'
+                    '${dateText(row['performed_at'] as String)}',
+              ),
+              isThreeLine: true,
+              trailing: IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () async {
+                  await db.deleteWorkoutLog(row['id'] as int);
+                  await refresh();
+                },
+              ),
+              onTap: () async {
+                await showDialog<void>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('${row['exercise_name']}'),
+                    content: Text('${row['suggestion_message']}'),
+                    actions: [
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           )),
         ],
