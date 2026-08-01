@@ -1,0 +1,671 @@
+<mxfile host="Electron" compressed="false">
+  <diagram id="optifit-overall" name="OptiFit Overall Flowchart">
+    <mxGraphModel dx="2118" dy="998" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1587" pageHeight="1120" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lane_user" parent="1" style="swimlane;horizontal=1;startSize=35;container=1;pointerEvents=0;html=1;whiteSpace=wrap;fillColor=#ffffff;swimlaneFillColor=#ffffff;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;collapsible=0;" value="User" vertex="1">
+          <mxGeometry height="1055" width="210" x="20" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="m_meal" parent="lane_user" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="M" vertex="1">
+          <mxGeometry height="22" width="22" x="3" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_flutter" parent="1" style="swimlane;horizontal=1;startSize=35;container=1;pointerEvents=0;html=1;whiteSpace=wrap;fillColor=#ffffff;swimlaneFillColor=#ffffff;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;collapsible=0;" value="Flutter Mobile Application" vertex="1">
+          <mxGeometry height="1055" width="410" x="230" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="e_meal_display_decision" edge="1" parent="lane_flutter" source="meal_profile" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;" target="meal_save_decision" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="432" />
+              <mxPoint x="230" y="340" />
+              <mxPoint x="105" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="meal_validate" parent="lane_flutter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Validate Input and&#xa;Send Diet Request" vertex="1">
+          <mxGeometry height="35" width="160" x="30" y="297.5" as="geometry" />
+        </mxCell>
+        <mxCell id="save_meal_history" parent="lane_flutter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Save Meal Plan History" vertex="1">
+          <mxGeometry height="38" width="150" x="30" y="432" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_fastapi" parent="1" style="swimlane;horizontal=1;startSize=35;container=1;pointerEvents=0;html=1;whiteSpace=wrap;fillColor=#ffffff;swimlaneFillColor=#ffffff;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;collapsible=0;" value="FastAPI Backend" vertex="1">
+          <mxGeometry height="1055" width="350" x="640" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_csv" parent="1" style="swimlane;horizontal=1;startSize=35;container=1;pointerEvents=0;html=1;whiteSpace=wrap;fillColor=#ffffff;swimlaneFillColor=#ffffff;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;collapsible=0;" value="CSV Datasets" vertex="1">
+          <mxGeometry height="1055" width="220" x="990" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_sqlite" parent="1" style="swimlane;horizontal=1;startSize=35;container=1;pointerEvents=0;html=1;whiteSpace=wrap;fillColor=#ffffff;swimlaneFillColor=#ffffff;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;collapsible=0;" value="SQLite Database" vertex="1">
+          <mxGeometry height="1055" width="290" x="1210" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="title" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontColor=#111827;fontSize=17;fontStyle=1;strokeColor=none;fillColor=none;" value="OVERALL FLOWCHART OF THE OPTIFIT RECOMMENDER SYSTEM" vertex="1">
+          <mxGeometry height="35" width="950" x="20" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="sec_meal" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;spacingLeft=12;fillColor=#dbeafe;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;" value="1. MEAL RECOMMENDATION" vertex="1">
+          <mxGeometry height="25" width="1480" x="20" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="sec_workout" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;spacingLeft=12;fillColor=#dbeafe;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;" value="2. WORKOUT RECOMMENDATION AND PROGRESSIVE OVERLOAD" vertex="1">
+          <mxGeometry height="25" width="1480" x="20" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="sec_history" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;spacingLeft=12;fillColor=#dbeafe;strokeColor=#6b7280;fontColor=#1f2937;fontSize=12;fontStyle=1;shadow=0;" value="3. HISTORY AND SETTINGS" vertex="1">
+          <mxGeometry height="25" width="1480" x="20" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="start" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Start" vertex="1">
+          <mxGeometry height="35" width="100" x="75" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="launch" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Launch OptiFit" vertex="1">
+          <mxGeometry height="45" width="155" x="50" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="initialize" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Initialize Mobile Interface" vertex="1">
+          <mxGeometry height="45" width="220" x="300" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="modules" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Display Main Modules:&#xa;Meal • Workout • History • Settings" vertex="1">
+          <mxGeometry height="50" width="250" x="290" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="module_decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Which module does the&#xa;user select?" vertex="1">
+          <mxGeometry height="55" width="170" x="350" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="m_top" parent="1" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="M" vertex="1">
+          <mxGeometry height="20" width="20" x="575" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="w_top" parent="1" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="W" vertex="1">
+          <mxGeometry height="20" width="20" x="575" y="244" as="geometry" />
+        </mxCell>
+        <mxCell id="h_top" parent="1" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="H" vertex="1">
+          <mxGeometry height="20" width="20" x="575" y="268" as="geometry" />
+        </mxCell>
+        <mxCell id="s_top" parent="1" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="S" vertex="1">
+          <mxGeometry height="20" width="20" x="575" y="292" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacingTop=5;spacingLeft=8;fillColor=#ffffff;strokeColor=#9ca3af;fontColor=#374151;fontSize=11;fontStyle=1;shadow=0;" value="" vertex="1">
+          <mxGeometry height="42" width="515" x="985" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_flutter" parent="1" style="rounded=0;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;" value="Flutter process" vertex="1">
+          <mxGeometry height="22" width="92" x="995" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_fastapi" parent="1" style="shape=process;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#111827;fontSize=11;" value="FastAPI subprocess" vertex="1">
+          <mxGeometry height="22" width="105" x="1092" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_io" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;" value="Input / output" vertex="1">
+          <mxGeometry height="22" width="92" x="1202" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_data" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;" value="Stored data" vertex="1">
+          <mxGeometry height="26" width="88" x="1299" y="13" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#111827;fontSize=11;" value="Decision" vertex="1">
+          <mxGeometry height="32" width="95" x="1392" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_input" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Enter Personal Information&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;Age, gender, height, weight&#xa;and activity level&lt;/font&gt;" vertex="1">
+          <mxGeometry height="55" width="190" x="40" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_calc" parent="1" style="shape=process;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#111827;fontSize=11;shadow=0;" value="Calculate BMR, TDEE and Target Calories&#xa;Generate Meal Plan Using Branch and Bound" vertex="1">
+          <mxGeometry height="60" width="280" x="665" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="food_csv" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;shadow=0;" value="final-food-dataset.csv" vertex="1">
+          <mxGeometry height="50" width="180" x="1010" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_return_api" parent="1" style="shape=process;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#111827;fontSize=11;shadow=0;" value="Return Diet Recommendation" vertex="1">
+          <mxGeometry height="40" width="160" x="790" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_display" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Display Meal Recommendation" vertex="1">
+          <mxGeometry height="40" width="150" x="470" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_save_decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Save meal plan?" vertex="1">
+          <mxGeometry height="60" width="150" x="260" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_no_note" parent="1" style="text;html=1;whiteSpace=wrap;align=right;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#374151;fontSize=11;fontStyle=2;" value="No: Continue Without Saving" vertex="1">
+          <mxGeometry height="30" width="165" x="45" y="462" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_profile" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Save Current Profile&#xa;Automatically" vertex="1">
+          <mxGeometry height="38" width="150" x="470" y="468" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_return_menu" parent="1" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Return to Main Menu" vertex="1">
+          <mxGeometry height="30" width="150" x="470" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="meal_merge" parent="1" style="ellipse;aspect=fixed;html=1;fillColor=#4b5563;strokeColor=#4b5563;shadow=0;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="445" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="db_profile" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;shadow=0;" value="user_profile" vertex="1">
+          <mxGeometry height="50" width="110" x="1230" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="db_meal_history" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;shadow=0;" value="meal_plan_history" vertex="1">
+          <mxGeometry height="50" width="120" x="1360" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="w_workout" parent="1" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="W" vertex="1">
+          <mxGeometry height="22" width="22" x="35" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_input" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Select Split, Level and&#xa;Available Time" vertex="1">
+          <mxGeometry height="50" width="150" x="60" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_validate" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Validate Input and Send&#xa;Workout Request" vertex="1">
+          <mxGeometry height="50" width="170" x="250" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_filter" parent="1" style="shape=process;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#111827;fontSize=11;shadow=0;" value="Filter, Score and Select Exercises&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;Time-constrained exercise selection&lt;/font&gt;" vertex="1">
+          <mxGeometry height="50" width="210" x="665" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="gym_csv" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;shadow=0;" value="gym-ex-dataset.csv" vertex="1">
+          <mxGeometry height="50" width="180" x="1010" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_return_api" parent="1" style="shape=process;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#111827;fontSize=11;shadow=0;" value="Return Workout Recommendation" vertex="1">
+          <mxGeometry height="40" width="160" x="800" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_display" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Display Workout Recommendation" vertex="1">
+          <mxGeometry height="40" width="150" x="470" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_save_decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Save workout plan?" vertex="1">
+          <mxGeometry height="60" width="150" x="260" y="642" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_no_note" parent="1" style="text;html=1;whiteSpace=wrap;align=right;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#374151;fontSize=11;fontStyle=2;" value="No: Continue Without Saving" vertex="1">
+          <mxGeometry height="30" width="165" x="45" y="672" as="geometry" />
+        </mxCell>
+        <mxCell id="save_workout_history" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Save Workout Plan History" vertex="1">
+          <mxGeometry height="38" width="150" x="470" y="715" as="geometry" />
+        </mxCell>
+        <mxCell id="db_workout_history" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;shadow=0;" value="workout_plan_history" vertex="1">
+          <mxGeometry height="50" width="150" x="1230" y="705" as="geometry" />
+        </mxCell>
+        <mxCell id="log_decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Log exercise result?" vertex="1">
+          <mxGeometry height="55" width="150" x="260" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="performance_input" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Enter Weight, Reps&#xa;and Difficulty" vertex="1">
+          <mxGeometry height="45" width="150" x="60" y="715" as="geometry" />
+        </mxCell>
+        <mxCell id="performance_validate" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Validate and Send&#xa;Performance Data" vertex="1">
+          <mxGeometry height="40" width="150" x="260" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="overload_apply" parent="1" style="shape=process;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#111827;fontSize=11;shadow=0;" value="Apply Rule-Based&#xa;Progressive Overload" vertex="1">
+          <mxGeometry height="40" width="155" x="665" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="overload_return" parent="1" style="shape=process;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#111827;fontSize=11;shadow=0;" value="Return Next-Session&#xa;Recommendation" vertex="1">
+          <mxGeometry height="40" width="150" x="835" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="save_workout_log" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Save Workout Log Automatically" vertex="1">
+          <mxGeometry height="35" width="150" x="470" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="db_workout_logs" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;shadow=0;" value="workout_logs" vertex="1">
+          <mxGeometry height="50" width="150" x="1230" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="display_next" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Display Next-Session&#xa;Recommendation" vertex="1">
+          <mxGeometry height="40" width="150" x="260" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="workout_return_menu" parent="1" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Return to Main Menu" vertex="1">
+          <mxGeometry height="28" width="150" x="470" y="775" as="geometry" />
+        </mxCell>
+        <mxCell id="return_workout_screen" parent="1" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Return to Workout Screen" vertex="1">
+          <mxGeometry height="28" width="150" x="470" y="875" as="geometry" />
+        </mxCell>
+        <mxCell id="h_history" parent="1" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="H" vertex="1">
+          <mxGeometry height="22" width="22" x="35" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="open_history" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Open History" vertex="1">
+          <mxGeometry height="38" width="150" x="60" y="945" as="geometry" />
+        </mxCell>
+        <mxCell id="read_history" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Read Stored History" vertex="1">
+          <mxGeometry height="38" width="150" x="250" y="945" as="geometry" />
+        </mxCell>
+        <mxCell id="history_db" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#111827;fontSize=11;shadow=0;" value="meal_plan_history&#xa;workout_plan_history&#xa;workout_logs" vertex="1">
+          <mxGeometry height="80" width="240" x="1230" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="display_history" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Display History" vertex="1">
+          <mxGeometry height="38" width="150" x="470" y="945" as="geometry" />
+        </mxCell>
+        <mxCell id="history_decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="History action?" vertex="1">
+          <mxGeometry height="50" width="120" x="230" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="update_history_records" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Update History&#xa;Records" vertex="1">
+          <mxGeometry height="35" width="80" x="430" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="return_history" parent="1" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Return to History Screen" vertex="1">
+          <mxGeometry height="50" width="110" x="520" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="shared_return_menu" parent="1" style="rounded=1;arcSize=35;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="Return to Main Menu" vertex="1">
+          <mxGeometry height="30" width="120" x="520" y="1065" as="geometry" />
+        </mxCell>
+        <mxCell id="s_settings" parent="1" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4b5563;fontColor=#111827;fontSize=11;fontStyle=1;shadow=0;" value="S" vertex="1">
+          <mxGeometry height="22" width="22" x="35" y="1018" as="geometry" />
+        </mxCell>
+        <mxCell id="open_settings" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Open Settings" vertex="1">
+          <mxGeometry height="35" width="150" x="60" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="display_settings" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Display Appearance Settings" vertex="1">
+          <mxGeometry height="40" width="120" x="240" y="1055" as="geometry" />
+        </mxCell>
+        <mxCell id="select_theme" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#111827;fontSize=11;shadow=0;" value="Select Theme Mode" vertex="1">
+          <mxGeometry height="40" width="80" x="45" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="apply_theme" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#111827;fontSize=11;shadow=0;" value="Apply Theme Using&#xa;ThemeController" vertex="1">
+          <mxGeometry height="40" width="110" x="385" y="1055" as="geometry" />
+        </mxCell>
+        <mxCell id="e_start_launch" edge="1" parent="1" source="start" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="launch" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="125" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_launch_init" edge="1" parent="1" source="launch" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="initialize" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="168" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_init_modules" edge="1" parent="1" source="initialize" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="modules" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="198" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_modules_decision" edge="1" parent="1" source="modules" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="module_decision" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="435" y="255" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_dec_m" edge="1" parent="1" source="module_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.2;entryX=0;entryY=0.5;" target="m_top" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="550" y="266" />
+              <mxPoint x="550" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_dec_w" edge="1" parent="1" source="module_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.4;entryX=0;entryY=0.5;" target="w_top" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="555" y="277" />
+              <mxPoint x="555" y="254" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_dec_h" edge="1" parent="1" source="module_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.6;entryX=0;entryY=0.5;" target="h_top" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="288" />
+              <mxPoint x="560" y="278" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_dec_s" edge="1" parent="1" source="module_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.8;entryX=0;entryY=0.5;" target="s_top" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="299" />
+              <mxPoint x="560" y="302" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_m_input" edge="1" parent="1" source="m_meal" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="meal_input" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="58" y="361" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_input_validate" edge="1" parent="1" source="meal_input" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="meal_validate" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_validate_calc" edge="1" parent="1" source="meal_validate" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="meal_calc" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="550" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_csv" edge="1" parent="1" source="meal_calc" style="edgeStyle=none;rounded=0;html=1;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="food_csv" value="Read data">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="978" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_calc_return" edge="1" parent="1" source="meal_calc" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="meal_return_api" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="805" y="402" />
+              <mxPoint x="870" y="402" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_return_display" edge="1" parent="1" source="meal_return_api" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="meal_display" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="705" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_display_profile" edge="1" parent="1" source="meal_display" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="meal_profile" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="545" y="459" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_profile_db" edge="1" parent="1" source="meal_profile" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="db_profile" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="925" y="487" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_yes" edge="1" parent="1" source="meal_save_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="save_meal_history" value="Yes">
+          <mxGeometry relative="1" y="15" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="335" y="467" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_no" edge="1" parent="1" source="meal_save_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="meal_merge" value="No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="432" />
+              <mxPoint x="450" y="515" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_save_meal_db" edge="1" parent="1" source="save_meal_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=0.5;entryY=1;" target="db_meal_history" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="506" />
+              <mxPoint x="220" y="548" />
+              <mxPoint x="1420" y="548" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_save_meal_return" edge="1" parent="1" source="save_meal_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="meal_merge" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="415" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_meal_merge_return" edge="1" parent="1" source="meal_merge" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="meal_return_menu" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="462" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_w_input" edge="1" parent="1" source="w_workout" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="workout_input" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="58" y="601" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_input_validate" edge="1" parent="1" source="workout_input" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="workout_validate" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_validate_filter" edge="1" parent="1" source="workout_validate" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="workout_filter" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="545" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_csv" edge="1" parent="1" source="workout_filter" style="edgeStyle=none;rounded=0;html=1;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="gym_csv" value="Read data">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_filter_return" edge="1" parent="1" source="workout_filter" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="workout_return_api" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="770" y="642" />
+              <mxPoint x="880" y="642" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_return_display" edge="1" parent="1" source="workout_return_api" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="workout_display" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="705" y="670" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_display_decision" edge="1" parent="1" source="workout_display" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="workout_save_decision" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="670" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_yes" edge="1" parent="1" source="workout_save_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" target="save_workout_history" value="Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="373" y="707" />
+              <mxPoint x="545" y="707" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_workout_no" edge="1" parent="1" source="workout_save_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=0.25;entryY=0;" target="log_decision" value="No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="225" y="672" />
+              <mxPoint x="225" y="700" />
+              <mxPoint x="298" y="700" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_save_workout_db" edge="1" parent="1" source="save_workout_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="db_workout_history" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="925" y="734" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_save_workout_log_decision" edge="1" parent="1" source="save_workout_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="log_decision" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="738" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_log_yes" edge="1" parent="1" source="log_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="performance_input" value="Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="235" y="738" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_log_no" edge="1" parent="1" source="log_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="workout_return_menu" value="No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="738" />
+              <mxPoint x="440" y="789" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_perf_input_validate" edge="1" parent="1" source="performance_input" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="performance_validate" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="738" />
+              <mxPoint x="230" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_perf_validate_apply" edge="1" parent="1" source="performance_validate" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" target="overload_apply" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="800" />
+              <mxPoint x="440" y="825" />
+              <mxPoint x="743" y="825" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_apply_return" edge="1" parent="1" source="overload_apply" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="overload_return" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="828" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_overload_save_log" edge="1" parent="1" source="overload_return" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="save_workout_log" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="910" y="828" />
+              <mxPoint x="545" y="828" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_save_log_db" edge="1" parent="1" source="save_workout_log" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="db_workout_logs" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="925" y="848" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_save_log_display" edge="1" parent="1" source="save_workout_log" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="display_next" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="848" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_display_return_screen" edge="1" parent="1" source="display_next" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="return_workout_screen" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="845" />
+              <mxPoint x="440" y="889" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_h_open" edge="1" parent="1" source="h_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="open_history" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="58" y="961" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_open_read" edge="1" parent="1" source="open_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="read_history" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="964" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_read_history_db" edge="1" parent="1" source="read_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=0;" target="history_db" value="Read history records from SQLite">
+          <mxGeometry relative="1" x="-0.15" as="geometry">
+            <mxPoint y="14" as="offset" />
+            <Array as="points">
+              <mxPoint x="325" y="938" />
+              <mxPoint x="1350" y="938" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_db_display_history" edge="1" parent="1" source="history_db" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="display_history" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_display_history_decision" edge="1" parent="1" source="display_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" target="history_decision" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="964" />
+              <mxPoint x="410" y="985" />
+              <mxPoint x="210" y="985" />
+              <mxPoint x="210" y="1015" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_history_view" edge="1" parent="1" source="history_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=1;" target="return_history" value="View Details">
+          <mxGeometry relative="1" x="0.75" as="geometry">
+            <mxPoint y="5" as="offset" />
+            <Array as="points">
+              <mxPoint x="290" y="1050" />
+              <mxPoint x="575" y="1050" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_history_delete" edge="1" parent="1" source="history_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.143;" target="update_history_records" value="Delete Record">
+          <mxGeometry relative="1" x="0.25" y="15" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_history_clear" edge="1" parent="1" source="history_decision" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.8;entryX=0;entryY=0.571;" target="update_history_records" value="Clear History">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="5" as="offset" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_update_history_db" edge="1" parent="1" source="update_history_records" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0;entryY=0.875;" target="history_db" value="Delete / Clear">
+          <mxGeometry relative="1" x="0.2" as="geometry">
+            <mxPoint y="-12" as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="985" />
+              <mxPoint x="1200" y="985" />
+              <mxPoint x="1200" y="1010" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_history_refresh" edge="1" parent="1" source="history_db" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=1;entryY=0.3;" target="return_history" value="Refresh Displayed History">
+          <mxGeometry relative="1" x="0.15" as="geometry">
+            <mxPoint y="-12" as="offset" />
+            <Array as="points">
+              <mxPoint x="1350" y="1048" />
+              <mxPoint x="670" y="1048" />
+              <mxPoint x="670" y="1005" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_return_history_menu" edge="1" parent="1" source="return_history" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" target="shared_return_menu" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="650" y="1015" />
+              <mxPoint x="650" y="1080" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_s_open" edge="1" parent="1" source="s_settings" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="open_settings" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="58" y="1029" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_open_display_settings" edge="1" parent="1" source="open_settings" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="display_settings" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="225" y="1033" />
+              <mxPoint x="225" y="1075" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_display_select_theme" edge="1" parent="1" source="display_settings" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" target="select_theme" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="225" y="1075" />
+              <mxPoint x="225" y="1052" />
+              <mxPoint x="85" y="1052" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_select_apply_theme" edge="1" parent="1" source="select_theme" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=1;" target="apply_theme" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="85" y="1105" />
+              <mxPoint x="440" y="1105" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_apply_return_menu" edge="1" parent="1" source="apply_theme" style="edgeStyle=none;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#4b5563;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="shared_return_menu" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="508" y="1075" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
