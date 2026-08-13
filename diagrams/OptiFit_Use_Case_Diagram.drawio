@@ -1,52 +1,52 @@
 <mxfile host="Electron" compressed="false">
   <diagram id="optifit-use-case" name="Use Case Diagram">
-    <mxGraphModel dx="2095" dy="1075" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" background="#FFFFFF" math="0" shadow="0">
+    <mxGraphModel dx="4198" dy="1306" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" background="#FFFFFF" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="title" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#17365D;strokeColor=none;fillColor=none;" value="USE CASE DIAGRAM OF THE OPTIFIT RECOMMENDER SYSTEM" vertex="1">
-          <mxGeometry height="42" width="1420" x="120" y="20" as="geometry" />
+          <mxGeometry height="42" width="1420" x="-75" y="30" as="geometry" />
         </mxCell>
         <mxCell id="actor-user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;whiteSpace=wrap;align=center;fontSize=13;fontStyle=1;fontColor=#263746;fillColor=#FFFFFF;strokeColor=#40566B;" value="User" vertex="1">
           <mxGeometry height="140" width="90" x="70" y="470" as="geometry" />
         </mxCell>
         <mxCell id="system-boundary" parent="1" style="shape=rect;rounded=0;html=1;whiteSpace=wrap;verticalAlign=top;align=left;spacingTop=10;spacingLeft=14;fontSize=15;fontStyle=1;fontColor=#17365D;fillColor=#FCFDFE;strokeColor=#577590;strokeWidth=1.5;container=1;pointerEvents=0;collapsible=0;" value="OptiFit Recommender System" vertex="1">
-          <mxGeometry height="990" width="1330" x="270" y="90" as="geometry" />
+          <mxGeometry height="990" width="730" x="270" y="90" as="geometry" />
         </mxCell>
-        <mxCell id="uc-profile" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Manage User Profile" vertex="1">
+        <mxCell id="uc-profile" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Manage User Profile" vertex="1">
           <mxGeometry height="78" width="240" x="80" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="uc-meal" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Get Meal Recommendation" vertex="1">
+        <mxCell id="uc-meal" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Get Meal Recommendation" vertex="1">
           <mxGeometry height="78" width="240" x="80" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="uc-save-meal" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Save Meal Plan" vertex="1">
+        <mxCell id="uc-save-meal" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Save Meal Plan" vertex="1">
           <mxGeometry height="78" width="240" x="420" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="uc-workout" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Get Workout Recommendation" vertex="1">
+        <mxCell id="uc-workout" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Get Workout Recommendation" vertex="1">
           <mxGeometry height="78" width="240" x="80" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="uc-save-workout" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Save Workout Plan" vertex="1">
+        <mxCell id="uc-save-workout" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Save Workout Plan" vertex="1">
           <mxGeometry height="78" width="240" x="420" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="uc-log" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Log Exercise Result" vertex="1">
+        <mxCell id="uc-log" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Log Exercise Result" vertex="1">
           <mxGeometry height="78" width="240" x="80" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="uc-overload" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Get Progressive Overload Recommendation" vertex="1">
+        <mxCell id="uc-overload" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Get Progressive Overload Recommendation" vertex="1">
           <mxGeometry height="78" width="240" x="420" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="uc-history" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="View History" vertex="1">
+        <mxCell id="uc-history" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="View History" vertex="1">
           <mxGeometry height="78" width="240" x="70" y="600" as="geometry" />
         </mxCell>
-        <mxCell id="uc-details" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="View Record Details" vertex="1">
+        <mxCell id="uc-details" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="View Record Details" vertex="1">
           <mxGeometry height="78" width="240" x="420" y="530" as="geometry" />
         </mxCell>
-        <mxCell id="uc-delete" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Delete Record" vertex="1">
+        <mxCell id="uc-delete" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Delete Record" vertex="1">
           <mxGeometry height="78" width="240" x="420" y="630" as="geometry" />
         </mxCell>
-        <mxCell id="uc-clear" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Clear All History" vertex="1">
+        <mxCell id="uc-clear" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Clear All History" vertex="1">
           <mxGeometry height="78" width="240" x="420" y="730" as="geometry" />
         </mxCell>
-        <mxCell id="uc-theme" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;" value="Change Theme" vertex="1">
+        <mxCell id="uc-theme" parent="system-boundary" style="ellipse;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;perimeter=ellipsePerimeter;fillColor=#EAF3FA;strokeColor=#5B7C99;strokeWidth=1.5;fontColor=#1F3447;fontSize=12;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" value="Change Theme" vertex="1">
           <mxGeometry height="78" width="240" x="70" y="770" as="geometry" />
         </mxCell>
         <mxCell id="a-profile" edge="1" parent="1" source="actor-user" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;startArrow=none;strokeColor=#536779;strokeWidth=1.2;exitX=1;exitY=0.08;entryX=0;entryY=0.5;" target="uc-profile" value="">
@@ -80,7 +80,9 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="r-delete" edge="1" parent="1" source="uc-delete" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=7 5;endArrow=open;endFill=0;endSize=11;strokeColor=#3E5C76;strokeWidth=1.2;fontColor=#20384D;fontSize=11;fontStyle=2;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="uc-history" value="&amp;lt;extend&amp;gt;">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry relative="1" x="-0.1123" y="4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="r-clear" edge="1" parent="1" source="uc-clear" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=7 5;endArrow=open;endFill=0;endSize=11;strokeColor=#3E5C76;strokeWidth=1.2;fontColor=#20384D;fontSize=11;fontStyle=2;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;" value="&amp;lt;extend&amp;gt;">
           <mxGeometry relative="1" as="geometry">

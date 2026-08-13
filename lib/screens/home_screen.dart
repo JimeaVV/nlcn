@@ -18,18 +18,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int index = 0;
-  final api = ApiService();
   final historyKey = GlobalKey<HistoryScreenState>();
+  late final ApiService api;
+  late final List<Widget> pages;
 
   @override
-  Widget build(BuildContext context) {
-    final pages = [
+  void initState() {
+    super.initState();
+    api = ApiService();
+    pages = [
       MealScreen(api: api),
       WorkoutScreen(api: api),
       HistoryScreen(key: historyKey),
       SettingsScreen(themeController: widget.themeController),
     ];
+  }
 
+  @override
+  void dispose() {
+    api.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(

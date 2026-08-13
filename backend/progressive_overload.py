@@ -1,6 +1,6 @@
 """Rule-based progressive overload for a 3-set, 8-12 rep range."""
 
-from typing import Dict, List
+from typing import Sequence
 
 TARGET_SETS = 3
 MIN_REPS = 8
@@ -10,9 +10,9 @@ WEIGHT_INCREMENT_KG = 2.5
 
 def suggest_progressive_overload(
     current_weight: float,
-    reps_per_set: List[int],
+    reps_per_set: Sequence[int],
     difficulty: str,
-) -> Dict[str, object]:
+) -> dict[str, object]:
     if current_weight < 0:
         raise ValueError("Current weight cannot be negative.")
     if len(reps_per_set) != TARGET_SETS:

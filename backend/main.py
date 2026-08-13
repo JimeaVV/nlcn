@@ -1,15 +1,62 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from __future__ import annotations
+
+import logging
+from contextlib import asynccontextmanager
+from typing import Literal
+
 import uvicorn
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
-from tienxuly import load_and_preprocess_data
-from constraint_based import generate_meal_plan
-from content_based import recommend_workout_routine
-from progressive_overload import suggest_progressive_overload
-from calorie_calculator import calculate_target_calories
+if __package__:
+    from .calorie_calculator import calculate_target_calories
+    from .constraint_based import generate_meal_plan
+    from .content_based import LEVEL_MAX_EXERCISES, recommend_workout_routine
+    from .progressive_overload import suggest_progressive_overload
+    from .tienxuly import load_and_preprocess_data
+else:
+    from calorie_calculator import calculate_target_calories
+    from constraint_based import generate_meal_plan
+    from content_based import LEVEL_MAX_EXERCISES, recommend_workout_routine
+    from progressive_overload import suggest_progressive_overload
+    from tienxuly import load_and_preprocess_data
 
-app = FastAPI(title="Gym & Diet Recommender API")
+logger = logging.getLogger("optifit.api")
+
+Gender = Literal["male", "female"]
+ActivityLevel = Literal[1.2, 1.375, 1.55, 1.725, 1.9]
+WorkoutSplit = Literal["Push", "Pull", "Legs", "Core"]
+ExperienceLevel = Literal["Beginner", "Intermediate", "Pro"]
+Difficulty = Literal["Easy", "Moderate", "Hard", "Failure"]
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    food_data, gym_data = load_and_preprocess_data()
+    app.state.food_data = food_data
+    app.state.gym_data = gym_data
+    app.state.food_list = (
+        food_data.to_dict("records") if food_data is not None else []
+    )
+
+    if food_data is None or gym_data is None:
+        logger.error("One or more recommendation datasets could not be loaded.")
+    else:
+        logger.info(
+            "Datasets loaded: %s foods and %s exercises.",
+            len(food_data),
+            len(gym_data),
+        )
+
+    yield
+
+
+app = FastAPI(
+    title="OptiFit Recommender API",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,51 +66,57 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("Loading and preprocessing datasets...")
-food_data, gym_data = load_and_preprocess_data()
-
-if food_data is None or gym_data is None:
-    print("ERROR: Could not load data. Please check the CSV files!")
-    food_list = []
-else:
-    food_list = food_data.to_dict("records")
-    print("Data loaded successfully! Server is ready.")
-
 
 class DietRequest(BaseModel):
-    age: int
-    gender: str
-    weight: float
-    height: float
-    activity_level: float
+    age: int = Field(ge=13, le=100)
+    gender: Gender
+    weight: float = Field(gt=0, le=500)
+    height: float = Field(gt=0, le=300)
+    activity_level: ActivityLevel
 
 
 class WorkoutRequest(BaseModel):
-    target_split: str
-    target_level: str
-    available_time_mins: int = 45
+    target_split: WorkoutSplit
+    target_level: ExperienceLevel
+    available_time_mins: int = Field(default=45, ge=15, le=180)
 
 
 class ProgressiveOverloadRequest(BaseModel):
-    exercise_name: str
-    current_weight: float
-    set_1_reps: int
-    set_2_reps: int
-    set_3_reps: int
-    difficulty: str
+    exercise_name: str = Field(min_length=1, max_length=200)
+    current_weight: float = Field(ge=0, le=1000)
+    set_1_reps: int = Field(ge=0, le=30)
+    set_2_reps: int = Field(ge=0, le=30)
+    set_3_reps: int = Field(ge=0, le=30)
+    difficulty: Difficulty
+
+
+def _workout_note(
+    remaining_time: int,
+) -> str:
+    notes: list[str] = []
+    if remaining_time > 0:
+        notes.append(
+            "Remaining time can be used for warm-up, rest between sets, "
+            "cool-down or cardio."
+        )
+    return " ".join(notes)
 
 
 @app.get("/api/health")
-def health_check():
+def health_check(request: Request):
+    food_data = request.app.state.food_data
+    gym_data = request.app.state.gym_data
+    datasets_ready = food_data is not None and gym_data is not None
     return {
-        "status": "ok",
+        "status": "ok" if datasets_ready else "degraded",
         "food_rows": len(food_data) if food_data is not None else 0,
         "gym_rows": len(gym_data) if gym_data is not None else 0,
     }
 
 
 @app.post("/api/recommend-diet")
-def get_diet_plan(req: DietRequest):
+def get_diet_plan(req: DietRequest, request: Request):
+    food_list = request.app.state.food_list
     if not food_list:
         raise HTTPException(status_code=503, detail="Food dataset is unavailable.")
 
@@ -75,30 +128,38 @@ def get_diet_plan(req: DietRequest):
             height=req.height,
             activity_level=req.activity_level,
         )
-
         meal_plan = generate_meal_plan(
             food_list=food_list,
             daily_calories=target_calories,
             body_weight_kg=req.weight,
-            protein_per_kg=1.8,
         )
-
-        return {
-            "status": "success",
-            "message": "Successfully recommended diet plan!",
-            "bmr": bmr,
-            "tdee": tdee,
-            "target_calories": target_calories,
-            "data": meal_plan,
-        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("Diet recommendation failed.")
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to generate a diet recommendation.",
+        ) from exc
+
+    return {
+        "status": "success",
+        "message": "Successfully recommended diet plan!",
+        "bmr": bmr,
+        "tdee": tdee,
+        "target_calories": target_calories,
+        "data": meal_plan,
+    }
 
 
 @app.post("/api/recommend-workout")
-def get_workout_plan(req: WorkoutRequest):
+def get_workout_plan(req: WorkoutRequest, request: Request):
+    gym_data = request.app.state.gym_data
     if gym_data is None:
-        raise HTTPException(status_code=503, detail="Workout dataset is unavailable.")
+        raise HTTPException(
+            status_code=503,
+            detail="Workout dataset is unavailable.",
+        )
 
     try:
         routine_df, total_time = recommend_workout_routine(
@@ -107,27 +168,38 @@ def get_workout_plan(req: WorkoutRequest):
             req.target_level,
             req.available_time_mins,
         )
-
-        routine_list = routine_df.to_dict("records")
-
-        remaining_time = max(0, req.available_time_mins - total_time)
-
-        return {
-            "status": "success",
-            "message": "Workout plan generated successfully!",
-            "target_time": req.available_time_mins,
-            "estimated_time": total_time,
-            "remaining_time": remaining_time,
-            "total_exercises": len(routine_list),
-            "exercise_limit": {"Beginner": 5, "Intermediate": 7, "Pro": 9}.get(req.target_level, 7),
-            "note": (
-                "Remaining time can be used for warm-up, rest between sets, "
-                "cool-down or cardio."
-            ) if remaining_time > 0 else "",
-            "data": routine_list,
-        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("Workout recommendation failed.")
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to generate a workout recommendation.",
+        ) from exc
+
+    routine_list = routine_df.to_dict("records")
+    remaining_time = max(0, req.available_time_mins - total_time)
+    used_levels = sorted({str(item["level"]) for item in routine_list})
+    level_fallback_used = any(
+        level.casefold() != req.target_level.casefold() for level in used_levels
+    )
+
+    return {
+        "status": "success",
+        "message": "Workout plan generated successfully!",
+        "target_time": req.available_time_mins,
+        "estimated_time": total_time,
+        "remaining_time": remaining_time,
+        "total_exercises": len(routine_list),
+        "exercise_limit": LEVEL_MAX_EXERCISES[req.target_level],
+        "requested_level": req.target_level,
+        "used_levels": used_levels,
+        "level_fallback_used": level_fallback_used,
+        "note": _workout_note(
+            remaining_time,
+        ),
+        "data": routine_list,
+    }
 
 
 @app.post("/api/progressive-overload")
@@ -138,17 +210,23 @@ def get_progressive_overload(req: ProgressiveOverloadRequest):
             reps_per_set=[req.set_1_reps, req.set_2_reps, req.set_3_reps],
             difficulty=req.difficulty,
         )
-        return {
-            "status": "success",
-            "message": "Progressive overload recommendation generated.",
-            "exercise_name": req.exercise_name,
-            "data": recommendation,
-        }
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("Progressive Overload recommendation failed.")
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to generate a Progressive Overload recommendation.",
+        ) from exc
+
+    return {
+        "status": "success",
+        "message": "Progressive overload recommendation generated.",
+        "exercise_name": req.exercise_name,
+        "data": recommendation,
+    }
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    module = "backend.main:app" if __package__ else "main:app"
+    uvicorn.run(module, host="0.0.0.0", port=8000, reload=True)

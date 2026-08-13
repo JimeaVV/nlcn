@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/history_models.dart';
+import '../models/recommendation_models.dart';
+
 class DatabaseService {
   DatabaseService._();
   static final instance = DatabaseService._();
@@ -91,15 +94,18 @@ class DatabaseService {
     required double activityLevel,
   }) async {
     final db = await database;
-    await db.insert('user_profile', {
-      'id': 1,
-      'age': age,
-      'gender': gender,
-      'height': height,
-      'weight': weight,
-      'activity_level': activityLevel,
-      'updated_at': DateTime.now().toIso8601String(),
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+        'user_profile',
+        {
+          'id': 1,
+          'age': age,
+          'gender': gender,
+          'height': height,
+          'weight': weight,
+          'activity_level': activityLevel,
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<Map<String, dynamic>?> getProfile() async {
@@ -113,23 +119,21 @@ class DatabaseService {
     return rows.isEmpty ? null : Map<String, dynamic>.from(rows.first);
   }
 
-  double _d(dynamic v) =>
-      v is num ? v.toDouble() : double.tryParse('$v') ?? 0;
-  int _i(dynamic v) => v is num ? v.round() : int.tryParse('$v') ?? 0;
+  Map<String, dynamic>? _map(dynamic value) {
+    return value is Map ? Map<String, dynamic>.from(value) : null;
+  }
 
-  Future<int> saveMealPlan(Map<String, dynamic> response) async {
+  Future<int> saveMealPlan(DietRecommendation recommendation) async {
     final db = await database;
-    final plan = response['data'] is Map<String, dynamic>
-        ? response['data'] as Map<String, dynamic>
-        : <String, dynamic>{};
+    final plan = recommendation.plan;
     return db.insert('meal_plan_history', {
-      'target_calories': _d(response['target_calories'] ?? plan['target_calo']),
-      'protein_target': _d(plan['protein_target']),
-      'total_calories': _d(plan['total_calo']),
-      'total_protein': _d(plan['total_protein']),
-      'total_carb': _d(plan['total_carb']),
-      'total_fat': _d(plan['total_fat']),
-      'plan_json': jsonEncode(response),
+      'target_calories': recommendation.targetCalories,
+      'protein_target': plan.proteinTarget,
+      'total_calories': plan.totalCalories,
+      'total_protein': plan.totalProtein,
+      'total_carb': plan.totalCarbohydrates,
+      'total_fat': plan.totalFat,
+      'plan_json': jsonEncode(recommendation.rawResponse),
       'created_at': DateTime.now().toIso8601String(),
     });
   }
@@ -137,15 +141,15 @@ class DatabaseService {
   Future<int> saveWorkoutPlan({
     required String split,
     required String level,
-    required Map<String, dynamic> response,
+    required WorkoutRecommendation recommendation,
   }) async {
     final db = await database;
     return db.insert('workout_plan_history', {
       'split': split,
       'level': level,
-      'target_time': _i(response['target_time']),
-      'estimated_time': _i(response['estimated_time']),
-      'exercises_json': jsonEncode(response),
+      'target_time': recommendation.targetTime,
+      'estimated_time': recommendation.estimatedTime,
+      'exercises_json': jsonEncode(recommendation.rawResponse),
       'created_at': DateTime.now().toIso8601String(),
     });
   }
@@ -157,13 +161,9 @@ class DatabaseService {
     required int set2Reps,
     required int set3Reps,
     required String difficulty,
-    required Map<String, dynamic> recommendation,
+    required ProgressiveOverloadRecommendation recommendation,
   }) async {
     final db = await database;
-    final data = recommendation['data'] is Map<String, dynamic>
-        ? recommendation['data'] as Map<String, dynamic>
-        : <String, dynamic>{};
-
     return db.insert('workout_logs', {
       'exercise_name': exerciseName,
       'weight_kg': currentWeight,
@@ -171,37 +171,46 @@ class DatabaseService {
       'set_2_reps': set2Reps,
       'set_3_reps': set3Reps,
       'difficulty': difficulty,
-      'suggested_weight': _d(data['next_weight']),
-      'suggested_reps': _i(data['next_rep_target']),
-      'action': '${data['action'] ?? ''}',
-      'suggestion_message': '${data['message'] ?? ''}',
+      'suggested_weight': recommendation.nextWeight,
+      'suggested_reps': recommendation.nextRepTarget,
+      'action': recommendation.action,
+      'suggestion_message': recommendation.message,
       'performed_at': DateTime.now().toIso8601String(),
     });
   }
 
-  Future<List<Map<String, dynamic>>> getMealHistory() async {
+  Future<List<MealHistoryEntry>> getMealHistory() async {
     final db = await database;
-    final rows = await db.query('meal_plan_history', orderBy: 'created_at desc');
-    return rows.map(Map<String, dynamic>.from).toList();
+    final rows = await db.query(
+      'meal_plan_history',
+      orderBy: 'created_at desc',
+    );
+    return rows.map(MealHistoryEntry.fromMap).toList(growable: false);
   }
 
-  Future<List<Map<String, dynamic>>> getWorkoutHistory() async {
+  Future<List<WorkoutHistoryEntry>> getWorkoutHistory() async {
     final db = await database;
     final rows = await db.query(
       'workout_plan_history',
       orderBy: 'created_at desc',
     );
-    return rows.map(Map<String, dynamic>.from).toList();
+    return rows.map(WorkoutHistoryEntry.fromMap).toList(growable: false);
   }
 
-  Future<List<Map<String, dynamic>>> getWorkoutLogs() async {
+  Future<List<WorkoutLogEntry>> getWorkoutLogs() async {
     final db = await database;
     final rows = await db.query('workout_logs', orderBy: 'performed_at desc');
-    return rows.map(Map<String, dynamic>.from).toList();
+    return rows.map(WorkoutLogEntry.fromMap).toList(growable: false);
   }
 
-  Map<String, dynamic> decodeJson(String raw) =>
-      Map<String, dynamic>.from(jsonDecode(raw) as Map);
+  Map<String, dynamic>? tryDecodeJson(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      return _map(decoded);
+    } on FormatException {
+      return null;
+    }
+  }
 
   Future<void> deleteMealPlan(int id) async {
     final db = await database;

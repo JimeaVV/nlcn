@@ -1,0 +1,138 @@
+<mxfile host="Electron" compressed="false">
+  <diagram id="optifit-class-diagram" name="Page-1">
+    <mxGraphModel dx="2500" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1500" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="OPTIFIT CLASS AND MODULE DIAGRAM" style="text;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=24;fontStyle=1;fontColor=#1f3a4d;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="320" y="20" width="1660" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ui-zone" value="FLUTTER PRESENTATION" style="swimlane;html=1;rounded=1;startSize=34;horizontal=1;fillColor=#f7fbff;strokeColor=#6c8ebf;dashed=1;fontFamily=Arial;fontSize=15;fontStyle=1;fontColor=#365f91;" vertex="1" parent="1">
+          <mxGeometry x="20" y="80" width="620" height="1340" as="geometry" />
+        </mxCell>
+        <mxCell id="data-zone" value="FLUTTER SERVICES AND DATA MODELS" style="swimlane;html=1;rounded=1;startSize=34;horizontal=1;fillColor=#fbf9fd;strokeColor=#9673a6;dashed=1;fontFamily=Arial;fontSize=15;fontStyle=1;fontColor=#6f4b7e;" vertex="1" parent="1">
+          <mxGeometry x="660" y="80" width="960" height="1340" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-zone" value="FASTAPI BACKEND MODULES" style="swimlane;html=1;rounded=1;startSize=34;horizontal=1;fillColor=#f7fcf6;strokeColor=#82b366;dashed=1;fontFamily=Arial;fontSize=15;fontStyle=1;fontColor=#3f6f3c;" vertex="1" parent="1">
+          <mxGeometry x="1640" y="80" width="630" height="1340" as="geometry" />
+        </mxCell>
+
+        <mxCell id="app" value="&lt;b&gt;OptiFitApp&lt;/b&gt;&lt;hr&gt;+ themeController: ThemeController&lt;hr&gt;+ build(): Widget" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="135" width="245" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="home" value="&lt;b&gt;HomeScreen&lt;/b&gt;&lt;hr&gt;+ themeController: ThemeController&lt;br&gt;- api: ApiService&lt;br&gt;- pages: List&amp;lt;Widget&amp;gt;&lt;hr&gt;+ build(): Widget" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="355" y="135" width="245" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="meal-screen" value="&lt;b&gt;MealScreen&lt;/b&gt;&lt;hr&gt;+ api: ApiService&lt;br&gt;- result: DietRecommendation?&lt;hr&gt;+ submit(): Future&amp;lt;void&amp;gt;&lt;br&gt;- loadProfile()&lt;br&gt;- saveMealPlan()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="355" width="245" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="workout-screen" value="&lt;b&gt;WorkoutScreen&lt;/b&gt;&lt;hr&gt;+ api: ApiService&lt;br&gt;- result: WorkoutRecommendation?&lt;hr&gt;+ submit(): Future&amp;lt;void&amp;gt;&lt;br&gt;+ saveWorkout()&lt;br&gt;+ logExercise(name)&lt;br&gt;- showProgressiveOverloadResult()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="355" y="355" width="245" height="205" as="geometry" />
+        </mxCell>
+        <mxCell id="history-screen" value="&lt;b&gt;HistoryScreen&lt;/b&gt;&lt;hr&gt;- db: DatabaseService&lt;br&gt;- meals / workouts / workoutLogs&lt;hr&gt;+ refresh()&lt;br&gt;+ showMeal(entry)&lt;br&gt;+ showWorkout(entry)&lt;br&gt;- deleteRecord() / clearAllHistory()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="635" width="245" height="205" as="geometry" />
+        </mxCell>
+        <mxCell id="settings-screen" value="&lt;b&gt;SettingsScreen&lt;/b&gt;&lt;hr&gt;+ themeController: ThemeController&lt;hr&gt;+ build(): Widget" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="355" y="635" width="245" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="theme-controller" value="&lt;b&gt;ThemeController&lt;/b&gt;&lt;hr&gt;- style: AppStyle&lt;br&gt;+ theme: ThemeData&lt;hr&gt;+ load(): Future&amp;lt;void&amp;gt;&lt;br&gt;+ setStyle(value): Future&amp;lt;void&amp;gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="200" y="960" width="255" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="dialog" value="&lt;b&gt;ExerciseLogDialog&lt;/b&gt;&lt;hr&gt;+ exerciseName: String&lt;br&gt;- form controllers&lt;hr&gt;+ submit(): void&lt;br&gt;&lt;&lt;creates&gt;&gt; ExerciseLogInput" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="200" y="1190" width="255" height="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="api-service" value="&lt;b&gt;ApiService&lt;/b&gt;&lt;hr&gt;+ baseUrl: String&lt;br&gt;- client: http.Client&lt;hr&gt;+ health()&lt;br&gt;+ recommendDiet(...)&lt;br&gt;+ recommendWorkout(...)&lt;br&gt;+ recommendProgressiveOverload(...)&lt;br&gt;- send(request) / parse(json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="135" width="280" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="db-service" value="&lt;b&gt;DatabaseService&lt;/b&gt;&lt;hr&gt;+ instance: DatabaseService&lt;br&gt;- db: Database?&lt;hr&gt;+ save/getProfile()&lt;br&gt;+ save/get/deleteMealPlan()&lt;br&gt;+ save/get/deleteWorkoutPlan()&lt;br&gt;+ save/get/deleteWorkoutLog()&lt;br&gt;+ clearAllHistory()" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="135" width="305" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="sqlite" value="&lt;b&gt;&amp;lt;&amp;lt;database&amp;gt;&amp;gt; SQLite&lt;/b&gt;&lt;hr&gt;user_profile&lt;br&gt;meal_plan_history&lt;br&gt;workout_plan_history&lt;br&gt;workout_logs" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1380" y="155" width="190" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="diet-rec" value="&lt;b&gt;DietRecommendation&lt;/b&gt;&lt;hr&gt;+ bmr / tdee / targetCalories&lt;br&gt;+ plan: MealPlan&lt;br&gt;+ rawResponse: Map&lt;hr&gt;+ fromJson(json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="455" width="280" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="meal-plan" value="&lt;b&gt;MealPlan&lt;/b&gt;&lt;hr&gt;+ proteinTarget&lt;br&gt;+ totalCalories / Protein / Carb / Fat&lt;br&gt;+ meals: Map&amp;lt;String, MealRecommendation&amp;gt;&lt;hr&gt;+ fromJson(json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="455" width="305" height="175" as="geometry" />
+        </mxCell>
+        <mxCell id="meal-rec" value="&lt;b&gt;MealRecommendation&lt;/b&gt;&lt;hr&gt;+ name / calories / protein / carbohydrates / fat&lt;br&gt;+ items: List&amp;lt;FoodItem&amp;gt;&lt;hr&gt;+ fromJson(name, json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="680" width="280" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="food-item" value="&lt;b&gt;FoodItem&lt;/b&gt;&lt;hr&gt;+ displayName: String&lt;br&gt;+ suggestedPrep: String&lt;hr&gt;+ fromJson(json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="690" width="305" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="workout-rec" value="&lt;b&gt;WorkoutRecommendation&lt;/b&gt;&lt;hr&gt;+ targetTime / estimatedTime / totalExercises&lt;br&gt;+ exercises: List&amp;lt;ExerciseRecommendation&amp;gt;&lt;br&gt;+ note / rawResponse&lt;hr&gt;+ fromJson(json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="900" width="280" height="175" as="geometry" />
+        </mxCell>
+        <mxCell id="exercise-rec" value="&lt;b&gt;ExerciseRecommendation&lt;/b&gt;&lt;hr&gt;+ name / muscleGroup / equipment / level&lt;br&gt;+ estimatedMinutes: int&lt;hr&gt;+ fromJson(json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="910" width="305" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="po-rec" value="&lt;b&gt;ProgressiveOverloadRecommendation&lt;/b&gt;&lt;hr&gt;+ nextWeight / nextRepTarget&lt;br&gt;+ action / message / rawResponse&lt;hr&gt;+ fromJson(json)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="1140" width="280" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="history-models" value="&lt;b&gt;&amp;lt;&amp;lt;data classes&amp;gt;&amp;gt; History Models&lt;/b&gt;&lt;hr&gt;MealHistoryEntry&lt;br&gt;WorkoutHistoryEntry&lt;br&gt;WorkoutLogEntry&lt;hr&gt;Each provides fromMap(row)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#f5f0f8;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="1140" width="305" height="155" as="geometry" />
+        </mxCell>
+
+        <mxCell id="controller" value="&lt;b&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt; main.py&lt;/b&gt;&lt;hr&gt;FastAPI routes and Pydantic request models&lt;hr&gt;GET /api/health&lt;br&gt;POST /api/recommend-diet&lt;br&gt;POST /api/recommend-workout&lt;br&gt;POST /api/progressive-overload" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1725" y="140" width="460" height="215" as="geometry" />
+        </mxCell>
+        <mxCell id="calorie" value="&lt;b&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt; calorie_calculator.py&lt;/b&gt;&lt;hr&gt;+ calculate_bmr(...)&lt;br&gt;+ calculate_target_calories(...)&lt;hr&gt;Mifflin-St Jeor; TDEE; 500-kcal deficit" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#eaf4e8;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1685" y="450" width="265" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="meal-optimizer" value="&lt;b&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt; constraint_based.py&lt;/b&gt;&lt;hr&gt;+ generate_meal_plan(...)&lt;br&gt;+ branch_and_bound_meal(...)&lt;hr&gt;Candidate sampling; scoring; pruning; three meals" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#eaf4e8;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1980" y="450" width="265" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="workout-module" value="&lt;b&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt; content_based.py&lt;/b&gt;&lt;hr&gt;+ recommend_workout_routine(...)&lt;br&gt;+ estimate_exercise_time(...)&lt;hr&gt;Split filtering; level score; balanced time-limited selection" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#eaf4e8;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1685" y="705" width="265" height="175" as="geometry" />
+        </mxCell>
+        <mxCell id="po-module" value="&lt;b&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt; progressive_overload.py&lt;/b&gt;&lt;hr&gt;+ suggest_progressive_overload(...)&lt;hr&gt;Deterministic 3-set, 8-12 rep, 2.5 kg rules" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#eaf4e8;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1980" y="705" width="265" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="preprocess" value="&lt;b&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt; tienxuly.py&lt;/b&gt;&lt;hr&gt;+ load_and_preprocess_data()&lt;hr&gt;Schema validation, numeric conversion, null and duplicate removal" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Arial;fontSize=12;fillColor=#eaf4e8;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1685" y="970" width="265" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="csv" value="&lt;b&gt;&amp;lt;&amp;lt;read-only data&amp;gt;&amp;gt; CSV&lt;/b&gt;&lt;hr&gt;final-food-dataset.csv: 160 rows&lt;br&gt;gym-ex-dataset.csv: 96 rows" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1995" y="970" width="235" height="145" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-app-home" value="creates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="app" target="home"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-home-meal" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="home" target="meal-screen"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-home-workout" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="home" target="workout-screen"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-home-history" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="home" target="history-screen"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-home-settings" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="home" target="settings-screen"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-app-theme" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="app" target="theme-controller"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-settings-theme" value="updates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="settings-screen" target="theme-controller"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-workout-dialog" value="opens" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="workout-screen" target="dialog"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e-meal-api" value="requests" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="meal-screen" target="api-service"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-workout-api" value="requests" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="workout-screen" target="api-service"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-meal-db" value="persists" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="meal-screen" target="db-service"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-workout-db" value="persists" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="workout-screen" target="db-service"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-history-db" value="queries / deletes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="history-screen" target="db-service"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-db-sqlite" value="CRUD" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="db-service" target="sqlite"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e-api-diet" value="creates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="api-service" target="diet-rec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-api-workout" value="creates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="api-service" target="workout-rec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-api-po" value="creates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="api-service" target="po-rec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-diet-plan" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="diet-rec" target="meal-plan"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-plan-meal" value="1..3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="meal-plan" target="meal-rec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-meal-food" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="meal-rec" target="food-item"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-workout-exercise" value="1..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=diamondThin;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="workout-rec" target="exercise-rec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-db-history" value="maps rows" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="db-service" target="history-models"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e-api-controller" value="HTTP / JSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontFamily=Arial;fontSize=10;strokeWidth=2;" edge="1" parent="1" source="api-service" target="controller"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-controller-calorie" value="calls" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="controller" target="calorie"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-controller-meal" value="calls" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="controller" target="meal-optimizer"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-controller-workout" value="calls" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="controller" target="workout-module"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-controller-po" value="calls" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="controller" target="po-module"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-controller-pre" value="loads at startup" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="controller" target="preprocess"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e-pre-csv" value="reads / cleans" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontFamily=Arial;fontSize=10;" edge="1" parent="1" source="preprocess" target="csv"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

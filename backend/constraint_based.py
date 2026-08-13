@@ -14,14 +14,29 @@ from __future__ import annotations
 import math
 import random
 import time
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Sequence
 
-Food = Dict[str, Any]
-MealResult = Dict[str, Any]
+Food = dict[str, Any]
+MealResult = dict[str, Any]
+FoodSelection = tuple[Food, str, int]
+CandidateGroup = tuple[str, Sequence[Food], bool]
 
 STEP_G = 25
 FAT_PORTIONS_G = (0, 5, 10, 15)
 TIME_LIMIT_SECONDS = 1.5
+DEFAULT_PROTEIN_PER_KG = 1.8
+CALORIE_OVERSHOOT_RATIO = 1.12
+REQUIRED_CANDIDATE_LIMIT = 6
+OPTIONAL_CANDIDATE_LIMIT = 4
+
+PROTEIN_SHORTAGE_WEIGHT = 120.0
+PROTEIN_EXCESS_WEIGHT = 15.0
+PROTEIN_EXCESS_RATIO = 1.20
+CALORIE_ERROR_WEIGHT = 1.0
+MIN_CARB_CALORIE_RATIO = 0.20
+MAX_FAT_CALORIE_RATIO = 0.40
+MACRO_PENALTY_WEIGHT = 50.0
+REPEATED_CHEESE_PENALTY = 20.0
 
 MEAL_RATIOS = {
     "Breakfast": 0.30,
@@ -83,12 +98,12 @@ def _food_name(food: Food) -> str:
 
 
 def _max_serving(food: Food, group: str) -> int:
-    dataset_max = max(STEP_G, int(_number(food.get("max_amount_g"), 200)))
-    minimum, maximum = PORTION_RANGES[group]
-    return max(minimum, min(dataset_max, maximum))
+    dataset_max = max(1, int(_number(food.get("max_amount_g"), 200)))
+    _, configured_max = PORTION_RANGES[group]
+    return min(dataset_max, configured_max)
 
 
-def _portion_options(food: Food, group: str) -> List[int]:
+def _portion_options(food: Food, group: str) -> list[int]:
     if group == "fat":
         dataset_max = int(_number(food.get("max_amount_g"), 15))
         max_allowed = min(dataset_max, PORTION_RANGES["fat"][1])
@@ -97,13 +112,15 @@ def _portion_options(food: Food, group: str) -> List[int]:
     minimum, _ = PORTION_RANGES[group]
     maximum = _max_serving(food, group)
 
+    # Some concentrated foods have a dataset limit below the usual serving
+    # minimum. In that case the dataset limit is authoritative.
     if maximum < minimum:
         return [maximum]
 
     return list(range(minimum, maximum + 1, STEP_G))
 
 
-def _nutrition(food: Food, grams: int) -> Tuple[float, float, float, float]:
+def _nutrition(food: Food, grams: int) -> tuple[float, float, float, float]:
     factor = grams / 100.0
     return (
         _number(food.get("calories_per_100g")) * factor,
@@ -141,8 +158,8 @@ def _candidate_score(food: Food, group: str, meal_name: str) -> float:
     return score
 
 
-def _prepare_pools(food_list: Sequence[Food]) -> Dict[str, List[Food]]:
-    pools: Dict[str, List[Food]] = {
+def _prepare_pools(food_list: Sequence[Food]) -> dict[str, list[Food]]:
+    pools: dict[str, list[Food]] = {
         "starch": [],
         "meat": [],
         "dairyegg": [],
@@ -151,7 +168,7 @@ def _prepare_pools(food_list: Sequence[Food]) -> Dict[str, List[Food]]:
         "fat": [],
     }
 
-    seen: Set[str] = set()
+    seen: set[str] = set()
 
     for food in food_list:
         name = _food_name(food)
@@ -161,6 +178,8 @@ def _prepare_pools(food_list: Sequence[Food]) -> Dict[str, List[Food]]:
         if not name or normalized_name in seen or group not in pools:
             continue
         if _number(food.get("calories_per_100g")) <= 0:
+            continue
+        if _number(food.get("max_amount_g")) <= 0:
             continue
 
         seen.add(normalized_name)
@@ -175,8 +194,8 @@ def _pick_candidates(
     meal_name: str,
     limit: int,
     rng: random.Random,
-    excluded_names: Set[str],
-) -> List[Food]:
+    excluded_names: set[str],
+) -> list[Food]:
     filtered = [
         food for food in pool
         if _food_name(food).lower() not in excluded_names
@@ -205,7 +224,7 @@ def _meal_score(
     fat: float,
     target_calories: float,
     target_protein: float,
-    selected: Sequence[Tuple[Food, str, int]],
+    selected: Sequence[FoodSelection],
 ) -> float:
     """
     Lower is better.
@@ -214,29 +233,33 @@ def _meal_score(
     calorie difference, because the app targets cutting while preserving muscle.
     """
     protein_shortage = max(0.0, target_protein - protein)
-    protein_excess = max(0.0, protein - target_protein * 1.20)
+    protein_excess = max(0.0, protein - target_protein * PROTEIN_EXCESS_RATIO)
     calorie_error = abs(calories - target_calories)
 
     carb_ratio = (carbs * 4) / max(calories, 1.0)
     fat_ratio = (fat * 9) / max(calories, 1.0)
 
     macro_penalty = 0.0
-    if carb_ratio < 0.20:
-        macro_penalty += (0.20 - carb_ratio) * 50.0
-    if fat_ratio > 0.40:
-        macro_penalty += (fat_ratio - 0.40) * 50.0
+    if carb_ratio < MIN_CARB_CALORIE_RATIO:
+        macro_penalty += (
+            MIN_CARB_CALORIE_RATIO - carb_ratio
+        ) * MACRO_PENALTY_WEIGHT
+    if fat_ratio > MAX_FAT_CALORIE_RATIO:
+        macro_penalty += (
+            fat_ratio - MAX_FAT_CALORIE_RATIO
+        ) * MACRO_PENALTY_WEIGHT
 
     cheese_count = sum(
         1
         for food, _, grams in selected
         if grams > 0 and "cheese" in _food_name(food).lower()
     )
-    repetition_penalty = max(0, cheese_count - 1) * 20.0
+    repetition_penalty = max(0, cheese_count - 1) * REPEATED_CHEESE_PENALTY
 
     return (
-        protein_shortage * 120.0
-        + protein_excess * 15.0
-        + calorie_error * 1.0
+        protein_shortage * PROTEIN_SHORTAGE_WEIGHT
+        + protein_excess * PROTEIN_EXCESS_WEIGHT
+        + calorie_error * CALORIE_ERROR_WEIGHT
         + macro_penalty
         + repetition_penalty
     )
@@ -262,14 +285,14 @@ def _build_result_item(food: Food, group: str, grams: int) -> Food:
 
 
 def branch_and_bound_meal(
-    group_candidates: Sequence[Tuple[str, Sequence[Food], bool]],
+    group_candidates: Sequence[CandidateGroup],
     target_calories: float,
     target_protein: float,
     time_limit: float = TIME_LIMIT_SECONDS,
 ) -> MealResult:
     started = time.perf_counter()
     best_score = math.inf
-    best_selection: List[Tuple[Food, str, int]] = []
+    best_selection: list[FoodSelection] = []
 
     max_remaining_protein = [0.0] * (len(group_candidates) + 1)
 
@@ -291,7 +314,7 @@ def branch_and_bound_meal(
         protein: float,
         carbs: float,
         fat: float,
-        selected: List[Tuple[Food, str, int]],
+        selected: list[FoodSelection],
     ) -> None:
         nonlocal best_score, best_selection
 
@@ -301,7 +324,7 @@ def branch_and_bound_meal(
         optimistic_protein = protein + max_remaining_protein[index]
         unavoidable_shortage = max(0.0, target_protein - optimistic_protein)
 
-        if unavoidable_shortage * 120.0 > best_score:
+        if unavoidable_shortage * PROTEIN_SHORTAGE_WEIGHT > best_score:
             return
 
         if index == len(group_candidates):
@@ -335,7 +358,7 @@ def branch_and_bound_meal(
                 new_calories = calories + add_calories
 
                 # Small overshoot is allowed to avoid sacrificing too much protein.
-                if new_calories > target_calories * 1.12:
+                if new_calories > target_calories * CALORIE_OVERSHOOT_RATIO:
                     continue
 
                 selected.append((food, group, grams))
@@ -350,6 +373,11 @@ def branch_and_bound_meal(
                 selected.pop()
 
     search(0, 0.0, 0.0, 0.0, 0.0, [])
+
+    if not best_selection:
+        raise ValueError(
+            "No feasible meal combination was found within the search limit."
+        )
 
     items = [
         _build_result_item(food, group, grams)
@@ -375,31 +403,83 @@ def branch_and_bound_meal(
     }
 
 
-def generate_meal_plan(
-    food_list: Sequence[Food],
+def _meal_candidate_groups(
+    pools: dict[str, list[Food]],
+    meal_name: str,
+    rng: random.Random,
+    used_starches: set[str],
+    used_proteins: set[str],
+) -> list[CandidateGroup]:
+    rules = MEAL_RULES[meal_name]
+    groups: list[CandidateGroup] = []
+
+    for group in rules["required_groups"]:
+        excluded_names: set[str] = set()
+        if meal_name == "Dinner" and group == "starch":
+            excluded_names = used_starches
+        elif meal_name == "Dinner" and group == "meat":
+            excluded_names = used_proteins
+
+        candidates = _pick_candidates(
+            pools[group],
+            group,
+            meal_name,
+            limit=REQUIRED_CANDIDATE_LIMIT,
+            rng=rng,
+            excluded_names=excluded_names,
+        )
+        if not candidates and excluded_names:
+            candidates = _pick_candidates(
+                pools[group],
+                group,
+                meal_name,
+                limit=REQUIRED_CANDIDATE_LIMIT,
+                rng=rng,
+                excluded_names=set(),
+            )
+        if not candidates:
+            raise ValueError(f"No foods available for required group: {group}")
+
+        groups.append((group, candidates, False))
+
+    for group in rules["optional_groups"]:
+        candidates = _pick_candidates(
+            pools[group],
+            group,
+            meal_name,
+            limit=OPTIONAL_CANDIDATE_LIMIT,
+            rng=rng,
+            excluded_names=set(),
+        )
+        if candidates:
+            groups.append((group, candidates, True))
+
+    return groups
+
+
+def _record_lunch_dinner_foods(
+    meal: MealResult,
+    used_starches: set[str],
+    used_proteins: set[str],
+) -> None:
+    for item in meal["items"]:
+        item_name = str(item.get("name", "")).lower()
+        item_group = str(item.get("food_group", "")).lower()
+        if item_group == "starch":
+            used_starches.add(item_name)
+        elif item_group == "meat":
+            used_proteins.add(item_name)
+
+
+def _empty_plan(
     daily_calories: float,
     body_weight_kg: float,
-    protein_per_kg: float = 1.8,
-    seed: Optional[int] = None,
+    protein_per_kg: float,
 ) -> MealResult:
-    if not food_list:
-        raise ValueError("Food list is empty.")
-    if daily_calories <= 0:
-        raise ValueError("Daily calories must be greater than 0.")
-    if body_weight_kg <= 0:
-        raise ValueError("Body weight must be greater than 0.")
-    if protein_per_kg <= 0:
-        raise ValueError("Protein per kg must be greater than 0.")
-
-    pools = _prepare_pools(food_list)
-    rng = random.Random(seed)
-
-    daily_protein_target = body_weight_kg * protein_per_kg
-
-    plan: MealResult = {
+    return {
         "meals": {},
         "target_calo": round(daily_calories, 2),
-        "protein_target": round(daily_protein_target, 2),
+        "protein_target": round(body_weight_kg * protein_per_kg, 2),
         "protein_per_kg": round(protein_per_kg, 2),
         "body_weight_kg": round(body_weight_kg, 2),
         "total_calo": 0.0,
@@ -411,61 +491,53 @@ def generate_meal_plan(
         "time": 0.0,
     }
 
+
+def _add_meal_totals(plan: MealResult, meal: MealResult) -> None:
+    plan["total_calo"] += meal["calo"]
+    plan["total_protein"] += meal["protein"]
+    plan["total_carb"] += meal["carb"]
+    plan["total_fat"] += meal["fat"]
+
+
+def generate_meal_plan(
+    food_list: Sequence[Food],
+    daily_calories: float,
+    body_weight_kg: float,
+    protein_per_kg: float = DEFAULT_PROTEIN_PER_KG,
+    seed: int | None = None,
+) -> MealResult:
+    if not food_list:
+        raise ValueError("Food list is empty.")
+    if daily_calories <= 0:
+        raise ValueError("Daily calories must be greater than 0.")
+    if body_weight_kg <= 0:
+        raise ValueError("Body weight must be greater than 0.")
+    if protein_per_kg <= 0:
+        raise ValueError("Protein per kg must be greater than 0.")
+
+    pools = _prepare_pools(food_list)
+    # No seed means a fresh plan on each request. Tests and experiments can
+    # pass a seed when they need a reproducible recommendation.
+    rng = random.Random(seed)
+
+    daily_protein_target = body_weight_kg * protein_per_kg
+
+    plan = _empty_plan(daily_calories, body_weight_kg, protein_per_kg)
+
     started = time.perf_counter()
-    used_lunch_dinner_starches: Set[str] = set()
-    used_lunch_dinner_proteins: Set[str] = set()
+    used_lunch_dinner_starches: set[str] = set()
+    used_lunch_dinner_proteins: set[str] = set()
 
     for meal_name, ratio in MEAL_RATIOS.items():
-        rules = MEAL_RULES[meal_name]
         meal_target_calories = daily_calories * ratio
         meal_target_protein = daily_protein_target * ratio
-        candidate_groups: List[Tuple[str, Sequence[Food], bool]] = []
-
-        for group in rules["required_groups"]:
-            excluded_names: Set[str] = set()
-
-            if meal_name == "Dinner" and group == "starch":
-                excluded_names = used_lunch_dinner_starches
-            elif meal_name == "Dinner" and group == "meat":
-                excluded_names = used_lunch_dinner_proteins
-
-            candidates = _pick_candidates(
-                pools[group],
-                group,
-                meal_name,
-                limit=6,
-                rng=rng,
-                excluded_names=excluded_names,
-            )
-
-            if not candidates:
-                candidates = _pick_candidates(
-                    pools[group],
-                    group,
-                    meal_name,
-                    limit=6,
-                    rng=rng,
-                    excluded_names=set(),
-                )
-
-            if not candidates:
-                raise ValueError(
-                    f"No foods available for required group: {group}"
-                )
-
-            candidate_groups.append((group, candidates, False))
-
-        for group in rules["optional_groups"]:
-            candidates = _pick_candidates(
-                pools[group],
-                group,
-                meal_name,
-                limit=4,
-                rng=rng,
-                excluded_names=set(),
-            )
-            if candidates:
-                candidate_groups.append((group, candidates, True))
+        candidate_groups = _meal_candidate_groups(
+            pools,
+            meal_name,
+            rng,
+            used_lunch_dinner_starches,
+            used_lunch_dinner_proteins,
+        )
 
         meal = branch_and_bound_meal(
             candidate_groups,
@@ -476,19 +548,13 @@ def generate_meal_plan(
         plan["meals"][meal_name] = meal
 
         if meal_name in {"Lunch", "Dinner"}:
-            for item in meal["items"]:
-                item_name = str(item.get("name", "")).lower()
-                item_group = str(item.get("food_group", "")).lower()
+            _record_lunch_dinner_foods(
+                meal,
+                used_lunch_dinner_starches,
+                used_lunch_dinner_proteins,
+            )
 
-                if item_group == "starch":
-                    used_lunch_dinner_starches.add(item_name)
-                elif item_group == "meat":
-                    used_lunch_dinner_proteins.add(item_name)
-
-        plan["total_calo"] += meal["calo"]
-        plan["total_protein"] += meal["protein"]
-        plan["total_carb"] += meal["carb"]
-        plan["total_fat"] += meal["fat"]
+        _add_meal_totals(plan, meal)
 
     plan["time"] = round(time.perf_counter() - started, 6)
     plan["total_calo"] = round(plan["total_calo"], 2)
@@ -508,7 +574,10 @@ def generate_meal_plan(
 
 
 if __name__ == "__main__":
-    from tienxuly import load_and_preprocess_data
+    if __package__:
+        from .tienxuly import load_and_preprocess_data
+    else:
+        from tienxuly import load_and_preprocess_data
 
     food_data, _ = load_and_preprocess_data()
 
@@ -519,7 +588,7 @@ if __name__ == "__main__":
         food_data.to_dict("records"),
         daily_calories=2100,
         body_weight_kg=70,
-        protein_per_kg=1.8,
+        protein_per_kg=DEFAULT_PROTEIN_PER_KG,
         seed=42,
     )
 
