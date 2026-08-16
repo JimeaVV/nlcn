@@ -5,6 +5,13 @@ import '../models/recommendation_models.dart';
 import 'cyber_card.dart';
 import 'metric_tile.dart';
 
+String _formatWholeNumber(int value) {
+  return value.toString().replaceAllMapped(
+        RegExp(r'(?<=\d)(?=(\d{3})+$)'),
+        (_) => ',',
+      );
+}
+
 class MealResult extends StatelessWidget {
   const MealResult({super.key, required this.recommendation});
 
@@ -26,7 +33,7 @@ class MealResult extends StatelessWidget {
               Expanded(
                 child: MetricTile(
                   label: 'BMR',
-                  value: '${recommendation.bmr.round()}',
+                  value: _formatWholeNumber(recommendation.bmr.round()),
                   unit: 'kcal',
                 ),
               ),
@@ -34,7 +41,7 @@ class MealResult extends StatelessWidget {
               Expanded(
                 child: MetricTile(
                   label: 'TDEE',
-                  value: '${recommendation.tdee.round()}',
+                  value: _formatWholeNumber(recommendation.tdee.round()),
                   unit: 'kcal',
                 ),
               ),
@@ -42,7 +49,9 @@ class MealResult extends StatelessWidget {
               Expanded(
                 child: MetricTile(
                   label: 'Target',
-                  value: '${recommendation.targetCalories.round()}',
+                  value: _formatWholeNumber(
+                    recommendation.targetCalories.round(),
+                  ),
                   unit: 'kcal',
                 ),
               ),

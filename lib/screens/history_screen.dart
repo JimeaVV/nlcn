@@ -5,6 +5,13 @@ import '../models/history_models.dart';
 import '../models/recommendation_models.dart';
 import '../services/database_service.dart';
 
+String _formatWholeNumber(int value) {
+  return value.toString().replaceAllMapped(
+        RegExp(r'(?<=\d)(?=(\d{3})+$)'),
+        (_) => ',',
+      );
+}
+
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
@@ -292,7 +299,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                   color: CyberColors.cyan,
                 ),
                 title: Text(
-                  '${row.totalCalories.round()} kcal • '
+                  '${_formatWholeNumber(row.totalCalories.round())} kcal • '
                   '${row.totalProtein.toStringAsFixed(1)}g protein',
                 ),
                 subtitle: Text(dateText(row.createdAt)),
