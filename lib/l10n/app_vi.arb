@@ -514,5 +514,127 @@
   "equipmentEzCurlBar": "Thanh EZ",
   "equipmentKettlebells": "Tạ ấm",
   "equipmentMachine": "Máy tập",
-  "equipmentOther": "Khác"
+  "equipmentOther": "Khác",
+  "navDiary": "Nhật ký",
+  "mealSnack": "Bữa phụ",
+  "diaryTitle": "NHẬT KÝ ĂN UỐNG",
+  "diarySubtitle": "Ghi lại những gì bạn đã ăn và so với mục tiêu trong hồ sơ.",
+  "diaryToday": "Hôm nay",
+  "diaryPreviousDay": "Ngày trước",
+  "diaryNextDay": "Ngày sau",
+  "diaryEaten": "Đã ăn",
+  "diaryCaloriesProgress": "{eaten} / {target} kcal",
+  "@diaryCaloriesProgress": {
+    "placeholders": {
+      "eaten": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryProteinProgress": "{eaten} / {target} g protein",
+  "@diaryProteinProgress": {
+    "placeholders": {
+      "eaten": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryRemaining": "Còn {value} kcal so với mục tiêu",
+  "@diaryRemaining": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryOver": "Vượt mục tiêu {value} kcal",
+  "@diaryOver": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryNoTarget": "Lưu hồ sơ để so với mục tiêu calo và protein.",
+  "diaryMacros": "Carb {carbs} g • Chất béo {fat} g",
+  "@diaryMacros": {
+    "placeholders": {
+      "carbs": {
+        "type": "String"
+      },
+      "fat": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryEmptyMeal": "Chưa ghi món nào.",
+  "diaryAddFood": "THÊM MÓN",
+  "diaryAddTitle": "Thêm món vào nhật ký",
+  "diaryMealSlot": "Bữa",
+  "diaryFromDataset": "Từ dữ liệu",
+  "diaryCustom": "Tự nhập",
+  "diaryFoodSearch": "Tìm thực phẩm",
+  "diaryFoodRequired": "Chọn một thực phẩm trong danh sách.",
+  "diaryGrams": "Khối lượng (g)",
+  "diaryGramsError": "Nhập khối lượng lớn hơn 0 và không quá 5000 g.",
+  "diaryOptionalGrams": "Khối lượng (g, không bắt buộc)",
+  "diaryCustomName": "Tên món",
+  "diaryCustomNameError": "Nhập tên món.",
+  "diaryCustomCalories": "Calo (kcal)",
+  "diaryCustomCaloriesError": "Nhập calo từ 0 đến 10000.",
+  "diaryCarbsLabel": "Carb (g)",
+  "diaryFatLabel": "Chất béo (g)",
+  "diaryMacroError": "Từ 0 đến 1000 g.",
+  "diaryPreview": "Ước tính: {calories} kcal • {protein} g protein",
+  "@diaryPreview": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "diarySave": "Thêm vào nhật ký",
+  "diaryEntryDetails": "{grams} g • {calories} kcal • {protein} g protein",
+  "@diaryEntryDetails": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryEntryDetailsNoGrams": "{calories} kcal • {protein} g protein",
+  "@diaryEntryDetailsNoGrams": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryAdded": "Đã thêm vào nhật ký.",
+  "diaryDeleted": "Đã xóa món khỏi nhật ký.",
+  "diaryUndo": "Hoàn tác",
+  "diaryDeleteEntry": "Xóa món",
+  "diaryLoadFailed": "Không tải được nhật ký. Hãy thử lại.",
+  "diarySaveFailed": "Không lưu được nhật ký. Hãy thử lại.",
+  "mealLogPlan": "GHI VÀO NHẬT KÝ HÔM NAY",
+  "mealPlanLogged": "Đã ghi thực đơn vào nhật ký hôm nay.",
+  "mealPlanAlreadyLogged": "ĐÃ GHI VÀO NHẬT KÝ"
 }

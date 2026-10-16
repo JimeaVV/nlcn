@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:optifit/core/cyber_theme.dart';
+import 'package:optifit/models/food_log_entry.dart';
 import 'package:optifit/models/recommendation_models.dart';
 import 'package:optifit/models/user_profile.dart';
 import 'package:optifit/screens/meal_screen.dart';
@@ -14,6 +15,13 @@ import 'helpers/localized_app.dart';
 class _Database extends Fake implements DatabaseService {
   Map<String, dynamic>? profile;
   final saved = <DietRecommendation>[];
+  final logged = <FoodLogEntry>[];
+
+  @override
+  Future<List<int>> addFoodLogEntries(List<FoodLogEntry> entries) async {
+    logged.addAll(entries);
+    return [for (var i = 0; i < entries.length; i++) logged.length - i];
+  }
 
   @override
   Future<Map<String, dynamic>?> getProfile() async => profile;
@@ -68,7 +76,8 @@ UserProfile _profile(
         calorieOverride: calories,
         proteinOverride: 140);
 
-DietRecommendation _plan(double target) => DietRecommendation.fromJson({
+DietRecommendation _plan(double target, {bool nutrition = false}) =>
+    DietRecommendation.fromJson({
       'bmr': 1694,
       'tdee': 2625,
       'target_calories': target,
@@ -85,7 +94,17 @@ DietRecommendation _plan(double target) => DietRecommendation.fromJson({
             'carb': 200,
             'fat': 60,
             'items': [
-              {'name': 'Oats', 'display_name': '100g oats'}
+              {
+                'name': 'Oats',
+                'display_name': '100g oats',
+                if (nutrition) ...{
+                  'portion_g': 100,
+                  'serving_calo': 389.0,
+                  'serving_protein': 16.9,
+                  'serving_carb': 66.3,
+                  'serving_fat': 6.9,
+                },
+              }
             ]
           }
         }
@@ -170,5 +189,57 @@ void main() {
     await tester.scrollUntilVisible(find.text('LƯU THỰC ĐƠN'), 350);
     expect(find.text('LƯU THỰC ĐƠN'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a generated plan is logged to today\'s diary only once',
+      (tester) async {
+    final database = _Database()..profile = _profile().toMap();
+    final recommendations = _Recommendations();
+    var diaryChanges = 0;
+    tester.view.physicalSize = const Size(360, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(localizedApp(
+        home: Scaffold(
+            body: MealScreen(
+                database: database,
+                recommendations: recommendations,
+                onDiaryChanged: () => diaryChanges++))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TẠO THỰC ĐƠN'));
+    await tester.pump();
+    recommendations.pending.single.complete(_plan(2200, nutrition: true));
+    await tester.pumpAndSettle();
+
+    final log = find.byKey(const ValueKey('meal-log-plan'));
+    await tester.scrollUntilVisible(log, 350);
+    await tester.tap(log);
+    await tester.pumpAndSettle();
+    final entry = database.logged.single;
+    expect(entry.name, 'Oats');
+    expect(entry.meal, MealSlot.breakfast);
+    expect(entry.grams, 100);
+    expect(entry.calories, 389);
+    expect(entry.source, FoodLogSource.mealPlan);
+    expect(diaryChanges, 1);
+    expect(find.text('ĐÃ GHI VÀO NHẬT KÝ'), findsOneWidget);
+
+    await tester.tap(log);
+    await tester.pumpAndSettle();
+    expect(database.logged, hasLength(1));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('plans saved without portion nutrition cannot be logged',
+      (tester) async {
+    final database = _Database()..profile = _profile().toMap();
+    final recommendations = _Recommendations();
+    await _mount(tester, database, recommendations);
+    await tester.tap(find.text('TẠO THỰC ĐƠN'));
+    await tester.pump();
+    recommendations.pending.single.complete(_plan(2200));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('meal-log-plan')), findsNothing);
   });
 }

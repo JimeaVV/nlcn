@@ -1461,6 +1461,276 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Khác'**
   String get equipmentOther;
+
+  /// No description provided for @navDiary.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhật ký'**
+  String get navDiary;
+
+  /// No description provided for @mealSnack.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bữa phụ'**
+  String get mealSnack;
+
+  /// No description provided for @diaryTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'NHẬT KÝ ĂN UỐNG'**
+  String get diaryTitle;
+
+  /// No description provided for @diarySubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi lại những gì bạn đã ăn và so với mục tiêu trong hồ sơ.'**
+  String get diarySubtitle;
+
+  /// No description provided for @diaryToday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôm nay'**
+  String get diaryToday;
+
+  /// No description provided for @diaryPreviousDay.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày trước'**
+  String get diaryPreviousDay;
+
+  /// No description provided for @diaryNextDay.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày sau'**
+  String get diaryNextDay;
+
+  /// No description provided for @diaryEaten.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã ăn'**
+  String get diaryEaten;
+
+  /// No description provided for @diaryCaloriesProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'{eaten} / {target} kcal'**
+  String diaryCaloriesProgress(String eaten, String target);
+
+  /// No description provided for @diaryProteinProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'{eaten} / {target} g protein'**
+  String diaryProteinProgress(String eaten, String target);
+
+  /// No description provided for @diaryRemaining.
+  ///
+  /// In vi, this message translates to:
+  /// **'Còn {value} kcal so với mục tiêu'**
+  String diaryRemaining(String value);
+
+  /// No description provided for @diaryOver.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vượt mục tiêu {value} kcal'**
+  String diaryOver(String value);
+
+  /// No description provided for @diaryNoTarget.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu hồ sơ để so với mục tiêu calo và protein.'**
+  String get diaryNoTarget;
+
+  /// No description provided for @diaryMacros.
+  ///
+  /// In vi, this message translates to:
+  /// **'Carb {carbs} g • Chất béo {fat} g'**
+  String diaryMacros(String carbs, String fat);
+
+  /// No description provided for @diaryEmptyMeal.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa ghi món nào.'**
+  String get diaryEmptyMeal;
+
+  /// No description provided for @diaryAddFood.
+  ///
+  /// In vi, this message translates to:
+  /// **'THÊM MÓN'**
+  String get diaryAddFood;
+
+  /// No description provided for @diaryAddTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm món vào nhật ký'**
+  String get diaryAddTitle;
+
+  /// No description provided for @diaryMealSlot.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bữa'**
+  String get diaryMealSlot;
+
+  /// No description provided for @diaryFromDataset.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ dữ liệu'**
+  String get diaryFromDataset;
+
+  /// No description provided for @diaryCustom.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tự nhập'**
+  String get diaryCustom;
+
+  /// No description provided for @diaryFoodSearch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm thực phẩm'**
+  String get diaryFoodSearch;
+
+  /// No description provided for @diaryFoodRequired.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn một thực phẩm trong danh sách.'**
+  String get diaryFoodRequired;
+
+  /// No description provided for @diaryGrams.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khối lượng (g)'**
+  String get diaryGrams;
+
+  /// No description provided for @diaryGramsError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập khối lượng lớn hơn 0 và không quá 5000 g.'**
+  String get diaryGramsError;
+
+  /// No description provided for @diaryOptionalGrams.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khối lượng (g, không bắt buộc)'**
+  String get diaryOptionalGrams;
+
+  /// No description provided for @diaryCustomName.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tên món'**
+  String get diaryCustomName;
+
+  /// No description provided for @diaryCustomNameError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập tên món.'**
+  String get diaryCustomNameError;
+
+  /// No description provided for @diaryCustomCalories.
+  ///
+  /// In vi, this message translates to:
+  /// **'Calo (kcal)'**
+  String get diaryCustomCalories;
+
+  /// No description provided for @diaryCustomCaloriesError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập calo từ 0 đến 10000.'**
+  String get diaryCustomCaloriesError;
+
+  /// No description provided for @diaryCarbsLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Carb (g)'**
+  String get diaryCarbsLabel;
+
+  /// No description provided for @diaryFatLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chất béo (g)'**
+  String get diaryFatLabel;
+
+  /// No description provided for @diaryMacroError.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ 0 đến 1000 g.'**
+  String get diaryMacroError;
+
+  /// No description provided for @diaryPreview.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ước tính: {calories} kcal • {protein} g protein'**
+  String diaryPreview(String calories, String protein);
+
+  /// No description provided for @diarySave.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm vào nhật ký'**
+  String get diarySave;
+
+  /// No description provided for @diaryEntryDetails.
+  ///
+  /// In vi, this message translates to:
+  /// **'{grams} g • {calories} kcal • {protein} g protein'**
+  String diaryEntryDetails(String grams, String calories, String protein);
+
+  /// No description provided for @diaryEntryDetailsNoGrams.
+  ///
+  /// In vi, this message translates to:
+  /// **'{calories} kcal • {protein} g protein'**
+  String diaryEntryDetailsNoGrams(String calories, String protein);
+
+  /// No description provided for @diaryAdded.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã thêm vào nhật ký.'**
+  String get diaryAdded;
+
+  /// No description provided for @diaryDeleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xóa món khỏi nhật ký.'**
+  String get diaryDeleted;
+
+  /// No description provided for @diaryUndo.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoàn tác'**
+  String get diaryUndo;
+
+  /// No description provided for @diaryDeleteEntry.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa món'**
+  String get diaryDeleteEntry;
+
+  /// No description provided for @diaryLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tải được nhật ký. Hãy thử lại.'**
+  String get diaryLoadFailed;
+
+  /// No description provided for @diarySaveFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không lưu được nhật ký. Hãy thử lại.'**
+  String get diarySaveFailed;
+
+  /// No description provided for @mealLogPlan.
+  ///
+  /// In vi, this message translates to:
+  /// **'GHI VÀO NHẬT KÝ HÔM NAY'**
+  String get mealLogPlan;
+
+  /// No description provided for @mealPlanLogged.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã ghi thực đơn vào nhật ký hôm nay.'**
+  String get mealPlanLogged;
+
+  /// No description provided for @mealPlanAlreadyLogged.
+  ///
+  /// In vi, this message translates to:
+  /// **'ĐÃ GHI VÀO NHẬT KÝ'**
+  String get mealPlanAlreadyLogged;
 }
 
 class _AppLocalizationsDelegate

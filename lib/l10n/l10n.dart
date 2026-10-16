@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 import '../engine/nutrition_targets.dart';
+import '../models/food_log_entry.dart';
 import '../models/user_profile.dart';
 import '../services/recommendation_service.dart';
 import 'app_localizations.dart';
@@ -49,6 +50,13 @@ extension AppLocalizationsLabels on AppLocalizations {
         'Lunch' => lunch,
         'Dinner' => dinner,
         _ => meal,
+      };
+
+  String mealSlotLabel(MealSlot meal) => switch (meal) {
+        MealSlot.breakfast => breakfast,
+        MealSlot.lunch => lunch,
+        MealSlot.dinner => dinner,
+        MealSlot.snack => mealSnack,
       };
 
   String levelLabel(String level) => switch (level.trim().toLowerCase()) {

@@ -777,4 +777,157 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get equipmentOther => 'Khác';
+
+  @override
+  String get navDiary => 'Nhật ký';
+
+  @override
+  String get mealSnack => 'Bữa phụ';
+
+  @override
+  String get diaryTitle => 'NHẬT KÝ ĂN UỐNG';
+
+  @override
+  String get diarySubtitle =>
+      'Ghi lại những gì bạn đã ăn và so với mục tiêu trong hồ sơ.';
+
+  @override
+  String get diaryToday => 'Hôm nay';
+
+  @override
+  String get diaryPreviousDay => 'Ngày trước';
+
+  @override
+  String get diaryNextDay => 'Ngày sau';
+
+  @override
+  String get diaryEaten => 'Đã ăn';
+
+  @override
+  String diaryCaloriesProgress(String eaten, String target) {
+    return '$eaten / $target kcal';
+  }
+
+  @override
+  String diaryProteinProgress(String eaten, String target) {
+    return '$eaten / $target g protein';
+  }
+
+  @override
+  String diaryRemaining(String value) {
+    return 'Còn $value kcal so với mục tiêu';
+  }
+
+  @override
+  String diaryOver(String value) {
+    return 'Vượt mục tiêu $value kcal';
+  }
+
+  @override
+  String get diaryNoTarget => 'Lưu hồ sơ để so với mục tiêu calo và protein.';
+
+  @override
+  String diaryMacros(String carbs, String fat) {
+    return 'Carb $carbs g • Chất béo $fat g';
+  }
+
+  @override
+  String get diaryEmptyMeal => 'Chưa ghi món nào.';
+
+  @override
+  String get diaryAddFood => 'THÊM MÓN';
+
+  @override
+  String get diaryAddTitle => 'Thêm món vào nhật ký';
+
+  @override
+  String get diaryMealSlot => 'Bữa';
+
+  @override
+  String get diaryFromDataset => 'Từ dữ liệu';
+
+  @override
+  String get diaryCustom => 'Tự nhập';
+
+  @override
+  String get diaryFoodSearch => 'Tìm thực phẩm';
+
+  @override
+  String get diaryFoodRequired => 'Chọn một thực phẩm trong danh sách.';
+
+  @override
+  String get diaryGrams => 'Khối lượng (g)';
+
+  @override
+  String get diaryGramsError =>
+      'Nhập khối lượng lớn hơn 0 và không quá 5000 g.';
+
+  @override
+  String get diaryOptionalGrams => 'Khối lượng (g, không bắt buộc)';
+
+  @override
+  String get diaryCustomName => 'Tên món';
+
+  @override
+  String get diaryCustomNameError => 'Nhập tên món.';
+
+  @override
+  String get diaryCustomCalories => 'Calo (kcal)';
+
+  @override
+  String get diaryCustomCaloriesError => 'Nhập calo từ 0 đến 10000.';
+
+  @override
+  String get diaryCarbsLabel => 'Carb (g)';
+
+  @override
+  String get diaryFatLabel => 'Chất béo (g)';
+
+  @override
+  String get diaryMacroError => 'Từ 0 đến 1000 g.';
+
+  @override
+  String diaryPreview(String calories, String protein) {
+    return 'Ước tính: $calories kcal • $protein g protein';
+  }
+
+  @override
+  String get diarySave => 'Thêm vào nhật ký';
+
+  @override
+  String diaryEntryDetails(String grams, String calories, String protein) {
+    return '$grams g • $calories kcal • $protein g protein';
+  }
+
+  @override
+  String diaryEntryDetailsNoGrams(String calories, String protein) {
+    return '$calories kcal • $protein g protein';
+  }
+
+  @override
+  String get diaryAdded => 'Đã thêm vào nhật ký.';
+
+  @override
+  String get diaryDeleted => 'Đã xóa món khỏi nhật ký.';
+
+  @override
+  String get diaryUndo => 'Hoàn tác';
+
+  @override
+  String get diaryDeleteEntry => 'Xóa món';
+
+  @override
+  String get diaryLoadFailed => 'Không tải được nhật ký. Hãy thử lại.';
+
+  @override
+  String get diarySaveFailed => 'Không lưu được nhật ký. Hãy thử lại.';
+
+  @override
+  String get mealLogPlan => 'GHI VÀO NHẬT KÝ HÔM NAY';
+
+  @override
+  String get mealPlanLogged => 'Đã ghi thực đơn vào nhật ký hôm nay.';
+
+  @override
+  String get mealPlanAlreadyLogged => 'ĐÃ GHI VÀO NHẬT KÝ';
 }

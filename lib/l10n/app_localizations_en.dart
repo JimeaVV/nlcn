@@ -784,4 +784,158 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get equipmentOther => 'Other';
+
+  @override
+  String get navDiary => 'Diary';
+
+  @override
+  String get mealSnack => 'Snack';
+
+  @override
+  String get diaryTitle => 'FOOD DIARY';
+
+  @override
+  String get diarySubtitle =>
+      'Record what you ate and compare it with your profile targets.';
+
+  @override
+  String get diaryToday => 'Today';
+
+  @override
+  String get diaryPreviousDay => 'Previous day';
+
+  @override
+  String get diaryNextDay => 'Next day';
+
+  @override
+  String get diaryEaten => 'Eaten';
+
+  @override
+  String diaryCaloriesProgress(String eaten, String target) {
+    return '$eaten / $target kcal';
+  }
+
+  @override
+  String diaryProteinProgress(String eaten, String target) {
+    return '$eaten / $target g protein';
+  }
+
+  @override
+  String diaryRemaining(String value) {
+    return '$value kcal left for your target';
+  }
+
+  @override
+  String diaryOver(String value) {
+    return '$value kcal over your target';
+  }
+
+  @override
+  String get diaryNoTarget =>
+      'Save your profile to compare with calorie and protein targets.';
+
+  @override
+  String diaryMacros(String carbs, String fat) {
+    return 'Carbs $carbs g • Fat $fat g';
+  }
+
+  @override
+  String get diaryEmptyMeal => 'Nothing logged yet.';
+
+  @override
+  String get diaryAddFood => 'ADD FOOD';
+
+  @override
+  String get diaryAddTitle => 'Add food to the diary';
+
+  @override
+  String get diaryMealSlot => 'Meal';
+
+  @override
+  String get diaryFromDataset => 'From dataset';
+
+  @override
+  String get diaryCustom => 'Custom';
+
+  @override
+  String get diaryFoodSearch => 'Search foods';
+
+  @override
+  String get diaryFoodRequired => 'Choose a food from the list.';
+
+  @override
+  String get diaryGrams => 'Amount (g)';
+
+  @override
+  String get diaryGramsError =>
+      'Enter an amount greater than 0 and at most 5000 g.';
+
+  @override
+  String get diaryOptionalGrams => 'Amount (g, optional)';
+
+  @override
+  String get diaryCustomName => 'Food name';
+
+  @override
+  String get diaryCustomNameError => 'Enter a food name.';
+
+  @override
+  String get diaryCustomCalories => 'Calories (kcal)';
+
+  @override
+  String get diaryCustomCaloriesError => 'Enter calories from 0 to 10000.';
+
+  @override
+  String get diaryCarbsLabel => 'Carbs (g)';
+
+  @override
+  String get diaryFatLabel => 'Fat (g)';
+
+  @override
+  String get diaryMacroError => '0 to 1000 g.';
+
+  @override
+  String diaryPreview(String calories, String protein) {
+    return 'Estimate: $calories kcal • $protein g protein';
+  }
+
+  @override
+  String get diarySave => 'Add to diary';
+
+  @override
+  String diaryEntryDetails(String grams, String calories, String protein) {
+    return '$grams g • $calories kcal • $protein g protein';
+  }
+
+  @override
+  String diaryEntryDetailsNoGrams(String calories, String protein) {
+    return '$calories kcal • $protein g protein';
+  }
+
+  @override
+  String get diaryAdded => 'Added to the diary.';
+
+  @override
+  String get diaryDeleted => 'Food removed from the diary.';
+
+  @override
+  String get diaryUndo => 'Undo';
+
+  @override
+  String get diaryDeleteEntry => 'Remove food';
+
+  @override
+  String get diaryLoadFailed => 'Could not load the diary. Please try again.';
+
+  @override
+  String get diarySaveFailed => 'Could not save the diary. Please try again.';
+
+  @override
+  String get mealLogPlan => 'LOG TO TODAY\'S DIARY';
+
+  @override
+  String get mealPlanLogged => 'Meal plan logged to today\'s diary.';
+
+  @override
+  String get mealPlanAlreadyLogged => 'LOGGED TO DIARY';
 }

@@ -150,19 +150,51 @@ class MealRecommendation {
 }
 
 class FoodItem {
-  const FoodItem({required this.displayName, required this.suggestedPrep});
+  const FoodItem({
+    required this.displayName,
+    required this.suggestedPrep,
+    this.name = '',
+    this.grams,
+    this.calories,
+    this.protein,
+    this.carbs,
+    this.fat,
+  });
 
   factory FoodItem.fromJson(Map<String, dynamic> json) {
     final name = '${json['display_name'] ?? json['name'] ?? ''}'.trim();
     if (name.isEmpty) throw const FormatException('Food name is missing.');
+    double? optional(String key) {
+      final value = json[key];
+      return value is num && value.isFinite ? value.toDouble() : null;
+    }
+
     return FoodItem(
       displayName: name,
       suggestedPrep: '${json['suggested_prep'] ?? ''}'.trim(),
+      name: '${json['name'] ?? name}'.trim(),
+      grams: optional('portion_g'),
+      calories: optional('serving_calo'),
+      protein: optional('serving_protein'),
+      carbs: optional('serving_carb'),
+      fat: optional('serving_fat'),
     );
   }
 
   final String displayName;
   final String suggestedPrep;
+
+  /// Food name without the portion prefix of [displayName].
+  final String name;
+
+  /// Portion nutrition; absent in plans saved before the diary existed.
+  final double? grams;
+  final double? calories;
+  final double? protein;
+  final double? carbs;
+  final double? fat;
+
+  bool get hasNutrition => calories != null && protein != null;
 }
 
 class WorkoutRecommendation {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:optifit/models/food_log_entry.dart';
 import 'package:optifit/models/user_profile.dart';
 import 'package:optifit/services/database_service.dart';
 
@@ -171,12 +172,12 @@ void main() {
         path: overridePath ?? databasePath,
       );
 
-  test('fresh v3 works in memory and shares one concurrent open', () async {
+  test('fresh v4 works in memory and shares one concurrent open', () async {
     final storage = openService(inMemoryDatabasePath);
     final handles = await Future.wait([storage.database, storage.database]);
     expect(identical(handles[0], handles[1]), isTrue);
     final db = handles.first;
-    expect(await db.getVersion(), 3);
+    expect(await db.getVersion(), 4);
     final columns = await db.rawQuery('pragma table_info(user_profile)');
     final goalColumn = columns.singleWhere((row) => row['name'] == 'goal');
     expect(goalColumn['dflt_value'], "'maintain'");
@@ -187,6 +188,87 @@ void main() {
     expect(profile['protein_override'], isNull);
     expect(await storage.getWeightHistory(), isEmpty);
     expect(await storage.getWorkoutLogs(), isEmpty);
+    expect(await storage.getFoodLog(DateTime.now()), isEmpty);
+  });
+
+  test('upgrading to v4 adds an empty diary next to existing data', () async {
+    await _legacyFixture(databasePath);
+    final storage = openService();
+    expect(await storage.getFoodLog(DateTime(2024, 5, 17)), isEmpty);
+    expect(await storage.getMealHistory(), hasLength(1));
+  });
+
+  test('diary entries are stored per day and keep their nutrition snapshot',
+      () async {
+    final storage = openService(inMemoryDatabasePath);
+    final today = DateTime.now();
+    final yesterday = DateTime(today.year, today.month, today.day - 1);
+    final ids = await storage.addFoodLogEntries([
+      FoodLogEntry.fromFood(
+        const {
+          'name': 'oats',
+          'calories_per_100g': 389.0,
+          'protein_g': 16.9,
+          'carb_g': 66.3,
+          'fat_g': 6.9,
+        },
+        grams: 50,
+        date: today,
+        meal: MealSlot.breakfast,
+      ),
+      FoodLogEntry(
+        date: today,
+        meal: MealSlot.snack,
+        name: 'Bánh mì',
+        calories: 350,
+        protein: 12,
+        source: FoodLogSource.camera,
+        confidence: 0.82,
+      ),
+      FoodLogEntry(
+        date: yesterday,
+        meal: MealSlot.dinner,
+        name: 'Phở bò',
+        calories: 450,
+        protein: 25,
+      ),
+    ]);
+    expect(ids, hasLength(3));
+
+    final todayEntries = await storage.getFoodLog(today);
+    expect(todayEntries.map((entry) => entry.name), ['oats', 'Bánh mì']);
+    expect(todayEntries.first.calories, closeTo(194.5, 1e-9));
+    expect(todayEntries.first.grams, 50);
+    expect(todayEntries.last.grams, isNull);
+    expect(todayEntries.last.source, FoodLogSource.camera);
+    expect(todayEntries.last.confidence, 0.82);
+    expect((await storage.getFoodLog(yesterday)).single.name, 'Phở bò');
+
+    await storage.deleteFoodLogEntry(todayEntries.first.id!);
+    expect((await storage.getFoodLog(today)).single.name, 'Bánh mì');
+  });
+
+  test('diary rejects invalid and future entries without partial writes',
+      () async {
+    final storage = openService(inMemoryDatabasePath);
+    final today = DateTime.now();
+    final tomorrow = DateTime(today.year, today.month, today.day + 1);
+    FoodLogEntry entry({DateTime? date, double calories = 100}) => FoodLogEntry(
+          date: date ?? today,
+          meal: MealSlot.lunch,
+          name: 'Cơm',
+          calories: calories,
+          protein: 3,
+        );
+    await expectLater(
+      storage.addFoodLogEntries([entry(), entry(date: tomorrow)]),
+      throwsArgumentError,
+    );
+    await expectLater(
+      storage.addFoodLogEntries([entry(), entry(calories: double.nan)]),
+      throwsArgumentError,
+    );
+    expect(await storage.getFoodLog(today), isEmpty);
   });
 
   test(
@@ -195,7 +277,7 @@ void main() {
     final before = await _legacyFixture(databasePath);
     final storage = openService();
     final db = await storage.database;
-    expect(await db.getVersion(), 3);
+    expect(await db.getVersion(), 4);
     expect(await storage.getProfile(), {
       ...before['user_profile']!.single,
       'goal': 'lose',
@@ -221,12 +303,12 @@ void main() {
     expect(await storage.getWorkoutLogs(), hasLength(1));
   });
 
-  test('v1 upgrades through logs and v3 without losing its old records',
+  test('v1 upgrades through logs, v3 and v4 without losing its old records',
       () async {
     final before = await _legacyFixture(databasePath, version: 1);
     final storage = openService();
     final db = await storage.database;
-    expect(await db.getVersion(), 3);
+    expect(await db.getVersion(), 4);
     expect(await db.query('meal_plan_history'), before['meal_plan_history']);
     expect(
         await db.query('workout_plan_history'), before['workout_plan_history']);
@@ -384,5 +466,20 @@ void main() {
     expect(await storage.getWorkoutLogs(), isEmpty);
     expect(await storage.getProfile(), profileBefore);
     expect(await db.query('weight_history'), weightsBefore);
+  });
+
+  test('clearing recommendation archives preserves the food diary', () async {
+    final storage = openService(inMemoryDatabasePath);
+    await storage.addFoodLogEntries([
+      FoodLogEntry(
+        date: DateTime.now(),
+        meal: MealSlot.lunch,
+        name: 'Cơm tấm',
+        calories: 600,
+        protein: 30,
+      ),
+    ]);
+    await storage.clearAllHistory();
+    expect(await storage.getFoodLog(DateTime.now()), hasLength(1));
   });
 }
