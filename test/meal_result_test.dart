@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:optifit/models/recommendation_models.dart';
 import 'package:optifit/widgets/meal_result.dart';
 
+import 'helpers/localized_app.dart';
+
 DietRecommendation _result({double calories = 2000, double protein = 120}) =>
     DietRecommendation.fromJson({
       'bmr': 1600,
@@ -55,14 +57,14 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(localizedApp(
         home: Scaffold(
             body: ListView(children: [
       MealResult(recommendation: _result(calories: 1800, protein: 100)),
     ]))));
     expect(find.text('Chưa đạt khoảng mục tiêu'), findsOneWidget);
-    expect(find.text('Calo: 1,800 / 2,000 kcal'), findsOneWidget);
-    expect(find.text('Lệch -200 kcal (-10.0%)'), findsOneWidget);
+    expect(find.text('Calo: 1.800 / 2.000 kcal'), findsOneWidget);
+    expect(find.text('Lệch -200 kcal (-10,0%)'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

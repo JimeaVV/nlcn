@@ -35,6 +35,11 @@ const _lunchDinnerStarchKeywords = [
   'corn',
 ];
 
+/// The dataset or search could not produce a meal for otherwise valid targets.
+class MealPlanUnavailableError extends ArgumentError {
+  MealPlanUnavailableError(String super.message);
+}
+
 /// One required or optional food group for [branchAndBoundMeal].
 class MealCandidateGroup {
   const MealCandidateGroup({
@@ -358,7 +363,8 @@ List<_PreparedGroup> _mealCandidateGroups(
       candidates = _pickCandidates(pools[group]!, mealName, 6, rng);
     }
     if (candidates.isEmpty) {
-      throw ArgumentError('No foods available for required group: $group');
+      throw MealPlanUnavailableError(
+          'No foods available for required group: $group');
     }
     groups.add(_PreparedGroup(group, candidates, false));
   }
@@ -473,7 +479,7 @@ Map<String, dynamic> _searchMeal(
 
   search(0, 0, 0, 0, 0, 0);
   if (bestSelection.isEmpty) {
-    throw ArgumentError(
+    throw MealPlanUnavailableError(
       'No feasible meal combination was found within the search limit.',
     );
   }

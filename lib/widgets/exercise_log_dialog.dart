@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../l10n/l10n.dart';
 
 class ExerciseLogInput {
   const ExerciseLogInput({
@@ -61,8 +62,9 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
-      title: Text('Log ${widget.exerciseName}'),
+      title: Text(l10n.logExerciseTitle(widget.exerciseName)),
       content: SingleChildScrollView(
         child: Form(
           key: formKey,
@@ -70,7 +72,7 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Progression model: 3 sets in the 8–12 rep range.',
+                l10n.progressionModel,
                 style: TextStyle(color: CyberColors.muted),
               ),
               const SizedBox(height: 14),
@@ -79,8 +81,8 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Current weight (kg)',
+                decoration: InputDecoration(
+                  labelText: l10n.currentLoadKg,
                 ),
                 validator: (value) {
                   final number = double.tryParse(value?.trim() ?? '');
@@ -88,7 +90,7 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
                       !number.isFinite ||
                       number < 0 ||
                       number > 1000) {
-                    return 'Use a weight from 0 to 1000 kg.';
+                    return l10n.currentLoadError;
                   }
                   return null;
                 },
@@ -99,21 +101,21 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
                   Expanded(
                     child: _RepField(
                       controller: set1Controller,
-                      label: 'Set 1',
+                      label: l10n.setLabel('1'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _RepField(
                       controller: set2Controller,
-                      label: 'Set 2',
+                      label: l10n.setLabel('2'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _RepField(
                       controller: set3Controller,
-                      label: 'Set 3',
+                      label: l10n.setLabel('3'),
                     ),
                   ),
                 ],
@@ -121,12 +123,19 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 initialValue: difficulty,
-                decoration: const InputDecoration(labelText: 'Difficulty'),
-                items: const [
-                  DropdownMenuItem(value: 'Easy', child: Text('Easy')),
-                  DropdownMenuItem(value: 'Moderate', child: Text('Moderate')),
-                  DropdownMenuItem(value: 'Hard', child: Text('Hard')),
-                  DropdownMenuItem(value: 'Failure', child: Text('Failure')),
+                isExpanded: true,
+                decoration: InputDecoration(labelText: l10n.difficulty),
+                items: [
+                  for (final value in const [
+                    'Easy',
+                    'Moderate',
+                    'Hard',
+                    'Failure',
+                  ])
+                    DropdownMenuItem(
+                      value: value,
+                      child: Text(l10n.difficultyLabel(value)),
+                    ),
                 ],
                 onChanged: (value) {
                   if (value != null) setState(() => difficulty = value);
@@ -139,9 +148,9 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
-        FilledButton(onPressed: submit, child: const Text('Calculate')),
+        FilledButton(onPressed: submit, child: Text(l10n.calculate)),
       ],
     );
   }

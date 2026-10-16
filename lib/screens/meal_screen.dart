@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
 import '../engine/nutrition_targets.dart';
+import '../l10n/l10n.dart';
 import '../models/recommendation_models.dart';
 import '../models/user_profile.dart';
 import '../services/database_service.dart';
@@ -33,7 +34,9 @@ class MealScreenState extends State<MealScreen> {
   UserProfile? _profile;
   Map<String, dynamic>? _targets;
   DietRecommendation? _result;
-  String? _error;
+
+  /// Built at paint time so a language switch also translates the message.
+  String Function(AppLocalizations)? _error;
   bool _loadingProfile = true;
   bool _generating = false;
   bool _saving = false;
@@ -66,12 +69,14 @@ class MealScreenState extends State<MealScreen> {
       if (!mounted || version != _loadVersion) return;
       final profile = row == null ? null : UserProfile.fromMap(row);
       Map<String, dynamic>? targets;
-      String? validationError;
+      String Function(AppLocalizations)? validationError;
       if (profile != null) {
         try {
           targets = calculateNutritionTargets(profile);
-        } on ArgumentError catch (error) {
-          validationError = '${error.message}';
+        } on NutritionTargetError catch (error) {
+          validationError = (l10n) => l10n.targetError(error.issue);
+        } on ArgumentError {
+          validationError = (l10n) => l10n.targetError(null);
         }
       }
       setState(() {
@@ -89,7 +94,7 @@ class MealScreenState extends State<MealScreen> {
       if (!mounted || version != _loadVersion) return;
       setState(() {
         _loadingProfile = false;
-        _error = 'Không tải được hồ sơ đã lưu. Hãy thử lại.';
+        _error = (l10n) => l10n.profileLoadFailed;
       });
     }
   }
@@ -119,7 +124,7 @@ class MealScreenState extends State<MealScreen> {
       }
     } on RecommendationException catch (error) {
       if (mounted && generation == _generation) {
-        setState(() => _error = error.message);
+        setState(() => _error = (l10n) => l10n.recommendationError(error));
       }
     } finally {
       if (mounted && generation == _generation) {
@@ -134,9 +139,9 @@ class MealScreenState extends State<MealScreen> {
     setState(() => _saving = true);
     try {
       await _database.saveMealPlan(result);
-      if (mounted) _message('Đã lưu thực đơn.');
+      if (mounted) _message(context.l10n.mealSaved);
     } catch (_) {
-      if (mounted) _message('Không lưu được thực đơn. Hãy thử lại.');
+      if (mounted) _message(context.l10n.mealSaveFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -149,76 +154,86 @@ class MealScreenState extends State<MealScreen> {
   Widget build(BuildContext context) {
     final profile = _profile;
     final targets = _targets;
+    final l10n = context.l10n;
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         children: [
-          Text('THỰC ĐƠN', style: Theme.of(context).textTheme.headlineSmall),
+          Text(l10n.mealTitle,
+              style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 6),
-          Text('Tạo thực đơn từ hồ sơ và mục tiêu đã lưu trên máy.',
-              style: TextStyle(color: CyberColors.muted)),
+          Text(l10n.mealSubtitle, style: TextStyle(color: CyberColors.muted)),
           const SizedBox(height: 18),
           if (_loadingProfile)
             const Center(child: CircularProgressIndicator())
           else if (profile == null)
             CyberCard(
-              title: 'Thiết lập hồ sơ trước',
+              title: l10n.mealProfileRequiredTitle,
               icon: Icons.person_outline_rounded,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                      'Chọn mục tiêu và lưu thông tin cơ thể trong tab Hồ sơ.'),
+                  Text(l10n.mealProfileRequiredBody),
                   const SizedBox(height: 12),
                   FilledButton.icon(
                     onPressed: widget.onOpenProfile,
                     icon: const Icon(Icons.person_add_alt_1_rounded),
-                    label: const Text('MỞ HỒ SƠ'),
+                    label: Text(l10n.mealOpenProfile),
                   ),
                 ],
               ),
             )
           else
             CyberCard(
-              title: profile.goal.label,
+              title: l10n.goalLabel(profile.goal),
               icon: Icons.flag_outlined,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${profile.weight.toStringAsFixed(1)} kg • '
-                      '${profile.height.toStringAsFixed(0)} cm • ${profile.age} tuổi'),
+                  Text(l10n.mealProfileSummary(
+                    context.formatNumber(profile.weight, decimals: 1),
+                    context.formatNumber(profile.height),
+                    '${profile.age}',
+                  )),
                   if (targets != null) ...[
                     const SizedBox(height: 12),
                     Row(children: [
                       Expanded(
                           child: MetricTile(
-                              label: 'Calo/ngày',
-                              value: (targets['target_calories'] as num)
-                                  .toStringAsFixed(0),
+                              label: l10n.caloriesPerDay,
+                              value: context.formatNumber(
+                                  targets['target_calories'] as num),
                               unit: 'kcal')),
                       const SizedBox(width: 8),
                       Expanded(
                           child: MetricTile(
-                              label: 'Protein/ngày',
-                              value: (targets['protein_target'] as num)
-                                  .toStringAsFixed(1),
+                              label: l10n.proteinPerDay,
+                              value: context.formatNumber(
+                                  targets['protein_target'] as num,
+                                  decimals: 1),
                               unit: 'g')),
                     ]),
                     const SizedBox(height: 10),
                     Text(
-                        'Calo: ${targets['calorie_source'] == 'manual' ? 'tự đặt' : 'ước tính'} • '
-                        'Protein: ${targets['protein_source'] == 'manual' ? 'tự đặt' : 'ước tính'}',
+                        l10n.targetSources(
+                          targets['calorie_source'] == 'manual'
+                              ? l10n.sourceManual
+                              : l10n.sourceEstimated,
+                          targets['protein_source'] == 'manual'
+                              ? l10n.sourceManual
+                              : l10n.sourceEstimated,
+                        ),
                         style: TextStyle(color: CyberColors.muted)),
                   ],
                   const SizedBox(height: 10),
                   TextButton.icon(
                     onPressed: widget.onOpenProfile,
                     icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Sửa hồ sơ và mục tiêu'),
+                    label: Text(l10n.mealEditProfile),
                   ),
                   const SizedBox(height: 6),
                   NeonButton(
-                    label: 'TẠO THỰC ĐƠN',
+                    label: l10n.mealGenerate,
                     icon: Icons.restaurant_menu_rounded,
                     loading: _generating,
                     onPressed: targets == null || _saving ? null : _generate,
@@ -228,10 +243,9 @@ class MealScreenState extends State<MealScreen> {
             ),
           if (_error != null) ...[
             const SizedBox(height: 14),
-            ErrorBox(message: _error!),
+            ErrorBox(message: _error!(l10n)),
             if (profile == null)
-              TextButton(
-                  onPressed: refreshProfile, child: const Text('Thử lại')),
+              TextButton(onPressed: refreshProfile, child: Text(l10n.retry)),
           ],
           if (_result != null) ...[
             const SizedBox(height: 16),
@@ -240,7 +254,7 @@ class MealScreenState extends State<MealScreen> {
             OutlinedButton.icon(
               onPressed: _saving ? null : _save,
               icon: const Icon(Icons.bookmark_add_outlined),
-              label: Text(_saving ? 'ĐANG LƯU...' : 'LƯU THỰC ĐƠN'),
+              label: Text(_saving ? l10n.savingButton : l10n.mealSave),
             ),
           ],
         ],

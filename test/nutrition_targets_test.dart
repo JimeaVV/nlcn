@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:optifit/l10n/l10n.dart';
 import 'package:optifit/engine/nutrition_targets.dart';
 import 'package:optifit/models/user_profile.dart';
 
@@ -260,10 +262,31 @@ void main() {
       }
     });
 
-    test('exposes Vietnamese goal labels', () {
-      expect(NutritionGoal.lose.label, 'Giảm mỡ');
-      expect(NutritionGoal.maintain.label, 'Giữ cân');
-      expect(NutritionGoal.gain.label, 'Tăng cân');
+    test('labels goals in Vietnamese and English', () {
+      final vi = lookupAppLocalizations(const Locale('vi'));
+      final en = lookupAppLocalizations(const Locale('en'));
+      expect(vi.goalLabel(NutritionGoal.lose), 'Giảm mỡ');
+      expect(vi.goalLabel(NutritionGoal.maintain), 'Giữ cân');
+      expect(vi.goalLabel(NutritionGoal.gain), 'Tăng cân');
+      expect(en.goalLabel(NutritionGoal.lose), 'Lose fat');
+      expect(en.goalLabel(NutritionGoal.gain), 'Gain weight');
+    });
+
+    test('reports which target rule failed', () {
+      const profile = UserProfile(
+        age: 30,
+        gender: 'male',
+        height: 175,
+        weight: 70,
+        activityLevel: 1.55,
+        calorieOverride: 1000,
+        proteinOverride: 300,
+      );
+      expect(
+        () => calculateNutritionTargets(profile),
+        throwsA(isA<NutritionTargetError>().having((error) => error.issue,
+            'issue', NutritionTargetIssue.proteinExceedsCalories)),
+      );
     });
   });
 }

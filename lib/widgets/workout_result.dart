@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../l10n/l10n.dart';
 import '../models/recommendation_models.dart';
 import 'cyber_card.dart';
 import 'metric_tile.dart';
@@ -19,13 +20,16 @@ class WorkoutResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final exercises = recommendation.exercises;
-    final note = recommendation.note;
+    // The engine's English note is stored with the plan; derive the text here
+    // so it follows the selected language.
+    final remaining = recommendation.targetTime - recommendation.estimatedTime;
 
     return Column(
       children: [
         CyberCard(
-          title: 'Session summary',
+          title: l10n.sessionSummary,
           accent: CyberColors.lime,
           child: Column(
             children: [
@@ -33,37 +37,40 @@ class WorkoutResult extends StatelessWidget {
                 children: [
                   Expanded(
                     child: MetricTile(
-                      label: 'Target',
+                      label: l10n.targetLabel,
                       value: '${recommendation.targetTime}',
-                      unit: 'min',
+                      unit: l10n.minutesUnit,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: MetricTile(
-                      label: 'Estimated',
+                      label: l10n.estimatedLabel,
                       value: '${recommendation.estimatedTime}',
-                      unit: 'min',
+                      unit: l10n.minutesUnit,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: MetricTile(
-                      label: 'Exercises',
+                      label: l10n.exercisesLabel,
                       value: '${recommendation.totalExercises}',
                     ),
                   ),
                 ],
               ),
-              if (note.isNotEmpty) ...[
+              if (remaining > 0) ...[
                 const SizedBox(height: 10),
-                Text(note, style: TextStyle(color: CyberColors.muted)),
+                Text(l10n.remainingTimeNote('$remaining'),
+                    style: TextStyle(color: CyberColors.muted)),
               ],
               if (recommendation.levelFallbackUsed) ...[
                 const SizedBox(height: 10),
                 Text(
-                  'Limited exercises for ${recommendation.requestedLevel}. '
-                  'This plan includes: ${recommendation.usedLevels.join(', ')}.',
+                  l10n.levelFallbackNote(
+                    l10n.levelLabel(recommendation.requestedLevel),
+                    recommendation.usedLevels.map(l10n.levelLabel).join(', '),
+                  ),
                   style: TextStyle(color: CyberColors.muted),
                 ),
               ],
@@ -72,10 +79,10 @@ class WorkoutResult extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         CyberCard(
-          title: 'Exercise sequence',
+          title: l10n.exerciseSequence,
           accent: CyberColors.cyan,
           child: exercises.isEmpty
-              ? const Text('No exercise data returned.')
+              ? Text(l10n.noExerciseData)
               : Column(
                   children: List.generate(exercises.length, (index) {
                     final exercise = exercises[index];
@@ -88,13 +95,10 @@ class WorkoutResult extends StatelessWidget {
                         child: ListTile(
                           leading: CircleAvatar(child: Text('${index + 1}')),
                           title: Text(exerciseName),
-                          subtitle: Text(
-                            '${exercise.muscleGroup} • '
-                            '${exercise.equipment} • '
-                            '${exercise.estimatedMinutes} min',
-                          ),
+                          subtitle: Text(exerciseDetails(l10n, exercise)),
                           trailing: IconButton(
-                            tooltip: logging ? 'Saving result' : 'Log result',
+                            tooltip:
+                                logging ? l10n.savingResult : l10n.logResult,
                             onPressed: logging
                                 ? null
                                 : () => onLogExercise(exerciseName),
@@ -113,3 +117,12 @@ class WorkoutResult extends StatelessWidget {
     );
   }
 }
+
+/// Muscle group, equipment and duration in the selected language.
+String exerciseDetails(
+        AppLocalizations l10n, ExerciseRecommendation exercise) =>
+    l10n.exerciseDetails(
+      l10n.muscleLabel(exercise.muscleGroup),
+      l10n.equipmentLabel(exercise.equipment),
+      '${exercise.estimatedMinutes}',
+    );

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../engine/fitness_engine.dart';
+import '../l10n/l10n.dart';
 import '../models/recommendation_models.dart';
 import '../services/recommendation_service.dart';
 import '../services/database_service.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/error_box.dart';
 import '../widgets/exercise_log_dialog.dart';
 import '../widgets/neon_button.dart';
 import '../widgets/workout_result.dart';
@@ -27,7 +30,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   bool loading = false;
   bool saving = false;
   bool logging = false;
-  String? error;
+  RecommendationException? error;
   WorkoutRecommendation? result;
   String? resultSplit;
   String? resultLevel;
@@ -69,7 +72,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         });
       }
     } on RecommendationException catch (exception) {
-      if (mounted) setState(() => error = exception.message);
+      if (mounted) setState(() => error = exception);
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -92,9 +95,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         level: savedLevel,
         recommendation: recommendation,
       );
-      if (mounted) _showMessage('Workout plan saved.');
+      if (mounted) _showMessage(context.l10n.workoutSaved);
     } catch (_) {
-      if (mounted) _showMessage('Could not save the workout plan.');
+      if (mounted) _showMessage(context.l10n.workoutSaveFailed);
     } finally {
       if (mounted) setState(() => saving = false);
     }
@@ -132,9 +135,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       if (!mounted) return;
       await _showProgressiveOverloadResult(recommendation);
     } on RecommendationException catch (exception) {
-      if (mounted) _showMessage(exception.message);
+      if (mounted) {
+        _showMessage(context.l10n.recommendationError(exception));
+      }
     } catch (_) {
-      if (mounted) _showMessage('Could not save the exercise result.');
+      if (mounted) _showMessage(context.l10n.exerciseLogSaveFailed);
     } finally {
       if (mounted) setState(() => logging = false);
     }
@@ -143,17 +148,20 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   Future<void> _showProgressiveOverloadResult(
     ProgressiveOverloadRecommendation recommendation,
   ) async {
+    final l10n = context.l10n;
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Next-session recommendation'),
+        title: Text(l10n.nextSessionTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${recommendation.nextWeight} kg • 3 sets • '
-              'target ${recommendation.nextRepTarget} reps',
+              l10n.nextSessionSummary(
+                context.formatMeasurement(recommendation.nextWeight),
+                '${recommendation.nextRepTarget}',
+              ),
               style: TextStyle(
                 color: CyberColors.cyan,
                 fontSize: 18,
@@ -161,13 +169,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(recommendation.message),
+            Text(l10n.overloadMessage(
+              recommendation.action,
+              recommendation.message,
+            )),
           ],
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -182,17 +193,23 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    String levelOption(String level) => l10n.levelOption(
+        l10n.levelLabel(level), '${workoutExerciseLimits[level]}');
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         children: [
           Text(
-            'WORKOUT PROTOCOL',
+            l10n.workoutTitle,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
+          const SizedBox(height: 6),
+          Text(l10n.workoutSubtitle,
+              style: TextStyle(color: CyberColors.muted)),
           const SizedBox(height: 18),
           CyberCard(
-            title: 'Training setup',
+            title: l10n.trainingSetup,
             icon: Icons.tune_rounded,
             accent: CyberColors.magenta,
             child: Form(
@@ -201,14 +218,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: split,
-                    decoration: const InputDecoration(
-                      labelText: 'Workout split',
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: l10n.workoutSplit,
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'Push', child: Text('Push')),
-                      DropdownMenuItem(value: 'Pull', child: Text('Pull')),
-                      DropdownMenuItem(value: 'Legs', child: Text('Legs')),
-                      DropdownMenuItem(value: 'Core', child: Text('Core')),
+                    items: [
+                      DropdownMenuItem(
+                          value: 'Push', child: Text(l10n.splitPush)),
+                      DropdownMenuItem(
+                          value: 'Pull', child: Text(l10n.splitPull)),
+                      DropdownMenuItem(
+                          value: 'Legs', child: Text(l10n.splitLegs)),
+                      DropdownMenuItem(
+                          value: 'Core', child: Text(l10n.splitCore)),
                     ],
                     onChanged: (value) {
                       if (value != null) setState(() => split = value);
@@ -217,22 +239,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: level,
-                    decoration: const InputDecoration(
-                      labelText: 'Experience level',
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: l10n.experienceLevel,
                     ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Beginner',
-                        child: Text('Beginner • max 5 exercises'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Intermediate',
-                        child: Text('Intermediate • max 7 exercises'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Pro',
-                        child: Text('Pro • max 9 exercises'),
-                      ),
+                    items: [
+                      for (final value in workoutExerciseLimits.keys)
+                        DropdownMenuItem(
+                          value: value,
+                          child: Text(levelOption(value)),
+                        ),
                     ],
                     onChanged: (value) {
                       if (value != null) setState(() => level = value);
@@ -242,20 +258,20 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   TextFormField(
                     controller: timeController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Available time (minutes)',
+                    decoration: InputDecoration(
+                      labelText: l10n.availableTime,
                     ),
                     validator: (value) {
                       final number = int.tryParse(value?.trim() ?? '');
                       if (number == null || number < 15 || number > 180) {
-                        return 'Use 15–180 minutes.';
+                        return l10n.availableTimeError;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
                   NeonButton(
-                    label: 'GENERATE WORKOUT',
+                    label: l10n.workoutGenerate,
                     icon: Icons.bolt_rounded,
                     color: CyberColors.magenta,
                     loading: loading,
@@ -267,7 +283,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           ),
           if (error != null) ...[
             const SizedBox(height: 12),
-            Text(error!, style: TextStyle(color: CyberColors.danger)),
+            ErrorBox(message: l10n.recommendationError(error!)),
           ],
           if (result != null) ...[
             const SizedBox(height: 16),
@@ -280,7 +296,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             OutlinedButton.icon(
               onPressed: saving ? null : saveWorkout,
               icon: const Icon(Icons.bookmark_add_outlined),
-              label: Text(saving ? 'SAVING...' : 'SAVE WORKOUT PLAN'),
+              label: Text(saving ? l10n.savingButton : l10n.workoutSave),
             ),
           ],
         ],

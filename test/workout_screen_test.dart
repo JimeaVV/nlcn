@@ -10,6 +10,8 @@ import 'package:optifit/services/recommendation_service.dart';
 import 'package:optifit/widgets/exercise_log_dialog.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'helpers/localized_app.dart';
+
 class _Recommendations extends RecommendationService {
   final requests = <({String split, String level, int minutes})>[];
   Completer<WorkoutRecommendation> response = Completer();
@@ -82,7 +84,8 @@ void main() {
     addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
     final recommendations = _Recommendations();
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
+        locale: const Locale('en'),
         home: Scaffold(body: WorkoutScreen(recommendations: recommendations)),
       ),
     );
@@ -97,7 +100,7 @@ void main() {
 
     await tester.tap(find.byType(DropdownButtonFormField<String>).first);
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.text('Pull').last);
+    await tester.tap(find.text('Pull · Back, lats, biceps').last);
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.byType(DropdownButtonFormField<String>).last);
     await tester.pump(const Duration(milliseconds: 300));
@@ -129,10 +132,17 @@ void main() {
       minutes: 45,
     ));
     recommendations.response.completeError(
-      const RecommendationException('No workout available.'),
+      const RecommendationException(
+        'No workout available.',
+        code: RecommendationErrorCode.workoutNotFound,
+      ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('No workout available.'), findsOneWidget);
+    expect(
+      find.text('No exercises fit this selection. '
+          'Try a longer time or a different split.'),
+      findsOneWidget,
+    );
     expect(find.text('SAVE WORKOUT PLAN'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -141,8 +151,11 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(body: ExerciseLogDialog(exerciseName: 'Bench Press')),
+      localizedApp(
+        locale: const Locale('en'),
+        home: const Scaffold(
+          body: ExerciseLogDialog(exerciseName: 'Bench Press'),
+        ),
       ),
     );
 

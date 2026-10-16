@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:optifit/widgets/exercise_log_dialog.dart';
 
+import 'helpers/localized_app.dart';
+
 void main() {
   Future<ExerciseLogInput?> openDialog(WidgetTester tester) async {
     ExerciseLogInput? result;
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
+        locale: const Locale('en'),
         home: Scaffold(
           body: Builder(
             builder: (context) => FilledButton(
@@ -44,7 +47,8 @@ void main() {
   testWidgets('calculate returns validated exercise input', (tester) async {
     ExerciseLogInput? result;
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
+        locale: const Locale('en'),
         home: Scaffold(
           body: Builder(
             builder: (context) => FilledButton(

@@ -63,6 +63,7 @@ class WorkoutLogEntry {
     required this.set3Reps,
     required this.suggestedWeight,
     required this.suggestedReps,
+    this.action = '',
     required this.message,
     required this.performedAt,
   });
@@ -77,6 +78,7 @@ class WorkoutLogEntry {
       set3Reps: _integer(row['set_3_reps']),
       suggestedWeight: _number(row['suggested_weight']),
       suggestedReps: _integer(row['suggested_reps']),
+      action: '${row['action'] ?? ''}',
       message: '${row['suggestion_message'] ?? ''}',
       performedAt: _date(row['performed_at']),
     );
@@ -90,6 +92,7 @@ class WorkoutLogEntry {
   final int set3Reps;
   final double suggestedWeight;
   final int suggestedReps;
+  final String action;
   final String message;
   final DateTime performedAt;
 }

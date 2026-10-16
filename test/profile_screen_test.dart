@@ -6,6 +6,8 @@ import 'package:optifit/models/weight_entry.dart';
 import 'package:optifit/screens/profile_screen.dart';
 import 'package:optifit/services/database_service.dart';
 
+import 'helpers/localized_app.dart';
+
 class _Database extends Fake implements DatabaseService {
   _Database({UserProfile? profile, List<WeightEntry> weights = const []})
       : profile = profile?.toMap(),
@@ -93,7 +95,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(localizedApp(
       theme: AppTheme.build(AppStyle.minimalLight),
       home: Scaffold(
         body: ProfileScreen(database: database, onProfileChanged: onChanged),

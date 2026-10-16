@@ -1,5 +1,14 @@
 import '../models/user_profile.dart';
 
+/// Which target rule failed, so the interface can explain it in any language.
+enum NutritionTargetIssue { calorieRange, proteinRange, proteinExceedsCalories }
+
+class NutritionTargetError extends ArgumentError {
+  NutritionTargetError(this.issue, String message) : super(message);
+
+  final NutritionTargetIssue issue;
+}
+
 /// Calculates starting estimates for this app, rather than clinical prescriptions.
 ///
 /// The goal factors (0.90/1.00/1.10) are product assumptions. The 1000 kcal lower
@@ -26,16 +35,20 @@ Map<String, dynamic> calculateNutritionTargets(UserProfile profile) {
   final calories = profile.calorieOverride ?? estimatedCalories.toDouble();
   final protein = profile.proteinOverride ?? estimatedProtein;
   if (!calories.isFinite || calories < 1000 || calories > 10000) {
-    throw ArgumentError('Calorie target must be between 1000 and 10000 kcal. '
+    throw NutritionTargetError(
+        NutritionTargetIssue.calorieRange,
+        'Calorie target must be between 1000 and 10000 kcal. '
         'Review your profile or enter a manual target.');
   }
   if (!protein.isFinite || protein <= 0 || protein > 500) {
-    throw ArgumentError(
+    throw NutritionTargetError(
+        NutritionTargetIssue.proteinRange,
         'Protein target must be greater than 0 and at most 500 g. '
         'Review your profile or enter a manual target.');
   }
   if (protein * 4 > calories) {
-    throw ArgumentError('Protein energy cannot exceed the calorie target.');
+    throw NutritionTargetError(NutritionTargetIssue.proteinExceedsCalories,
+        'Protein energy cannot exceed the calorie target.');
   }
   return {
     'bmr': roundHalfUp(bmr),

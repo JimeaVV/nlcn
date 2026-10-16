@@ -1,12 +1,5 @@
+/// Displayed through AppLocalizations.goalLabel.
 enum NutritionGoal { lose, maintain, gain }
-
-extension NutritionGoalLabel on NutritionGoal {
-  String get label => switch (this) {
-        NutritionGoal.lose => 'Giảm mỡ',
-        NutritionGoal.maintain => 'Giữ cân',
-        NutritionGoal.gain => 'Tăng cân',
-      };
-}
 
 const profileActivityFactors = [1.2, 1.375, 1.55, 1.725, 1.9];
 

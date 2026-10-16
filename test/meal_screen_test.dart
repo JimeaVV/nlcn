@@ -9,6 +9,8 @@ import 'package:optifit/screens/meal_screen.dart';
 import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/recommendation_service.dart';
 
+import 'helpers/localized_app.dart';
+
 class _Database extends Fake implements DatabaseService {
   Map<String, dynamic>? profile;
   final saved = <DietRecommendation>[];
@@ -97,7 +99,7 @@ Future<void> _mount(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
-  await tester.pumpWidget(MaterialApp(
+  await tester.pumpWidget(localizedApp(
       theme: AppTheme.build(AppStyle.cyberpunk),
       home: Scaffold(
           body: MealScreen(

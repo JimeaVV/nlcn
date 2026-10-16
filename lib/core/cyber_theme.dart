@@ -3,17 +3,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppStyle { cyberpunk, minimalLight, forest, sunset }
 
+/// Style names are proper names; descriptions are localized in Settings.
 class AppStyleInfo {
   const AppStyleInfo({
     required this.style,
     required this.name,
-    required this.description,
     required this.icon,
   });
 
   final AppStyle style;
   final String name;
-  final String description;
   final IconData icon;
 }
 
@@ -21,25 +20,21 @@ const appStyleOptions = <AppStyleInfo>[
   AppStyleInfo(
     style: AppStyle.cyberpunk,
     name: 'Cyberpunk',
-    description: 'Neon cyan, magenta and deep navy.',
     icon: Icons.bolt_rounded,
   ),
   AppStyleInfo(
     style: AppStyle.minimalLight,
     name: 'Minimal Light',
-    description: 'Bright, clean and easy to read.',
     icon: Icons.light_mode_rounded,
   ),
   AppStyleInfo(
     style: AppStyle.forest,
     name: 'Forest',
-    description: 'Calm green palette for a natural fitness look.',
     icon: Icons.forest_rounded,
   ),
   AppStyleInfo(
     style: AppStyle.sunset,
     name: 'Sunset',
-    description: 'Warm orange and violet accents.',
     icon: Icons.wb_twilight_rounded,
   ),
 ];
@@ -192,7 +187,8 @@ class AppTheme {
         labelStyle: TextStyle(color: p.muted),
         hintStyle: TextStyle(color: p.muted.withValues(alpha: 0.7)),
         prefixIconColor: p.primary,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: p.border),

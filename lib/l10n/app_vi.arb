@@ -1,0 +1,518 @@
+{
+  "@@locale": "vi",
+  "navMeal": "Bữa ăn",
+  "navWorkout": "Tập luyện",
+  "navHistory": "Lịch sử",
+  "navProfile": "Hồ sơ",
+  "navSettings": "Cài đặt",
+  "cancel": "Hủy",
+  "delete": "Xóa",
+  "ok": "OK",
+  "retry": "Thử lại",
+  "choose": "Chọn",
+  "minutesUnit": "phút",
+  "savingButton": "ĐANG LƯU...",
+  "sourceManual": "tự đặt",
+  "sourceEstimated": "ước tính",
+  "mealTitle": "THỰC ĐƠN",
+  "mealSubtitle": "Tạo thực đơn từ hồ sơ và mục tiêu đã lưu trên máy.",
+  "mealProfileRequiredTitle": "Thiết lập hồ sơ trước",
+  "mealProfileRequiredBody": "Chọn mục tiêu và lưu thông tin cơ thể trong tab Hồ sơ.",
+  "mealOpenProfile": "MỞ HỒ SƠ",
+  "mealProfileSummary": "{weight} kg • {height} cm • {age} tuổi",
+  "@mealProfileSummary": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "height": {
+        "type": "String"
+      },
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "caloriesPerDay": "Calo/ngày",
+  "proteinPerDay": "Protein/ngày",
+  "targetSources": "Calo: {calories} • Protein: {protein}",
+  "@targetSources": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "mealEditProfile": "Sửa hồ sơ và mục tiêu",
+  "mealGenerate": "TẠO THỰC ĐƠN",
+  "mealSave": "LƯU THỰC ĐƠN",
+  "mealSaved": "Đã lưu thực đơn.",
+  "mealSaveFailed": "Không lưu được thực đơn. Hãy thử lại.",
+  "profileLoadFailed": "Không tải được hồ sơ đã lưu. Hãy thử lại.",
+  "mealTargetsTitle": "Mục tiêu của thực đơn",
+  "targetLabel": "Mục tiêu",
+  "mealComparisonTitle": "Đối chiếu thực đơn",
+  "mealWithinTarget": "Trong khoảng mục tiêu",
+  "mealOutsideTarget": "Chưa đạt khoảng mục tiêu",
+  "caloriesLabel": "Calo",
+  "proteinLabel": "Protein",
+  "comparisonDifference": "Lệch {difference} {unit} ({percent}%)",
+  "@comparisonDifference": {
+    "placeholders": {
+      "difference": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "mealToleranceNote": "Mốc đối chiếu: calo ±5%, protein ±10%. Thực đơn gợi ý chưa phải lượng bạn đã ăn.",
+  "mealsTitle": "Các bữa ăn",
+  "breakfast": "Bữa sáng",
+  "lunch": "Bữa trưa",
+  "dinner": "Bữa tối",
+  "workoutTitle": "BUỔI TẬP",
+  "workoutSubtitle": "Gợi ý bài tập theo nhóm cơ, trình độ và thời gian bạn có.",
+  "trainingSetup": "Thiết lập buổi tập",
+  "workoutSplit": "Nhóm bài tập (split)",
+  "splitPush": "Push · Ngực, vai, tay sau",
+  "splitPull": "Pull · Lưng, xô, tay trước",
+  "splitLegs": "Legs · Đùi, mông, bắp chân",
+  "splitCore": "Core · Cơ bụng",
+  "experienceLevel": "Trình độ",
+  "levelBeginner": "Mới bắt đầu",
+  "levelIntermediate": "Trung bình",
+  "levelPro": "Nâng cao",
+  "levelOption": "{level} • tối đa {count} bài",
+  "@levelOption": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "availableTime": "Thời gian có (phút)",
+  "availableTimeError": "Nhập từ 15 đến 180 phút.",
+  "workoutGenerate": "TẠO BUỔI TẬP",
+  "workoutSave": "LƯU BUỔI TẬP",
+  "workoutSaved": "Đã lưu buổi tập.",
+  "workoutSaveFailed": "Không lưu được buổi tập.",
+  "exerciseLogSaveFailed": "Không lưu được kết quả bài tập.",
+  "nextSessionTitle": "Gợi ý cho buổi sau",
+  "nextSessionSummary": "{weight} kg • 3 hiệp • mục tiêu {reps} lần",
+  "@nextSessionSummary": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "overloadIncreaseWeight": "Bạn đã hoàn thành 3×12 với mức gắng sức vừa phải. Buổi sau tăng thêm 2,5 kg và bắt đầu lại trong khoảng 8–12 lần.",
+  "overloadMaintainWeight": "Bạn đã hoàn thành 3×12 nhưng thấy rất nặng. Giữ nguyên mức tạ thêm một buổi trước khi tăng.",
+  "overloadDecreaseWeight": "Số lần chưa đạt khoảng mục tiêu. Giảm 2,5 kg và ưu tiên kỹ thuật có kiểm soát.",
+  "overloadIncreaseReps": "Giữ nguyên mức tạ và cố gắng tăng số lần cho đến khi cả ba hiệp đạt 12 lần.",
+  "sessionSummary": "Tóm tắt buổi tập",
+  "estimatedLabel": "Ước tính",
+  "exercisesLabel": "Số bài",
+  "remainingTimeNote": "Còn {minutes} phút cho khởi động, nghỉ giữa hiệp, giãn cơ hoặc cardio.",
+  "@remainingTimeNote": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "levelFallbackNote": "Dữ liệu cho trình độ {requested} còn ít. Buổi tập này gồm bài ở mức: {used}.",
+  "@levelFallbackNote": {
+    "placeholders": {
+      "requested": {
+        "type": "String"
+      },
+      "used": {
+        "type": "String"
+      }
+    }
+  },
+  "exerciseSequence": "Danh sách bài tập",
+  "noExerciseData": "Không có dữ liệu bài tập.",
+  "exerciseDetails": "{muscle} • {equipment} • {minutes} phút",
+  "@exerciseDetails": {
+    "placeholders": {
+      "muscle": {
+        "type": "String"
+      },
+      "equipment": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "logResult": "Ghi kết quả",
+  "savingResult": "Đang lưu kết quả",
+  "logExerciseTitle": "Ghi kết quả: {name}",
+  "@logExerciseTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "progressionModel": "Mô hình tăng tiến: 3 hiệp, mỗi hiệp 8–12 lần.",
+  "currentLoadKg": "Mức tạ hiện tại (kg)",
+  "currentLoadError": "Nhập mức tạ từ 0 đến 1000 kg.",
+  "setLabel": "Hiệp {number}",
+  "@setLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "difficulty": "Độ khó",
+  "difficultyEasy": "Dễ",
+  "difficultyModerate": "Vừa sức",
+  "difficultyHard": "Khó",
+  "difficultyFailure": "Kiệt sức (failure)",
+  "calculate": "Tính toán",
+  "historyTitle": "LỊCH SỬ",
+  "historyLoadFailed": "Không tải được lịch sử trên máy.",
+  "clearAllHistory": "Xóa toàn bộ lịch sử",
+  "clearAllTitle": "Xóa toàn bộ lịch sử?",
+  "clearAllBody": "Toàn bộ thực đơn, buổi tập và nhật ký tăng tiến đã lưu sẽ bị xóa. Hồ sơ và lịch sử cân nặng vẫn được giữ lại.",
+  "clearAllFailed": "Không xóa được lịch sử trên máy.",
+  "historyMealPlans": "THỰC ĐƠN",
+  "historyWorkoutPlans": "BUỔI TẬP",
+  "historyOverloadLogs": "NHẬT KÝ TĂNG TIẾN",
+  "savedMealPlan": "THỰC ĐƠN ĐÃ LƯU",
+  "savedWorkout": "BUỔI TẬP ĐÃ LƯU",
+  "savedMealCorrupted": "Thực đơn đã lưu bị thiếu hoặc hỏng dữ liệu.",
+  "savedWorkoutCorrupted": "Buổi tập đã lưu bị thiếu hoặc hỏng dữ liệu.",
+  "noMealPlans": "Chưa có thực đơn nào được lưu.",
+  "noWorkoutPlans": "Chưa có buổi tập nào được lưu.",
+  "noExerciseLogs": "Chưa có nhật ký bài tập.",
+  "deleteRecordTitle": "Xóa {record}?",
+  "@deleteRecordTitle": {
+    "placeholders": {
+      "record": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteRecordBody": "Không thể khôi phục bản ghi sau khi xóa.",
+  "deleteRecordFailed": "Không xóa được bản ghi đã chọn.",
+  "recordMealPlan": "thực đơn",
+  "recordWorkoutPlan": "buổi tập",
+  "recordExerciseLog": "nhật ký bài tập",
+  "deleteMealPlan": "Xóa thực đơn",
+  "deleteWorkoutPlan": "Xóa buổi tập",
+  "deleteExerciseLog": "Xóa nhật ký bài tập",
+  "mealHistoryTitle": "{calories} kcal • {protein} g protein",
+  "@mealHistoryTitle": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "workoutHistorySubtitle": "{minutes} phút • {date}",
+  "@workoutHistorySubtitle": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exerciseLogSubtitle": "{weight} kg • {reps} lần\nBuổi sau: {nextWeight} kg • mục tiêu {nextReps} lần\n{date}",
+  "@exerciseLogSubtitle": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      },
+      "nextWeight": {
+        "type": "String"
+      },
+      "nextReps": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileTitle": "Hồ sơ & mục tiêu",
+  "profileDisclaimer": "Ước tính dành cho người trưởng thành từ 18 tuổi. Nhu cầu thực tế có thể khác; đây không phải chỉ định y khoa.",
+  "personalInfo": "Thông tin cá nhân",
+  "age": "Tuổi",
+  "ageError": "Nhập tuổi từ 18 đến 100.",
+  "genderFormula": "Giới tính dùng trong công thức",
+  "male": "Nam",
+  "female": "Nữ",
+  "heightCm": "Chiều cao (cm)",
+  "heightName": "Chiều cao",
+  "currentBodyWeight": "Cân nặng hiện tại (kg)",
+  "weightName": "Cân nặng",
+  "activityLevel": "Mức vận động",
+  "activitySedentary": "Ít vận động · ×{factor}",
+  "@activitySedentary": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityLight": "Nhẹ · ×{factor}",
+  "@activityLight": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityModerate": "Vừa · ×{factor}",
+  "@activityModerate": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityActive": "Nhiều · ×{factor}",
+  "@activityActive": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      }
+    }
+  },
+  "activityVeryActive": "Rất nhiều · ×{factor}",
+  "@activityVeryActive": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      }
+    }
+  },
+  "goal": "Mục tiêu",
+  "goalLose": "Giảm mỡ",
+  "goalMaintain": "Giữ cân",
+  "goalGain": "Tăng cân",
+  "estimateFormula": "Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).",
+  "manualCalories": "Calo tự đặt (kcal/ngày)",
+  "manualHint": "Để trống để dùng ước tính",
+  "useEstimatedCalories": "Dùng calo ước tính",
+  "manualProtein": "Protein tự đặt (g/ngày)",
+  "useEstimatedProtein": "Dùng protein ước tính",
+  "numberInvalid": "Nhập {name} hợp lệ.",
+  "@numberInvalid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "numberPositiveMax": "{name} phải lớn hơn 0 và không quá {max}.",
+  "@numberPositiveMax": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "numberRange": "{name} phải từ {min} đến {max}.",
+  "@numberRange": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "targetsInvalidHint": "Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.",
+  "caloriesPerDayValue": "{value} kcal/ngày",
+  "@caloriesPerDayValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "proteinPerDayValue": "{value} g protein/ngày",
+  "@proteinPerDayValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "estimatedCalories": "Calo ước tính",
+  "manualCaloriesSource": "Calo tự đặt",
+  "estimatedProtein": "Protein ước tính",
+  "manualProteinSource": "Protein tự đặt",
+  "saveProfile": "Lưu hồ sơ",
+  "savingProfile": "Đang lưu...",
+  "profileSaved": "Đã lưu hồ sơ và mục tiêu.",
+  "profileSaveFailed": "Không thể lưu hồ sơ. Vui lòng thử lại.",
+  "targetErrorProteinEnergy": "Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. Hãy điều chỉnh mục tiêu calo hoặc protein.",
+  "targetErrorCalorieRange": "Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.",
+  "targetErrorProteinRange": "Mục tiêu protein phải lớn hơn 0 và không quá 500 g. Kiểm tra hồ sơ hoặc tự nhập mục tiêu.",
+  "targetErrorGeneric": "Thông tin chưa cho ước tính hợp lệ. Kiểm tra tuổi, chiều cao, cân nặng và mục tiêu.",
+  "weightTracking": "Theo dõi cân nặng",
+  "noWeights": "Chưa có lần ghi cân nặng. Lưu hồ sơ để bắt đầu.",
+  "latestWeight": "Gần nhất: {weight} kg · {date}",
+  "@latestWeight": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "weightChange": "Thay đổi: {change} kg từ {from} đến {to}",
+  "@weightChange": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "logWeight": "Ghi cân nặng",
+  "weightHistoryNote": "Mỗi ngày lưu một giá trị; ghi lại cùng ngày sẽ cập nhật giá trị đó. Biểu đồ hiển thị tối đa 90 lần ghi gần nhất.",
+  "editWeightTooltip": "Sửa cân nặng ngày {date}",
+  "@editWeightTooltip": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteWeightTooltip": "Xóa cân nặng ngày {date}",
+  "@deleteWeightTooltip": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "weightSaved": "Đã lưu cân nặng ngày {date}.",
+  "@weightSaved": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "weightSaveFailed": "Không thể lưu cân nặng. Vui lòng thử lại.",
+  "deleteWeightTitle": "Xóa lần ghi cân nặng?",
+  "weightDeleted": "Đã xóa lần ghi cân nặng.",
+  "weightDeleteFailed": "Không thể xóa cân nặng. Vui lòng thử lại.",
+  "editWeight": "Sửa cân nặng",
+  "weightKg": "Cân nặng (kg)",
+  "weightValueError": "Nhập cân nặng lớn hơn 0 và không quá 500 kg.",
+  "weighInDateField": "Ngày cân (ngày/tháng/năm)",
+  "weighInDate": "Ngày cân",
+  "chooseWeighInDate": "Chọn ngày cân",
+  "datePickerFuture": "Chọn ngày không sau hôm nay.",
+  "datePickerInvalid": "Nhập ngày hợp lệ.",
+  "dateFormatError": "Nhập ngày theo dạng ngày/tháng/năm.",
+  "dateAfterToday": "Ngày cân không được sau hôm nay.",
+  "saveWeight": "Lưu cân nặng",
+  "weightChartSemantics": "Biểu đồ {count} lần ghi cân nặng. Từ {firstDate}: {firstWeight} kg đến {lastDate}: {lastWeight} kg. Các giá trị được liệt kê bên dưới.",
+  "@weightChartSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "firstDate": {
+        "type": "String"
+      },
+      "firstWeight": {
+        "type": "String"
+      },
+      "lastDate": {
+        "type": "String"
+      },
+      "lastWeight": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTitle": "CÀI ĐẶT",
+  "settingsSubtitle": "Chọn ngôn ngữ và giao diện. Lựa chọn được lưu trên máy.",
+  "offlineModeTitle": "Chế độ offline",
+  "offlineModeBody": "Thực đơn, buổi tập và gợi ý cho buổi sau đều chạy trên máy. Hồ sơ và lịch sử được lưu cục bộ.",
+  "languageTitle": "Ngôn ngữ",
+  "interfaceStyle": "Giao diện",
+  "styleCyberpunkDescription": "Neon xanh lơ, hồng tím trên nền xanh đen.",
+  "styleMinimalLightDescription": "Sáng, gọn gàng và dễ đọc.",
+  "styleForestDescription": "Tông xanh lá dịu mắt, mang cảm giác tự nhiên.",
+  "styleSunsetDescription": "Điểm nhấn cam ấm và tím.",
+  "errorDataUnavailable": "Không đọc được dữ liệu thực phẩm và bài tập đi kèm ứng dụng.",
+  "errorMealNotFound": "Không tìm được thực đơn phù hợp với mục tiêu hiện tại. Hãy thử lại hoặc điều chỉnh mục tiêu.",
+  "errorWorkoutNotFound": "Không có bài tập phù hợp với lựa chọn này. Hãy thử thời gian dài hơn hoặc nhóm bài khác.",
+  "errorInvalidInput": "Dữ liệu nhập chưa hợp lệ. Hãy kiểm tra lại.",
+  "errorUnknown": "Không tạo được gợi ý trên máy. Hãy thử lại.",
+  "muscleAbdominals": "Cơ bụng",
+  "muscleAbductors": "Cơ dạng hông",
+  "muscleAdductors": "Cơ khép đùi",
+  "muscleBiceps": "Tay trước",
+  "muscleCalves": "Bắp chân",
+  "muscleChest": "Ngực",
+  "muscleForearms": "Cẳng tay",
+  "muscleGlutes": "Mông",
+  "muscleHamstrings": "Đùi sau",
+  "muscleLats": "Cơ xô",
+  "muscleLowerBack": "Lưng dưới",
+  "muscleMiddleBack": "Lưng giữa",
+  "muscleQuadriceps": "Đùi trước",
+  "muscleShoulders": "Vai",
+  "muscleTraps": "Cơ cầu vai",
+  "muscleTriceps": "Tay sau",
+  "equipmentBarbell": "Tạ đòn",
+  "equipmentBodyOnly": "Không dụng cụ",
+  "equipmentCable": "Máy cáp",
+  "equipmentDumbbell": "Tạ đơn",
+  "equipmentEzCurlBar": "Thanh EZ",
+  "equipmentKettlebells": "Tạ ấm",
+  "equipmentMachine": "Máy tập",
+  "equipmentOther": "Khác"
+}
