@@ -79,6 +79,29 @@ commit và kết quả kiểm thử.
 - **Kiểm thử:** analyze sạch, 92/92 test (migration v4, model, màn Nhật ký,
   nút ghi thực đơn).
 
+### 2026-10-17 · Chốt hướng nhận diện, phân công nhóm và lịch 8 tuần
+- **Yêu cầu làm rõ:** không chỉ nhận ra "cơm tấm", mà còn phải biết dĩa
+  **có những thành phần nào** (sườn, trứng, cơm, bì…) thì mới tính calo theo
+  từng phần được.
+- **Quyết định:**
+  - Dùng **một model hai đầu ra** (multi-task) trên cùng backbone ImageNet:
+    - đầu `dish`: phân loại món (softmax);
+    - đầu `components`: nhận diện nhiều nhãn thành phần (sigmoid).
+  - Cách này đủ để biết có hay không có từng thành phần, mà công gán nhãn chỉ
+    là tick chọn, rẻ hơn vẽ khung nhiều.
+  - **YOLO** chuyển xuống tuần 5–7, chỉ dùng để **đếm số lượng** và gợi ý
+    khẩu phần; có phương án bỏ YOLO nếu đến tuần 4 chậm tiến độ.
+- **Phân công:**
+  - Người A lo app và dữ liệu dinh dưỡng;
+  - Người B lo dữ liệu ảnh và model;
+  - cả hai cùng gán nhãn khung ở giai đoạn YOLO.
+- **Tài liệu mới:**
+  - [MODEL_CONTRACT.md](MODEL_CONTRACT.md): bản nháp 20 món, 24 thành phần,
+    định dạng `labels.csv`, đầu vào/đầu ra của model, ngưỡng hiển thị;
+  - [PHAN_CONG.md](PHAN_CONG.md): vai trò, lịch 19/10 – 13/12/2026, mốc an
+    toàn ở tuần 4, quy trình git theo branch và Pull Request.
+- `dataset/vnfood/` được thêm vào `.gitignore` để không commit ảnh.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
@@ -101,7 +124,7 @@ người dùng xác nhận món và khẩu phần → ghi vào `food_log` với
 | Dùng model có sẵn hay tự train | **Tự fine-tune** (transfer learning) | Danh sách món phải khớp bảng dinh dưỡng; model có sẵn (Food-101, ML Kit) không biết món Việt hoặc nhãn quá chung chung |
 | Điểm xuất phát | Backbone train sẵn trên **ImageNet** | Có sẵn cho các kiến trúc nhẹ, xuất `.tflite` dễ |
 | Train ở đâu | **Google Colab** trước; sau này có thể dựng WSL2 trên máy | Colab không phải cài đặt. Máy cá nhân có RTX 2060 Super 8 GB đủ mạnh, nhưng TensorFlow trên Windows không chạy GPU, cần WSL2 và Python 3.10/3.11 |
-| Phạm vi | **Phân loại ảnh có một món** | Đĩa nhiều món là bài toán object detection, đưa vào hướng phát triển |
+| Phạm vi | **Một ảnh một dĩa/tô**; model trả về món + các thành phần có trong dĩa (nhiều nhãn) | Đủ để tính calo theo từng thành phần; đếm số lượng giao cho YOLO ở tuần 5–7 (cập nhật 2026-10-17) |
 
 ### 2.3. Thiết kế thí nghiệm (chương thực nghiệm)
 Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng tập test.
@@ -142,18 +165,25 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   thể gợi ý khẩu phần, nhưng vẫn chưa ra được gram.
 - **Lưu ý license:** Ultralytics YOLO (v8/11) dùng giấy phép AGPL-3.0. Với đồ
   án học tập thì không sao, nhưng cần ghi rõ nếu sau này phát hành ứng dụng.
-- **Quyết định:** NLCN tập trung vào phân loại ảnh một món; YOLO cho ảnh
-  nhiều món ghi vào *hướng phát triển*. Nếu còn thời gian có thể làm thử
-  trên vài món.
+- **Quyết định (cập nhật 2026-10-17):**
+  - Tuần 1–4 làm model hai đầu ra (món + thành phần nhiều nhãn).
+  - Tuần 5–7 làm YOLO để đếm số lượng và gợi ý khẩu phần.
+  - Chậm tiến độ thì bỏ YOLO, chuyển vào *hướng phát triển*.
 
 ---
 
 ## 3. Việc còn tồn đọng
-- [ ] Notebook Colab để train (chia dữ liệu, 4 thí nghiệm, đánh giá, xuất
+- [ ] Chốt contract v1.0 (danh sách món và thành phần), điền tên hai người
+  vào `PHAN_CONG.md`.
+- [ ] Gom ảnh vào `dataset/vnfood/` kèm `SOURCES.md`.
+- [ ] Script dọn dữ liệu, gán nhãn sơ bộ, trang duyệt ảnh.
+- [ ] Notebook Colab để train (chia dữ liệu, các thí nghiệm, đánh giá, xuất
   `.tflite`) trong `tool/train/`.
-- [ ] Dataset món Việt: tên tiếng Việt, calo/protein theo khẩu phần, ghép
-  vào danh sách chọn của Nhật ký.
-- [ ] Màn chụp ảnh và xác nhận top-3, gắn `tflite_flutter`.
+- [ ] `assets/data/vn_food/components.csv` và `dishes.csv` (dinh dưỡng có
+  nguồn, khẩu phần mặc định).
+- [ ] Màn chụp ảnh, xác nhận món và thành phần, chỉnh khẩu phần, gắn
+  `tflite_flutter`.
+- [ ] Giai đoạn YOLO (tuần 5–7): gán khung, train, đếm số lượng.
 - [ ] Mở rộng dữ liệu bài tập (đang 96/2918 bài, thiếu Beginner/Pro).
 - [ ] Benchmark Branch & Bound so với greedy/vét cạn (số node, thời gian,
   độ lệch mục tiêu).
