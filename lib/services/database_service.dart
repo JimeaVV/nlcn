@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/food_log_entry.dart';
 import '../models/history_models.dart';
 import '../models/recommendation_models.dart';
 import '../models/user_profile.dart';
@@ -46,15 +47,17 @@ class DatabaseService {
     return factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 3,
+        version: 4,
         onCreate: (db, _) async {
           await _createBaseTables(db);
           await _createWorkoutLogTable(db);
           await _createWeightTable(db);
+          await _createFoodLogTable(db);
         },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) await _createWorkoutLogTable(db);
           if (oldVersion < 3) await _upgradeProfileAndWeights(db);
+          if (oldVersion < 4) await _createFoodLogTable(db);
         },
       ),
     );
@@ -136,6 +139,29 @@ class DatabaseService {
       select substr(updated_at, 1, 10), weight, updated_at
       from user_profile where id = 1
     ''');
+  }
+
+  /// Version 4: what the user actually ate, one row per food.
+  Future<void> _createFoodLogTable(Database db) async {
+    await db.execute('''
+      create table if not exists food_log(
+        id integer primary key autoincrement,
+        logged_date text not null,
+        meal text not null,
+        food_name text not null,
+        grams real,
+        calories real not null,
+        protein real not null,
+        carbs real not null,
+        fat real not null,
+        source text not null,
+        confidence real,
+        created_at text not null
+      )
+    ''');
+    await db.execute(
+      'create index if not exists food_log_date on food_log(logged_date)',
+    );
   }
 
   Future<void> _createWorkoutLogTable(Database db) async {
@@ -379,6 +405,44 @@ class DatabaseService {
       'suggestion_message': recommendation.message,
       'performed_at': DateTime.now().toIso8601String(),
     });
+  }
+
+  /// Adds diary entries in one transaction, so a plan is logged whole or not
+  /// at all. Entries dated in the future are rejected.
+  Future<List<int>> addFoodLogEntries(List<FoodLogEntry> entries) async {
+    final today = diaryDateKey(DateTime.now());
+    for (final entry in entries) {
+      entry.validate();
+      // Compare calendar days: an entry stamped later today is still today.
+      if (diaryDateKey(entry.date).compareTo(today) > 0) {
+        throw ArgumentError('Diary entries cannot be dated in the future.');
+      }
+    }
+    final db = await database;
+    return db.transaction((txn) async {
+      final ids = <int>[];
+      for (final entry in entries) {
+        final row = entry.toMap()..remove('id');
+        ids.add(await txn.insert('food_log', row));
+      }
+      return ids;
+    });
+  }
+
+  Future<List<FoodLogEntry>> getFoodLog(DateTime day) async {
+    final db = await database;
+    final rows = await db.query(
+      'food_log',
+      where: 'logged_date=?',
+      whereArgs: [diaryDateKey(day)],
+      orderBy: 'id',
+    );
+    return rows.map(FoodLogEntry.fromMap).toList(growable: false);
+  }
+
+  Future<void> deleteFoodLogEntry(int id) async {
+    final db = await database;
+    await db.delete('food_log', where: 'id=?', whereArgs: [id]);
   }
 
   Future<List<MealHistoryEntry>> getMealHistory() async {

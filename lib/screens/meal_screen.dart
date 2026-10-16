@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/cyber_theme.dart';
 import '../engine/nutrition_targets.dart';
 import '../l10n/l10n.dart';
+import '../models/food_log_entry.dart';
 import '../models/recommendation_models.dart';
 import '../models/user_profile.dart';
 import '../services/database_service.dart';
@@ -19,11 +20,15 @@ class MealScreen extends StatefulWidget {
     required this.recommendations,
     this.database,
     this.onOpenProfile,
+    this.onDiaryChanged,
   });
 
   final RecommendationService recommendations;
   final DatabaseService? database;
   final VoidCallback? onOpenProfile;
+
+  /// Called after the current plan is written to today's diary.
+  final VoidCallback? onDiaryChanged;
 
   @override
   State<MealScreen> createState() => MealScreenState();
@@ -40,6 +45,10 @@ class MealScreenState extends State<MealScreen> {
   bool _loadingProfile = true;
   bool _generating = false;
   bool _saving = false;
+  bool _logging = false;
+
+  /// The plan already written to the diary, so it is not logged twice.
+  DietRecommendation? _loggedResult;
   int _loadVersion = 0;
   int _generation = 0;
 
@@ -144,6 +153,47 @@ class MealScreenState extends State<MealScreen> {
       if (mounted) _message(context.l10n.mealSaveFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  bool _canLog(DietRecommendation result) => result.plan.meals.values
+      .every((meal) => meal.items.every((item) => item.hasNutrition));
+
+  Future<void> _logPlan() async {
+    final result = _result;
+    if (result == null || _logging || identical(result, _loggedResult)) return;
+    final today = DateTime.now();
+    final entries = [
+      for (final meal in result.plan.meals.entries)
+        for (final item in meal.value.items)
+          FoodLogEntry(
+            date: today,
+            meal: switch (meal.key) {
+              'Breakfast' => MealSlot.breakfast,
+              'Lunch' => MealSlot.lunch,
+              'Dinner' => MealSlot.dinner,
+              _ => MealSlot.snack,
+            },
+            name: item.name,
+            grams: item.grams,
+            calories: item.calories!,
+            protein: item.protein!,
+            carbs: item.carbs ?? 0,
+            fat: item.fat ?? 0,
+            source: FoodLogSource.mealPlan,
+          ),
+    ];
+    setState(() => _logging = true);
+    try {
+      await _database.addFoodLogEntries(entries);
+      if (!mounted) return;
+      setState(() => _loggedResult = result);
+      _message(context.l10n.mealPlanLogged);
+      widget.onDiaryChanged?.call();
+    } catch (_) {
+      if (mounted) _message(context.l10n.diarySaveFailed);
+    } finally {
+      if (mounted) setState(() => _logging = false);
     }
   }
 
@@ -256,6 +306,21 @@ class MealScreenState extends State<MealScreen> {
               icon: const Icon(Icons.bookmark_add_outlined),
               label: Text(_saving ? l10n.savingButton : l10n.mealSave),
             ),
+            if (_canLog(_result!)) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const ValueKey('meal-log-plan'),
+                onPressed: _logging || identical(_result, _loggedResult)
+                    ? null
+                    : _logPlan,
+                icon: Icon(identical(_result, _loggedResult)
+                    ? Icons.check_rounded
+                    : Icons.menu_book_rounded),
+                label: Text(identical(_result, _loggedResult)
+                    ? l10n.mealPlanAlreadyLogged
+                    : l10n.mealLogPlan),
+              ),
+            ],
           ],
         ],
       ),
