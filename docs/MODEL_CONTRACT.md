@@ -107,6 +107,11 @@ com_tam,trung_op_la,,1
 com_tam,do_chua,30,
 pho_bo,_base,500,        ← nước dùng; dinh dưỡng ghi ở dòng `_base_pho_bo` trong components.csv
 ```
+Kiểm tra hai file bằng `python tool/check_vn_food.py`; thêm `--strict` để
+liệt kê các ô còn trống. Script kiểm tra mã có khớp contract không, số liệu có
+hợp lý không (calo ≈ 4·protein + 4·carb + 9·fat, sai lệch ≤ 25%) và đã có
+nguồn chưa.
+
 App dùng `dishes.csv` để điền sẵn khẩu phần cho những thành phần model báo là
 có. Thành phần model báo có mà không nằm trong danh sách mặc định của món thì
 lấy `unit_grams`, hoặc 100 g nếu không có.
