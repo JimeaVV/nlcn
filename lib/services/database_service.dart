@@ -4,29 +4,68 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/history_models.dart';
 import '../models/recommendation_models.dart';
+import '../models/user_profile.dart';
+import '../models/weight_entry.dart';
 
 class DatabaseService {
-  DatabaseService._();
-  static final instance = DatabaseService._();
-  Database? _db;
+  DatabaseService._()
+      : _factory = null,
+        _path = null;
 
-  Future<Database> get database async {
-    if (_db != null) return _db!;
-    final path = join(await getDatabasesPath(), 'optifit.db');
-    _db = await openDatabase(
-      path,
-      version: 2,
-      onCreate: (db, _) async {
-        await _createBaseTables(db);
-        await _createWorkoutLogTable(db);
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
-          await _createWorkoutLogTable(db);
-        }
+  DatabaseService.forTesting({
+    required DatabaseFactory factory,
+    required String path,
+  })  : _factory = factory,
+        _path = path;
+
+  static final instance = DatabaseService._();
+  final DatabaseFactory? _factory;
+  final String? _path;
+  Database? _db;
+  Future<Database>? _opening;
+
+  Future<Database> get database {
+    final current = _db;
+    if (current != null) {
+      if (current.isOpen) return Future.value(current);
+      _db = null;
+      _opening = null;
+    }
+    return _opening ??= _open().then(
+      (db) => _db = db,
+      onError: (Object error, StackTrace stack) {
+        _opening = null;
+        Error.throwWithStackTrace(error, stack);
       },
     );
-    return _db!;
+  }
+
+  Future<Database> _open() async {
+    final factory = _factory ?? databaseFactory;
+    final path = _path ?? join(await factory.getDatabasesPath(), 'optifit.db');
+    return factory.openDatabase(
+      path,
+      options: OpenDatabaseOptions(
+        version: 3,
+        onCreate: (db, _) async {
+          await _createBaseTables(db);
+          await _createWorkoutLogTable(db);
+          await _createWeightTable(db);
+        },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) await _createWorkoutLogTable(db);
+          if (oldVersion < 3) await _upgradeProfileAndWeights(db);
+        },
+      ),
+    );
+  }
+
+  Future<void> close() async {
+    final pending = _opening;
+    final current = _db ?? (pending == null ? null : await pending);
+    if (current != null) await current.close();
+    _db = null;
+    _opening = null;
   }
 
   Future<void> _createBaseTables(Database db) async {
@@ -38,6 +77,9 @@ class DatabaseService {
         height real not null,
         weight real not null,
         activity_level real not null,
+        goal text not null default 'maintain',
+        calorie_override real,
+        protein_override real,
         updated_at text not null
       )
     ''');
@@ -67,6 +109,35 @@ class DatabaseService {
     ''');
   }
 
+  Future<void> _createWeightTable(DatabaseExecutor db) async {
+    await db.execute('''
+      create table if not exists weight_history(
+        id integer primary key autoincrement,
+        recorded_date text unique not null,
+        weight_kg real not null,
+        updated_at text not null
+      )
+    ''');
+  }
+
+  Future<void> _upgradeProfileAndWeights(Database db) async {
+    await db.execute(
+      "alter table user_profile add column goal text not null default 'lose'",
+    );
+    await db
+        .execute('alter table user_profile add column calorie_override real');
+    await db
+        .execute('alter table user_profile add column protein_override real');
+    await _createWeightTable(db);
+    // The previous app only stored the current weight. Keep that historical
+    // baseline on its original date, preserving an existing measurement there.
+    await db.execute('''
+      insert or ignore into weight_history(recorded_date, weight_kg, updated_at)
+      select substr(updated_at, 1, 10), weight, updated_at
+      from user_profile where id = 1
+    ''');
+  }
+
   Future<void> _createWorkoutLogTable(Database db) async {
     await db.execute('''
       create table if not exists workout_logs(
@@ -92,20 +163,151 @@ class DatabaseService {
     required double height,
     required double weight,
     required double activityLevel,
+    NutritionGoal? goal,
+    double? calorieOverride,
+    double? proteinOverride,
+    DateTime? recordedAt,
   }) async {
+    final date = _measurementDate(recordedAt);
     final db = await database;
-    await db.insert(
-        'user_profile',
-        {
-          'id': 1,
-          'age': age,
-          'gender': gender,
-          'height': height,
-          'weight': weight,
-          'activity_level': activityLevel,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.transaction((txn) async {
+      final rows =
+          await txn.query('user_profile', where: 'id=?', whereArgs: [1]);
+      final existing = rows.isEmpty ? null : UserProfile.fromMap(rows.first);
+      // Legacy callers cannot accidentally erase the user's newer settings.
+      // Use saveUserProfile with nullable overrides to clear them explicitly.
+      final profile = UserProfile(
+        age: age,
+        gender: gender,
+        height: height,
+        weight: weight,
+        activityLevel: activityLevel,
+        goal: goal ?? existing?.goal ?? NutritionGoal.maintain,
+        calorieOverride: calorieOverride ?? existing?.calorieOverride,
+        proteinOverride: proteinOverride ?? existing?.proteinOverride,
+      );
+      profile.validate();
+      await _saveProfileAndWeight(txn, profile, date);
+    });
+  }
+
+  Future<void> saveUserProfile(
+    UserProfile profile, {
+    DateTime? recordedAt,
+  }) async {
+    profile.validate();
+    final date = _measurementDate(recordedAt);
+    final db = await database;
+    await db.transaction((txn) => _saveProfileAndWeight(txn, profile, date));
+  }
+
+  Future<void> _saveProfileAndWeight(
+    Transaction txn,
+    UserProfile profile,
+    String date,
+  ) async {
+    final updatedAt = DateTime.now().toIso8601String();
+    await txn.insert(
+      'user_profile',
+      {...profile.toMap(), 'id': 1, 'updated_at': updatedAt},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await _upsertWeight(txn, profile.weight, date, updatedAt);
+    await _synchronizeProfileWeight(txn, updatedAt);
+  }
+
+  Future<void> saveWeight({
+    required double weight,
+    DateTime? recordedAt,
+  }) async {
+    if (!weight.isFinite || weight <= 0 || weight > 500) {
+      throw ArgumentError('Weight must be finite and between 0 and 500 kg.');
+    }
+    final date = _measurementDate(recordedAt);
+    final db = await database;
+    await db.transaction((txn) async {
+      final updatedAt = DateTime.now().toIso8601String();
+      await _upsertWeight(txn, weight, date, updatedAt);
+      await _synchronizeProfileWeight(txn, updatedAt);
+    });
+  }
+
+  String _measurementDate(DateTime? recordedAt) {
+    final date = (recordedAt ?? DateTime.now()).toLocal();
+    final today = DateTime.now();
+    final day = DateTime(date.year, date.month, date.day);
+    if (day.isAfter(DateTime(today.year, today.month, today.day))) {
+      throw ArgumentError('Weight measurements cannot be dated in the future.');
+    }
+    if (date.year < 1 || date.year > 9999) {
+      throw ArgumentError('Weight measurements require a valid calendar date.');
+    }
+    String pad(int value) => value.toString().padLeft(2, '0');
+    return '${date.year.toString().padLeft(4, '0')}-${pad(date.month)}-${pad(date.day)}';
+  }
+
+  Future<void> _upsertWeight(
+    Transaction txn,
+    double weight,
+    String date,
+    String updatedAt,
+  ) async {
+    final changes = await txn.update(
+      'weight_history',
+      {'weight_kg': weight, 'updated_at': updatedAt},
+      where: 'recorded_date=?',
+      whereArgs: [date],
+    );
+    if (changes == 0) {
+      await txn.insert('weight_history', {
+        'recorded_date': date,
+        'weight_kg': weight,
+        'updated_at': updatedAt,
+      });
+    }
+  }
+
+  Future<void> _synchronizeProfileWeight(
+    Transaction txn,
+    String updatedAt,
+  ) async {
+    final latest = await txn.query(
+      'weight_history',
+      columns: ['weight_kg'],
+      orderBy: 'recorded_date desc',
+      limit: 1,
+    );
+    if (latest.isEmpty) return;
+    await txn.update(
+      'user_profile',
+      {'weight': latest.first['weight_kg'], 'updated_at': updatedAt},
+      where: 'id=?',
+      whereArgs: [1],
+    );
+  }
+
+  Future<List<WeightEntry>> getWeightHistory({int limit = 90}) async {
+    if (limit <= 0) {
+      throw ArgumentError('Weight history limit must be positive.');
+    }
+    final db = await database;
+    final rows = await db.query(
+      'weight_history',
+      orderBy: 'recorded_date desc',
+      limit: limit,
+    );
+    return rows.map(WeightEntry.fromMap).toList(growable: false);
+  }
+
+  Future<void> deleteWeightEntry(int id) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final deleted =
+          await txn.delete('weight_history', where: 'id=?', whereArgs: [id]);
+      if (deleted > 0) {
+        await _synchronizeProfileWeight(txn, DateTime.now().toIso8601String());
+      }
+    });
   }
 
   Future<Map<String, dynamic>?> getProfile() async {

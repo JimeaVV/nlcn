@@ -10,7 +10,9 @@ List<dynamic> _requiredList(dynamic value, String field) {
 
 double _requiredDouble(dynamic value, String field) {
   final number = value is num ? value.toDouble() : double.tryParse('$value');
-  if (number == null) throw FormatException('$field must be numeric.');
+  if (number == null || !number.isFinite) {
+    throw FormatException('$field must be finite and numeric.');
+  }
   return number;
 }
 
@@ -91,6 +93,20 @@ class MealPlan {
   final double totalCarbohydrates;
   final double totalFat;
   final Map<String, MealRecommendation> meals;
+
+  double calorieDifference(double targetCalories) =>
+      totalCalories - targetCalories;
+  double calorieDeviationPercent(double targetCalories) => targetCalories > 0
+      ? calorieDifference(targetCalories) / targetCalories * 100
+      : 0;
+  double get proteinDifference => totalProtein - proteinTarget;
+  double get proteinDeviationPercent =>
+      proteinTarget > 0 ? proteinDifference / proteinTarget * 100 : 0;
+
+  // A product quality check for the generated plan, not a nutritional safety score.
+  bool meetsTargets(double targetCalories) =>
+      calorieDeviationPercent(targetCalories).abs() <= 5 &&
+      proteinDeviationPercent.abs() <= 10;
 }
 
 class MealRecommendation {
@@ -156,6 +172,9 @@ class WorkoutRecommendation {
     required this.estimatedTime,
     required this.totalExercises,
     required this.note,
+    required this.requestedLevel,
+    required this.usedLevels,
+    required this.levelFallbackUsed,
     required this.exercises,
   });
 
@@ -180,6 +199,11 @@ class WorkoutRecommendation {
         'total_exercises',
       ),
       note: '${json['note'] ?? ''}'.trim(),
+      requestedLevel: '${json['requested_level'] ?? ''}',
+      usedLevels: List<String>.unmodifiable(
+        (json['used_levels'] as List? ?? []).map((level) => '$level'),
+      ),
+      levelFallbackUsed: json['level_fallback_used'] == true,
       exercises: exercises,
     );
   }
@@ -189,6 +213,9 @@ class WorkoutRecommendation {
   final int estimatedTime;
   final int totalExercises;
   final String note;
+  final String requestedLevel;
+  final List<String> usedLevels;
+  final bool levelFallbackUsed;
   final List<ExerciseRecommendation> exercises;
 }
 

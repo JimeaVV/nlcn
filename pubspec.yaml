@@ -1,8 +1,8 @@
 name: optifit
-description: Meal, workout and Progressive Overload recommendations for Android.
+description: Offline meal, workout and Progressive Overload recommendations for Android.
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.2.0+3
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.2.2
   sqflite: ^2.4.2
   path: ^1.9.1
   shared_preferences: ^2.5.3
@@ -21,6 +20,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  sqflite_common_ffi: ^2.4.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/data/recommendations.json

@@ -59,6 +59,14 @@ class WorkoutResult extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(note, style: TextStyle(color: CyberColors.muted)),
               ],
+              if (recommendation.levelFallbackUsed) ...[
+                const SizedBox(height: 10),
+                Text(
+                  'Limited exercises for ${recommendation.requestedLevel}. '
+                  'This plan includes: ${recommendation.usedLevels.join(', ')}.',
+                  style: TextStyle(color: CyberColors.muted),
+                ),
+              ],
             ],
           ),
         ),

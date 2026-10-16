@@ -5,12 +5,9 @@ import '../models/recommendation_models.dart';
 import 'cyber_card.dart';
 import 'metric_tile.dart';
 
-String _formatWholeNumber(int value) {
-  return value.toString().replaceAllMapped(
-        RegExp(r'(?<=\d)(?=(\d{3})+$)'),
-        (_) => ',',
-      );
-}
+String _format(double value, [int decimals = 0]) =>
+    value.toStringAsFixed(decimals).replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]},');
 
 class MealResult extends StatelessWidget {
   const MealResult({super.key, required this.recommendation});
@@ -20,138 +17,154 @@ class MealResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final plan = recommendation.plan;
-    final meals = plan.meals;
-
+    final target = recommendation.targetCalories;
+    final meetsTargets = plan.meetsTargets(target);
+    final accent = meetsTargets ? CyberColors.lime : Colors.orange;
     return Column(
       children: [
         CyberCard(
-          title: 'Daily targets',
+          title: 'Mục tiêu của thực đơn',
           icon: Icons.speed_rounded,
-          accent: CyberColors.lime,
-          child: Row(
+          child: Row(children: [
+            Expanded(
+                child: MetricTile(
+                    label: 'BMR',
+                    value: _format(recommendation.bmr),
+                    unit: 'kcal')),
+            const SizedBox(width: 8),
+            Expanded(
+                child: MetricTile(
+                    label: 'TDEE',
+                    value: _format(recommendation.tdee),
+                    unit: 'kcal')),
+            const SizedBox(width: 8),
+            Expanded(
+                child: MetricTile(
+                    label: 'Mục tiêu', value: _format(target), unit: 'kcal')),
+          ]),
+        ),
+        const SizedBox(height: 14),
+        CyberCard(
+          title: 'Đối chiếu thực đơn',
+          icon: meetsTargets
+              ? Icons.check_circle_outline_rounded
+              : Icons.info_outline_rounded,
+          accent: accent,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: MetricTile(
-                  label: 'BMR',
-                  value: _formatWholeNumber(recommendation.bmr.round()),
-                  unit: 'kcal',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: MetricTile(
-                  label: 'TDEE',
-                  value: _formatWholeNumber(recommendation.tdee.round()),
-                  unit: 'kcal',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: MetricTile(
-                  label: 'Target',
-                  value: _formatWholeNumber(
-                    recommendation.targetCalories.round(),
-                  ),
-                  unit: 'kcal',
-                ),
-              ),
+              Text(
+                  meetsTargets
+                      ? 'Trong khoảng mục tiêu'
+                      : 'Chưa đạt khoảng mục tiêu',
+                  style: TextStyle(color: accent, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 12),
+              _Comparison(
+                  label: 'Calo',
+                  actual: plan.totalCalories,
+                  target: target,
+                  difference: plan.calorieDifference(target),
+                  percent: plan.calorieDeviationPercent(target),
+                  unit: 'kcal'),
+              const SizedBox(height: 12),
+              _Comparison(
+                  label: 'Protein',
+                  actual: plan.totalProtein,
+                  target: plan.proteinTarget,
+                  difference: plan.proteinDifference,
+                  percent: plan.proteinDeviationPercent,
+                  unit: 'g'),
+              const SizedBox(height: 10),
+              Text(
+                  'Mốc đối chiếu: calo ±5%, protein ±10%. '
+                  'Thực đơn gợi ý chưa phải lượng bạn đã ăn.',
+                  style: TextStyle(color: CyberColors.muted, fontSize: 12)),
             ],
           ),
         ),
         const SizedBox(height: 14),
         CyberCard(
-          title: 'Recommended meals',
+          title: 'Các bữa ăn',
           icon: Icons.ramen_dining_rounded,
           accent: CyberColors.magenta,
-          child: meals.isEmpty
-              ? const Text('No meal data returned.')
-              : Column(
-                  children: meals.entries.map((entry) {
-                    final meal = entry.value;
-                    final items = meal.items;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: CyberColors.surfaceAlt,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              entry.key.toUpperCase(),
-                              style: TextStyle(
-                                color: CyberColors.magenta,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...items.map((item) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 5),
-                                child: Text(
-                                  '• ${item.displayName}',
-                                  style: TextStyle(color: CyberColors.text),
-                                ),
-                              );
-                            }),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 10,
-                              runSpacing: 6,
-                              children: [
-                                _MetricChip(
-                                  'Cal ${meal.calories.round()}',
-                                ),
-                                _MetricChip(
-                                  'P ${meal.protein.toStringAsFixed(1)}g',
-                                ),
-                                _MetricChip(
-                                  'C ${meal.carbohydrates.toStringAsFixed(1)}g',
-                                ),
-                                _MetricChip(
-                                  'F ${meal.fat.toStringAsFixed(1)}g',
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
+          child: Column(
+            children: recommendation.plan.meals.entries.map((entry) {
+              final meal = entry.value;
+              final label = const {
+                    'Breakfast': 'Bữa sáng',
+                    'Lunch': 'Bữa trưa',
+                    'Dinner': 'Bữa tối'
+                  }[entry.key] ??
+                  entry.key;
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                    color: CyberColors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(14)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label,
+                        style: TextStyle(
+                            color: CyberColors.magenta,
+                            fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 8),
+                    ...meal.items.map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 5),
+                          child: Text('• ${item.displayName}',
+                              style: TextStyle(color: CyberColors.text)),
+                        )),
+                    const SizedBox(height: 8),
+                    Text('${_format(meal.calories)} kcal • '
+                        'P ${_format(meal.protein, 1)} g • '
+                        'C ${_format(meal.carbohydrates, 1)} g • '
+                        'F ${_format(meal.fat, 1)} g'),
+                  ],
                 ),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
   }
 }
 
-class _MetricChip extends StatelessWidget {
-  const _MetricChip(this.text);
+class _Comparison extends StatelessWidget {
+  const _Comparison(
+      {required this.label,
+      required this.actual,
+      required this.target,
+      required this.difference,
+      required this.percent,
+      required this.unit});
 
-  final String text;
+  final String label;
+  final double actual;
+  final double target;
+  final double difference;
+  final double percent;
+  final String unit;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: CyberColors.border),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: CyberColors.muted,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+    final sign = difference >= 0 ? '+' : '';
+    final decimals = unit == 'g' ? 1 : 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+            '$label: ${_format(actual, decimals)} / ${_format(target, decimals)} $unit',
+            style: TextStyle(
+                color: CyberColors.text, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(
+            'Lệch $sign${difference.toStringAsFixed(decimals)} $unit '
+            '($sign${percent.toStringAsFixed(1)}%)',
+            style: TextStyle(color: CyberColors.muted)),
+      ],
     );
   }
 }
