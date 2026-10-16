@@ -5,7 +5,9 @@ File này ghi lại **đã làm gì, vì sao làm vậy và kết quả ra sao**
 thay đổi đáng kể thì bổ sung một mục mới vào phần *Nhật ký*, ghi rõ ngày,
 commit và kết quả kiểm thử.
 
-- Repo: <https://github.com/JimeaVV/nlcsn>
+- Repo NLCN: <https://github.com/JimeaVV/nlcn> (từ 2026-10-17; giữ toàn bộ
+  lịch sử commit). Repo NLCSN cũ: <https://github.com/JimeaVV/nlcsn>, giữ
+  nguyên, không cập nhật thêm.
 - Nền tảng: Flutter (Android), chạy **hoàn toàn offline**: SQLite lưu dữ
   liệu, engine gợi ý viết bằng Dart thuần.
 - Xuất phát điểm: sản phẩm NLCSN (OptiFit 1.0, có backend FastAPI), sau đó
@@ -101,6 +103,14 @@ commit và kết quả kiểm thử.
   - [PHAN_CONG.md](PHAN_CONG.md): vai trò, lịch 19/10 – 13/12/2026, mốc an
     toàn ở tuần 4, quy trình git theo branch và Pull Request.
 - `dataset/vnfood/` được thêm vào `.gitignore` để không commit ảnh.
+
+### 2026-10-17 · Tách repo riêng cho NLCN
+- Tạo repo công khai **JimeaVV/nlcn** và push toàn bộ lịch sử commit, để vẫn
+  thấy được quá trình nâng cấp từ NLCSN lên NLCN.
+- Trong repo trên máy: `origin` trỏ về `nlcn`; repo cũ đổi tên remote thành
+  `nlcsn` và không push lên đó nữa.
+- Bạn cùng nhóm clone từ repo mới:
+  `git clone https://github.com/JimeaVV/nlcn.git`.
 
 ---
 
