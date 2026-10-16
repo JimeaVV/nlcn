@@ -53,3 +53,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Food photo dataset (large; see docs/MODEL_CONTRACT.md)
+/dataset/vnfood/
