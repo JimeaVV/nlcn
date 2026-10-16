@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/cyber_theme.dart';
 import '../models/history_models.dart';
 import '../models/recommendation_models.dart';
+import '../widgets/meal_result.dart';
 import '../services/database_service.dart';
 
 String _formatWholeNumber(int value) {
@@ -79,65 +80,23 @@ class HistoryScreenState extends State<HistoryScreen> {
       _showMessage('This saved meal plan is incomplete or corrupted.');
       return;
     }
-    final mealData = recommendation.plan.meals;
     if (!mounted) return;
-
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: CyberColors.surface,
       builder: (_) => DraggableScrollableSheet(
         expand: false,
-        initialChildSize: .75,
-        maxChildSize: .92,
+        initialChildSize: .8,
+        maxChildSize: .95,
         builder: (_, controller) => ListView(
           controller: controller,
           padding: const EdgeInsets.all(18),
           children: [
-            Text(
-              'SAVED MEAL PLAN',
-              style: TextStyle(
-                color: CyberColors.cyan,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+            Text('THỰC ĐƠN ĐÃ LƯU',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            ...mealData.entries.map((entry) {
-              final meal = entry.value;
-              final items = meal.items;
-              return Card(
-                color: CyberColors.surfaceAlt,
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.key.toUpperCase(),
-                        style: TextStyle(
-                          color: CyberColors.magenta,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (items.isEmpty) const Text('No food items stored.'),
-                      ...items.map((item) {
-                        final prep = item.suggestedPrep;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 7),
-                          child: Text(
-                            '• ${item.displayName}'
-                            '${prep.isEmpty ? '' : '\n  Prep: $prep'}',
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              );
-            }),
+            MealResult(recommendation: recommendation),
           ],
         ),
       ),
@@ -240,7 +199,7 @@ class HistoryScreenState extends State<HistoryScreen> {
     final confirmed = await _confirm(
       'Clear all history?',
       'All saved meal plans, workout plans and Progressive Overload logs '
-          'will be deleted. Your user profile will be preserved.',
+          'will be deleted. Your profile and weight history will be preserved.',
     );
     if (!confirmed) return;
     try {

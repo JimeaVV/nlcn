@@ -22,6 +22,16 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           CyberCard(
+            title: 'Offline mode',
+            icon: Icons.offline_bolt_rounded,
+            child: Text(
+              'Meal plans, workouts and next-session suggestions run on this '
+              'device. Your profile and history are saved locally.',
+              style: TextStyle(color: CyberColors.muted),
+            ),
+          ),
+          const SizedBox(height: 18),
+          CyberCard(
             title: 'Interface style',
             icon: Icons.palette_outlined,
             child: Column(
@@ -39,7 +49,8 @@ class SettingsScreen extends StatelessWidget {
                         color: CyberColors.surfaceAlt,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: selected ? CyberColors.cyan : CyberColors.border,
+                          color:
+                              selected ? CyberColors.cyan : CyberColors.border,
                           width: selected ? 1.6 : 1,
                         ),
                       ),
@@ -81,7 +92,8 @@ class SettingsScreen extends StatelessWidget {
                             selected
                                 ? Icons.check_circle_rounded
                                 : Icons.circle_outlined,
-                            color: selected ? CyberColors.lime : CyberColors.muted,
+                            color:
+                                selected ? CyberColors.lime : CyberColors.muted,
                           ),
                         ],
                       ),

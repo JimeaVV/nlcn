@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
 import '../models/recommendation_models.dart';
-import '../services/api_service.dart';
+import '../services/recommendation_service.dart';
 import '../services/database_service.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/exercise_log_dialog.dart';
@@ -10,9 +10,9 @@ import '../widgets/neon_button.dart';
 import '../widgets/workout_result.dart';
 
 class WorkoutScreen extends StatefulWidget {
-  const WorkoutScreen({super.key, required this.api});
+  const WorkoutScreen({super.key, required this.recommendations});
 
-  final ApiService api;
+  final RecommendationService recommendations;
 
   @override
   State<WorkoutScreen> createState() => _WorkoutScreenState();
@@ -29,6 +29,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   bool logging = false;
   String? error;
   WorkoutRecommendation? result;
+  String? resultSplit;
+  String? resultLevel;
 
   @override
   void dispose() {
@@ -37,23 +39,36 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   Future<void> submit() async {
+    if (loading || saving) return;
     FocusScope.of(context).unfocus();
     if (!formKey.currentState!.validate()) return;
+
+    final requestedSplit = split;
+    final requestedLevel = level;
+    final requestedMinutes = int.parse(timeController.text.trim());
 
     setState(() {
       loading = true;
       error = null;
       result = null;
+      resultSplit = null;
+      resultLevel = null;
     });
 
     try {
-      final response = await widget.api.recommendWorkout(
-        split: split,
-        level: level,
-        minutes: int.parse(timeController.text.trim()),
+      final response = await widget.recommendations.recommendWorkout(
+        split: requestedSplit,
+        level: requestedLevel,
+        minutes: requestedMinutes,
       );
-      if (mounted) setState(() => result = response);
-    } on ApiException catch (exception) {
+      if (mounted) {
+        setState(() {
+          result = response;
+          resultSplit = requestedSplit;
+          resultLevel = requestedLevel;
+        });
+      }
+    } on RecommendationException catch (exception) {
       if (mounted) setState(() => error = exception.message);
     } finally {
       if (mounted) setState(() => loading = false);
@@ -61,13 +76,21 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   Future<void> saveWorkout() async {
-    if (result == null || saving) return;
+    final recommendation = result;
+    final savedSplit = resultSplit;
+    final savedLevel = resultLevel;
+    if (recommendation == null ||
+        savedSplit == null ||
+        savedLevel == null ||
+        saving) {
+      return;
+    }
     setState(() => saving = true);
     try {
       await DatabaseService.instance.saveWorkoutPlan(
-        split: split,
-        level: level,
-        recommendation: result!,
+        split: savedSplit,
+        level: savedLevel,
+        recommendation: recommendation,
       );
       if (mounted) _showMessage('Workout plan saved.');
     } catch (_) {
@@ -87,7 +110,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     setState(() => logging = true);
     try {
-      final recommendation = await widget.api.recommendProgressiveOverload(
+      final recommendation =
+          await widget.recommendations.recommendProgressiveOverload(
         exerciseName: exerciseName,
         currentWeight: input.currentWeight,
         set1Reps: input.set1Reps,
@@ -107,7 +131,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
       if (!mounted) return;
       await _showProgressiveOverloadResult(recommendation);
-    } on ApiException catch (exception) {
+    } on RecommendationException catch (exception) {
       if (mounted) _showMessage(exception.message);
     } catch (_) {
       if (mounted) _showMessage('Could not save the exercise result.');
@@ -222,7 +246,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       labelText: 'Available time (minutes)',
                     ),
                     validator: (value) {
-                      final number = int.tryParse(value ?? '');
+                      final number = int.tryParse(value?.trim() ?? '');
                       if (number == null || number < 15 || number > 180) {
                         return 'Use 15–180 minutes.';
                       }
@@ -235,7 +259,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     icon: Icons.bolt_rounded,
                     color: CyberColors.magenta,
                     loading: loading,
-                    onPressed: submit,
+                    onPressed: saving ? null : submit,
                   ),
                 ],
               ),

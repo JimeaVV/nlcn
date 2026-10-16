@@ -83,9 +83,12 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
                   labelText: 'Current weight (kg)',
                 ),
                 validator: (value) {
-                  final number = double.tryParse(value ?? '');
-                  if (number == null || number < 0) {
-                    return 'Enter a valid weight.';
+                  final number = double.tryParse(value?.trim() ?? '');
+                  if (number == null ||
+                      !number.isFinite ||
+                      number < 0 ||
+                      number > 1000) {
+                    return 'Use a weight from 0 to 1000 kg.';
                   }
                   return null;
                 },
@@ -157,7 +160,7 @@ class _RepField extends StatelessWidget {
       keyboardType: TextInputType.number,
       decoration: InputDecoration(labelText: label),
       validator: (value) {
-        final number = int.tryParse(value ?? '');
+        final number = int.tryParse(value?.trim() ?? '');
         if (number == null || number < 0 || number > 30) return '0–30';
         return null;
       },
