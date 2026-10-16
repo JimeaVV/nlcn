@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../l10n/l10n.dart';
 import '../models/history_models.dart';
 import '../models/recommendation_models.dart';
 import '../widgets/meal_result.dart';
+import '../widgets/workout_result.dart';
 import '../services/database_service.dart';
-
-String _formatWholeNumber(int value) {
-  return value.toString().replaceAllMapped(
-        RegExp(r'(?<=\d)(?=(\d{3})+$)'),
-        (_) => ',',
-      );
-}
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -24,7 +19,7 @@ class HistoryScreenState extends State<HistoryScreen> {
   final db = DatabaseService.instance;
 
   bool loading = true;
-  String? error;
+  bool loadFailed = false;
   List<MealHistoryEntry> meals = [];
   List<WorkoutHistoryEntry> workouts = [];
   List<WorkoutLogEntry> workoutLogs = [];
@@ -53,22 +48,15 @@ class HistoryScreenState extends State<HistoryScreen> {
         workouts = workoutRows;
         workoutLogs = logRows;
         loading = false;
-        error = null;
+        loadFailed = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         loading = false;
-        error = 'Could not load local history.';
+        loadFailed = true;
       });
     }
-  }
-
-  String dateText(DateTime value) {
-    final date = value.toLocal();
-    String pad(int value) => value.toString().padLeft(2, '0');
-    return '${pad(date.day)}/${pad(date.month)}/${date.year} '
-        '${pad(date.hour)}:${pad(date.minute)}';
   }
 
   Future<void> showMeal(MealHistoryEntry entry) async {
@@ -77,7 +65,7 @@ class HistoryScreenState extends State<HistoryScreen> {
     try {
       recommendation = DietRecommendation.fromJson(response ?? {});
     } on FormatException {
-      _showMessage('This saved meal plan is incomplete or corrupted.');
+      _showMessage(context.l10n.savedMealCorrupted);
       return;
     }
     if (!mounted) return;
@@ -93,7 +81,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           controller: controller,
           padding: const EdgeInsets.all(18),
           children: [
-            Text('THỰC ĐƠN ĐÃ LƯU',
+            Text(context.l10n.savedMealPlan,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             MealResult(recommendation: recommendation),
@@ -109,7 +97,7 @@ class HistoryScreenState extends State<HistoryScreen> {
     try {
       recommendation = WorkoutRecommendation.fromJson(response ?? {});
     } on FormatException {
-      _showMessage('This saved workout plan is incomplete or corrupted.');
+      _showMessage(context.l10n.savedWorkoutCorrupted);
       return;
     }
     final items = recommendation.exercises;
@@ -128,7 +116,7 @@ class HistoryScreenState extends State<HistoryScreen> {
           padding: const EdgeInsets.all(18),
           children: [
             Text(
-              'SAVED WORKOUT',
+              context.l10n.savedWorkout,
               style: TextStyle(
                 color: CyberColors.magenta,
                 fontSize: 20,
@@ -143,11 +131,7 @@ class HistoryScreenState extends State<HistoryScreen> {
                 child: ListTile(
                   leading: CircleAvatar(child: Text('${index + 1}')),
                   title: Text(exercise.name),
-                  subtitle: Text(
-                    '${exercise.muscleGroup} • '
-                    '${exercise.equipment} • '
-                    '${exercise.estimatedMinutes} min',
-                  ),
+                  subtitle: Text(exerciseDetails(context.l10n, exercise)),
                 ),
               );
             }),
@@ -166,11 +150,11 @@ class HistoryScreenState extends State<HistoryScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Delete'),
+                child: Text(context.l10n.delete),
               ),
             ],
           ),
@@ -183,30 +167,29 @@ class HistoryScreenState extends State<HistoryScreen> {
     required Future<void> Function() delete,
   }) async {
     final confirmed = await _confirm(
-      'Delete $label?',
-      'This record cannot be recovered after deletion.',
+      context.l10n.deleteRecordTitle(label),
+      context.l10n.deleteRecordBody,
     );
     if (!confirmed) return;
     try {
       await delete();
       await refresh();
     } catch (_) {
-      if (mounted) _showMessage('Could not delete the selected record.');
+      if (mounted) _showMessage(context.l10n.deleteRecordFailed);
     }
   }
 
   Future<void> _clearAllHistory() async {
     final confirmed = await _confirm(
-      'Clear all history?',
-      'All saved meal plans, workout plans and Progressive Overload logs '
-          'will be deleted. Your profile and weight history will be preserved.',
+      context.l10n.clearAllTitle,
+      context.l10n.clearAllBody,
     );
     if (!confirmed) return;
     try {
       await db.clearAllHistory();
       await refresh();
     } catch (_) {
-      if (mounted) _showMessage('Could not clear local history.');
+      if (mounted) _showMessage(context.l10n.clearAllFailed);
     }
   }
 
@@ -220,6 +203,7 @@ class HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     if (loading) return const Center(child: CircularProgressIndicator());
+    final l10n = context.l10n;
 
     return RefreshIndicator(
       onRefresh: refresh,
@@ -230,25 +214,27 @@ class HistoryScreenState extends State<HistoryScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'HISTORY ARCHIVE',
+                  l10n.historyTitle,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
               IconButton(
-                tooltip: 'Clear all history',
+                tooltip: l10n.clearAllHistory,
                 onPressed: hasHistory ? _clearAllHistory : null,
                 icon: const Icon(Icons.delete_sweep_outlined),
               ),
             ],
           ),
-          if (error != null) ...[
+          if (loadFailed) ...[
             const SizedBox(height: 8),
-            Text(error!, style: TextStyle(color: CyberColors.danger)),
+            Text(l10n.historyLoadFailed,
+                style: TextStyle(color: CyberColors.danger)),
           ],
           const SizedBox(height: 16),
-          _HistoryHeading(title: 'MEAL PLANS', color: CyberColors.cyan),
+          _HistoryHeading(
+              title: l10n.historyMealPlans, color: CyberColors.cyan),
           const SizedBox(height: 8),
-          if (meals.isEmpty) const Text('No saved meal plans yet.'),
+          if (meals.isEmpty) Text(l10n.noMealPlans),
           ...meals.map(
             (row) => Card(
               child: ListTile(
@@ -258,15 +244,17 @@ class HistoryScreenState extends State<HistoryScreen> {
                   color: CyberColors.cyan,
                 ),
                 title: Text(
-                  '${_formatWholeNumber(row.totalCalories.round())} kcal • '
-                  '${row.totalProtein.toStringAsFixed(1)}g protein',
+                  l10n.mealHistoryTitle(
+                    context.formatNumber(row.totalCalories.round()),
+                    context.formatNumber(row.totalProtein, decimals: 1),
+                  ),
                 ),
-                subtitle: Text(dateText(row.createdAt)),
+                subtitle: Text(formatDateTime(row.createdAt)),
                 trailing: IconButton(
-                  tooltip: 'Delete meal plan',
+                  tooltip: l10n.deleteMealPlan,
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => _deleteRecord(
-                    label: 'meal plan',
+                    label: l10n.recordMealPlan,
                     delete: () => db.deleteMealPlan(row.id),
                   ),
                 ),
@@ -274,9 +262,10 @@ class HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          _HistoryHeading(title: 'WORKOUT PLANS', color: CyberColors.magenta),
+          _HistoryHeading(
+              title: l10n.historyWorkoutPlans, color: CyberColors.magenta),
           const SizedBox(height: 8),
-          if (workouts.isEmpty) const Text('No saved workout plans yet.'),
+          if (workouts.isEmpty) Text(l10n.noWorkoutPlans),
           ...workouts.map(
             (row) => Card(
               child: ListTile(
@@ -285,15 +274,18 @@ class HistoryScreenState extends State<HistoryScreen> {
                   Icons.fitness_center_rounded,
                   color: CyberColors.magenta,
                 ),
-                title: Text('${row.split} • ${row.level}'),
+                title: Text('${row.split} • ${l10n.levelLabel(row.level)}'),
                 subtitle: Text(
-                  '${row.estimatedTime} min • ${dateText(row.createdAt)}',
+                  l10n.workoutHistorySubtitle(
+                    '${row.estimatedTime}',
+                    formatDateTime(row.createdAt),
+                  ),
                 ),
                 trailing: IconButton(
-                  tooltip: 'Delete workout plan',
+                  tooltip: l10n.deleteWorkoutPlan,
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => _deleteRecord(
-                    label: 'workout plan',
+                    label: l10n.recordWorkoutPlan,
                     delete: () => db.deleteWorkoutPlan(row.id),
                   ),
                 ),
@@ -302,11 +294,11 @@ class HistoryScreenState extends State<HistoryScreen> {
           ),
           const SizedBox(height: 18),
           _HistoryHeading(
-            title: 'PROGRESSIVE OVERLOAD LOGS',
+            title: l10n.historyOverloadLogs,
             color: CyberColors.lime,
           ),
           const SizedBox(height: 8),
-          if (workoutLogs.isEmpty) const Text('No exercise logs yet.'),
+          if (workoutLogs.isEmpty) Text(l10n.noExerciseLogs),
           ...workoutLogs.map(
             (row) => Card(
               child: ListTile(
@@ -316,18 +308,20 @@ class HistoryScreenState extends State<HistoryScreen> {
                 ),
                 title: Text(row.exerciseName),
                 subtitle: Text(
-                  '${row.weight}kg • '
-                  '${row.set1Reps}/${row.set2Reps}/${row.set3Reps} reps\n'
-                  'Next: ${row.suggestedWeight}kg • '
-                  'target ${row.suggestedReps} reps\n'
-                  '${dateText(row.performedAt)}',
+                  l10n.exerciseLogSubtitle(
+                    context.formatMeasurement(row.weight),
+                    '${row.set1Reps}/${row.set2Reps}/${row.set3Reps}',
+                    context.formatMeasurement(row.suggestedWeight),
+                    '${row.suggestedReps}',
+                    formatDateTime(row.performedAt),
+                  ),
                 ),
                 isThreeLine: true,
                 trailing: IconButton(
-                  tooltip: 'Delete exercise log',
+                  tooltip: l10n.deleteExerciseLog,
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => _deleteRecord(
-                    label: 'exercise log',
+                    label: l10n.recordExerciseLog,
                     delete: () => db.deleteWorkoutLog(row.id),
                   ),
                 ),
@@ -335,11 +329,12 @@ class HistoryScreenState extends State<HistoryScreen> {
                   context: context,
                   builder: (dialogContext) => AlertDialog(
                     title: Text(row.exerciseName),
-                    content: Text(row.message),
+                    content:
+                        Text(l10n.overloadMessage(row.action, row.message)),
                     actions: [
                       FilledButton(
                         onPressed: () => Navigator.pop(dialogContext),
-                        child: const Text('OK'),
+                        child: Text(l10n.ok),
                       ),
                     ],
                   ),

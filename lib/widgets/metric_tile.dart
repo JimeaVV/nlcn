@@ -28,9 +28,9 @@ class MetricTile extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: CyberColors.muted,
-              fontWeight: FontWeight.w700,
-            ),
+                  color: CyberColors.muted,
+                  fontWeight: FontWeight.w700,
+                ),
           ),
           const SizedBox(height: 5),
           FittedBox(

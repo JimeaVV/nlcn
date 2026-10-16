@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../models/weight_entry.dart';
 
 /// A small local chart; the measurement list remains the accessible data source.
@@ -18,12 +19,13 @@ class WeightTrendChart extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Semantics(
       image: true,
-      label: 'Biểu đồ ${ordered.length} lần ghi cân nặng. '
-          'Từ ${_date(ordered.first.recordedAt)}: '
-          '${ordered.first.weight.toStringAsFixed(1)} kg '
-          'đến ${_date(ordered.last.recordedAt)}: '
-          '${ordered.last.weight.toStringAsFixed(1)} kg. '
-          'Các giá trị được liệt kê bên dưới.',
+      label: context.l10n.weightChartSemantics(
+        '${ordered.length}',
+        formatDate(ordered.first.recordedAt),
+        context.formatNumber(ordered.first.weight, decimals: 1),
+        formatDate(ordered.last.recordedAt),
+        context.formatNumber(ordered.last.weight, decimals: 1),
+      ),
       child: ExcludeSemantics(
         child: SizedBox(
           width: double.infinity,
@@ -31,6 +33,7 @@ class WeightTrendChart extends StatelessWidget {
           child: CustomPaint(
             painter: _WeightPainter(
               ordered,
+              formatWeight: (value) => context.formatNumber(value, decimals: 1),
               lineColor: colors.primary,
               labelColor: colors.onSurfaceVariant,
               gridColor: colors.outlineVariant,
@@ -42,18 +45,17 @@ class WeightTrendChart extends StatelessWidget {
   }
 }
 
-String _date(DateTime value) => '${value.day.toString().padLeft(2, '0')}/'
-    '${value.month.toString().padLeft(2, '0')}/${value.year}';
-
 class _WeightPainter extends CustomPainter {
   _WeightPainter(
     this.entries, {
+    required this.formatWeight,
     required this.lineColor,
     required this.labelColor,
     required this.gridColor,
   });
 
   final List<WeightEntry> entries;
+  final String Function(double) formatWeight;
   final Color lineColor;
   final Color labelColor;
   final Color gridColor;
@@ -94,7 +96,7 @@ class _WeightPainter extends CustomPainter {
       canvas.drawLine(Offset(left, y), Offset(right, y), grid);
       _label(
         canvas,
-        '${(upper - (upper - lower) * fraction).toStringAsFixed(1)} kg',
+        '${formatWeight(upper - (upper - lower) * fraction)} kg',
         Offset(0, y - 6),
       );
     }
@@ -121,11 +123,12 @@ class _WeightPainter extends CustomPainter {
     for (final point in points) {
       canvas.drawCircle(point, 3.5, dot);
     }
-    _label(canvas, _date(entries.first.recordedAt), Offset(left, bottom + 8));
+    _label(
+        canvas, formatDate(entries.first.recordedAt), Offset(left, bottom + 8));
     if (timeRange != 0 && size.width >= 240) {
       _label(
         canvas,
-        _date(entries.last.recordedAt),
+        formatDate(entries.last.recordedAt),
         Offset(math.max(left + 80, right - 66), bottom + 8),
       );
     }

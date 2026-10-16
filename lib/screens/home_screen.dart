@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../core/locale_controller.dart';
+import '../l10n/l10n.dart';
 import '../services/recommendation_service.dart';
 import 'history_screen.dart';
 import 'meal_screen.dart';
@@ -9,9 +11,14 @@ import 'settings_screen.dart';
 import 'workout_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.themeController});
+  const HomeScreen({
+    super.key,
+    required this.themeController,
+    required this.localeController,
+  });
 
   final ThemeController themeController;
+  final LocaleController localeController;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -37,7 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
       HistoryScreen(key: historyKey),
       ProfileScreen(
           onProfileChanged: () => mealKey.currentState?.refreshProfile()),
-      SettingsScreen(themeController: widget.themeController),
+      SettingsScreen(
+        themeController: widget.themeController,
+        localeController: widget.localeController,
+      ),
     ];
   }
 
@@ -49,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -70,26 +81,26 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: _selectPage,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.restaurant_menu_rounded),
-            label: 'Bữa ăn',
+            icon: const Icon(Icons.restaurant_menu_rounded),
+            label: l10n.navMeal,
           ),
           NavigationDestination(
-            icon: Icon(Icons.fitness_center_rounded),
-            label: 'Tập luyện',
+            icon: const Icon(Icons.fitness_center_rounded),
+            label: l10n.navWorkout,
           ),
           NavigationDestination(
-            icon: Icon(Icons.history_rounded),
-            label: 'Lịch sử',
+            icon: const Icon(Icons.history_rounded),
+            label: l10n.navHistory,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            label: 'Hồ sơ',
+            icon: const Icon(Icons.person_outline_rounded),
+            label: l10n.navProfile,
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_rounded),
-            label: 'Cài đặt',
+            icon: const Icon(Icons.settings_rounded),
+            label: l10n.navSettings,
           ),
         ],
       ),

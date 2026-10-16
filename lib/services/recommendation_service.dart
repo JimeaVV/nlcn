@@ -1,14 +1,33 @@
 import 'package:flutter/foundation.dart';
 
+import '../engine/meal_planner.dart';
+import '../engine/nutrition_targets.dart';
 import '../engine/recommendation_engine.dart';
 import '../models/recommendation_models.dart';
 import '../models/user_profile.dart';
 import 'dataset_repository.dart';
 
-class RecommendationException implements Exception {
-  const RecommendationException(this.message);
+/// Why a recommendation failed; the interface turns this into localized text.
+enum RecommendationErrorCode {
+  dataUnavailable,
+  calorieTargetOutOfRange,
+  proteinTargetOutOfRange,
+  proteinExceedsCalories,
+  mealNotFound,
+  workoutNotFound,
+  invalidInput,
+  unknown,
+}
 
+class RecommendationException implements Exception {
+  const RecommendationException(
+    this.message, {
+    this.code = RecommendationErrorCode.unknown,
+  });
+
+  /// English diagnostic text; shown to users only through [code].
   final String message;
+  final RecommendationErrorCode code;
 
   @override
   String toString() => message;
@@ -40,6 +59,7 @@ class RecommendationService {
     } catch (_) {
       throw const RecommendationException(
         'Could not load the food and exercise data packaged with the app.',
+        code: RecommendationErrorCode.dataUnavailable,
       );
     }
   }
@@ -114,13 +134,39 @@ class RecommendationService {
         request['exercises'] = (await _datasets.load()).exercises;
       }
       return parse(await _runner(request));
+    } on NutritionTargetError catch (error) {
+      throw RecommendationException(
+        '${error.message}',
+        code: switch (error.issue) {
+          NutritionTargetIssue.calorieRange =>
+            RecommendationErrorCode.calorieTargetOutOfRange,
+          NutritionTargetIssue.proteinRange =>
+            RecommendationErrorCode.proteinTargetOutOfRange,
+          NutritionTargetIssue.proteinExceedsCalories =>
+            RecommendationErrorCode.proteinExceedsCalories,
+        },
+      );
+    } on MealPlanUnavailableError catch (error) {
+      throw RecommendationException(
+        '${error.message}',
+        code: RecommendationErrorCode.mealNotFound,
+      );
     } on ArgumentError catch (error) {
-      throw RecommendationException('${error.message}');
+      throw RecommendationException(
+        '${error.message}',
+        code: RecommendationErrorCode.invalidInput,
+      );
     } on StateError catch (error) {
-      throw RecommendationException(error.message);
+      throw RecommendationException(
+        error.message,
+        code: operation == 'workout'
+            ? RecommendationErrorCode.workoutNotFound
+            : RecommendationErrorCode.unknown,
+      );
     } on FormatException {
       throw const RecommendationException(
         'Could not read the local recommendation data.',
+        code: RecommendationErrorCode.dataUnavailable,
       );
     } on RecommendationException {
       rethrow;

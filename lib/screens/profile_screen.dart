@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
 import '../engine/nutrition_targets.dart';
+import '../l10n/l10n.dart';
 import '../models/user_profile.dart';
 import '../models/weight_entry.dart';
 import '../services/database_service.dart';
@@ -32,7 +33,9 @@ class ProfileScreenState extends State<ProfileScreen> {
   bool _loading = true;
   bool _saving = false;
   bool _hasProfile = false;
-  String? _error;
+
+  /// Built at paint time so a language switch also translates the message.
+  String Function(AppLocalizations)? _error;
   int _refreshId = 0;
 
   DatabaseService get _database => widget.database ?? DatabaseService.instance;
@@ -86,7 +89,7 @@ class ProfileScreenState extends State<ProfileScreen> {
       if (mounted && refreshId == _refreshId) {
         setState(() {
           _loading = false;
-          _error = 'Không thể tải hồ sơ. Vui lòng thử lại.';
+          _error = (l10n) => l10n.profileLoadFailed;
         });
       }
     }
@@ -124,8 +127,11 @@ class ProfileScreenState extends State<ProfileScreen> {
     try {
       profile.validate();
       calculateNutritionTargets(profile);
-    } on ArgumentError catch (error) {
-      setState(() => _error = _targetError('${error.message}'));
+    } on NutritionTargetError catch (error) {
+      setState(() => _error = (l10n) => l10n.targetError(error.issue));
+      return;
+    } on ArgumentError {
+      setState(() => _error = (l10n) => l10n.targetError(null));
       return;
     }
     setState(() {
@@ -138,10 +144,10 @@ class ProfileScreenState extends State<ProfileScreen> {
       await refresh();
       if (!mounted) return;
       widget.onProfileChanged?.call();
-      _message('Đã lưu hồ sơ và mục tiêu.');
+      _message(context.l10n.profileSaved);
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Không thể lưu hồ sơ. Vui lòng thử lại.');
+        setState(() => _error = (l10n) => l10n.profileSaveFailed);
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -162,13 +168,15 @@ class ProfileScreenState extends State<ProfileScreen> {
   }) {
     final text = value?.trim() ?? '';
     if (optional && text.isEmpty) return null;
+    final l10n = context.l10n;
     final number = double.tryParse(text);
-    if (number == null || !number.isFinite) return 'Nhập $name hợp lệ.';
+    if (number == null || !number.isFinite) return l10n.numberInvalid(name);
     if ((inclusiveMinimum ? number < minimum : number <= minimum) ||
         number > maximum) {
       return minimum == 0
-          ? '$name phải lớn hơn 0 và không quá ${_number(maximum)}.'
-          : '$name phải từ ${_number(minimum)} đến ${_number(maximum)}.';
+          ? l10n.numberPositiveMax(name, context.formatMeasurement(maximum))
+          : l10n.numberRange(name, context.formatMeasurement(minimum),
+              context.formatMeasurement(maximum));
     }
     return null;
   }
@@ -210,9 +218,9 @@ class ProfileScreenState extends State<ProfileScreen> {
       await _reload(preserveDraft: true);
       if (!mounted) return;
       widget.onProfileChanged?.call();
-      _message('Đã lưu cân nặng ngày ${_date(input.date)}.');
+      _message(context.l10n.weightSaved(_date(input.date)));
     } catch (_) {
-      if (mounted) _message('Không thể lưu cân nặng. Vui lòng thử lại.');
+      if (mounted) _message(context.l10n.weightSaveFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -223,18 +231,19 @@ class ProfileScreenState extends State<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xóa lần ghi cân nặng?'),
+        title: Text(context.l10n.deleteWeightTitle),
         content: Text(
-          '${_number(entry.weight)} kg · ${_date(entry.recordedAt)}',
+          '${context.formatMeasurement(entry.weight)} kg · '
+          '${_date(entry.recordedAt)}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xóa'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -247,40 +256,41 @@ class ProfileScreenState extends State<ProfileScreen> {
       await _reload(preserveDraft: true);
       if (!mounted) return;
       widget.onProfileChanged?.call();
-      _message('Đã xóa lần ghi cân nặng.');
+      _message(context.l10n.weightDeleted);
     } catch (_) {
-      if (mounted) _message('Không thể xóa cân nặng. Vui lòng thử lại.');
+      if (mounted) _message(context.l10n.weightDeleteFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
   Widget _targetSummary(Map<String, dynamic>? targets) {
-    if (targets == null) {
-      return const Text(
-        'Nhập thông tin và mục tiêu hợp lệ để xem ước tính. '
-        'Năng lượng từ protein (4 kcal/g) không vượt tổng calo.',
-      );
-    }
+    final l10n = context.l10n;
+    if (targets == null) return Text(l10n.targetsInvalidHint);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${_number((targets['target_calories'] as num).toDouble())} kcal/ngày',
+          l10n.caloriesPerDayValue(context.formatMeasurement(
+              (targets['target_calories'] as num).toDouble())),
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        Text(_calories.text.trim().isEmpty ? 'Calo ước tính' : 'Calo tự đặt'),
+        Text(_calories.text.trim().isEmpty
+            ? l10n.estimatedCalories
+            : l10n.manualCaloriesSource),
         const SizedBox(height: 8),
         Text(
-          '${_number((targets['protein_target'] as num).toDouble())} g protein/ngày',
+          l10n.proteinPerDayValue(context.formatMeasurement(
+              (targets['protein_target'] as num).toDouble())),
           style: Theme.of(context).textTheme.titleMedium,
         ),
         Text(_protein.text.trim().isEmpty
-            ? 'Protein ước tính'
-            : 'Protein tự đặt'),
+            ? l10n.estimatedProtein
+            : l10n.manualProteinSource),
         const SizedBox(height: 8),
         Text(
-          'BMR: ${targets['bmr']} kcal · TDEE: ${targets['tdee']} kcal',
+          'BMR: ${context.formatNumber(targets['bmr'] as num)} kcal · '
+          'TDEE: ${context.formatNumber(targets['tdee'] as num)} kcal',
         ),
       ],
     );
@@ -289,26 +299,32 @@ class ProfileScreenState extends State<ProfileScreen> {
   Widget _weightHistory() {
     final chronological = List<WeightEntry>.of(_weights)
       ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
+    final l10n = context.l10n;
+    final weight = context.formatMeasurement;
     return CyberCard(
-      title: 'Theo dõi cân nặng',
+      title: l10n.weightTracking,
       icon: Icons.monitor_weight_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_weights.isEmpty)
-            const Text('Chưa có lần ghi cân nặng. Lưu hồ sơ để bắt đầu.')
+            Text(l10n.noWeights)
           else ...[
             Text(
-              'Gần nhất: ${_number(chronological.last.weight)} kg '
-              '· ${_date(chronological.last.recordedAt)}',
+              l10n.latestWeight(weight(chronological.last.weight),
+                  _date(chronological.last.recordedAt)),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             if (chronological.length > 1) ...[
               const SizedBox(height: 6),
               Text(
-                'Thay đổi: ${_signed(chronological.last.weight - chronological.first.weight)} kg '
-                'từ ${_date(chronological.first.recordedAt)} '
-                'đến ${_date(chronological.last.recordedAt)}',
+                l10n.weightChange(
+                  context.formatSigned(
+                      chronological.last.weight - chronological.first.weight,
+                      decimals: 1),
+                  _date(chronological.first.recordedAt),
+                  _date(chronological.last.recordedAt),
+                ),
               ),
             ],
             const SizedBox(height: 10),
@@ -321,32 +337,29 @@ class ProfileScreenState extends State<ProfileScreen> {
               key: const ValueKey('add-weight'),
               onPressed: _saving || !_hasProfile ? null : () => _editWeight(),
               icon: const Icon(Icons.add_rounded),
-              label: const Text('Ghi cân nặng'),
+              label: Text(l10n.logWeight),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Mỗi ngày lưu một giá trị; ghi lại cùng ngày sẽ cập nhật giá trị đó. '
-            'Biểu đồ hiển thị tối đa 90 lần ghi gần nhất.',
-          ),
+          Text(l10n.weightHistoryNote),
           for (final entry in _weights) ...[
             const Divider(),
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    '${_number(entry.weight)} kg\n${_date(entry.recordedAt)}',
+                    '${weight(entry.weight)} kg\n${_date(entry.recordedAt)}',
                   ),
                 ),
                 IconButton(
                   key: ValueKey('edit-weight-${entry.id}'),
-                  tooltip: 'Sửa cân nặng ngày ${_date(entry.recordedAt)}',
+                  tooltip: l10n.editWeightTooltip(_date(entry.recordedAt)),
                   onPressed: _saving ? null : () => _editWeight(entry),
                   icon: const Icon(Icons.edit_outlined),
                 ),
                 IconButton(
                   key: ValueKey('delete-weight-${entry.id}'),
-                  tooltip: 'Xóa cân nặng ngày ${_date(entry.recordedAt)}',
+                  tooltip: l10n.deleteWeightTooltip(_date(entry.recordedAt)),
                   onPressed: _saving ? null : () => _deleteWeight(entry),
                   icon: const Icon(Icons.delete_outline_rounded),
                 ),
@@ -362,20 +375,20 @@ class ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
     final targets = _preview;
+    final l10n = context.l10n;
+    String factor(double value) => context.formatNumber(value,
+        decimals: value.toString().split('.').last.length);
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         children: [
-          Text('Hồ sơ & mục tiêu',
+          Text(l10n.profileTitle,
               style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 6),
-          const Text(
-            'Ước tính dành cho người trưởng thành từ 18 tuổi. '
-            'Nhu cầu thực tế có thể khác; đây không phải chỉ định y khoa.',
-          ),
+          Text(l10n.profileDisclaimer),
           const SizedBox(height: 16),
           CyberCard(
-            title: 'Thông tin cá nhân',
+            title: l10n.personalInfo,
             icon: Icons.person_outline_rounded,
             child: Form(
               key: _formKey,
@@ -384,13 +397,13 @@ class ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _numberField(
                     keyName: 'profile-age',
-                    label: 'Tuổi',
+                    label: l10n.age,
                     controller: _age,
                     integer: true,
                     validator: (value) {
                       final number = int.tryParse(value?.trim() ?? '');
                       return number == null || number < 18 || number > 100
-                          ? 'Nhập tuổi từ 18 đến 100.'
+                          ? l10n.ageError
                           : null;
                     },
                   ),
@@ -399,11 +412,11 @@ class ProfileScreenState extends State<ProfileScreen> {
                     key: ValueKey('profile-gender-$_gender'),
                     initialValue: _gender,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                        labelText: 'Giới tính dùng trong công thức'),
-                    items: const [
-                      DropdownMenuItem(value: 'male', child: Text('Nam')),
-                      DropdownMenuItem(value: 'female', child: Text('Nữ')),
+                    decoration: InputDecoration(labelText: l10n.genderFormula),
+                    items: [
+                      DropdownMenuItem(value: 'male', child: Text(l10n.male)),
+                      DropdownMenuItem(
+                          value: 'female', child: Text(l10n.female)),
                     ],
                     onChanged: _saving
                         ? null
@@ -412,36 +425,41 @@ class ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 12),
                   _numberField(
                     keyName: 'profile-height',
-                    label: 'Chiều cao (cm)',
+                    label: l10n.heightCm,
                     controller: _height,
-                    validator: (value) =>
-                        _validateNumber(value, name: 'Chiều cao', maximum: 300),
+                    validator: (value) => _validateNumber(value,
+                        name: l10n.heightName, maximum: 300),
                   ),
                   const SizedBox(height: 12),
                   _numberField(
                     keyName: 'profile-weight',
-                    label: 'Cân nặng hiện tại (kg)',
+                    label: l10n.currentBodyWeight,
                     controller: _weight,
-                    validator: (value) =>
-                        _validateNumber(value, name: 'Cân nặng', maximum: 500),
+                    validator: (value) => _validateNumber(value,
+                        name: l10n.weightName, maximum: 500),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<double>(
                     key: ValueKey('profile-activity-$_activity'),
                     initialValue: _activity,
                     isExpanded: true,
-                    decoration:
-                        const InputDecoration(labelText: 'Mức vận động'),
-                    items: const [
+                    decoration: InputDecoration(labelText: l10n.activityLevel),
+                    items: [
                       DropdownMenuItem(
-                          value: 1.2, child: Text('Ít vận động · ×1,2')),
+                          value: 1.2,
+                          child: Text(l10n.activitySedentary(factor(1.2)))),
                       DropdownMenuItem(
-                          value: 1.375, child: Text('Nhẹ · ×1,375')),
-                      DropdownMenuItem(value: 1.55, child: Text('Vừa · ×1,55')),
+                          value: 1.375,
+                          child: Text(l10n.activityLight(factor(1.375)))),
                       DropdownMenuItem(
-                          value: 1.725, child: Text('Nhiều · ×1,725')),
+                          value: 1.55,
+                          child: Text(l10n.activityModerate(factor(1.55)))),
                       DropdownMenuItem(
-                          value: 1.9, child: Text('Rất nhiều · ×1,9')),
+                          value: 1.725,
+                          child: Text(l10n.activityActive(factor(1.725)))),
+                      DropdownMenuItem(
+                          value: 1.9,
+                          child: Text(l10n.activityVeryActive(factor(1.9)))),
                     ],
                     onChanged: _saving
                         ? null
@@ -452,29 +470,25 @@ class ProfileScreenState extends State<ProfileScreen> {
                     key: ValueKey('profile-goal-${_goal.name}'),
                     initialValue: _goal,
                     isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Mục tiêu'),
+                    decoration: InputDecoration(labelText: l10n.goal),
                     items: NutritionGoal.values
                         .map((goal) => DropdownMenuItem(
-                            value: goal, child: Text(goal.label)))
+                            value: goal, child: Text(l10n.goalLabel(goal))))
                         .toList(),
                     onChanged: _saving
                         ? null
                         : (value) => setState(() => _goal = value!),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. '
-                    'Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. '
-                    'Protein = 1,8 g × cân nặng (kg).',
-                  ),
+                  Text(l10n.estimateFormula),
                   const SizedBox(height: 16),
                   _numberField(
                     keyName: 'profile-calories',
-                    label: 'Calo tự đặt (kcal/ngày)',
-                    hint: 'Để trống để dùng ước tính',
+                    label: l10n.manualCalories,
+                    hint: l10n.manualHint,
                     controller: _calories,
                     validator: (value) => _validateNumber(value,
-                        name: 'Calo',
+                        name: l10n.caloriesLabel,
                         minimum: 1000,
                         inclusiveMinimum: true,
                         maximum: 10000,
@@ -487,15 +501,15 @@ class ProfileScreenState extends State<ProfileScreen> {
                               _calories.clear();
                               _error = null;
                             }),
-                    child: const Text('Dùng calo ước tính'),
+                    child: Text(l10n.useEstimatedCalories),
                   ),
                   _numberField(
                     keyName: 'profile-protein',
-                    label: 'Protein tự đặt (g/ngày)',
-                    hint: 'Để trống để dùng ước tính',
+                    label: l10n.manualProtein,
+                    hint: l10n.manualHint,
                     controller: _protein,
                     validator: (value) => _validateNumber(value,
-                        name: 'Protein', maximum: 500, optional: true),
+                        name: l10n.proteinLabel, maximum: 500, optional: true),
                   ),
                   TextButton(
                     onPressed: _saving
@@ -504,13 +518,14 @@ class ProfileScreenState extends State<ProfileScreen> {
                               _protein.clear();
                               _error = null;
                             }),
-                    child: const Text('Dùng protein ước tính'),
+                    child: Text(l10n.useEstimatedProtein),
                   ),
                   const SizedBox(height: 10),
                   _targetSummary(targets),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: TextStyle(color: CyberColors.danger)),
+                    Text(_error!(l10n),
+                        style: TextStyle(color: CyberColors.danger)),
                   ],
                   const SizedBox(height: 16),
                   SizedBox(
@@ -519,7 +534,8 @@ class ProfileScreenState extends State<ProfileScreen> {
                       key: const ValueKey('save-profile'),
                       onPressed: _saving ? null : _saveProfile,
                       icon: const Icon(Icons.save_outlined),
-                      label: Text(_saving ? 'Đang lưu...' : 'Lưu hồ sơ'),
+                      label:
+                          Text(_saving ? l10n.savingProfile : l10n.saveProfile),
                     ),
                   ),
                 ],
@@ -534,38 +550,14 @@ class ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-String _number(double value) => value == value.roundToDouble()
-    ? value.toInt().toString()
-    : value.toStringAsFixed(1);
-
 String _inputNumber(double value) => value == value.roundToDouble()
     ? value.toInt().toString()
     : value.toString();
 
-String _targetError(String message) {
-  if (message.contains('Protein energy')) {
-    return 'Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. '
-        'Hãy điều chỉnh mục tiêu calo hoặc protein.';
-  }
-  if (message.contains('Calorie target')) {
-    return 'Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). '
-        'Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.';
-  }
-  if (message.contains('Protein target')) {
-    return 'Mục tiêu protein phải lớn hơn 0 và không quá 500 g. '
-        'Kiểm tra hồ sơ hoặc tự nhập mục tiêu.';
-  }
-  return 'Thông tin chưa cho ước tính hợp lệ. '
-      'Kiểm tra tuổi, chiều cao, cân nặng và mục tiêu.';
-}
-
-String _signed(double value) =>
-    value > 0 ? '+${_number(value)}' : _number(value);
-
 DateTime _day(DateTime value) => DateTime(value.year, value.month, value.day);
 
-String _date(DateTime value) => '${value.day.toString().padLeft(2, '0')}/'
-    '${value.month.toString().padLeft(2, '0')}/${value.year}';
+/// Weigh-in dates are typed and shown as dd/mm/yyyy in both languages.
+String _date(DateTime value) => formatDate(value);
 
 DateTime? _parseDate(String value) {
   final parts = value.trim().split('/');
@@ -629,17 +621,18 @@ class _WeightDialogState extends State<_WeightDialog> {
   Future<void> _chooseDate() async {
     final today = _day(DateTime.now());
     final parsed = _parseDate(_dateText.text);
+    final l10n = context.l10n;
     final selected = await showDatePicker(
       context: context,
       initialDate: parsed == null || parsed.isAfter(today) ? today : parsed,
       firstDate: DateTime(1900),
       lastDate: today,
-      helpText: 'Chọn ngày cân',
-      cancelText: 'Hủy',
-      confirmText: 'Chọn',
-      fieldLabelText: 'Ngày cân',
-      errorInvalidText: 'Chọn ngày không sau hôm nay.',
-      errorFormatText: 'Nhập ngày hợp lệ.',
+      helpText: l10n.chooseWeighInDate,
+      cancelText: l10n.cancel,
+      confirmText: l10n.choose,
+      fieldLabelText: l10n.weighInDate,
+      errorInvalidText: l10n.datePickerFuture,
+      errorFormatText: l10n.datePickerInvalid,
     );
     if (selected != null && mounted) _dateText.text = _date(selected);
   }
@@ -654,66 +647,68 @@ class _WeightDialogState extends State<_WeightDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-        title: Text(widget.editing ? 'Sửa cân nặng' : 'Ghi cân nặng'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  key: const ValueKey('weight-log-value'),
-                  controller: _weight,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Cân nặng (kg)'),
-                  validator: (value) {
-                    final weight = double.tryParse(value?.trim() ?? '');
-                    return weight == null ||
-                            !weight.isFinite ||
-                            weight <= 0 ||
-                            weight > 500
-                        ? 'Nhập cân nặng lớn hơn 0 và không quá 500 kg.'
-                        : null;
-                  },
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(widget.editing ? l10n.editWeight : l10n.logWeight),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                key: const ValueKey('weight-log-value'),
+                controller: _weight,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: l10n.weightKg),
+                validator: (value) {
+                  final weight = double.tryParse(value?.trim() ?? '');
+                  return weight == null ||
+                          !weight.isFinite ||
+                          weight <= 0 ||
+                          weight > 500
+                      ? l10n.weightValueError
+                      : null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                key: const ValueKey('weight-log-date'),
+                controller: _dateText,
+                readOnly: widget.editing,
+                keyboardType: TextInputType.datetime,
+                decoration: InputDecoration(
+                  labelText: l10n.weighInDateField,
+                  suffixIcon: widget.editing
+                      ? null
+                      : IconButton(
+                          tooltip: l10n.chooseWeighInDate,
+                          onPressed: _chooseDate,
+                          icon: const Icon(Icons.calendar_today_outlined),
+                        ),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  key: const ValueKey('weight-log-date'),
-                  controller: _dateText,
-                  readOnly: widget.editing,
-                  keyboardType: TextInputType.datetime,
-                  decoration: InputDecoration(
-                    labelText: 'Ngày cân (ngày/tháng/năm)',
-                    suffixIcon: widget.editing
-                        ? null
-                        : IconButton(
-                            tooltip: 'Chọn ngày cân',
-                            onPressed: _chooseDate,
-                            icon: const Icon(Icons.calendar_today_outlined),
-                          ),
-                  ),
-                  validator: (value) {
-                    final date = _parseDate(value ?? '');
-                    if (date == null) {
-                      return 'Nhập ngày theo dạng ngày/tháng/năm.';
-                    }
-                    if (date.isAfter(_day(DateTime.now()))) {
-                      return 'Ngày cân không được sau hôm nay.';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
+                validator: (value) {
+                  final date = _parseDate(value ?? '');
+                  if (date == null) {
+                    return l10n.dateFormatError;
+                  }
+                  if (date.isAfter(_day(DateTime.now()))) {
+                    return l10n.dateAfterToday;
+                  }
+                  return null;
+                },
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy')),
-          FilledButton(onPressed: _submit, child: const Text('Lưu cân nặng')),
-        ],
-      );
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+        FilledButton(onPressed: _submit, child: Text(l10n.saveWeight)),
+      ],
+    );
+  }
 }
