@@ -8,8 +8,15 @@ import 'number_utils.dart';
 const workoutExerciseLimits = {'Beginner': 5, 'Intermediate': 7, 'Pro': 9};
 const _splitMuscles = {
   'Push': ['Chest', 'Shoulders', 'Triceps'],
-  'Pull': ['Back', 'Biceps', 'Lats', 'Forearms'],
-  'Legs': ['Quadriceps', 'Hamstrings', 'Calves', 'Glutes'],
+  'Pull': ['Back', 'Biceps', 'Lats', 'Forearms', 'Traps'],
+  'Legs': [
+    'Quadriceps',
+    'Hamstrings',
+    'Calves',
+    'Glutes',
+    'Adductors',
+    'Abductors',
+  ],
   'Core': ['Abdominals'],
 };
 const _levelRanks = {'beginner': 0, 'intermediate': 1, 'pro': 2};

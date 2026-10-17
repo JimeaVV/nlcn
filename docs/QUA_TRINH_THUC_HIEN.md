@@ -684,6 +684,28 @@ commit và kết quả kiểm thử.
   dưới 8 lần, mà trường hợp đó đã được kiểm tra riêng.
 - **Kiểm thử:** 138 test pass, gồm luật 2 buổi (khác mức tạ, buổi trước
   nặng, buổi trước thiếu lần đều không tính) và bài không tạ.
+
+### 2026-10-18 · Gán lại cấp độ cho 96 bài tập (đợt 2, phần 3)
+- **Giữ bộ 96 bài** (quyết định của nhóm): bộ 2.918 bài có nhiều bài ít
+  người tập, nên chỉ giữ những bài phổ biến nhất cho mỗi nhóm cơ.
+- **Vấn đề:** trong 96 bài chỉ có 7 bài Beginner và 0 bài Pro, nên người chọn
+  Beginner hoặc Pro gần như luôn nhận bài Intermediate.
+- **Cách sửa:** gán lại cấp cho 42 bài theo nguyên tắc:
+  - máy, cáp, cô lập, thân người đơn giản là **Beginner**;
+  - bài nặng, đòi kỹ thuật (deadlift, front squat, dip, glute ham raise,
+    hanging leg raise…) là **Pro**.
+  - Nhóm đã duyệt từng dòng, chi tiết trong [CAP_DO_BAI_TAP.md](CAP_DO_BAI_TAP.md).
+  - Sau khi sửa: 38 Beginner, 49 Intermediate, 9 Pro; buổi nào cũng có đủ cả
+    3 cấp.
+  - Cấp độ trong app là **ưu tiên mềm**: đúng cấp 6 điểm, lệch 1 cấp 3 điểm.
+    Gán lại cấp không làm mất bài của ai.
+- **Nhóm cơ bị bỏ sót:** cầu vai (shrug) và đùi trong/ngoài (máy khép, mở
+  đùi) không nằm trong buổi nào nên không bao giờ được gợi ý. Đã cho cầu vai
+  vào Pull, đùi trong/ngoài vào Legs.
+- Sửa ở file gốc `backend/data/gym-ex-dataset.csv` rồi sinh lại asset. Đã
+  kiểm tra chỉ 42 dòng cấp độ thay đổi, dữ liệu thực phẩm giữ nguyên.
+- **Kiểm thử:** người mới tập Push giờ nhận toàn bài Beginner; Pro nhận được
+  bài Pro; shrug và máy khép/mở đùi được gợi ý.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.
