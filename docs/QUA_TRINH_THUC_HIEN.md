@@ -372,7 +372,7 @@ commit và kết quả kiểm thử.
   4. Script `tool/vn_food_recipes.py` cộng dinh dưỡng các nguyên liệu (số
      của Viện Dinh dưỡng) rồi chia cho khối lượng thành phẩm, ra số trên
      100 g. Chạy `--write` để ghi vào `components.csv`.
-- **Kết quả:** thêm 7 dòng, nâng lên **31/40**:
+- **Kết quả đợt đầu:** thêm 7 dòng, nâng lên 31/40:
   - nước mắm cơm tấm 122 kcal, nước chấm bún chả 53 kcal, nước mắm bún thịt
     nướng 98 kcal (trên 100 g);
   - mỡ hành 583 kcal, chả trứng 168 kcal, vỏ bánh xèo và giá 191 kcal
@@ -380,12 +380,27 @@ commit và kết quả kiểm thử.
   - **xôi nếp:** không dùng tỷ lệ nếp ra xôi của chatbot (2,2 lần hoặc 1,62
     lần, hai bên lệch nhau). Lấy "Xôi nếp cẩm" của Viện Dinh dưỡng (235 kcal)
     làm số gần đúng, vì cùng là nếp đồ chín.
-- **Còn lại 9 dòng (7 loại nước dùng, sốt bò kho, gỏi cuốn):**
-  - Nước dùng hầm xương: phần lớn năng lượng đến từ mỡ và chất tan từ xương,
-    công thức không cho biết lượng này. Nếu chỉ cộng gia vị thì ra khoảng 2–3
-    kcal/100 g, thấp hơn thực tế nhiều.
-  - Gỏi cuốn: phần nền gồm cả bánh tráng và nước chấm, cần biết tỷ lệ trong
-    một cuốn.
+- **9 dòng cuối (7 loại nước dùng, sốt bò kho, gỏi cuốn), dùng số tạm:**
+  - Nước dùng hầm xương: phần lớn năng lượng đến từ mỡ và chất tan từ
+    xương, công thức không cho biết lượng này. Nhóm chốt **dùng số tạm**:
+    mọi app đếm calo đều chỉ là ước tính, và nước dùng chiếm phần nhỏ trong
+    tổng calo của tô.
+  - Cách tính: lấy nước dùng xương làm sẵn của USDA (bò 171538: 7 kcal; gà
+    174536: 6 kcal trên 100 g), cộng phần gia vị còn lại trong nồi theo công
+    thức (nước mắm, đường phèn, mắm ruốc, dầu điều, riêu cua, cà chua…).
+  - Kết quả: phở bò 9, phở gà 9, hủ tiếu 11, bánh canh 10, bún bò Huế 19,
+    bún riêu 25, nước nhưn mì Quảng 40 kcal/100 g. Cột nguồn ghi **"ước tính
+    thấp"** vì chưa tính mỡ xương. Nước phở thật có thể cao hơn vài lần.
+  - Sốt bò kho (46 kcal): chưa tính gói xốt 90 g (không rõ thành phần) và
+    mỡ bò tiết ra.
+  - Gỏi cuốn: 1 cuốn = 1 bánh tráng 15 g (khối lượng theo USDA FNDDS
+    2708166) và 15 g tương đậu phộng (**giả định** 1 muỗng canh/cuốn).
+  - Phở bò, phở gà: link ChatGPT đưa (BlueStone, VnExpress) không tìm thấy,
+    nên dẫn bài Điện máy XANH tương ứng. Phần chính là số USDA, gia vị nêm
+    chỉ thêm vài kcal.
+- **Kết quả cuối: 40/40 thành phần có dinh dưỡng.** Còn thiếu khối lượng 1
+  đơn vị (chén cơm, miếng sườn…) và khẩu phần mặc định trong `dishes.csv`:
+  cần cân thực tế.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.
