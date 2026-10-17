@@ -186,6 +186,32 @@ commit và kết quả kiểm thử.
 - **Kiểm thử:** analyze sạch, 98/98 test (thêm test thanh điều hướng, tab
   con, Hôm nay, Quét, Lịch sử tách đôi, xóa lịch sử trong Cài đặt).
 
+### 2026-10-17 · Khóa ký phát hành và tự đăng APK lên GitHub Release
+- **Vì sao:**
+  - Android chỉ cho cài đè một bản cập nhật khi nó được ký bằng **cùng một
+    khóa**.
+  - Trước đây bản release ký bằng khóa debug, mà mỗi máy tính lại sinh một
+    khóa riêng. Nên APK build ở máy này không cài đè được lên bản build ở
+    máy khác hay trên CI, buộc phải gỡ app và mất dữ liệu.
+- **Khóa ký:**
+  - Tạo khóa RSA 2048, hiệu lực 10.000 ngày, alias `optifit`, chứng chỉ
+    `CN=OptiFit, OU=NLCN, O=JimeaVV, C=VN`, SHA-256
+    `e3b83ac4…7c7efb`.
+  - Khóa và mật khẩu lưu **ngoài repo** (`D:\project\nlcn-keys\`, có
+    README hướng dẫn sao lưu); `android/key.properties` bị git bỏ qua.
+  - Gradle dùng khóa này khi có `key.properties`. Máy không có khóa (ví dụ
+    máy bạn cùng nhóm) vẫn build được bằng khóa debug.
+- **GitHub Actions** (`.github/workflows/release.yml`), chạy mỗi lần `main`
+  thay đổi:
+  - lấy khóa từ **GitHub Secrets** và build APK cho từng loại chip;
+  - **kiểm tra chữ ký đúng khóa OptiFit**, sai thì dừng;
+  - đăng lên bản phát hành `latest`, để bạn cùng nhóm và giảng viên tải
+    thẳng về điện thoại;
+  - số hiệu bản (build number) = 100 + số lần chạy, nên bản sau luôn cài
+    đè được bản trước.
+- **Lưu ý:** app cài bằng khóa debug trên điện thoại phải gỡ một lần để
+  chuyển sang khóa mới. Từ đó trở đi, mọi bản đều cài đè được và giữ dữ liệu.
+
 ### 2026-10-17 · Nút Quét đổi kiểu theo giao diện
 - **Yêu cầu:** đổi giao diện trong Cài đặt thì nút Quét cũng đổi kiểu,
   không chỉ đổi màu.
@@ -293,5 +319,5 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   độ lệch mục tiêu).
 - [ ] Progressive Overload dựa vào lịch sử tập; biểu đồ tiến bộ từng bài.
 - [x] Đổi `applicationId` sang `io.github.jimeavv.optifit`.
-- [ ] Tạo keystore release riêng.
+- [x] Tạo keystore release riêng, tự đăng APK lên GitHub Release.
 - [ ] Chạy thử trên điện thoại thật: đổi ngôn ngữ, Nhật ký, ghi thực đơn.
