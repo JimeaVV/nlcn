@@ -5,7 +5,10 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **0.1 (bản nháp, chờ hai người chốt danh sách ở mục 2–3)**
+- `contract_version`: **1.1**
+  - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
+  - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
+    tra khi nạp model (mục 6).
 - Cập nhật: 2026-10-17
 
 ---
@@ -25,7 +28,13 @@ Quy tắc đặt mã: chữ thường, không dấu, nối bằng `_`. Mã dùng
 nhãn trong `labels.csv`, thứ tự trong `dishes.txt` và khoá trong bảng dinh
 dưỡng của app.
 
-Bản nháp gồm **20 món** để bắt đầu; khi dữ liệu đủ thì mở rộng lên 30.
+Gồm **40 món**:
+- món 1–20 là danh sách ban đầu, phần lớn có trong bộ ảnh 30VNFoods;
+- món 21–40 lấy theo bộ ảnh VinaFood21 (chỉ trùng `bo_kho` với danh sách
+  ban đầu).
+
+Món nào chỉ gồm một thứ (bánh tét, bắp nướng…) thì không cần gán nhãn thành
+phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 
 | # | Mã | Tên hiển thị (vi) | Ghi chú |
 |---|---|---|---|
@@ -49,6 +58,26 @@ Bản nháp gồm **20 món** để bắt đầu; khi dữ liệu đủ thì m�
 | 18 | `banh_xeo` | Bánh xèo | |
 | 19 | `goi_cuon` | Gỏi cuốn | |
 | 20 | `xoi` | Xôi | |
+| 21 | `bo_la_lot` | Bò lá lốt | VinaFood21 |
+| 22 | `ha_cao` | Há cảo | VinaFood21 |
+| 23 | `banh_uot` | Bánh ướt | VinaFood21 |
+| 24 | `banh_hoi` | Bánh hỏi | VinaFood21 |
+| 25 | `thit_kho_trung` | Thịt kho trứng | VinaFood21; thành phần `thit_kho`, `trung_kho` |
+| 26 | `banh_can` | Bánh căn | VinaFood21 |
+| 27 | `ca_ri` | Cà ri gà | VinaFood21 |
+| 28 | `bap_nuong` | Bắp nướng | VinaFood21 |
+| 29 | `banh_trang_tron` | Bánh tráng trộn | VinaFood21 |
+| 30 | `hoanh_thanh_nuoc` | Hoành thánh nước | VinaFood21 |
+| 31 | `pha_lau` | Phá lấu | VinaFood21 |
+| 32 | `tau_hu` | Tàu hũ nước đường | VinaFood21 |
+| 33 | `bot_chien` | Bột chiên | VinaFood21 |
+| 34 | `ga_nuong` | Gà nướng | VinaFood21; thành phần `ga` |
+| 35 | `banh_u` | Bánh ú | VinaFood21 |
+| 36 | `banh_tet` | Bánh tét | VinaFood21 |
+| 37 | `goi_ga` | Gỏi gà | VinaFood21 |
+| 38 | `canh_khoai_mo` | Canh khoai mỡ | VinaFood21 |
+| 39 | `canh_kho_qua` | Canh khổ qua | VinaFood21 |
+| 40 | `banh_mi_chao` | Bánh mì chảo | VinaFood21 |
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
@@ -113,6 +142,10 @@ com_tam,trung_op_la,,1
 com_tam,do_chua,30,
 pho_bo,_base,500,        ← nước dùng; dinh dưỡng ghi ở dòng `_base_pho_bo` trong components.csv
 ```
+Thành phần là hỗn hợp (nước chấm, mỡ hành, chả trứng…) được tính từ công
+thức nấu bằng `python tool/vn_food_recipes.py --write`. Script cộng dinh
+dưỡng của từng nguyên liệu rồi chia cho khối lượng thành phẩm.
+
 Kiểm tra hai file bằng `python tool/check_vn_food.py`; thêm `--strict` để
 liệt kê các ô còn trống. Script kiểm tra mã có khớp contract không, số liệu có
 hợp lý không (calo ≈ 4·protein + 4·carb + 9·fat, sai lệch ≤ 25%) và đã có
@@ -171,6 +204,28 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 - `< 0.3`: ẩn, người dùng vẫn tự thêm được.
 
 Món có xác suất cao nhất dưới `0.5` thì app hiện top-3 cho người dùng chọn.
+
+**Cách ghi ngưỡng trong `MODEL_CARD.md`** (từ v1.1): mỗi ngưỡng một dòng
+dạng `khoá: giá trị`, giá trị trong khoảng 0–1. Thiếu dòng nào thì app dùng
+số mặc định ở trên.
+```
+threshold_checked: 0.6
+threshold_ask: 0.3
+threshold_confident_dish: 0.5
+```
+
+**App kiểm tra khi nạp model:**
+- đầu vào phải là `float32 [1, 224, 224, 3]`, mọi đầu ra là float32;
+- hai đầu ra được nhận ra theo **độ dài**, khớp với số dòng của
+  `dishes.txt` và `components.txt`, nên thứ tự đầu ra trong file `.tflite`
+  không quan trọng; vì vậy hai file này phải có số dòng khác nhau;
+- mã trong hai file phải có trong bảng dinh dưỡng (test
+  `food_model_test.dart` tự kiểm tra khi có model);
+- file nào hỏng thì app bỏ qua model và chuyển về chọn món bằng tay.
+
+**Model giả để thử:** `python tool/make_dummy_food_model.py build/dummy_model`
+(cần TensorFlow) tạo một model chưa train, đúng định dạng trên. Đây cũng là
+mẫu cách xuất model. **Không** đưa model giả vào `assets/models/`.
 
 ## 7. Giai đoạn YOLO (tuần 5–7, nâng cấp)
 - Lớp của YOLO = các thành phần trong `components.txt` (có thể chỉ lấy một

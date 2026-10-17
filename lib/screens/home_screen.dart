@@ -4,7 +4,9 @@ import '../core/cyber_theme.dart';
 import '../core/locale_controller.dart';
 import '../l10n/l10n.dart';
 import '../services/dataset_repository.dart';
+import '../services/food_recognizer.dart';
 import '../services/recommendation_service.dart';
+import '../services/tflite_food_recognizer.dart';
 import '../widgets/optifit_bottom_bar.dart';
 import '../widgets/section_tabs.dart';
 import 'diary_screen.dart';
@@ -48,6 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // One cached copy of the packaged dataset serves every screen.
   final datasets = DatasetRepository();
   late final recommendations = RecommendationService(datasets: datasets);
+  // Checks once whether a food model is bundled; its interpreter opens on
+  // the first photo.
+  late final Future<FoodRecognizer> recognizer = loadFoodRecognizer();
 
   void _select(_Section value) {
     setState(() => section = value);
@@ -81,8 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _scan() async {
+    final model = await recognizer;
+    if (!mounted) return;
     final logged = await Navigator.of(context).push<bool>(MaterialPageRoute(
-      builder: (_) => ScanScreen(datasets: datasets),
+      builder: (_) => ScanScreen(datasets: datasets, recognizer: model),
     ));
     if (logged != true || !mounted) return;
     _openFoodTab(_FoodTab.diary);

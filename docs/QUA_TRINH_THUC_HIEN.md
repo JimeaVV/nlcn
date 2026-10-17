@@ -349,6 +349,220 @@ commit và kết quả kiểm thử.
   - ⓘ hiện công thức và BMR/TDEE;
   - danh sách cân nặng gập ở 5 lần ghi.
 
+### 2026-10-17 · Điền dữ liệu dinh dưỡng cho các thành phần món ăn
+- **Mục tiêu:** model chỉ nhận ra trong dĩa có gì; muốn ra calo thì app cần
+  dinh dưỡng trên 100 g của từng thành phần trong `components.csv`.
+- **Nguồn dữ liệu (theo thứ tự ưu tiên):**
+  1. **Viện Dinh dưỡng Quốc gia**, công cụ "Tra cứu giá trị dinh dưỡng thực
+     phẩm" (https://viendinhduong.vn/vi/cong-cu-va-tien-ich/gia-tri-dinh-duong-thuc-pham):
+     853 thực phẩm, mã số theo Bảng thành phần thực phẩm Việt Nam. Ưu tiên vì
+     là số liệu của thực phẩm Việt Nam.
+  2. **USDA FoodData Central** (https://fdc.nal.usda.gov), bộ FNDDS và SR
+     Legacy: dùng cho món đã nấu mà bảng Việt Nam không có (cơm, trứng ốp la,
+     hủ tiếu, cháo, sườn nướng).
+  - Công cụ "Tra cứu giá trị dinh dưỡng của món ăn" của Viện cho số liệu
+    **theo suất**, không ghi khối lượng, nên không quy ra 100 g được; chỉ
+    dùng để tham khảo.
+- **Kết quả:** 24/40 thành phần đã có số. Cột `source` ghi mã của từng số
+  liệu; dòng nào là **gần đúng** thì ghi rõ lý do. Ví dụ "Thịt kho" lấy theo
+  thịt luộc, chưa tính nước kho.
+  - Đơn vị có nguồn: 1 quả trứng ốp la = 55 g, 1 quả trứng luộc = 50 g
+    (USDA FNDDS).
+- **Chưa điền, có lý do:**
+  - **Xôi nếp:** USDA chỉ có nếp luộc (96 kcal/100 g), trong khi xôi hấp
+    đặc hơn nhiều (bảng Việt Nam ghi xôi gấc, xôi đỗ khoảng 230 kcal). Dùng
+    số USDA sẽ sai gần 2,5 lần.
+  - **Nước dùng, nước chấm** (13 dòng `_base_*`), **mỡ hành**, **chả trứng**:
+    không có nguồn cho riêng phần này. Mục phở của USDA đã gồm cả bánh phở
+    nên dùng sẽ bị tính hai lần. Cần tính theo công thức nấu từ nguyên liệu
+    có trong bảng.
+  - **Khối lượng 1 đơn vị** (chén cơm, ổ bánh mì, miếng sườn…) và khẩu phần
+    mặc định trong `dishes.csv`: cần cân thực tế.
+- **Sửa lỗi nhỏ:** `tool/check_vn_food.py --strict` bị lỗi khi in tiếng Việt
+  ra console Windows. Đã ép stdout dùng UTF-8.
+- **Kiểm thử:** `check_vn_food.py` báo OK; tất cả dòng đã điền đều khớp
+  calo ≈ 4·đạm + 4·bột đường + 9·béo; 114/114 test.
+
+### 2026-10-17 · Tính dinh dưỡng cho nước chấm và món phụ theo công thức
+- **Vấn đề:** nước chấm, mỡ hành, chả trứng, vỏ bánh xèo là hỗn hợp nhiều
+  nguyên liệu. Bảng thành phần không có sẵn số cho chúng.
+- **Cách làm:**
+  1. Nhờ hai chatbot (ChatGPT và Gemini) liệt kê công thức nấu: nguyên liệu
+     tính bằng gram, khối lượng thành phẩm, link nguồn. **Không** lấy số calo
+     của chatbot.
+  2. So sánh hai bản:
+     - **Chọn bản ChatGPT** vì mỗi món dẫn về một bài công thức cụ thể và
+       tự ghi rõ chỗ nào là ước tính.
+     - **Không dùng bản Gemini:** nguồn mơ hồ ("Hướng Nghiệp Á Âu", sách
+       không ghi trang). Có số chính xác giả tạo, ví dụ "xương tiết 50–70 g
+       mỡ". Còn ghi Bảng thành phần thực phẩm là nguồn của tỷ lệ nếp ra xôi,
+       trong khi bảng này không có số đó.
+  3. Tự mở bài gốc trên Điện máy XANH để kiểm tra từng công thức:
+     - bánh xèo khớp định lượng (200 g bột gạo, 50 g bột năng, 400 ml nước
+       dừa);
+     - chả trứng: bài gốc ghi **20 g gia vị**, ChatGPT tự nâng lên 52 g. Đã
+       sửa theo bài gốc.
+  4. Script `tool/vn_food_recipes.py` cộng dinh dưỡng các nguyên liệu (số
+     của Viện Dinh dưỡng) rồi chia cho khối lượng thành phẩm, ra số trên
+     100 g. Chạy `--write` để ghi vào `components.csv`.
+- **Kết quả đợt đầu:** thêm 7 dòng, nâng lên 31/40:
+  - nước mắm cơm tấm 122 kcal, nước chấm bún chả 53 kcal, nước mắm bún thịt
+    nướng 98 kcal (trên 100 g);
+  - mỡ hành 583 kcal, chả trứng 168 kcal, vỏ bánh xèo và giá 191 kcal
+    (1 cái khoảng 139 g, tính từ mẻ 6 cái);
+  - **xôi nếp:** không dùng tỷ lệ nếp ra xôi của chatbot (2,2 lần hoặc 1,62
+    lần, hai bên lệch nhau). Lấy "Xôi nếp cẩm" của Viện Dinh dưỡng (235 kcal)
+    làm số gần đúng, vì cùng là nếp đồ chín.
+- **9 dòng cuối (7 loại nước dùng, sốt bò kho, gỏi cuốn), dùng số tạm:**
+  - Nước dùng hầm xương: phần lớn năng lượng đến từ mỡ và chất tan từ
+    xương, công thức không cho biết lượng này. Nhóm chốt **dùng số tạm**:
+    mọi app đếm calo đều chỉ là ước tính, và nước dùng chiếm phần nhỏ trong
+    tổng calo của tô.
+  - Cách tính: lấy nước dùng xương làm sẵn của USDA (bò 171538: 7 kcal; gà
+    174536: 6 kcal trên 100 g), cộng phần gia vị còn lại trong nồi theo công
+    thức (nước mắm, đường phèn, mắm ruốc, dầu điều, riêu cua, cà chua…).
+  - Kết quả: phở bò 9, phở gà 9, hủ tiếu 11, bánh canh 10, bún bò Huế 19,
+    bún riêu 25, nước nhưn mì Quảng 40 kcal/100 g. Cột nguồn ghi **"ước tính
+    thấp"** vì chưa tính mỡ xương. Nước phở thật có thể cao hơn vài lần.
+  - Sốt bò kho (46 kcal): chưa tính gói xốt 90 g (không rõ thành phần) và
+    mỡ bò tiết ra.
+  - Gỏi cuốn: 1 cuốn = 1 bánh tráng 15 g (khối lượng theo USDA FNDDS
+    2708166) và 15 g tương đậu phộng (**giả định** 1 muỗng canh/cuốn).
+  - Phở bò, phở gà: link ChatGPT đưa (BlueStone, VnExpress) không tìm thấy,
+    nên dẫn bài Điện máy XANH tương ứng. Phần chính là số USDA, gia vị nêm
+    chỉ thêm vài kcal.
+- **Kết quả cuối: 40/40 thành phần có dinh dưỡng.**
+- **Khối lượng 1 đơn vị** (nhóm ước lượng):
+
+  | Đơn vị | Khối lượng |
+  |---|---|
+  | 1 chén cơm | 150 g |
+  | 1 ổ bánh mì | 80 g |
+  | 1 miếng chả trứng | 50 g |
+  | 1 khúc cá | 100 g |
+  | 1 miếng đậu hũ | 100 g |
+  | 1 lát chả lụa | 20 g |
+  | 1 cuốn bánh cuốn | 35 g |
+
+  - **Trừ phần không ăn được:** số dinh dưỡng trên 100 g tính cho phần ăn
+    được. Vì vậy:
+    - Sườn: 1 miếng 120 g kể cả xương. Theo USDA 167827 (miếng sườn 209 g
+      có xương cho 157 g thịt) phần ăn được là 75%, nên tính **90 g**.
+    - Tôm: 1 con 20 g cả vỏ, thịt bóc vỏ 10–12 g, nên tính **11 g**.
+    - Cá: 100 g còn da và xương, chưa trừ vì không có tỷ lệ; có thể hơi cao.
+  - Các số này là ước lượng của nhóm. Khi cân thực tế thì cập nhật lại.
+
+### 2026-10-17 · Khẩu phần mặc định của từng món
+- **Mục đích:** model báo dĩa có thành phần nào thì app điền sẵn lượng của
+  thành phần đó theo `dishes.csv`; người dùng chỉnh lại nếu dĩa nhiều hoặc
+  ít hơn.
+- **Cách làm:** nhóm **ước lượng** một suất bình thường ở quán cho cả 94
+  dòng. Đây là đồ án sinh viên nên không cân từng món. Ví dụ:
+  - cơm tấm: 1,5 chén cơm, 1 miếng sườn, 30 g bì, 1 miếng chả, 1 trứng;
+  - phở: 200 g bánh phở, 80 g thịt, 400 g nước dùng;
+  - bánh cuốn: 6 cuốn.
+- **Kiểm tra chéo** với công cụ tra cứu món ăn của Viện Dinh dưỡng (số liệu
+  theo suất):
+
+  | Món | App tính | Viện Dinh dưỡng |
+  |---|---|---|
+  | Phở bò | 480 kcal | 350–450 kcal |
+  | Bún chả | 809 kcal | 520–750 kcal |
+  | Hủ tiếu | 292 kcal | khoảng 450 kcal |
+
+  - Hủ tiếu thấp hơn vì nước dùng đang là ước tính thấp và chưa tính thịt.
+  - Bún chả hơi cao vì thịt nướng (401 kcal/100 g) là loại nửa nạc nửa mỡ.
+  - Nhìn chung cùng cỡ số, đủ dùng cho app ước tính.
+- **Kết quả:** `check_vn_food.py --strict` không còn ô trống: 40/40 thành
+  phần, 94/94 khẩu phần.
+
+### 2026-10-17 · Mở rộng lên 40 món theo bộ ảnh VinaFood21
+- **Phát hiện:** đối chiếu 20 món ban đầu với hai bộ ảnh công khai:
+  - **30VNFoods** (MIT, 30 món): có 13/20 món;
+  - **VinaFood21** (UIT, 21 món, khoảng 14 nghìn ảnh): chỉ trùng `bo_kho`;
+  - không bộ nào có cơm phần, cơm gà, cơm chiên, bún chả, cháo gà; phở chỉ
+    có chung "Phở", không tách bò và gà. Những món này phải tự chụp.
+- **Quyết định:** thêm 20 món còn lại của VinaFood21 (món 21–40 trong
+  contract), để dùng được hết bộ ảnh đó.
+- **Giữ chi phí gán nhãn thấp:**
+  - Món gồm nhiều thứ thì **dùng lại thành phần có sẵn**, không thêm mã thành
+    phần mới. Ví dụ: thịt kho trứng = `thit_kho` + `trung_kho`; gà nướng =
+    `ga`; bánh hỏi = `thit_nuong` + `mo_hanh`.
+  - Món chỉ có một thứ (bánh tét, bắp nướng, tàu hũ, há cảo…) thì để toàn
+    bộ dinh dưỡng ở dòng nền `_base_<món>`. Ảnh VinaFood21 đã có nhãn món,
+    nên không phải gán nhãn thành phần.
+- **Dinh dưỡng của 18 dòng nền mới:**
+  - Lấy món gần nhất trong bảng Viện Dinh dưỡng, ghi rõ "gần đúng":
+    - bánh tét theo bánh chưng (181 kcal/100 g);
+    - bánh ú theo bánh gio (173);
+    - bò lá lốt theo chả lá lốt rán (306);
+    - hoành thánh theo mỳ vằn thắn, tính cả nước (81);
+    - bánh ướt theo bánh cuốn (129);
+    - bánh hỏi theo bún tươi (116);
+    - bắp nướng theo ngô nướng (274).
+  - Lấy theo USDA: há cảo (113, FNDDS 2708708), pate của bánh mì chảo (319,
+    SR 172930).
+  - Tính theo **công thức nhóm ước lượng** bằng `vn_food_recipes.py`:
+    - tàu hũ 90, phá lấu 135, bánh căn 173, bánh tráng trộn 338, bột chiên
+      199 kcal/100 g;
+    - nước cà ri 87, canh khoai mỡ 45, canh khổ qua 43 kcal/100 g;
+    - nước trộn gỏi gà 210 kcal/100 g.
+  - Khối lượng 1 đơn vị và khẩu phần mặc định cũng do nhóm ước lượng, ví dụ
+    1 khoanh bánh tét 100 g, 1 trái bắp 120 g, 6 cái há cảo.
+- **Kết quả:** 40 món, 58 dòng thành phần (24 thành phần + 34 dòng nền), 133
+  dòng khẩu phần; `--strict` báo OK; 114/114 test.
+- Đây là thay đổi contract: số lớp đầu ra `dish` tăng từ 20 lên 40.
+
+### 2026-10-17 · Họp nhóm: chốt contract v1.0
+- Hai thành viên đồng ý danh sách **40 món** và các thành phần hiện có.
+  `contract_version` tăng từ 0.1 lên **1.0**.
+- Từ nay muốn thêm hoặc bớt món, thành phần thì phải cả hai đồng ý và tăng
+  phiên bản contract.
+
+### 2026-10-17 · Gắn sẵn khung chạy model TFLite vào app
+- **Mục tiêu:** làm trước phần ghép model, để tới tuần 4 (mốc ghép model
+  thật) chỉ việc thả file của người B vào `assets/models/` là app chạy.
+  Lỗi kỹ thuật lộ ra từ bây giờ thay vì sát hạn.
+- **Thiết kế:**
+  - `food_model.dart` (Dart thuần, test được trên máy tính):
+    - **tiền xử lý ảnh:** xoay ảnh theo EXIF (ảnh điện thoại thường lưu
+      hướng xoay trong EXIF chứ không xoay điểm ảnh), cắt vuông ở giữa,
+      resize 224×224 bilinear, RGB 0–255 float32;
+    - đọc `dishes.txt`, `components.txt` và các ngưỡng trong
+      `MODEL_CARD.md`;
+    - đổi hai đầu ra thành xác suất theo mã.
+  - `tflite_food_recognizer.dart`:
+    - chạy model bằng `tflite_flutter` 0.12.1 (LiteRT 1.4.0);
+    - giải mã ảnh và chạy model trên **isolate riêng** để giao diện không
+      bị khựng;
+    - interpreter chỉ mở khi chụp tấm đầu tiên, không làm chậm lúc mở app.
+  - App kiểm tra `assets/models/food_v1.tflite`: có thì chạy model, không có
+    hoặc file hỏng thì về chọn món bằng tay như trước.
+  - Ngưỡng tick/hỏi lại không còn cố định trong code mà đi theo từng model.
+    Contract tăng lên **v1.1** để ghi cách viết ngưỡng.
+- **Phát hiện khi thử:**
+  - Model xuất từ Keras có thể đổi thứ tự đầu ra: model giả trả ra
+    `components` trước `dish`. Vì vậy app nhận ra đầu ra theo **độ dài**,
+    không theo vị trí.
+  - Build Android lỗi "Inconsistent JVM Target": `tflite_flutter` biên dịch
+    Java theo bản 11 nhưng Kotlin theo bản 21. Sửa trong
+    `android/build.gradle.kts`, chỉ áp cho plugin này.
+  - APK arm64 tăng từ 19,9 MB lên 39,4 MB do thư viện LiteRT (có cả phần
+    GPU). Có thể tối ưu sau.
+- **Model giả:**
+  - `tool/make_dummy_food_model.py` tạo model **chưa train**, đúng định dạng
+    contract: 40 món, 24 thành phần, float16, 6,8 KB. Đây cũng là mẫu cách
+    xuất model cho người B.
+  - Đã cài thử lên điện thoại thật: chụp ảnh thì app hiện 3 món, mỗi món
+    khoảng 3% (đoán ngẫu nhiên trên 40 món). App báo "model không chắc, hãy
+    chọn món", đúng nhánh xử lý khi độ tin cậy thấp.
+  - Model giả **không** được đưa vào repo.
+- **Kiểm thử:** thêm 13 test, có test tự kiểm tra mã trong model khớp bảng
+  dinh dưỡng khi người B đưa model vào; analyze sạch.
+- **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
+  công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
+  chạy lại.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera

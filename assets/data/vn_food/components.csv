@@ -1,41 +1,59 @@
 code,name_vi,name_en,kcal_per_100g,protein_g,carb_g,fat_g,unit_name_vi,unit_grams,source
-com,Cơm,Cooked rice,,,,,chén,,
-bun,Bún,Rice vermicelli,,,,,,,
-banh_pho,Bánh phở,Pho rice noodles,,,,,,,
-mi,Mì / hủ tiếu / sợi khác,Noodles,,,,,,,
-banh_mi_o,Ổ bánh mì,Baguette,,,,,ổ,,
-xoi_nep,Xôi nếp,Sticky rice,,,,,,,
-suon_nuong,Sườn nướng,Grilled pork chop,,,,,miếng,,
-thit_nuong,Thịt nướng,Grilled pork,,,,,,,
-thit_kho,Thịt kho,Braised pork,,,,,,,
-bi,Bì,Shredded pork skin,,,,,,,
-cha_trung,Chả trứng hấp,Steamed egg meatloaf,,,,,miếng,,
-trung_op_la,Trứng ốp la,Fried egg,,,,,quả,,
-trung_kho,Trứng kho / trứng luộc,Braised or boiled egg,,,,,quả,,
-ga,Thịt gà,Chicken,,,,,,,
-bo,Thịt bò,Beef,,,,,,,
-ca,Cá,Fish,,,,,miếng,,
-tom,Tôm,Shrimp,,,,,con,,
-dau_hu,Đậu hũ,Tofu,,,,,miếng,,
-cha_lua,Chả lụa / giò,Vietnamese pork sausage,,,,,lát,,
-rau_song,Rau sống,Fresh herbs and greens,,,,,,,
-rau_nau,Rau luộc / xào,Cooked vegetables,,,,,,,
-do_chua,Đồ chua,Pickled carrot and daikon,,,,,,,
-dua_leo_ca_chua,Dưa leo / cà chua,Cucumber and tomato,,,,,,,
-mo_hanh,Mỡ hành,Scallion oil,,,,,,,
-_base_com_tam,Nước mắm chấm (cơm tấm),Dipping fish sauce (broken rice),,,,,,,
-_base_com_chien,Dầu và gia vị (cơm chiên),Frying oil and seasoning (fried rice),,,,,,,
-_base_pho_bo,Nước dùng phở bò,Beef pho broth,,,,,,,
-_base_pho_ga,Nước dùng phở gà,Chicken pho broth,,,,,,,
-_base_bun_bo_hue,Nước dùng bún bò Huế,Hue beef noodle broth,,,,,,,
-_base_bun_cha,Nước chấm bún chả,Bun cha dipping sauce,,,,,,,
-_base_bun_rieu,Nước dùng riêu cua,Crab paste broth,,,,,,,
-_base_bun_thit_nuong,Nước mắm chấm (bún thịt nướng),Dipping fish sauce (grilled pork vermicelli),,,,,,,
-_base_hu_tieu,Nước dùng hủ tiếu,Hu tieu broth,,,,,,,
-_base_mi_quang,Nước nhưn mì Quảng,Mi Quang broth,,,,,,,
-_base_banh_canh,Nước dùng bánh canh,Banh canh broth,,,,,,,
-_base_bo_kho,Nước sốt bò kho,Beef stew sauce,,,,,,,
-_base_chao,Cháo trắng,Rice porridge,,,,,,,
-_base_banh_cuon,Bánh cuốn (vỏ và nhân),Steamed rice rolls,,,,,cuốn,,
-_base_banh_xeo,Vỏ bánh xèo và giá,Sizzling pancake crust and bean sprouts,,,,,cái,,
-_base_goi_cuon,Bánh tráng và nước chấm (gỏi cuốn),Rice paper and dipping sauce,,,,,cuốn,,
+com,Cơm,Cooked rice,129,2.67,27.99,0.28,chén,150,"USDA FoodData Central FNDDS 2708408: Rice, white, cooked, no added fat; 1 chén cơm chín = 150 g (nhóm ước lượng)"
+bun,Bún,Rice vermicelli,116,1.7,25.3,0.9,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 1020: Bún, tươi"
+banh_pho,Bánh phở,Pho rice noodles,146,3.2,31.2,0.9,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 1013: Bánh phở"
+mi,Mì / hủ tiếu / sợi khác,Noodles,107,1.78,23.87,0.2,,,"USDA FoodData Central FNDDS 2708356: Rice noodles, cooked; gần đúng cho hủ tiếu, sợi mì Quảng, bánh canh"
+banh_mi_o,Ổ bánh mì,Baguette,250,7.9,52.8,0.8,ổ,80,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 1012: Bánh mỳ; 1 ổ không nhân = 80 g (nhóm ước lượng)"
+xoi_nep,Xôi nếp,Sticky rice,235,5.59,49.21,1.71,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 1024002: Xôi nếp cẩm; gần đúng cho xôi trắng (cùng là nếp đồ chín), USDA chỉ có nếp luộc 96 kcal nên không dùng"
+suon_nuong,Sườn nướng,Grilled pork chop,209,25.6,0,11.1,miếng,90,"USDA FoodData Central SR Legacy 167827: Pork, loin, center loin chops, bone-in, lean and fat, broiled; gần đúng, chưa tính nước ướp đường mật ong; 1 miếng = 120 g kể cả xương (nhóm ước lượng), phần ăn được 75% theo USDA 167827 (chop 209 g có xương cho 157 g thịt) nên tính 90 g"
+thit_nuong,Thịt nướng,Grilled pork,401,20.5,0.56,35.2,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7086: Thịt lợn nửa nạc nửa mỡ, nướng"
+thit_kho,Thịt kho,Braised pork,220,13.98,0,18.22,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7018002: Thịt lợn nửa nạc nửa mỡ, luộc; gần đúng, chưa tính nước kho"
+bi,Bì,Shredded pork skin,118,23.3,0,2.7,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7031: Bì lợn, tươi; gần đúng, chưa tính thính và thịt trộn"
+cha_trung,Chả trứng hấp,Steamed egg meatloaf,167.7,10.95,4.8,11.63,miếng,50,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-lam-cha-trung-ngon-nhu-ngoai-hang-com-tam-02028, thành phẩm ước tính 540 g; nguyên liệu theo Viện Dinh dưỡng mã 9012, 7018, 4125, 2015, 4037, 6002, 13017, 13005, 13004; cách 2; thịt băm tính là nửa nạc nửa mỡ; mộc nhĩ và bún ngâm hút nước; 1 miếng = 50 g (nhóm ước lượng)"
+trung_op_la,Trứng ốp la,Fried egg,192,11.56,0.9,15.81,quả,55,"USDA FoodData Central FNDDS 2707158: Egg, whole, fried with oil; 1 quả = 55 g theo cùng nguồn"
+trung_kho,Trứng kho / trứng luộc,Braised or boiled egg,132,12.79,1.89,8.17,quả,50,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 9012: Trứng gà công nghiệp; 1 quả = 50 g theo USDA FNDDS 2707154 (Egg, whole, boiled)"
+ga,Thịt gà,Chicken,190,25,1.24,9.44,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7088002: Thịt gà công nghiệp, đùi, luộc"
+bo,Thịt bò,Beef,182,32.46,0,5.75,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7094003: Thịt bò, bắp, hấp"
+ca,Cá,Fish,133,24.34,0,3.98,miếng,100,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 8020002: Cá nục, luộc; gần đúng, mỗi loại cá và cách nấu khác nhau; 1 khúc = 100 g (nhóm ước lượng), còn da và xương nên có thể cao hơn thực tế"
+tom,Tôm,Shrimp,82,17.6,0.9,0.9,con,11,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 8051002: Tôm biển, luộc; 1 con cỡ vừa = 20 g cả vỏ, 10-12 g thịt bóc vỏ (nhóm ước lượng), tính 11 g"
+dau_hu,Đậu hũ,Tofu,97,10.9,1.1,5.4,miếng,100,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 3025: Đậu phụ, sống; gần đúng, đậu chiên sẽ nhiều béo hơn; 1 miếng = 100 g (nhóm ước lượng)"
+cha_lua,Chả lụa / giò,Vietnamese pork sausage,205,16.9,1.8,15,lát,20,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7069: Giò lụa, chín; 1 lát = 20 g (nhóm ước lượng)"
+rau_song,Rau sống,Fresh herbs and greens,18,1.5,2.43,0.27,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 4090: Rau sà lách, tươi; gần đúng cho đĩa rau sống"
+rau_nau,Rau luộc / xào,Cooked vegetables,27,3.27,3.57,0,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 4083002: Rau muống, luộc; gần đúng, rau xào có thêm dầu"
+do_chua,Đồ chua,Pickled carrot and daikon,35.5,1.5,7.07,0.13,,,"Trung bình 1:1 của Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 4007 và 4021: Cà rốt tươi, Củ cải trắng tươi; chưa tính đường trong nước ngâm"
+dua_leo_ca_chua,Dưa leo / cà chua,Cucumber and tomato,21,0.7,4.19,0.16,,,"Trung bình 1:1 của Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 4027 và 4005: Dưa chuột tươi, Cà chua tươi"
+mo_hanh,Mỡ hành,Scallion oil,582.53,0.46,2.54,63.41,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/2-cach-lam-mo-hanh-tuoi-xanh-thom-ngon-beo-ngay-ngot-vi-don-06904, thành phẩm ước tính 283 g; nguyên liệu theo Viện Dinh dưỡng mã 4038, 6002, 13005, 12014; bản không tóp mỡ"
+_base_com_tam,Nước mắm chấm (cơm tấm),Dipping fish sauce (broken rice),122.37,1.53,28.98,0.06,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-lam-nuoc-mam-an-com-tam-chua-ngot-ngon-nhu-ngoai-hang-13947, thành phẩm ước tính 975 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 12014, 14006, 5046, 13039; bỏ 60 g thơm sau khi nấu"
+_base_com_chien,Dầu và gia vị (cơm chiên),Frying oil and seasoning (fried rice),897,0,0,99.7,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 6002: Dầu thảo mộc; phần nền tính như dầu ăn"
+_base_pho_bo,Nước dùng phở bò,Beef pho broth,9.31,1.16,0.6,0.22,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-nau-pho-bo-ha-noi-chuan-vi-nuoc-dung-ngot-thanh-don-gian-22475, thành phẩm ước tính 2800 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 12014, 13005 và USDA FoodData Central 171538; ước tính thấp: nước dùng xương bò USDA cộng gia vị nêm"
+_base_pho_ga,Nước dùng phở gà,Chicken pho broth,8.62,0.69,1.05,0.21,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-nau-pho-ga-ha-noi-thom-ngon-chuan-vi-truyen-thong-cuc-23936, thành phẩm ước tính 3100 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 12014, 13005 và USDA FoodData Central 174536; ước tính thấp: nước dùng gà USDA cộng gia vị nêm"
+_base_bun_bo_hue,Nước dùng bún bò Huế,Hue beef noodle broth,18.84,1.38,1.19,0.92,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-nau-bun-bo-hue-dam-da-dung-vi-cho-bua-sang-ngay-tet-00541, thành phẩm ước tính 3600 g; nguyên liệu theo Viện Dinh dưỡng mã 13011, 13017, 6002, 13039, 12014, 13005, 4103, 4037 và USDA FoodData Central 171538; ước tính thấp: nước dùng xương USDA cộng mắm ruốc, dầu điều, gia vị"
+_base_bun_cha,Nước chấm bún chả,Bun cha dipping sauce,53.17,0.9,11.91,0.02,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-lam-nuoc-cham-bun-cha-thom-lung-an-sieu-ngon-don-gian-14271, thành phẩm ước tính 1055 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 13034, 12014, 4033, 4007, 4103, 13039; gồm đu đủ và cà rốt ngâm"
+_base_bun_rieu,Nước dùng riêu cua,Crab paste broth,25.03,1.94,1.75,1.11,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-nau-bun-rieu-cua-dong-ngon-kho-cuong-an-la-ghien-ngay-15299, thành phẩm ước tính 4000 g; nguyên liệu theo Viện Dinh dưỡng mã 8034, 9012, 4005, 4037, 4103, 13011, 13017, 12014, 13005, 6002 và USDA FoodData Central 171538; ước tính thấp: nước dùng xương USDA cộng riêu cua (tính như cua đồng), trứng, cà chua, gia vị"
+_base_bun_thit_nuong,Nước mắm chấm (bún thịt nướng),Dipping fish sauce (grilled pork vermicelli),97.54,1.65,22.64,0.04,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-lam-nuoc-mam-an-bun-thit-nuong-chua-ngot-ngon-nhu-ngoai-13905, thành phẩm ước tính 500 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 12014, 5003, 4103, 13039"
+_base_hu_tieu,Nước dùng hủ tiếu,Hu tieu broth,11.27,1.17,1.09,0.21,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-nau-hu-tieu-mi-nguoi-hoa-thom-ngon-dam-da-la-mieng-don-08607, thành phẩm ước tính 2950 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 12014, 13005 và USDA FoodData Central 171538; ước tính thấp: nước dùng xương USDA cộng gia vị nêm"
+_base_mi_quang,Nước nhưn mì Quảng,Mi Quang broth,39.49,0.78,5.54,1.61,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-nau-mi-quang-ga-mien-trung-dung-vi-thom-ngon-dam-da-cho-00046, thành phẩm ước tính 1075 g; nguyên liệu theo Viện Dinh dưỡng mã 14006, 6002, 4037, 4039, 13006, 13017, 12014, 13005 và USDA FoodData Central 174536; ước tính thấp: nước gà USDA cộng nước dừa, dầu điều, hành nén, gia vị"
+_base_banh_canh,Nước dùng bánh canh,Banh canh broth,10.01,1.17,0.77,0.21,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/huong-dan-chi-tiet-cach-nau-banh-canh-thom-ngon-tai-nha-01025, thành phẩm ước tính 2150 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 12014, 13005 và USDA FoodData Central 171538; ước tính thấp: nước dùng xương USDA cộng gia vị nêm"
+_base_bo_kho,Nước sốt bò kho,Beef stew sauce,45.58,0.57,6.56,1.93,,,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-nau-bo-kho-banh-mi-dam-da-doi-vi-cho-nhung-ngay-chan-com-010087, thành phẩm ước tính 1375 g; nguyên liệu theo Viện Dinh dưỡng mã 14006, 6002, 4037, 13017, 13046; ước tính thấp: chưa tính gói xốt bò kho 90 g và mỡ bò tiết ra"
+_base_chao,Cháo trắng,Rice porridge,39,0.8,8.4,0.08,,,USDA FoodData Central FNDDS 2708418: Congee
+_base_banh_cuon,Bánh cuốn (vỏ và nhân),Steamed rice rolls,129,3,17.4,5.3,cuốn,35,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 15009: Bánh cuốn; 1 cuốn nhân thịt = 35 g (nhóm ước lượng)"
+_base_banh_xeo,Vỏ bánh xèo và giá,Sizzling pancake crust and bean sprouts,191.21,3.85,30.07,6.2,cái,139,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/cach-lam-banh-xeo-mien-nam-bang-chao-chong-dinh-ngon-gion-22298, thành phẩm ước tính 835 g; nguyên liệu theo Viện Dinh dưỡng mã 1017, 13046, 14006, 13006, 13005, 4038, 4036, 6002; coi như dầu tráng bám hết vào bánh; mẻ khoảng 6 cái"
+_base_goi_cuon,Bánh tráng và nước chấm (gỏi cuốn),Rice paper and dipping sauce,265.5,4.4,46.42,6.94,cuốn,30,"Tính theo công thức https://www.dienmayxanh.com/vao-bep/tong-hop-4-loai-nuoc-cham-goi-cuon-thom-ngon-dam-da-de-thuc-02901, thành phẩm ước tính 30 g; nguyên liệu theo Viện Dinh dưỡng mã 1010, 13020, 3017, 6002, 4103, 12014, 13039; 1 cuốn = 1 bánh tráng 15 g (USDA FNDDS 2708166) và 15 g tương đậu phộng (giả định 1 muỗng canh)"
+_base_bo_la_lot,Bò lá lốt (cuốn),Beef in betel leaf rolls,306,20,2.3,24.8,cuốn,20,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7091: Chả lá lốt, rán; gần đúng, bản gốc là thịt lợn; 1 cuốn = 20 g (nhóm ước lượng)"
+_base_ha_cao,Há cảo,Dumplings,113,6.9,11.07,4.6,cái,25,"USDA FoodData Central FNDDS 2708708: Wonton, dumpling or pot sticker, steamed; 1 cái = 25 g (nhóm ước lượng)"
+_base_banh_uot,Bánh ướt,Steamed rice sheets,129,3,17.4,5.3,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 15009: Bánh cuốn; gần đúng, bánh ướt là bánh cuốn không nhân"
+_base_banh_hoi,Bánh hỏi,Woven rice vermicelli,116,1.7,25.3,0.9,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 1020: Bún, tươi; gần đúng, cùng là sợi gạo"
+_base_banh_can,Bánh căn,Mini rice pancakes,173.09,4.66,30.11,3.79,cái,23,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 280 g; nguyên liệu theo Viện Dinh dưỡng mã 1017, 9007, 6002, 4038; mẻ khoảng 12 cái, mỗi cái có trứng cút"
+_base_ca_ri,Nước cà ri,Curry sauce,86.61,0.86,10.75,4.47,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 1300 g; nguyên liệu theo Viện Dinh dưỡng mã 14006, 3001, 2008002, 6002, 13006, 12014, 13017, 4037; nước cà ri có khoai lang, chưa tính thịt gà; cùi dừa thay cho nước cốt dừa, bột nghệ thay cho bột cà ri"
+_base_bap_nuong,Bắp nướng,Grilled corn,274,5.62,55.89,3.15,trái,120,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 1007014: Ngô tươi, tẻ, nướng; 1 trái = 120 g phần hạt (nhóm ước lượng)"
+_base_banh_trang_tron,Bánh tráng trộn,Rice paper salad,338.08,10.47,40.56,14.9,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 120 g; nguyên liệu theo Viện Dinh dưỡng mã 1010, 9007, 3017, 6002, 8053, 4075, 5046, 12014; bánh tráng, trứng cút, đậu phộng, sa tế, tôm khô, rau răm"
+_base_hoanh_thanh_nuoc,Hoành thánh nước (cả tô),Wonton soup (whole bowl),81,2.6,10.58,3.1,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 15060: Mỳ vằn thắn; tính cả nước"
+_base_pha_lau,Phá lấu,Offal stew,135.28,7.42,5.14,9.45,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 750 g; nguyên liệu theo Viện Dinh dưỡng mã 7034002, 7046, 14006, 3001, 6002, 12014, 13017, 4103; lòng heo hầm nước dừa; cùi dừa thay cho nước cốt dừa"
+_base_tau_hu,Tàu hũ nước đường,Sweet tofu pudding,89.62,2.93,17.15,0.93,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 260 g; nguyên liệu theo Viện Dinh dưỡng mã 3033, 12014, 13003; tào phớ với nước đường gừng"
+_base_bot_chien,Bột chiên,Fried rice flour cake,199.14,4.14,30.15,6.91,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 560 g; nguyên liệu theo Viện Dinh dưỡng mã 1017, 13046, 9012, 6002, 4038; bột hấp cắt miếng chiên với trứng"
+_base_banh_u,Bánh ú,Pyramid rice dumpling,173,2,40.44,0.4,cái,80,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 15016: Bánh gio; gần đúng, bánh ú nước tro; 1 cái = 80 g (nhóm ước lượng)"
+_base_banh_tet,Bánh tét,Sticky rice cake,181,4.3,31.6,4.2,khoanh,100,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 15006: Bánh chưng; gần đúng, cùng nếp, đậu xanh, thịt; 1 khoanh = 100 g (nhóm ước lượng)"
+_base_goi_ga,Nước trộn gỏi,Salad dressing,210,2.14,30.67,8.75,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 115 g; nguyên liệu theo Viện Dinh dưỡng mã 13017, 12014, 5003, 4103, 13039, 6002; nước trộn: nước mắm, đường, chanh, tỏi ớt, dầu hành phi"
+_base_canh_khoai_mo,Canh khoai mỡ,Purple yam soup,45.08,1.64,5.96,1.64,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 1350 g; nguyên liệu theo Viện Dinh dưỡng mã 2010, 7018, 4038, 13017; khoai môn thay cho khoai mỡ, có thịt băm"
+_base_canh_kho_qua,Canh khổ qua nhồi thịt,Stuffed bitter melon soup,42.69,2.49,1.67,2.89,,,"Tính theo công thức nhóm ước lượng, thành phẩm ước tính 1500 g; nguyên liệu theo Viện Dinh dưỡng mã 4055002, 7018, 4125, 2015, 13017; khổ qua nhồi thịt băm, mộc nhĩ, miến"
+_base_banh_mi_chao,Pate (bánh mì chảo),Pate (pan-served banh mi),319,14.2,1.5,28,,,"USDA FoodData Central SR Legacy 172930: Pate, liver, not specified, canned; phần nền tính như pate, chưa tính nước sốt"

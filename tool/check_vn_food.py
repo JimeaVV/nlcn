@@ -53,6 +53,8 @@ def number(value):
 
 
 def main():
+    # Windows consoles default to a legacy code page that has no Vietnamese.
+    sys.stdout.reconfigure(encoding='utf-8')
     strict = '--strict' in sys.argv
     errors, missing = [], []
     dishes = contract_codes(2)

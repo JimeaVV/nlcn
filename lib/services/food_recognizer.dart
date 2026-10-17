@@ -1,7 +1,11 @@
 /// What a recognizer saw in one photo, following docs/MODEL_CONTRACT.md:
 /// a softmax over dishes and an independent probability per component.
 class FoodRecognition {
-  const FoodRecognition({this.dishes = const {}, this.components = const {}});
+  const FoodRecognition({
+    this.dishes = const {},
+    this.components = const {},
+    this.thresholds = RecognitionThresholds.contract,
+  });
 
   static const empty = FoodRecognition();
 
@@ -10,6 +14,9 @@ class FoodRecognition {
 
   /// Component code → probability between 0 and 1.
   final Map<String, double> components;
+
+  /// How the screen treats these probabilities; tuned per model.
+  final RecognitionThresholds thresholds;
 
   bool get isEmpty => dishes.isEmpty && components.isEmpty;
 
@@ -20,16 +27,25 @@ class FoodRecognition {
           .toList(growable: false);
 }
 
-/// Thresholds from the contract for showing components.
-abstract final class RecognitionThresholds {
+/// Thresholds for showing components. The contract sets the defaults; a
+/// model's MODEL_CARD.md may tune them on the validation set.
+class RecognitionThresholds {
+  const RecognitionThresholds({
+    this.checked = 0.6,
+    this.ask = 0.3,
+    this.confidentDish = 0.5,
+  });
+
+  static const contract = RecognitionThresholds();
+
   /// At or above: ticked automatically.
-  static const checked = 0.6;
+  final double checked;
 
   /// At or above (and below [checked]): shown unticked with a question.
-  static const ask = 0.3;
+  final double ask;
 
   /// Below this for the best dish: the user picks from the top three.
-  static const confidentDish = 0.5;
+  final double confidentDish;
 }
 
 /// Turns a photo into dish and component probabilities.
