@@ -53,6 +53,9 @@ class MealScreenState extends State<MealScreen> {
 
   /// The plan already written to the diary, so it is not logged twice.
   DietRecommendation? _loggedResult;
+
+  /// The plan already saved, so a second tap cannot store a duplicate.
+  DietRecommendation? _savedResult;
   int _loadVersion = 0;
   int _generation = 0;
 
@@ -148,10 +151,11 @@ class MealScreenState extends State<MealScreen> {
 
   Future<void> _save() async {
     final result = _result;
-    if (result == null || _saving) return;
+    if (result == null || _saving || identical(result, _savedResult)) return;
     setState(() => _saving = true);
     try {
       await _database.saveMealPlan(result);
+      if (mounted) setState(() => _savedResult = result);
       widget.onPlanSaved?.call();
       if (mounted) _message(context.l10n.mealSaved);
     } catch (_) {
@@ -304,9 +308,17 @@ class MealScreenState extends State<MealScreen> {
             MealResult(recommendation: _result!),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: _saving ? null : _save,
-              icon: const Icon(Icons.bookmark_add_outlined),
-              label: Text(_saving ? l10n.savingButton : l10n.mealSave),
+              key: const ValueKey('meal-save-plan'),
+              onPressed:
+                  _saving || identical(_result, _savedResult) ? null : _save,
+              icon: Icon(identical(_result, _savedResult)
+                  ? Icons.check_rounded
+                  : Icons.bookmark_add_outlined),
+              label: Text(identical(_result, _savedResult)
+                  ? l10n.planAlreadySaved
+                  : _saving
+                      ? l10n.savingButton
+                      : l10n.mealSave),
             ),
             if (_canLog(_result!)) ...[
               const SizedBox(height: 8),

@@ -161,7 +161,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Chọn một thực phẩm trong danh sách.'), findsOneWidget);
 
-    await tester.enterText(find.byKey(const ValueKey('diary-food')), 'oa');
+    await tester.enterText(find.byKey(const ValueKey('diary-food')), 'oats');
     await tester.pumpAndSettle();
     await tester.tap(find.text('oats').last);
     await tester.pumpAndSettle();
@@ -178,6 +178,55 @@ void main() {
     expect(find.text('Còn 1.844 kcal so với mục tiêu'), findsOneWidget);
     expect(find.text('40 g • 156 kcal • 6,8 g protein'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Vietnamese foods are found without diacritics', (tester) async {
+    final database = _Database();
+    await _mount(tester, database);
+    await tester.tap(find.byKey(const ValueKey('diary-add')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+        find.byKey(const ValueKey('diary-food')), 'trung op la');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Trứng ốp la').last);
+    await tester.pumpAndSettle();
+    // One egg is the natural unit, so the weight starts at 55 g.
+    expect(
+        tester
+            .widget<TextFormField>(find.byKey(const ValueKey('diary-grams')))
+            .controller!
+            .text,
+        '55');
+    await tester.tap(find.byKey(const ValueKey('diary-save')));
+    await tester.pumpAndSettle();
+
+    final saved = database.entries.single;
+    expect(saved.name, 'Trứng ốp la');
+    expect(saved.grams, 55);
+    expect(saved.calories, closeTo(105.6, 0.01));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('switching to custom entry drops the earlier food pick',
+      (tester) async {
+    final database = _Database();
+    await _mount(tester, database);
+    await tester.tap(find.byKey(const ValueKey('diary-add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('diary-food')), 'oats');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('oats').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Tự nhập'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Từ dữ liệu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('diary-save')));
+    await tester.pumpAndSettle();
+    expect(database.entries, isEmpty);
+    expect(find.text('Chọn một thực phẩm trong danh sách.'), findsOneWidget);
   });
 
   testWidgets('a custom dish is logged by calories and removal can be undone',

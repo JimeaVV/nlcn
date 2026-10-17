@@ -212,7 +212,7 @@ class _NutritionCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             proteinTarget == null
-                ? '${number(eaten.protein, decimals: 1)} g protein'
+                ? l10n.proteinGrams(number(eaten.protein, decimals: 1))
                 : l10n.diaryProteinProgress(number(eaten.protein, decimals: 1),
                     number(proteinTarget, decimals: 1)),
           ),

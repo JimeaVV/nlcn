@@ -316,5 +316,11 @@
   "showFewerWeights": "Show less",
   "goalLoseShort": "Lose",
   "goalMaintainShort": "Maintain",
-  "goalGainShort": "Gain"
+  "goalGainShort": "Gain",
+  "processingButton": "PROCESSING...",
+  "planAlreadySaved": "SAVED",
+  "proteinGrams": "{value} g protein",
+  "kcalProteinLine": "{kcal} kcal • P {protein} g",
+  "mealMacroLine": "{kcal} kcal • P {protein} g • C {carbs} g • F {fat} g",
+  "repsRange": "Enter 0 to 30"
 }

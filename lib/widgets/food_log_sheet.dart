@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
+import '../core/number_input.dart';
+import '../core/text_search.dart';
 
 /// Picks a dataset food by weight, or takes a custom dish by its nutrition,
 /// and returns the resulting [FoodLogEntry] without saving it.
@@ -53,15 +55,14 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
   }
 
   double? _parse(TextEditingController controller) =>
-      double.tryParse(controller.text.trim().replaceAll(',', '.'));
+      parseDecimal(controller.text);
 
   String? _range(String? value, double max, String error,
       {bool optional = false, bool allowZero = true}) {
     final text = value?.trim() ?? '';
     if (optional && text.isEmpty) return null;
-    final number = double.tryParse(text.replaceAll(',', '.'));
+    final number = parseDecimal(text);
     if (number == null ||
-        !number.isFinite ||
         number > max ||
         (allowZero ? number < 0 : number <= 0)) {
       return error;
@@ -139,8 +140,12 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
                     ButtonSegment(value: true, label: Text(l10n.diaryCustom)),
                   ],
                   selected: {_custom},
-                  onSelectionChanged: (value) =>
-                      setState(() => _custom = value.single),
+                  onSelectionChanged: (value) => setState(() {
+                    _custom = value.single;
+                    // The search field comes back empty, so the earlier
+                    // pick must not be saved unseen.
+                    _food = null;
+                  }),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -172,12 +177,18 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
         Autocomplete<Map<String, dynamic>>(
           displayStringForOption: (food) => '${food['name']}',
           optionsBuilder: (value) {
-            final query = value.text.trim().toLowerCase();
-            if (query.isEmpty) return const [];
-            return widget.foods.where(
-                (food) => '${food['name']}'.toLowerCase().contains(query));
+            if (value.text.trim().isEmpty) return const [];
+            return widget.foods.where((food) => matchesSearch(
+                value.text, ['${food['name']}', '${food['search'] ?? ''}']));
           },
-          onSelected: (food) => setState(() => _food = food),
+          onSelected: (food) => setState(() {
+            _food = food;
+            // Start at one natural unit (a bowl of rice, one egg) if known.
+            final unit = food['unit_grams'];
+            if (unit is num) {
+              _grams.text = context.formatMeasurement(unit.toDouble());
+            }
+          }),
           fieldViewBuilder: (context, controller, focusNode, onSubmitted) =>
               TextFormField(
             key: const ValueKey('diary-food'),

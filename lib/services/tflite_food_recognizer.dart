@@ -39,6 +39,11 @@ class TfliteFoodRecognizer implements FoodRecognizer {
   final PhotoPreparer _prepare;
   Future<ModelRunner>? _runner;
 
+  /// The previous photo's run. tflite_flutter's isolate interpreter returns
+  /// at once with zeroed outputs while it is busy, so a photo taken before
+  /// the last one finished would silently score 0 everywhere.
+  Future<void> _previousRun = Future.value();
+
   @override
   bool get isAvailable => true;
 
@@ -52,7 +57,9 @@ class TfliteFoodRecognizer implements FoodRecognizer {
       _runner = null; // Try again on the next photo.
       rethrow;
     }
-    return interpretOutputs(await runner.run(input), labels);
+    final outputs = _previousRun.then((_) => runner.run(input));
+    _previousRun = outputs.then<void>((_) {}, onError: (_) {});
+    return interpretOutputs(await outputs, labels);
   }
 }
 

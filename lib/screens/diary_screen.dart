@@ -11,13 +11,15 @@ import '../widgets/cyber_card.dart';
 import '../widgets/error_box.dart';
 import '../widgets/food_log_sheet.dart';
 import '../widgets/neon_button.dart';
+import '../services/vn_food_repository.dart';
 
 /// What the user ate on one day, compared with the saved profile targets.
 class DiaryScreen extends StatefulWidget {
-  const DiaryScreen({super.key, this.database, this.datasets});
+  const DiaryScreen({super.key, this.database, this.datasets, this.vnFood});
 
   final DatabaseService? database;
   final DatasetRepository? datasets;
+  final VnFoodRepository? vnFood;
 
   @override
   State<DiaryScreen> createState() => DiaryScreenState();
@@ -26,6 +28,7 @@ class DiaryScreen extends StatefulWidget {
 class DiaryScreenState extends State<DiaryScreen> {
   late final DatasetRepository _datasets =
       widget.datasets ?? DatasetRepository();
+  late final VnFoodRepository _vnFood = widget.vnFood ?? VnFoodRepository();
   DatabaseService get _database => widget.database ?? DatabaseService.instance;
 
   DateTime _day = _today();
@@ -90,12 +93,20 @@ class DiaryScreenState extends State<DiaryScreen> {
 
   Future<void> _addFood() async {
     if (_saving) return;
-    List<Map<String, dynamic>> foods;
+    final language = Localizations.localeOf(context).languageCode;
+    // Vietnamese dishes and components first, then the general food list;
+    // either source failing still leaves the other and custom entry.
+    final foods = <Map<String, dynamic>>[];
     try {
-      foods = (await _datasets.load()).foods;
-    } catch (_) {
-      foods = const [];
-    }
+      final vn = await _vnFood.load();
+      foods.addAll([
+        for (final component in vn.components.values)
+          if (component.hasNutrition) component.toFoodMap(language),
+      ]);
+    } catch (_) {}
+    try {
+      foods.addAll((await _datasets.load()).foods);
+    } catch (_) {}
     if (!mounted) return;
     final entry = await showModalBottomSheet<FoodLogEntry>(
       context: context,
@@ -261,7 +272,7 @@ class _Summary extends StatelessWidget {
           if (calorieTarget == null || proteinTarget == null) ...[
             Text('${number(totals.calories)} kcal',
                 style: Theme.of(context).textTheme.titleLarge),
-            Text('${number(totals.protein, decimals: 1)} g protein'),
+            Text(l10n.proteinGrams(number(totals.protein, decimals: 1))),
             const SizedBox(height: 8),
             Text(l10n.diaryNoTarget,
                 style: TextStyle(color: CyberColors.muted)),
@@ -373,8 +384,8 @@ class _MealSection extends StatelessWidget {
                 ),
               ),
             Text(
-              '${number(totals.calories)} kcal • '
-              'P ${number(totals.protein, decimals: 1)} g',
+              l10n.kcalProteinLine(
+                  number(totals.calories), number(totals.protein, decimals: 1)),
               style: TextStyle(color: CyberColors.muted),
             ),
           ],

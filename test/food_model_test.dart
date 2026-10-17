@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
@@ -38,6 +39,15 @@ class _FakeRunner implements ModelRunner {
     lastInput = input;
     return outputs;
   }
+}
+
+class _SlowRunner implements ModelRunner {
+  _SlowRunner(this.body);
+
+  final Future<List<Float32List>> Function() body;
+
+  @override
+  Future<List<Float32List>> run(Float32List input) => body();
 }
 
 void main() {
@@ -182,6 +192,29 @@ void main() {
       expect(identical(runner.lastInput, input), isTrue);
       expect(result.dishes['com_tam'], closeTo(0.7, 1e-6));
       expect(result.thresholds.checked, 0.9);
+    });
+
+    test('runs photos one after another, never overlapping', () async {
+      var running = 0, peak = 0;
+      final runner = _SlowRunner(() async {
+        peak = math.max(peak, ++running);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        running--;
+        return [
+          Float32List.fromList([0.6, 0.4]),
+          Float32List(3)
+        ];
+      });
+      final recognizer = TfliteFoodRecognizer(
+        labels: labels,
+        openRunner: () async => runner,
+        prepare: (_) async => Float32List(0),
+      );
+      final results = await Future.wait(
+          [for (var i = 0; i < 3; i++) recognizer.recognize('$i.jpg')]);
+      expect(peak, 1);
+      expect(results.map((r) => r.dishes['com_tam']),
+          everyElement(closeTo(0.6, 1e-6)));
     });
 
     test('retries opening the model after a failure', () async {

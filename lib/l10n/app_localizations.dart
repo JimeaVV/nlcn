@@ -1801,7 +1801,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanLowConfidence.
   ///
   /// In vi, this message translates to:
-  /// **'Model chưa chắc chắn, hãy chọn đúng món.'**
+  /// **'Ứng dụng chưa chắc chắn, hãy chọn đúng món.'**
   String get scanLowConfidence;
 
   /// No description provided for @scanComponentsTitle.
@@ -2001,6 +2001,42 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tăng cân'**
   String get goalGainShort;
+
+  /// No description provided for @processingButton.
+  ///
+  /// In vi, this message translates to:
+  /// **'ĐANG XỬ LÝ...'**
+  String get processingButton;
+
+  /// No description provided for @planAlreadySaved.
+  ///
+  /// In vi, this message translates to:
+  /// **'ĐÃ LƯU'**
+  String get planAlreadySaved;
+
+  /// No description provided for @proteinGrams.
+  ///
+  /// In vi, this message translates to:
+  /// **'{value} g protein'**
+  String proteinGrams(String value);
+
+  /// No description provided for @kcalProteinLine.
+  ///
+  /// In vi, this message translates to:
+  /// **'{kcal} kcal • protein {protein} g'**
+  String kcalProteinLine(String kcal, String protein);
+
+  /// No description provided for @mealMacroLine.
+  ///
+  /// In vi, this message translates to:
+  /// **'{kcal} kcal • protein {protein} g • tinh bột {carbs} g • béo {fat} g'**
+  String mealMacroLine(String kcal, String protein, String carbs, String fat);
+
+  /// No description provided for @repsRange.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập từ 0 đến 30'**
+  String get repsRange;
 }
 
 class _AppLocalizationsDelegate

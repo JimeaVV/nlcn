@@ -559,6 +559,47 @@ commit và kết quả kiểm thử.
   - Model giả **không** được đưa vào repo.
 - **Kiểm thử:** thêm 13 test, có test tự kiểm tra mã trong model khớp bảng
   dinh dưỡng khi người B đưa model vào; analyze sạch.
+
+### 2026-10-18 · Rà soát toàn app và sửa đợt 1
+- **Cách rà soát:** chia app làm 3 mảng, mỗi mảng giao một agent chỉ đọc
+  code:
+  - thuật toán gợi ý (Branch & Bound, bài tập, Progressive Overload);
+  - giao diện;
+  - dữ liệu, lưu trữ và luồng quét món.
+  - Kết quả: 36 đề xuất, mỗi đề xuất có vị trí code và mức công sức.
+  - Mọi lỗi được kiểm chứng lại trực tiếp trong code trước khi sửa.
+  - Nhóm thành 3 đợt: đợt 1 sửa lỗi người dùng gặp, đợt 2 nâng cấp thuật
+    toán, đợt 3 kỹ thuật.
+- **Đợt 1 đã sửa:**
+  1. **Lưu hồ sơ không còn tự ghi cân nặng.** Trước đây chỉ đổi mục tiêu
+     cũng ghi thêm cân nặng hôm nay, làm sai biểu đồ và số "thay đổi 7
+     ngày". Giờ chỉ ghi khi cân nặng trên form khác lần cân gần nhất.
+  2. **Nhận số thập phân dấu phẩy** ("70,5"), đúng cách app hiển thị tiếng
+     Việt. Dùng chung hàm `parseDecimal` cho hồ sơ, cân nặng, tạ và nhật ký.
+  3. **Bấm Quét 2 lần nhanh** không còn mở 2 màn camera.
+  4. **Chạy model lần lượt từng ảnh.** Thư viện `tflite_flutter` trả về
+     kết quả toàn 0 (không báo lỗi) nếu ảnh mới đến khi ảnh trước chưa chạy
+     xong; giờ ảnh sau chờ ảnh trước.
+  5. **Xoá ảnh quét** sau khi xem kết quả, để ảnh bữa ăn không chất trong
+     bộ nhớ máy. Camera cũng không tự mở lại sau màn kết quả khi app quay về
+     từ nền.
+  6. **Lưu thực đơn hoặc buổi tập chỉ một lần**: nút chuyển thành "ĐÃ LƯU".
+  7. **Bỏ chữ tiếng Anh viết cứng** (`PROCESSING...`, `g protein`,
+     `P/C/F`, `0–30`), chuyển hết vào file dịch. Câu "Model chưa chắc
+     chắn" đổi thành "Ứng dụng chưa chắc chắn".
+  8. **Tìm món trong Nhật ký:**
+     - không cần gõ dấu ("pho", "trung op la");
+     - tìm được cả 58 món và thành phần Việt Nam có dinh dưỡng;
+     - chọn món có đơn vị thì điền sẵn khối lượng 1 đơn vị (1 quả trứng ốp
+       la = 55 g);
+     - sửa lỗi đổi qua "Tự nhập" rồi quay lại vẫn lưu món cũ không còn hiện
+       trên màn.
+- **Kiểm thử:** 136 test pass, analyze sạch. Test mới gồm:
+  - lưu hồ sơ không thêm cân nặng;
+  - dấu phẩy thập phân, tìm kiếm bỏ dấu;
+  - tìm món Việt trong Nhật ký;
+  - chạy model không chồng lên nhau;
+  - lưu thực đơn một lần.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.

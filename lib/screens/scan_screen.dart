@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -68,6 +70,9 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   bool _torch = false;
   bool _busy = false;
 
+  /// True while the result screen covers the camera.
+  bool _reviewing = false;
+
   @override
   void initState() {
     super.initState();
@@ -97,7 +102,10 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.resumed &&
         _camera == null &&
         !_opening &&
+        !_reviewing &&
         _problem == null) {
+      // While the result screen is up the camera stays closed; it reopens
+      // when the user comes back to it.
       _openCamera();
     }
   }
@@ -177,12 +185,15 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   }
 
   /// Opens the result for [path]; closes Scan when the plate was logged.
+  /// The photo is a copy in the app cache and is deleted afterwards, so
+  /// meal photos never pile up on the phone.
   Future<void> _review(String path) async {
     try {
       final data = await _vnFood.load();
       if (!mounted) return;
       await _camera?.pause();
       if (!mounted) return;
+      _reviewing = true;
       final logged = await Navigator.push<bool>(
         context,
         MaterialPageRoute(
@@ -194,15 +205,23 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
           ),
         ),
       );
+      _reviewing = false;
       if (!mounted) return;
       if (logged == true) {
         Navigator.pop(context, true);
         return;
       }
-      await _camera?.resume();
+      if (_camera != null) {
+        await _camera!.resume();
+      } else if (_problem == null) {
+        // The app went to the background during the review.
+        await _openCamera();
+      }
     } catch (_) {
       if (mounted) _message(context.l10n.scanDataFailed);
     } finally {
+      _reviewing = false;
+      File(path).delete().ignore();
       if (mounted) setState(() => _busy = false);
     }
   }

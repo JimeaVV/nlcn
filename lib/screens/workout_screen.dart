@@ -39,6 +39,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   bool logging = false;
   RecommendationException? error;
   WorkoutRecommendation? result;
+
+  /// The plan already saved, so a second tap cannot store a duplicate.
+  WorkoutRecommendation? savedResult;
   String? resultSplit;
   String? resultLevel;
 
@@ -92,7 +95,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     if (recommendation == null ||
         savedSplit == null ||
         savedLevel == null ||
-        saving) {
+        saving ||
+        identical(recommendation, savedResult)) {
       return;
     }
     setState(() => saving = true);
@@ -102,6 +106,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         level: savedLevel,
         recommendation: recommendation,
       );
+      if (mounted) setState(() => savedResult = recommendation);
       widget.onHistoryChanged?.call();
       if (mounted) _showMessage(context.l10n.workoutSaved);
     } catch (_) {
@@ -298,9 +303,17 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: saving ? null : saveWorkout,
-              icon: const Icon(Icons.bookmark_add_outlined),
-              label: Text(saving ? l10n.savingButton : l10n.workoutSave),
+              key: const ValueKey('workout-save-plan'),
+              onPressed:
+                  saving || identical(result, savedResult) ? null : saveWorkout,
+              icon: Icon(identical(result, savedResult)
+                  ? Icons.check_rounded
+                  : Icons.bookmark_add_outlined),
+              label: Text(identical(result, savedResult)
+                  ? l10n.planAlreadySaved
+                  : saving
+                      ? l10n.savingButton
+                      : l10n.workoutSave),
             ),
           ],
         ],

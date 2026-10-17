@@ -191,6 +191,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a generated plan is saved only once', (tester) async {
+    final database = _Database()..profile = _profile().toMap();
+    final recommendations = _Recommendations();
+    await tester.pumpWidget(localizedApp(
+        home: Scaffold(
+            body: MealScreen(
+                database: database, recommendations: recommendations))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TẠO THỰC ĐƠN'));
+    await tester.pump();
+    recommendations.pending.single.complete(_plan(2200));
+    await tester.pumpAndSettle();
+
+    final save = find.byKey(const ValueKey('meal-save-plan'));
+    await tester.scrollUntilVisible(save, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    expect(find.text('ĐÃ LƯU'), findsOneWidget);
+    // The button is disabled now; the tap must not save again.
+    await tester.tap(save, warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(database.saved, hasLength(1));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a generated plan is logged to today\'s diary only once',
       (tester) async {
     final database = _Database()..profile = _profile().toMap();
@@ -213,7 +239,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final log = find.byKey(const ValueKey('meal-log-plan'));
-    await tester.ensureVisible(log);
+    await tester.scrollUntilVisible(log, 300,
+        scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await tester.tap(log);
     await tester.pumpAndSettle();
