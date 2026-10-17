@@ -305,6 +305,17 @@ commit và kết quả kiểm thử.
   - bị từ chối quyền thì sang màn dự phòng.
 - Đã cài lên điện thoại thật (Xiaomi, HyperOS 4).
 
+### 2026-10-17 · Bảo vệ nhánh main bằng CI bắt buộc
+- PR #6 (luồng quét và camera trong app) đã gộp vào `main`.
+- Bật **Allow auto-merge** cho repo, và đặt **branch protection** cho `main`:
+  - hai job `Flutter analyze and test` và `Nutrition data check` là điều
+    kiện bắt buộc trước khi gộp;
+  - không bắt buộc nhánh phải cập nhật theo `main` mới nhất (`strict: false`)
+    để nhóm 2 người đỡ phải gộp lại nhiều lần; job CI chạy khi push lên
+    `main` vẫn bắt lỗi phát sinh sau khi gộp.
+- **Lý do:** tự gộp chỉ chờ những check *bắt buộc*. Không đặt điều kiện thì
+  bật tự gộp sẽ gộp ngay cả khi CI chưa chạy xong.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
