@@ -114,6 +114,10 @@ void main() {
 
   Future<void> reveal(WidgetTester tester, Finder finder) async {
     FocusManager.instance.primaryFocus?.unfocus();
+    // A confirmation snack bar may cover the lowest rows of the list.
+    tester
+        .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+        .removeCurrentSnackBar();
     await tester.pumpAndSettle();
     if (finder.evaluate().isEmpty) {
       await tester.scrollUntilVisible(finder, 400,
@@ -122,6 +126,21 @@ void main() {
     await tester.ensureVisible(finder);
     await tester.pumpAndSettle();
   }
+
+  Future<void> toggle(WidgetTester tester, String key) async {
+    final finder = find.byKey(ValueKey(key));
+    await reveal(tester, finder);
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> scrollToTop(WidgetTester tester) async {
+    await tester.drag(find.byType(ListView), const Offset(0, 4000));
+    await tester.pumpAndSettle();
+  }
+
+  String fieldText(WidgetTester tester, String key) =>
+      tester.widget<TextFormField>(find.byKey(ValueKey(key))).controller!.text;
 
   Future<void> saveProfile(WidgetTester tester) async {
     final button = find.byKey(const ValueKey('save-profile'));
@@ -142,6 +161,13 @@ void main() {
     expect(database.savedProfiles, isEmpty);
 
     await fill(tester, 'profile-age', '21');
+    expect(find.byKey(const ValueKey('profile-calories')), findsNothing,
+        reason: 'manual targets stay hidden until switched on');
+    await toggle(tester, 'profile-custom-calories');
+    expect(fieldText(tester, 'profile-calories'), '2625',
+        reason: 'starts from the current estimate');
+    await toggle(tester, 'profile-custom-protein');
+    expect(fieldText(tester, 'profile-protein'), '126');
     await fill(tester, 'profile-calories', '1000');
     await fill(tester, 'profile-protein', '300');
     await saveProfile(tester);
@@ -156,16 +182,17 @@ void main() {
     expect(database.savedProfiles.single.calorieOverride, 2500);
     expect(database.savedProfiles.single.proteinOverride, 140);
     expect(changed, 1);
-    expect(find.text('Calo tự đặt'), findsOneWidget);
-    expect(find.text('Protein tự đặt'), findsOneWidget);
+    await scrollToTop(tester);
+    expect(find.text('tự đặt'), findsNWidgets(2));
 
-    await reveal(tester, find.text('Dùng calo ước tính'));
-    await tester.tap(find.text('Dùng calo ước tính'));
-    await tester.pump();
+    await toggle(tester, 'profile-custom-calories');
+    expect(find.byKey(const ValueKey('profile-calories')), findsNothing);
     await saveProfile(tester);
     expect(database.savedProfiles.last.calorieOverride, isNull);
     expect(database.savedProfiles.last.proteinOverride, 140);
-    expect(find.text('Calo ước tính'), findsOneWidget);
+    await scrollToTop(tester);
+    expect(find.text('ước tính'), findsOneWidget);
+    expect(find.text('tự đặt'), findsOneWidget);
     expect(changed, 2);
     expect(tester.takeException(), isNull);
   });
@@ -261,21 +288,19 @@ void main() {
     await open(tester, database);
     await fill(tester, 'profile-age', '25');
     await fill(tester, 'profile-height', '180');
-    await reveal(tester, find.byType(DropdownButtonFormField<String>));
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Nữ').last);
+    await reveal(tester, find.text('Nữ'));
+    await tester.tap(find.text('Nữ'));
     await tester.pumpAndSettle();
     await reveal(tester, find.byType(DropdownButtonFormField<double>));
     await tester.tap(find.byType(DropdownButtonFormField<double>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Nhiều · ×1,725').last);
     await tester.pumpAndSettle();
-    await reveal(tester, find.byType(DropdownButtonFormField<NutritionGoal>));
-    await tester.tap(find.byType(DropdownButtonFormField<NutritionGoal>));
+    await reveal(tester, find.text('Tăng cân'));
+    await tester.tap(find.text('Tăng cân'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Tăng cân').last);
-    await tester.pumpAndSettle();
+    await toggle(tester, 'profile-custom-calories');
+    await toggle(tester, 'profile-custom-protein');
     await fill(tester, 'profile-calories', '2700');
     await fill(tester, 'profile-protein', '150');
 
@@ -365,6 +390,40 @@ void main() {
         '160');
     expect(first.savedProfiles, isEmpty);
     expect(second.savedProfiles, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('explanations live behind info buttons and old weigh-ins fold',
+      (tester) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final database = _Database(profile: _profile(), weights: [
+      for (var day = 0; day < 7; day++)
+        WeightEntry(
+          id: day + 1,
+          weight: 70 + day / 10,
+          recordedAt: today.subtract(Duration(days: day)),
+        ),
+    ]);
+    await open(tester, database);
+
+    expect(find.textContaining('Mifflin'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('profile-how')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Mifflin'), findsOneWidget);
+    expect(find.textContaining('TDEE: 2.625 kcal'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('edit-weight-5')), findsOneWidget);
+    expect(find.byKey(const ValueKey('edit-weight-6')), findsNothing);
+    final showAll = find.byKey(const ValueKey('weights-show-all'));
+    await reveal(tester, showAll);
+    expect(find.text('Xem tất cả (7)'), findsOneWidget);
+    await tester.tap(showAll);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('edit-weight-7')), findsOneWidget);
+    expect(find.text('Thu gọn'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

@@ -316,6 +316,39 @@ commit và kết quả kiểm thử.
 - **Lý do:** tự gộp chỉ chờ những check *bắt buộc*. Không đặt điều kiện thì
   bật tự gộp sẽ gộp ngay cả khi CI chưa chạy xong.
 
+### 2026-10-17 · Làm gọn màn Hồ sơ
+- **Vấn đề khi dùng thật:** màn Hồ sơ quá nhiều chữ.
+  - Đoạn công thức BMR/TDEE và ghi chú luôn hiện.
+  - Hai ô "calo/protein tự đặt" kèm nút "Dùng … ước tính" nằm giữa form.
+  - Kết quả quan trọng nhất (calo, protein mỗi ngày) lại nằm cuối form.
+  - Thẻ cân nặng có đoạn ghi chú 4 dòng.
+- **Nguyên tắc áp dụng:** số liệu chính to và đặt lên đầu; giải thích để sau
+  nút ⓘ; tùy chọn nâng cao thì ẩn cho tới khi bật.
+- **Thay đổi:**
+  - Thẻ **Mục tiêu mỗi ngày** ở trên cùng:
+    - hai ô số lớn (kcal, protein), mỗi ô có nhãn "ước tính" hoặc "tự đặt";
+    - nút ⓘ mở bảng **Cách tính** gồm công thức, BMR/TDEE và lưu ý dành cho
+      người trưởng thành.
+  - Form gọn hơn:
+    - Tuổi, chiều cao, cân nặng trên **một hàng**;
+    - giới tính và mục tiêu chọn bằng **nút bấm** thay cho danh sách thả
+      xuống.
+  - **Công tắc "Tự đặt calo" và "Tự đặt protein"** (theo góp ý):
+    - tắt thì dùng số ước tính và ẩn ô nhập;
+    - bật thì hiện ô nhập, điền sẵn số ước tính hiện tại;
+    - tắt lại thì quay về ước tính.
+  - Thẻ cân nặng:
+    - ghi chú chuyển vào ⓘ;
+    - danh sách chỉ hiện 5 lần ghi gần nhất, có nút "Xem tất cả (n)".
+  - Bỏ 11 chuỗi không còn dùng.
+- **Lỗi phát hiện khi test:** `SwitchListTile` đặt trong thẻ có nền màu làm
+  hiệu ứng chạm không hiện được. Đã đổi sang hàng chữ cộng `Switch`.
+- **Kiểm thử:** 114/114 test, gồm:
+  - bật công tắc thì điền sẵn đúng số ước tính (2.625 kcal, 126 g);
+  - tắt công tắc thì quay về ước tính;
+  - ⓘ hiện công thức và BMR/TDEE;
+  - danh sách cân nặng gập ở 5 lần ghi.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera

@@ -259,17 +259,13 @@
       }
     }
   },
-  "profileTitle": "Hồ sơ & mục tiêu",
   "profileDisclaimer": "Ước tính dành cho người trưởng thành từ 18 tuổi. Nhu cầu thực tế có thể khác; đây không phải chỉ định y khoa.",
   "personalInfo": "Thông tin cá nhân",
   "age": "Tuổi",
   "ageError": "Nhập tuổi từ 18 đến 100.",
-  "genderFormula": "Giới tính dùng trong công thức",
   "male": "Nam",
   "female": "Nữ",
-  "heightCm": "Chiều cao (cm)",
   "heightName": "Chiều cao",
-  "currentBodyWeight": "Cân nặng hiện tại (kg)",
   "weightName": "Cân nặng",
   "activityLevel": "Mức vận động",
   "activitySedentary": "Ít vận động · ×{factor}",
@@ -318,10 +314,7 @@
   "goalGain": "Tăng cân",
   "estimateFormula": "Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).",
   "manualCalories": "Calo tự đặt (kcal/ngày)",
-  "manualHint": "Để trống để dùng ước tính",
-  "useEstimatedCalories": "Dùng calo ước tính",
   "manualProtein": "Protein tự đặt (g/ngày)",
-  "useEstimatedProtein": "Dùng protein ước tính",
   "numberInvalid": "Nhập {name} hợp lệ.",
   "@numberInvalid": {
     "placeholders": {
@@ -356,26 +349,8 @@
     }
   },
   "targetsInvalidHint": "Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.",
-  "caloriesPerDayValue": "{value} kcal/ngày",
-  "@caloriesPerDayValue": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "proteinPerDayValue": "{value} g protein/ngày",
-  "@proteinPerDayValue": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "estimatedCalories": "Calo ước tính",
-  "manualCaloriesSource": "Calo tự đặt",
   "estimatedProtein": "Protein ước tính",
-  "manualProteinSource": "Protein tự đặt",
   "saveProfile": "Lưu hồ sơ",
   "savingProfile": "Đang lưu...",
   "profileSaved": "Đã lưu hồ sơ và mục tiêu.",
@@ -721,5 +696,21 @@
   "scanCaptureFailed": "Không chụp được ảnh. Hãy thử lại.",
   "scanCameraDenied": "OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.",
   "scanNoCamera": "Không mở được camera. Bạn vẫn có thể chọn ảnh có sẵn hoặc ghi món thủ công.",
-  "scanRetryCamera": "Thử mở camera lại"
+  "scanRetryCamera": "Thử mở camera lại",
+  "dailyTargetsTitle": "Mục tiêu mỗi ngày",
+  "howCalculated": "Cách tính",
+  "customCalories": "Tự đặt calo",
+  "customProtein": "Tự đặt protein",
+  "heightShort": "Cao (cm)",
+  "weightShort": "Nặng (kg)",
+  "genderShort": "Giới tính",
+  "showAllWeights": "Xem tất cả ({count})",
+  "@showAllWeights": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "showFewerWeights": "Thu gọn"
 }

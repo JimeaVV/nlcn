@@ -10,6 +10,7 @@ class CyberCard extends StatelessWidget {
     this.icon,
     this.accent,
     this.padding = const EdgeInsets.all(18),
+    this.trailing,
   });
 
   final Widget child;
@@ -17,6 +18,9 @@ class CyberCard extends StatelessWidget {
   final IconData? icon;
   final Color? accent;
   final EdgeInsets padding;
+
+  /// Shown at the end of the title row, e.g. an info button.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +56,7 @@ class CyberCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
+                if (trailing != null) trailing!,
               ],
             ),
             const SizedBox(height: 16),

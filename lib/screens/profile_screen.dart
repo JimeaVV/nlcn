@@ -34,6 +34,11 @@ class ProfileScreenState extends State<ProfileScreen> {
   bool _saving = false;
   bool _hasProfile = false;
 
+  /// Manual targets are optional; their fields only show when switched on.
+  bool _customCalories = false;
+  bool _customProtein = false;
+  bool _showAllWeights = false;
+
   /// Built at paint time so a language switch also translates the message.
   String Function(AppLocalizations)? _error;
   int _refreshId = 0;
@@ -72,6 +77,8 @@ class ProfileScreenState extends State<ProfileScreen> {
             _gender = profile.gender;
             _activity = profile.activityLevel;
             _goal = profile.goal;
+            _customCalories = profile.calorieOverride != null;
+            _customProtein = profile.proteinOverride != null;
             _calories.text = profile.calorieOverride == null
                 ? ''
                 : _inputNumber(profile.calorieOverride!);
@@ -102,10 +109,10 @@ class ProfileScreenState extends State<ProfileScreen> {
         weight: double.parse(_weight.text.trim()),
         activityLevel: _activity,
         goal: _goal,
-        calorieOverride: _calories.text.trim().isEmpty
+        calorieOverride: !_customCalories || _calories.text.trim().isEmpty
             ? null
             : double.parse(_calories.text.trim()),
-        proteinOverride: _protein.text.trim().isEmpty
+        proteinOverride: !_customProtein || _protein.text.trim().isEmpty
             ? null
             : double.parse(_protein.text.trim()),
       );
@@ -187,14 +194,14 @@ class ProfileScreenState extends State<ProfileScreen> {
     required TextEditingController controller,
     required String? Function(String?) validator,
     bool integer = false,
-    String? hint,
   }) =>
       TextFormField(
         key: ValueKey(keyName),
         controller: controller,
         enabled: !_saving,
         keyboardType: TextInputType.numberWithOptions(decimal: !integer),
-        decoration: InputDecoration(labelText: label, hintText: hint),
+        // Narrow fields sit three to a row, so errors may need more lines.
+        decoration: InputDecoration(labelText: label, errorMaxLines: 4),
         validator: validator,
         onChanged: (_) => setState(() => _error = null),
       );
@@ -264,35 +271,121 @@ class ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Widget _targetSummary(Map<String, dynamic>? targets) {
+  /// Targets from the body details alone, ignoring manual overrides; used to
+  /// prefill a manual field when it is switched on.
+  Map<String, dynamic>? get _estimate {
+    try {
+      final draft = _draft();
+      return calculateNutritionTargets(UserProfile(
+        age: draft.age,
+        gender: draft.gender,
+        height: draft.height,
+        weight: draft.weight,
+        activityLevel: draft.activityLevel,
+        goal: draft.goal,
+      ));
+    } on ArgumentError {
+      return null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// Switching a manual target on starts from the current estimate; switching
+  /// it off returns to the estimate.
+  void _setCustom({required bool calories, required bool on}) {
+    final estimate = _estimate;
+    setState(() {
+      _error = null;
+      final controller = calories ? _calories : _protein;
+      if (calories) {
+        _customCalories = on;
+      } else {
+        _customProtein = on;
+      }
+      if (!on) {
+        controller.clear();
+      } else if (estimate != null) {
+        final value =
+            (estimate[calories ? 'target_calories' : 'protein_target'] as num)
+                .toDouble();
+        controller.text = _inputNumber(value.roundToDouble());
+      }
+    });
+  }
+
+  void _showInfo(String title, List<String> paragraphs) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: CyberColors.surface,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.titleLarge),
+              for (final paragraph in paragraphs) ...[
+                const SizedBox(height: 12),
+                Text(paragraph),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoButton(String key, VoidCallback onPressed) => IconButton(
+        key: ValueKey(key),
+        tooltip: context.l10n.howCalculated,
+        visualDensity: VisualDensity.compact,
+        onPressed: onPressed,
+        icon: Icon(Icons.info_outline_rounded, color: CyberColors.muted),
+      );
+
+  Widget _targetsCard(Map<String, dynamic>? targets) {
     final l10n = context.l10n;
-    if (targets == null) return Text(l10n.targetsInvalidHint);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.caloriesPerDayValue(context.formatMeasurement(
-              (targets['target_calories'] as num).toDouble())),
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        Text(_calories.text.trim().isEmpty
-            ? l10n.estimatedCalories
-            : l10n.manualCaloriesSource),
-        const SizedBox(height: 8),
-        Text(
-          l10n.proteinPerDayValue(context.formatMeasurement(
-              (targets['protein_target'] as num).toDouble())),
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        Text(_protein.text.trim().isEmpty
-            ? l10n.estimatedProtein
-            : l10n.manualProteinSource),
-        const SizedBox(height: 8),
-        Text(
-          'BMR: ${context.formatNumber(targets['bmr'] as num)} kcal · '
-          'TDEE: ${context.formatNumber(targets['tdee'] as num)} kcal',
-        ),
-      ],
+    final number = context.formatNumber;
+    return CyberCard(
+      key: const ValueKey('profile-targets'),
+      title: l10n.dailyTargetsTitle,
+      icon: Icons.flag_outlined,
+      trailing: _infoButton(
+        'profile-how',
+        () => _showInfo(l10n.howCalculated, [
+          l10n.estimateFormula,
+          if (targets != null)
+            'BMR: ${number(targets['bmr'] as num)} kcal · '
+                'TDEE: ${number(targets['tdee'] as num)} kcal',
+          l10n.profileDisclaimer,
+        ]),
+      ),
+      child: targets == null
+          ? Text(l10n.targetsInvalidHint)
+          : Row(
+              children: [
+                Expanded(
+                  child: _TargetTile(
+                    value: number(targets['target_calories'] as num),
+                    unit: 'kcal',
+                    label: l10n.caloriesLabel,
+                    manual: _customCalories,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _TargetTile(
+                    value: number(targets['protein_target'] as num),
+                    unit: 'g',
+                    label: l10n.proteinLabel,
+                    manual: _customProtein,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -301,14 +394,20 @@ class ProfileScreenState extends State<ProfileScreen> {
       ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
     final l10n = context.l10n;
     final weight = context.formatMeasurement;
+    // The newest five are enough at a glance; the rest are one tap away.
+    final shown = _showAllWeights ? _weights : _weights.take(5).toList();
     return CyberCard(
       title: l10n.weightTracking,
       icon: Icons.monitor_weight_outlined,
+      trailing: _infoButton(
+        'weight-info',
+        () => _showInfo(l10n.weightTracking, [l10n.weightHistoryNote]),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_weights.isEmpty)
-            Text(l10n.noWeights)
+            Text(l10n.noWeights, style: TextStyle(color: CyberColors.muted))
           else ...[
             Text(
               l10n.latestWeight(weight(chronological.last.weight),
@@ -316,7 +415,7 @@ class ProfileScreenState extends State<ProfileScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             if (chronological.length > 1) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               Text(
                 l10n.weightChange(
                   context.formatSigned(
@@ -325,49 +424,120 @@ class ProfileScreenState extends State<ProfileScreen> {
                   _date(chronological.first.recordedAt),
                   _date(chronological.last.recordedAt),
                 ),
+                style: TextStyle(color: CyberColors.muted),
               ),
             ],
             const SizedBox(height: 10),
             WeightTrendChart(entries: chronological),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            child: FilledButton.tonalIcon(
               key: const ValueKey('add-weight'),
               onPressed: _saving || !_hasProfile ? null : () => _editWeight(),
               icon: const Icon(Icons.add_rounded),
               label: Text(l10n.logWeight),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(l10n.weightHistoryNote),
-          for (final entry in _weights) ...[
-            const Divider(),
+          for (final entry in shown) ...[
+            const Divider(height: 20),
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    '${weight(entry.weight)} kg\n${_date(entry.recordedAt)}',
-                  ),
+                  child: Text.rich(TextSpan(children: [
+                    TextSpan(
+                      text: '${weight(entry.weight)} kg',
+                      style: TextStyle(
+                          color: CyberColors.text, fontWeight: FontWeight.w700),
+                    ),
+                    TextSpan(
+                      text: '  ·  ${_date(entry.recordedAt)}',
+                      style: TextStyle(color: CyberColors.muted),
+                    ),
+                  ])),
                 ),
                 IconButton(
                   key: ValueKey('edit-weight-${entry.id}'),
                   tooltip: l10n.editWeightTooltip(_date(entry.recordedAt)),
+                  visualDensity: VisualDensity.compact,
                   onPressed: _saving ? null : () => _editWeight(entry),
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: const Icon(Icons.edit_outlined, size: 20),
                 ),
                 IconButton(
                   key: ValueKey('delete-weight-${entry.id}'),
                   tooltip: l10n.deleteWeightTooltip(_date(entry.recordedAt)),
+                  visualDensity: VisualDensity.compact,
                   onPressed: _saving ? null : () => _deleteWeight(entry),
-                  icon: const Icon(Icons.delete_outline_rounded),
+                  icon: const Icon(Icons.delete_outline_rounded, size: 20),
                 ),
               ],
             ),
           ],
+          if (_weights.length > 5)
+            Center(
+              child: TextButton(
+                key: const ValueKey('weights-show-all'),
+                onPressed: () =>
+                    setState(() => _showAllWeights = !_showAllWeights),
+                child: Text(_showAllWeights
+                    ? l10n.showFewerWeights
+                    : l10n.showAllWeights('${_weights.length}')),
+              ),
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _customTarget({
+    required bool calories,
+    required bool on,
+  }) {
+    final l10n = context.l10n;
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                calories ? l10n.customCalories : l10n.customProtein,
+                style: TextStyle(color: CyberColors.text),
+              ),
+            ),
+            Switch(
+              key: ValueKey(calories
+                  ? 'profile-custom-calories'
+                  : 'profile-custom-protein'),
+              value: on,
+              onChanged: _saving
+                  ? null
+                  : (value) => _setCustom(calories: calories, on: value),
+            ),
+          ],
+        ),
+        if (on) ...[
+          calories
+              ? _numberField(
+                  keyName: 'profile-calories',
+                  label: l10n.manualCalories,
+                  controller: _calories,
+                  validator: (value) => _validateNumber(value,
+                      name: l10n.caloriesLabel,
+                      minimum: 1000,
+                      inclusiveMinimum: true,
+                      maximum: 10000),
+                )
+              : _numberField(
+                  keyName: 'profile-protein',
+                  label: l10n.manualProtein,
+                  controller: _protein,
+                  validator: (value) => _validateNumber(value,
+                      name: l10n.proteinLabel, maximum: 500),
+                ),
+          const SizedBox(height: 8),
+        ],
+      ],
     );
   }
 
@@ -378,67 +548,83 @@ class ProfileScreenState extends State<ProfileScreen> {
     final l10n = context.l10n;
     String factor(double value) => context.formatNumber(value,
         decimals: value.toString().split('.').last.length);
+    final segmentStyle = SegmentedButton.styleFrom(
+      visualDensity: VisualDensity.compact,
+      selectedForegroundColor: CyberColors.background,
+      selectedBackgroundColor: CyberColors.cyan,
+    );
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         children: [
-          Text(l10n.profileTitle,
-              style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 6),
-          Text(l10n.profileDisclaimer),
-          const SizedBox(height: 16),
+          _targetsCard(targets),
+          const SizedBox(height: 14),
           CyberCard(
             title: l10n.personalInfo,
             icon: Icons.person_outline_rounded,
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _numberField(
-                    keyName: 'profile-age',
-                    label: l10n.age,
-                    controller: _age,
-                    integer: true,
-                    validator: (value) {
-                      final number = int.tryParse(value?.trim() ?? '');
-                      return number == null || number < 18 || number > 100
-                          ? l10n.ageError
-                          : null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    key: ValueKey('profile-gender-$_gender'),
-                    initialValue: _gender,
-                    isExpanded: true,
-                    decoration: InputDecoration(labelText: l10n.genderFormula),
-                    items: [
-                      DropdownMenuItem(value: 'male', child: Text(l10n.male)),
-                      DropdownMenuItem(
-                          value: 'female', child: Text(l10n.female)),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _numberField(
+                          keyName: 'profile-age',
+                          label: l10n.age,
+                          controller: _age,
+                          integer: true,
+                          validator: (value) {
+                            final number = int.tryParse(value?.trim() ?? '');
+                            return number == null || number < 18 || number > 100
+                                ? l10n.ageError
+                                : null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _numberField(
+                          keyName: 'profile-height',
+                          label: l10n.heightShort,
+                          controller: _height,
+                          validator: (value) => _validateNumber(value,
+                              name: l10n.heightName, maximum: 300),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _numberField(
+                          keyName: 'profile-weight',
+                          label: l10n.weightShort,
+                          controller: _weight,
+                          validator: (value) => _validateNumber(value,
+                              name: l10n.weightName, maximum: 500),
+                        ),
+                      ),
                     ],
-                    onChanged: _saving
-                        ? null
-                        : (value) => setState(() => _gender = value!),
                   ),
-                  const SizedBox(height: 12),
-                  _numberField(
-                    keyName: 'profile-height',
-                    label: l10n.heightCm,
-                    controller: _height,
-                    validator: (value) => _validateNumber(value,
-                        name: l10n.heightName, maximum: 300),
+                  const SizedBox(height: 14),
+                  _Labeled(
+                    label: l10n.genderShort,
+                    child: SegmentedButton<String>(
+                      key: ValueKey('profile-gender-$_gender'),
+                      style: segmentStyle,
+                      showSelectedIcon: false,
+                      segments: [
+                        ButtonSegment(value: 'male', label: Text(l10n.male)),
+                        ButtonSegment(
+                            value: 'female', label: Text(l10n.female)),
+                      ],
+                      selected: {_gender},
+                      onSelectionChanged: _saving
+                          ? null
+                          : (value) => setState(() => _gender = value.single),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  _numberField(
-                    keyName: 'profile-weight',
-                    label: l10n.currentBodyWeight,
-                    controller: _weight,
-                    validator: (value) => _validateNumber(value,
-                        name: l10n.weightName, maximum: 500),
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   DropdownButtonFormField<double>(
                     key: ValueKey('profile-activity-$_activity'),
                     initialValue: _activity,
@@ -465,89 +651,149 @@ class ProfileScreenState extends State<ProfileScreen> {
                         ? null
                         : (value) => setState(() => _activity = value!),
                   ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<NutritionGoal>(
-                    key: ValueKey('profile-goal-${_goal.name}'),
-                    initialValue: _goal,
-                    isExpanded: true,
-                    decoration: InputDecoration(labelText: l10n.goal),
-                    items: NutritionGoal.values
-                        .map((goal) => DropdownMenuItem(
-                            value: goal, child: Text(l10n.goalLabel(goal))))
-                        .toList(),
-                    onChanged: _saving
-                        ? null
-                        : (value) => setState(() => _goal = value!),
+                  const SizedBox(height: 14),
+                  _Labeled(
+                    label: l10n.goal,
+                    child: SegmentedButton<NutritionGoal>(
+                      key: ValueKey('profile-goal-${_goal.name}'),
+                      style: segmentStyle,
+                      showSelectedIcon: false,
+                      segments: [
+                        for (final goal in NutritionGoal.values)
+                          ButtonSegment(
+                            value: goal,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(l10n.goalLabel(goal)),
+                            ),
+                          ),
+                      ],
+                      selected: {_goal},
+                      onSelectionChanged: _saving
+                          ? null
+                          : (value) => setState(() => _goal = value.single),
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(l10n.estimateFormula),
-                  const SizedBox(height: 16),
-                  _numberField(
-                    keyName: 'profile-calories',
-                    label: l10n.manualCalories,
-                    hint: l10n.manualHint,
-                    controller: _calories,
-                    validator: (value) => _validateNumber(value,
-                        name: l10n.caloriesLabel,
-                        minimum: 1000,
-                        inclusiveMinimum: true,
-                        maximum: 10000,
-                        optional: true),
-                  ),
-                  TextButton(
-                    onPressed: _saving
-                        ? null
-                        : () => setState(() {
-                              _calories.clear();
-                              _error = null;
-                            }),
-                    child: Text(l10n.useEstimatedCalories),
-                  ),
-                  _numberField(
-                    keyName: 'profile-protein',
-                    label: l10n.manualProtein,
-                    hint: l10n.manualHint,
-                    controller: _protein,
-                    validator: (value) => _validateNumber(value,
-                        name: l10n.proteinLabel, maximum: 500, optional: true),
-                  ),
-                  TextButton(
-                    onPressed: _saving
-                        ? null
-                        : () => setState(() {
-                              _protein.clear();
-                              _error = null;
-                            }),
-                    child: Text(l10n.useEstimatedProtein),
-                  ),
-                  const SizedBox(height: 10),
-                  _targetSummary(targets),
+                  const SizedBox(height: 8),
+                  _customTarget(calories: true, on: _customCalories),
+                  _customTarget(calories: false, on: _customProtein),
                   if (_error != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(_error!(l10n),
                         style: TextStyle(color: CyberColors.danger)),
                   ],
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      key: const ValueKey('save-profile'),
-                      onPressed: _saving ? null : _saveProfile,
-                      icon: const Icon(Icons.save_outlined),
-                      label:
-                          Text(_saving ? l10n.savingProfile : l10n.saveProfile),
-                    ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    key: const ValueKey('save-profile'),
+                    onPressed: _saving ? null : _saveProfile,
+                    icon: const Icon(Icons.save_outlined),
+                    label:
+                        Text(_saving ? l10n.savingProfile : l10n.saveProfile),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _weightHistory(),
         ],
       ),
     );
   }
+}
+
+/// A big number with its unit, label and whether it is estimated or manual.
+class _TargetTile extends StatelessWidget {
+  const _TargetTile({
+    required this.value,
+    required this.unit,
+    required this.label,
+    required this.manual,
+  });
+
+  final String value;
+  final String unit;
+  final String label;
+  final bool manual;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+      decoration: BoxDecoration(
+        color: CyberColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: CyberColors.border),
+      ),
+      child: Column(
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text.rich(TextSpan(children: [
+              TextSpan(
+                text: value,
+                style: TextStyle(
+                  color: CyberColors.cyan,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              TextSpan(
+                text: ' $unit',
+                style: TextStyle(
+                  color: CyberColors.cyan,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ])),
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(color: CyberColors.text)),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: (manual ? CyberColors.magenta : CyberColors.muted)
+                  .withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              manual ? l10n.sourceManual : l10n.sourceEstimated,
+              style: TextStyle(
+                color: manual ? CyberColors.magenta : CyberColors.muted,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A small caption above a control that has no label of its own.
+class _Labeled extends StatelessWidget {
+  const _Labeled({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(label,
+              style: TextStyle(
+                  color: CyberColors.muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          child,
+        ],
+      );
 }
 
 String _inputNumber(double value) => value == value.roundToDouble()
