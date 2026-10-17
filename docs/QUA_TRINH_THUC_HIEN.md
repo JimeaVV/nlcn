@@ -112,6 +112,25 @@ commit và kết quả kiểm thử.
 - Bạn cùng nhóm clone từ repo mới:
   `git clone https://github.com/JimeaVV/nlcn.git`.
 
+### 2026-10-17 · Chuẩn bị tuần 1: đổi Application ID, khung dữ liệu dinh dưỡng
+- **Phân vai:** JimeaVV là Người A (App + dinh dưỡng), vì đã nắm code app từ
+  NLCSN; bạn cùng nhóm là Người B (dữ liệu ảnh + model).
+- **Application ID:** đổi từ `com.example.nlcsn` sang
+  `io.github.jimeavv.optifit` (Android, iOS, macOS, Linux); `MainActivity`
+  chuyển sang package mới.
+  - Lưu ý: bản đã cài với ID cũ sẽ không cập nhật lên được, phải gỡ cài đặt
+    trước. Lịch sử trên máy đó cũng mất theo.
+- **Khung dữ liệu** `assets/data/vn_food/`:
+  - `components.csv`: 24 thành phần + 16 dòng "nền" (nước dùng, nước chấm,
+    vỏ bánh), đã có mã, tên Việt/Anh và đơn vị tự nhiên;
+  - `dishes.csv`: 94 dòng thành phần thường gặp của 20 món;
+  - mọi cột số liệu để trống, chờ điền từ nguồn chính thức.
+- **Script** `tool/check_vn_food.py`: kiểm tra mã khớp contract, số liệu hợp
+  lý, đủ nguồn và báo tiến độ điền. Đã thử với dữ liệu có lỗi cố ý: bắt đủ cả
+  4 lỗi.
+- Bắt đầu làm theo branch (`chore/week1-setup`) và Pull Request như đã thống
+  nhất.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
@@ -189,8 +208,8 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - [ ] Script dọn dữ liệu, gán nhãn sơ bộ, trang duyệt ảnh.
 - [ ] Notebook Colab để train (chia dữ liệu, các thí nghiệm, đánh giá, xuất
   `.tflite`) trong `tool/train/`.
-- [ ] `assets/data/vn_food/components.csv` và `dishes.csv` (dinh dưỡng có
-  nguồn, khẩu phần mặc định).
+- [ ] Điền số liệu `assets/data/vn_food/components.csv` và khẩu phần
+  `dishes.csv` (khung đã có; chạy `tool/check_vn_food.py`).
 - [ ] Màn chụp ảnh, xác nhận món và thành phần, chỉnh khẩu phần, gắn
   `tflite_flutter`.
 - [ ] Giai đoạn YOLO (tuần 5–7): gán khung, train, đếm số lượng.
@@ -198,5 +217,6 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - [ ] Benchmark Branch & Bound so với greedy/vét cạn (số node, thời gian,
   độ lệch mục tiêu).
 - [ ] Progressive Overload dựa vào lịch sử tập; biểu đồ tiến bộ từng bài.
-- [ ] Đổi `applicationId`, tạo keystore release riêng.
+- [x] Đổi `applicationId` sang `io.github.jimeavv.optifit`.
+- [ ] Tạo keystore release riêng.
 - [ ] Chạy thử trên điện thoại thật: đổi ngôn ngữ, Nhật ký, ghi thực đơn.
