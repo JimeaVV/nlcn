@@ -485,6 +485,47 @@ commit và kết quả kiểm thử.
   `contract_version` tăng từ 0.1 lên **1.0**.
 - Từ nay muốn thêm hoặc bớt món, thành phần thì phải cả hai đồng ý và tăng
   phiên bản contract.
+
+### 2026-10-17 · Gắn sẵn khung chạy model TFLite vào app
+- **Mục tiêu:** làm trước phần ghép model, để tới tuần 4 (mốc ghép model
+  thật) chỉ việc thả file của người B vào `assets/models/` là app chạy.
+  Lỗi kỹ thuật lộ ra từ bây giờ thay vì sát hạn.
+- **Thiết kế:**
+  - `food_model.dart` (Dart thuần, test được trên máy tính):
+    - **tiền xử lý ảnh:** xoay ảnh theo EXIF (ảnh điện thoại thường lưu
+      hướng xoay trong EXIF chứ không xoay điểm ảnh), cắt vuông ở giữa,
+      resize 224×224 bilinear, RGB 0–255 float32;
+    - đọc `dishes.txt`, `components.txt` và các ngưỡng trong
+      `MODEL_CARD.md`;
+    - đổi hai đầu ra thành xác suất theo mã.
+  - `tflite_food_recognizer.dart`:
+    - chạy model bằng `tflite_flutter` 0.12.1 (LiteRT 1.4.0);
+    - giải mã ảnh và chạy model trên **isolate riêng** để giao diện không
+      bị khựng;
+    - interpreter chỉ mở khi chụp tấm đầu tiên, không làm chậm lúc mở app.
+  - App kiểm tra `assets/models/food_v1.tflite`: có thì chạy model, không có
+    hoặc file hỏng thì về chọn món bằng tay như trước.
+  - Ngưỡng tick/hỏi lại không còn cố định trong code mà đi theo từng model.
+    Contract tăng lên **v1.1** để ghi cách viết ngưỡng.
+- **Phát hiện khi thử:**
+  - Model xuất từ Keras có thể đổi thứ tự đầu ra: model giả trả ra
+    `components` trước `dish`. Vì vậy app nhận ra đầu ra theo **độ dài**,
+    không theo vị trí.
+  - Build Android lỗi "Inconsistent JVM Target": `tflite_flutter` biên dịch
+    Java theo bản 11 nhưng Kotlin theo bản 21. Sửa trong
+    `android/build.gradle.kts`, chỉ áp cho plugin này.
+  - APK arm64 tăng từ 19,9 MB lên 39,4 MB do thư viện LiteRT (có cả phần
+    GPU). Có thể tối ưu sau.
+- **Model giả:**
+  - `tool/make_dummy_food_model.py` tạo model **chưa train**, đúng định dạng
+    contract: 40 món, 24 thành phần, float16, 6,8 KB. Đây cũng là mẫu cách
+    xuất model cho người B.
+  - Đã cài thử lên điện thoại thật: chụp ảnh thì app hiện 3 món, mỗi món
+    khoảng 3% (đoán ngẫu nhiên trên 40 món). App báo "model không chắc, hãy
+    chọn món", đúng nhánh xử lý khi độ tin cậy thấp.
+  - Model giả **không** được đưa vào repo.
+- **Kiểm thử:** thêm 13 test, có test tự kiểm tra mã trong model khớp bảng
+  dinh dưỡng khi người B đưa model vào; analyze sạch.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.

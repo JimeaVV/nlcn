@@ -62,7 +62,7 @@ class ScanPlate {
       final score = seen[component.code];
       final included = component.isBase ||
           recognition.isEmpty ||
-          (score ?? 0) >= RecognitionThresholds.checked;
+          (score ?? 0) >= recognition.thresholds.checked;
       final inUnits = part.defaultUnits != null ||
           (part.defaultGrams == null && component.unitNameVi != null);
       items.add(PlateItem(
@@ -72,7 +72,7 @@ class ScanPlate {
         amount: inUnits ? part.defaultUnits ?? 1 : part.defaultGrams ?? 100,
         confidence: component.isBase ? null : score,
         uncertain:
-            !included && score != null && score >= RecognitionThresholds.ask,
+            !included && score != null && score >= recognition.thresholds.ask,
       ));
     }
     final listed = {for (final part in dish.parts) part.component};
@@ -81,10 +81,10 @@ class ScanPlate {
       if (component == null ||
           component.isBase ||
           listed.contains(entry.key) ||
-          entry.value < RecognitionThresholds.ask) {
+          entry.value < recognition.thresholds.ask) {
         continue;
       }
-      final confident = entry.value >= RecognitionThresholds.checked;
+      final confident = entry.value >= recognition.thresholds.checked;
       items.add(PlateItem(
         component: component,
         included: confident,

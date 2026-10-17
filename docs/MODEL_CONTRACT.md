@@ -5,8 +5,10 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.0** (hai người đã chốt 40 món ở mục 2 và các thành
-  phần ở mục 3)
+- `contract_version`: **1.1**
+  - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
+  - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
+    tra khi nạp model (mục 6).
 - Cập nhật: 2026-10-17
 
 ---
@@ -202,6 +204,28 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 - `< 0.3`: ẩn, người dùng vẫn tự thêm được.
 
 Món có xác suất cao nhất dưới `0.5` thì app hiện top-3 cho người dùng chọn.
+
+**Cách ghi ngưỡng trong `MODEL_CARD.md`** (từ v1.1): mỗi ngưỡng một dòng
+dạng `khoá: giá trị`, giá trị trong khoảng 0–1. Thiếu dòng nào thì app dùng
+số mặc định ở trên.
+```
+threshold_checked: 0.6
+threshold_ask: 0.3
+threshold_confident_dish: 0.5
+```
+
+**App kiểm tra khi nạp model:**
+- đầu vào phải là `float32 [1, 224, 224, 3]`, mọi đầu ra là float32;
+- hai đầu ra được nhận ra theo **độ dài**, khớp với số dòng của
+  `dishes.txt` và `components.txt`, nên thứ tự đầu ra trong file `.tflite`
+  không quan trọng; vì vậy hai file này phải có số dòng khác nhau;
+- mã trong hai file phải có trong bảng dinh dưỡng (test
+  `food_model_test.dart` tự kiểm tra khi có model);
+- file nào hỏng thì app bỏ qua model và chuyển về chọn món bằng tay.
+
+**Model giả để thử:** `python tool/make_dummy_food_model.py build/dummy_model`
+(cần TensorFlow) tạo một model chưa train, đúng định dạng trên. Đây cũng là
+mẫu cách xuất model. **Không** đưa model giả vào `assets/models/`.
 
 ## 7. Giai đoạn YOLO (tuần 5–7, nâng cấp)
 - Lớp của YOLO = các thành phần trong `components.txt` (có thể chỉ lấy một
