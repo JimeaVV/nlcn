@@ -8,6 +8,7 @@ import '../models/weight_entry.dart';
 import '../services/database_service.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/weight_trend_chart.dart';
+import '../core/number_input.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, this.database, this.onProfileChanged});
@@ -105,16 +106,16 @@ class ProfileScreenState extends State<ProfileScreen> {
   UserProfile _draft() => UserProfile(
         age: int.parse(_age.text.trim()),
         gender: _gender,
-        height: double.parse(_height.text.trim()),
-        weight: double.parse(_weight.text.trim()),
+        height: parseDecimal(_height.text)!,
+        weight: parseDecimal(_weight.text)!,
         activityLevel: _activity,
         goal: _goal,
         calorieOverride: !_customCalories || _calories.text.trim().isEmpty
             ? null
-            : double.parse(_calories.text.trim()),
+            : parseDecimal(_calories.text)!,
         proteinOverride: !_customProtein || _protein.text.trim().isEmpty
             ? null
-            : double.parse(_protein.text.trim()),
+            : parseDecimal(_protein.text)!,
       );
 
   Map<String, dynamic>? get _preview {
@@ -176,8 +177,8 @@ class ProfileScreenState extends State<ProfileScreen> {
     final text = value?.trim() ?? '';
     if (optional && text.isEmpty) return null;
     final l10n = context.l10n;
-    final number = double.tryParse(text);
-    if (number == null || !number.isFinite) return l10n.numberInvalid(name);
+    final number = parseDecimal(text);
+    if (number == null) return l10n.numberInvalid(name);
     if ((inclusiveMinimum ? number < minimum : number <= minimum) ||
         number > maximum) {
       return minimum == 0
@@ -212,7 +213,7 @@ class ProfileScreenState extends State<ProfileScreen> {
     final input = await showDialog<_WeightInput>(
       context: context,
       builder: (_) => _WeightDialog(
-        initialWeight: entry?.weight ?? double.tryParse(_weight.text) ?? 70,
+        initialWeight: entry?.weight ?? parseDecimal(_weight.text) ?? 70,
         initialDate: entry?.recordedAt ?? today,
         editing: entry != null,
       ),
@@ -887,8 +888,7 @@ class _WeightDialogState extends State<_WeightDialog> {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(
       context,
-      _WeightInput(
-          double.parse(_weight.text.trim()), _parseDate(_dateText.text)!),
+      _WeightInput(parseDecimal(_weight.text)!, _parseDate(_dateText.text)!),
     );
   }
 
@@ -910,11 +910,8 @@ class _WeightDialogState extends State<_WeightDialog> {
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(labelText: l10n.weightKg),
                 validator: (value) {
-                  final weight = double.tryParse(value?.trim() ?? '');
-                  return weight == null ||
-                          !weight.isFinite ||
-                          weight <= 0 ||
-                          weight > 500
+                  final weight = parseDecimal(value);
+                  return weight == null || weight <= 0 || weight > 500
                       ? l10n.weightValueError
                       : null;
                 },

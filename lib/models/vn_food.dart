@@ -40,6 +40,18 @@ class VnComponent {
       fatPer100g != null;
 
   String name(String languageCode) => languageCode == 'vi' ? nameVi : nameEn;
+
+  /// This component as a food the diary logs by weight, searchable by both
+  /// names and starting at one natural unit when it has one.
+  Map<String, dynamic> toFoodMap(String languageCode) => {
+        'name': name(languageCode),
+        'search': '$nameVi $nameEn',
+        'calories_per_100g': kcalPer100g,
+        'protein_g': proteinPer100g,
+        'carb_g': carbPer100g,
+        'fat_g': fatPer100g,
+        if (unitGrams != null) 'unit_grams': unitGrams,
+      };
 }
 
 /// The usual amount of one component in a dish: grams or natural units.

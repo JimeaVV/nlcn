@@ -1087,4 +1087,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalGainShort => 'Gain';
+
+  @override
+  String get processingButton => 'PROCESSING...';
+
+  @override
+  String get planAlreadySaved => 'SAVED';
+
+  @override
+  String proteinGrams(String value) {
+    return '$value g protein';
+  }
+
+  @override
+  String kcalProteinLine(String kcal, String protein) {
+    return '$kcal kcal • P $protein g';
+  }
+
+  @override
+  String mealMacroLine(String kcal, String protein, String carbs, String fat) {
+    return '$kcal kcal • P $protein g • C $carbs g • F $fat g';
+  }
+
+  @override
+  String get repsRange => 'Enter 0 to 30';
 }

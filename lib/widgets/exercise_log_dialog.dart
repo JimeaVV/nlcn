@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
 import '../l10n/l10n.dart';
+import '../core/number_input.dart';
 
 class ExerciseLogInput {
   const ExerciseLogInput({
@@ -51,7 +52,7 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
     Navigator.pop(
       context,
       ExerciseLogInput(
-        currentWeight: double.parse(weightController.text.trim()),
+        currentWeight: parseDecimal(weightController.text)!,
         set1Reps: int.parse(set1Controller.text.trim()),
         set2Reps: int.parse(set2Controller.text.trim()),
         set3Reps: int.parse(set3Controller.text.trim()),
@@ -85,11 +86,8 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
                   labelText: l10n.currentLoadKg,
                 ),
                 validator: (value) {
-                  final number = double.tryParse(value?.trim() ?? '');
-                  if (number == null ||
-                      !number.isFinite ||
-                      number < 0 ||
-                      number > 1000) {
+                  final number = parseDecimal(value);
+                  if (number == null || number < 0 || number > 1000) {
                     return l10n.currentLoadError;
                   }
                   return null;
@@ -170,7 +168,9 @@ class _RepField extends StatelessWidget {
       decoration: InputDecoration(labelText: label),
       validator: (value) {
         final number = int.tryParse(value?.trim() ?? '');
-        if (number == null || number < 0 || number > 30) return '0–30';
+        if (number == null || number < 0 || number > 30) {
+          return context.l10n.repsRange;
+        }
         return null;
       },
     );

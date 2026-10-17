@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../l10n/l10n.dart';
 
 class NeonButton extends StatelessWidget {
   const NeonButton({
@@ -36,7 +37,7 @@ class NeonButton extends StatelessWidget {
                 ),
               )
             : Icon(icon),
-        label: Text(loading ? 'PROCESSING...' : label),
+        label: Text(loading ? context.l10n.processingButton : label),
         style: FilledButton.styleFrom(
           backgroundColor: resolvedColor,
           foregroundColor: CyberColors.background,

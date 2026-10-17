@@ -658,7 +658,7 @@
   "scanChooseDish": "Chọn món",
   "scanOtherDish": "Món khác",
   "scanNoGuess": "Chưa nhận ra món, hãy chọn món đúng với ảnh.",
-  "scanLowConfidence": "Model chưa chắc chắn, hãy chọn đúng món.",
+  "scanLowConfidence": "Ứng dụng chưa chắc chắn, hãy chọn đúng món.",
   "scanComponentsTitle": "Thành phần",
   "scanMaybe": "Có thể có",
   "scanAddComponent": "Thêm thành phần",
@@ -715,5 +715,44 @@
   "showFewerWeights": "Thu gọn",
   "goalLoseShort": "Giảm mỡ",
   "goalMaintainShort": "Giữ cân",
-  "goalGainShort": "Tăng cân"
+  "goalGainShort": "Tăng cân",
+  "processingButton": "ĐANG XỬ LÝ...",
+  "planAlreadySaved": "ĐÃ LƯU",
+  "proteinGrams": "{value} g protein",
+  "@proteinGrams": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "kcalProteinLine": "{kcal} kcal • protein {protein} g",
+  "@kcalProteinLine": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "mealMacroLine": "{kcal} kcal • protein {protein} g • tinh bột {carbs} g • béo {fat} g",
+  "@mealMacroLine": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      },
+      "carbs": {
+        "type": "String"
+      },
+      "fat": {
+        "type": "String"
+      }
+    }
+  },
+  "repsRange": "Nhập từ 0 đến 30"
 }

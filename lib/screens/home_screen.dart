@@ -54,6 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // the first photo.
   late final Future<FoodRecognizer> recognizer = loadFoodRecognizer();
 
+  /// Set while Scan is open, so a double tap cannot open a second camera.
+  bool _scanning = false;
+
   void _select(_Section value) {
     setState(() => section = value);
     switch (value) {
@@ -86,11 +89,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _scan() async {
-    final model = await recognizer;
-    if (!mounted) return;
-    final logged = await Navigator.of(context).push<bool>(MaterialPageRoute(
-      builder: (_) => ScanScreen(datasets: datasets, recognizer: model),
-    ));
+    if (_scanning) return;
+    _scanning = true;
+    final bool? logged;
+    try {
+      final model = await recognizer;
+      if (!mounted) return;
+      logged = await Navigator.of(context).push<bool>(MaterialPageRoute(
+        builder: (_) => ScanScreen(datasets: datasets, recognizer: model),
+      ));
+    } finally {
+      _scanning = false;
+    }
     if (logged != true || !mounted) return;
     _openFoodTab(_FoodTab.diary);
     diaryKey.currentState?.refresh();

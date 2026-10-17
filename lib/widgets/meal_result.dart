@@ -110,10 +110,11 @@ class MealResult extends StatelessWidget {
                               style: TextStyle(color: CyberColors.text)),
                         )),
                     const SizedBox(height: 8),
-                    Text('${format(meal.calories)} kcal • '
-                        'P ${format(meal.protein, 1)} g • '
-                        'C ${format(meal.carbohydrates, 1)} g • '
-                        'F ${format(meal.fat, 1)} g'),
+                    Text(context.l10n.mealMacroLine(
+                        format(meal.calories),
+                        format(meal.protein, 1),
+                        format(meal.carbohydrates, 1),
+                        format(meal.fat, 1))),
                   ],
                 ),
               );

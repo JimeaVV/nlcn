@@ -482,4 +482,25 @@ void main() {
     await storage.clearAllHistory();
     expect(await storage.getFoodLog(DateTime.now()), hasLength(1));
   });
+
+  test('saving a new goal does not log an extra weigh-in', () async {
+    final storage = openService();
+    await storage.saveUserProfile(_profile(weight: 70),
+        recordedAt: DateTime(2024, 5, 1, 9));
+    // Weeks later only the goal changes; the form still shows 70 kg.
+    await storage.saveUserProfile(
+        _profile(weight: 70, goal: NutritionGoal.lose),
+        recordedAt: DateTime(2024, 5, 20, 9));
+    final history = await storage.getWeightHistory();
+    expect(history, hasLength(1));
+    expect(history.single.recordedAt, DateTime(2024, 5, 1));
+    expect((await storage.getProfile())!['goal'], 'lose');
+
+    // A different weight in the form is a new measurement.
+    await storage.saveUserProfile(
+        _profile(weight: 69.5, goal: NutritionGoal.lose),
+        recordedAt: DateTime(2024, 5, 21, 9));
+    expect(await storage.getWeightHistory(), hasLength(2));
+    expect((await storage.getProfile())!['weight'], 69.5);
+  });
 }

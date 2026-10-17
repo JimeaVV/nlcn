@@ -970,7 +970,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get scanNoGuess => 'Chưa nhận ra món, hãy chọn món đúng với ảnh.';
 
   @override
-  String get scanLowConfidence => 'Model chưa chắc chắn, hãy chọn đúng món.';
+  String get scanLowConfidence => 'Ứng dụng chưa chắc chắn, hãy chọn đúng món.';
 
   @override
   String get scanComponentsTitle => 'Thành phần';
@@ -1078,4 +1078,28 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get goalGainShort => 'Tăng cân';
+
+  @override
+  String get processingButton => 'ĐANG XỬ LÝ...';
+
+  @override
+  String get planAlreadySaved => 'ĐÃ LƯU';
+
+  @override
+  String proteinGrams(String value) {
+    return '$value g protein';
+  }
+
+  @override
+  String kcalProteinLine(String kcal, String protein) {
+    return '$kcal kcal • protein $protein g';
+  }
+
+  @override
+  String mealMacroLine(String kcal, String protein, String carbs, String fat) {
+    return '$kcal kcal • protein $protein g • tinh bột $carbs g • béo $fat g';
+  }
+
+  @override
+  String get repsRange => 'Nhập từ 0 đến 30';
 }

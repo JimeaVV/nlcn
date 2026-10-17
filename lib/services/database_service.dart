@@ -238,7 +238,18 @@ class DatabaseService {
       {...profile.toMap(), 'id': 1, 'updated_at': updatedAt},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    await _upsertWeight(txn, profile.weight, date, updatedAt);
+    // Saving a new goal must not invent a weigh-in: only a weight that
+    // differs from the latest recorded one counts as measured on [date].
+    final latest = await txn.query(
+      'weight_history',
+      columns: ['weight_kg'],
+      orderBy: 'recorded_date desc',
+      limit: 1,
+    );
+    final unchanged = latest.isNotEmpty &&
+        ((latest.first['weight_kg'] as num).toDouble() - profile.weight).abs() <
+            0.005;
+    if (!unchanged) await _upsertWeight(txn, profile.weight, date, updatedAt);
     await _synchronizeProfileWeight(txn, updatedAt);
   }
 
