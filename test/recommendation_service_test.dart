@@ -81,8 +81,9 @@ void main() {
     expect(result.bmr, 1694);
     expect(result.tdee, 2625);
     expect(result.targetCalories, 2625);
+    // 2625 kcal is above the snack threshold of the Vietnamese planner.
     expect(result.plan.meals.keys,
-        unorderedEquals(['Breakfast', 'Lunch', 'Dinner']));
+        unorderedEquals(['Breakfast', 'Lunch', 'Dinner', 'Snack']));
     expect(result.plan.totalCalories, greaterThan(0));
     expect(result.plan.totalCalories, lessThanOrEqualTo(2625 * 1.12 + 0.1));
     final roundTrip = DietRecommendation.fromJson(
@@ -102,8 +103,24 @@ void main() {
     expect(result.exercises.map((item) => item.name).toSet().length,
         result.exercises.length);
     expect(result.requestedLevel, 'Beginner');
-    expect(result.levelFallbackUsed, isTrue);
-    expect(result.usedLevels, contains('Intermediate'));
+    // Push has machine, cable and bodyweight work tagged Beginner, so a
+    // beginner no longer borrows Intermediate exercises.
+    expect(result.levelFallbackUsed, isFalse);
+    expect(result.usedLevels, ['Beginner']);
+  });
+
+  test('every level and muscle group in the bundled data is reachable',
+      () async {
+    final service = RecommendationService();
+    final pro = await service.recommendWorkout(
+        split: 'Legs', level: 'Pro', minutes: 120);
+    expect(pro.usedLevels, contains('Pro'));
+    final pull = await service.recommendWorkout(
+        split: 'Pull', level: 'Intermediate', minutes: 120);
+    expect(pull.exercises.map((e) => e.name), contains(contains('shrug')));
+    final legs = await service.recommendWorkout(
+        split: 'Legs', level: 'Beginner', minutes: 120);
+    expect(legs.exercises.map((e) => e.name), anyElement(startsWith('Thigh')));
   });
 
   test('manual calories and protein survive the worker and saved response',

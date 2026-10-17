@@ -61,6 +61,7 @@ class WorkoutLogEntry {
     required this.set1Reps,
     required this.set2Reps,
     required this.set3Reps,
+    this.difficulty = '',
     required this.suggestedWeight,
     required this.suggestedReps,
     this.action = '',
@@ -76,6 +77,7 @@ class WorkoutLogEntry {
       set1Reps: _integer(row['set_1_reps']),
       set2Reps: _integer(row['set_2_reps']),
       set3Reps: _integer(row['set_3_reps']),
+      difficulty: '${row['difficulty'] ?? ''}',
       suggestedWeight: _number(row['suggested_weight']),
       suggestedReps: _integer(row['suggested_reps']),
       action: '${row['action'] ?? ''}',
@@ -90,6 +92,9 @@ class WorkoutLogEntry {
   final int set1Reps;
   final int set2Reps;
   final int set3Reps;
+
+  /// Easy, Moderate, Hard or Failure, as the user rated the session.
+  final String difficulty;
   final double suggestedWeight;
   final int suggestedReps;
   final String action;

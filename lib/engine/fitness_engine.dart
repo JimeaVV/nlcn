@@ -8,8 +8,15 @@ import 'number_utils.dart';
 const workoutExerciseLimits = {'Beginner': 5, 'Intermediate': 7, 'Pro': 9};
 const _splitMuscles = {
   'Push': ['Chest', 'Shoulders', 'Triceps'],
-  'Pull': ['Back', 'Biceps', 'Lats', 'Forearms'],
-  'Legs': ['Quadriceps', 'Hamstrings', 'Calves', 'Glutes'],
+  'Pull': ['Back', 'Biceps', 'Lats', 'Forearms', 'Traps'],
+  'Legs': [
+    'Quadriceps',
+    'Hamstrings',
+    'Calves',
+    'Glutes',
+    'Adductors',
+    'Abductors',
+  ],
   'Core': ['Abdominals'],
 };
 const _levelRanks = {'beginner': 0, 'intermediate': 1, 'pro': 2};
@@ -155,11 +162,20 @@ Map<String, dynamic> recommendWorkoutRoutine(
   };
 }
 
+/// Suggests the next session for one exercise from 3 working sets.
+///
+/// Loads move in 2.5 kg steps, the smallest plate pair in a gym. With
+/// [twoSessionRule] the load only goes up after two sessions in a row at
+/// the same load reached 3x12 comfortably: the app passes the previous
+/// session as [previousSession] (`weight`, `reps`, `difficulty`), or null
+/// when there is none. Bodyweight work (0 kg) progresses by reps instead.
 Map<String, dynamic> suggestProgressiveOverload({
   required String exerciseName,
   required double currentWeight,
   required List<int> repsPerSet,
   required String difficulty,
+  bool twoSessionRule = false,
+  Map<String, dynamic>? previousSession,
 }) {
   if (exerciseName.isEmpty || exerciseName.runes.length > 200) {
     throw ArgumentError(
@@ -172,32 +188,52 @@ Map<String, dynamic> suggestProgressiveOverload({
   if (repsPerSet.any((reps) => reps < 0 || reps > 30)) {
     throw ArgumentError('Each set must contain between 0 and 30 reps.');
   }
-  if (!{'Easy', 'Moderate', 'Hard', 'Failure'}.contains(difficulty)) {
+  if (!_difficulties.contains(difficulty)) {
     throw ArgumentError('Difficulty must be Easy, Moderate, Hard or Failure.');
   }
   final totalReps = repsPerSet.fold(0, (sum, reps) => sum + reps);
   final completed = repsPerSet.every((reps) => reps >= 12);
   final belowMinimum = repsPerSet.any((reps) => reps < 8);
+  final bodyweight = currentWeight == 0;
   var nextWeight = currentWeight;
   var nextRepTarget = 12;
   late String action;
   late String message;
   if (completed && (difficulty == 'Easy' || difficulty == 'Moderate')) {
-    nextWeight += 2.5;
-    nextRepTarget = 8;
-    action = 'increase_weight';
-    message = 'Completed 3x12 with manageable difficulty. Increase the load by '
-        '2.5kg next session and restart within the 8-12 rep range.';
-  } else if (completed && difficulty == 'Hard') {
+    if (bodyweight) {
+      nextRepTarget = math.min(30, repsPerSet.reduce(math.max) + 2);
+      action = 'increase_reps_bodyweight';
+      message = 'Completed 3x12 without added load. Add 2 reps per set next '
+          'session, or move to a harder variation.';
+    } else if (twoSessionRule &&
+        !_comfortableAtTarget(previousSession, currentWeight)) {
+      action = 'confirm_increase';
+      message = 'First comfortable 3x12 at this load. Repeat it once more; '
+          'if it is comfortable again, add 2.5kg.';
+    } else {
+      nextWeight += 2.5;
+      nextRepTarget = 8;
+      action = 'increase_weight';
+      message = 'Completed 3x12 with manageable difficulty. Increase the load '
+          'by 2.5kg next session and restart within the 8-12 rep range.';
+    }
+  } else if (completed) {
+    // Hard, or reached failure only on the last reps: the target was met.
     action = 'maintain_weight';
     message = 'Completed 3x12, but effort was high. Keep the same load for one '
         'more session before increasing it.';
-  } else if (difficulty == 'Failure' || totalReps < 24 || belowMinimum) {
-    nextWeight = math.max(0, currentWeight - 2.5);
+  } else if (difficulty == 'Failure' || belowMinimum) {
     nextRepTarget = 8;
-    action = 'decrease_weight';
-    message = 'Performance fell below the target rep range. Reduce the load by '
-        '2.5kg and prioritize controlled technique.';
+    if (bodyweight) {
+      action = 'decrease_reps_bodyweight';
+      message = 'Performance fell below the target rep range. Aim for 8 clean '
+          'reps per set, or use an easier variation.';
+    } else {
+      nextWeight = math.max(0, currentWeight - 2.5);
+      action = 'decrease_weight';
+      message = 'Performance fell below the target rep range. Reduce the load '
+          'by 2.5kg and prioritize controlled technique.';
+    }
   } else {
     action = 'increase_reps';
     message =
@@ -224,6 +260,21 @@ Map<String, dynamic> suggestProgressiveOverload({
       'message': message,
     },
   };
+}
+
+const _difficulties = {'Easy', 'Moderate', 'Hard', 'Failure'};
+
+/// Whether [session] reached 3x12 comfortably at [weight].
+bool _comfortableAtTarget(Map<String, dynamic>? session, double weight) {
+  if (session == null) return false;
+  final reps = session['reps'];
+  final previousWeight = session['weight'];
+  return previousWeight is num &&
+      (previousWeight - weight).abs() < 0.01 &&
+      reps is List &&
+      reps.length == 3 &&
+      reps.every((r) => r is int && r >= 12) &&
+      (session['difficulty'] == 'Easy' || session['difficulty'] == 'Moderate');
 }
 
 void _validateNumber(double value, String name, double minimum, double maximum,

@@ -36,7 +36,7 @@ void main() {
       // A single-item dish keeps all of its nutrition in the base row.
       expect(data.dish('banh_tet')!.parts.map((part) => part.component),
           ['_base_banh_tet']);
-      expect(data.addableComponents, hasLength(24));
+      expect(data.addableComponents, hasLength(25));
     });
 
     test('rejects unknown components and negative numbers', () {

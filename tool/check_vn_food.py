@@ -18,6 +18,11 @@ COMPONENT_HEADER = ['code', 'name_vi', 'name_en', 'kcal_per_100g', 'protein_g',
                     'carb_g', 'fat_g', 'unit_name_vi', 'unit_grams', 'source']
 DISH_HEADER = ['dish', 'component', 'default_grams', 'default_units']
 NAME_HEADER = ['code', 'name_vi', 'name_en']
+PLAN_HEADER = ['code', 'kind', 'slots', 'goals', 'note']
+DISH_KINDS = {'dish', 'combo', 'soup'}
+COMPONENT_KINDS = {'staple', 'main', 'side'}
+SLOTS = {'breakfast', 'lunch', 'dinner', 'snack'}
+GOALS = {'lose', 'maintain', 'gain'}
 NUTRIENTS = ['kcal_per_100g', 'protein_g', 'carb_g', 'fat_g']
 
 
@@ -134,6 +139,30 @@ def main():
     for dish in dishes:
         if not any(row['dish'] == dish for row in rows):
             missing.append(f'{dish}: no components in dishes.csv')
+
+    # meal_plan.csv: what the meal planner may suggest, for which meal and goal.
+    plan = read(DATA / 'meal_plan.csv', PLAN_HEADER)
+    seen = set()
+    nourishing = {row['code'] for row in components
+                  if all(row[key].strip() for key in NUTRIENTS)}
+    for row in plan:
+        code, kind = row['code'], row['kind']
+        where = f'meal_plan.csv {code}'
+        if code in seen:
+            errors.append(f'{where}: listed twice')
+        seen.add(code)
+        if kind in DISH_KINDS:
+            if code not in dishes:
+                errors.append(f'{where}: {kind} must be a contract dish')
+        elif kind in COMPONENT_KINDS:
+            if code not in nourishing:
+                errors.append(f'{where}: {kind} must be a component with nutrition')
+        else:
+            errors.append(f'{where}: unknown kind {kind}')
+        for name, allowed in (('slots', SLOTS), ('goals', GOALS)):
+            values = [v for v in row[name].split('|') if v]
+            if not values or any(v not in allowed for v in values):
+                errors.append(f'{where}: {name} must be from {sorted(allowed)}')
 
     print(f'Components with nutrition: {filled}/{len(components)}')
     print(f'Dish rows with a default portion: {defaults}/{len(rows)}')

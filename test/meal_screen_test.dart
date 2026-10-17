@@ -48,6 +48,7 @@ class _Recommendations extends RecommendationService {
     double? calorieOverride,
     double? proteinOverride,
     int? seed,
+    String languageCode = 'vi',
   }) {
     requests.add(UserProfile(
         age: age,

@@ -600,6 +600,112 @@ commit và kết quả kiểm thử.
   - tìm món Việt trong Nhật ký;
   - chạy model không chồng lên nhau;
   - lưu thực đơn một lần.
+
+### 2026-10-18 · Thực đơn món Việt (đợt 2, phần 1)
+- **Vấn đề:** planner cũ chọn từ 160 nguyên liệu tiếng Anh, ra kiểu "75 g
+  yến mạch sống + ức gà", không ai ăn theo được.
+- **Cách làm, chốt cùng nhóm:**
+  - **Bữa sáng:** ăn nguyên món (phở, bánh mì, xôi…), chỉnh số suất.
+  - **Trưa/tối:** món nguyên, hoặc **cơm phần** do Branch & Bound ghép: cơm
+    (theo chén), 1–2 món mặn, rau, canh tuỳ chọn.
+  - **Bảng tag `meal_plan.csv`:** món nào hợp bữa nào và mục tiêu nào.
+    - Đang giảm cân thì **không** gợi ý phở, bánh mì, xôi, bánh cuốn, cơm
+      tấm…: không ai cutting mà ăn các món đó.
+    - Giảm cân: cơm **tính theo gram** (người cutting thường cân cơm), mỗi
+      bữa 100–200 g; chỉ món nạc (gà, cá, tôm, đậu hũ, trứng luộc, thịt
+      bò).
+    - Tag nằm trong CSV, sửa được mà không cần sửa code.
+  - **Thêm thành phần `ga_chien`** (contract v1.2): cơm gà ở quán thường là
+    gà chiên hoặc xối mỡ. Tính như gà luộc sẽ thiếu nhiều calo. Số liệu
+    lấy theo USDA FNDDS 2705996.
+  - Planner cũ (nguyên liệu tiếng Anh) vẫn giữ trong code; app dùng planner
+    mới.
+- **Cải tiến Branch & Bound:**
+  - **Cận dưới theo calo:** từ calo ít nhất và nhiều nhất các nhóm còn lại
+    có thể thêm, tính được sai số calo nhỏ nhất còn có thể đạt. Cộng với
+    cận protein cũ, nhánh nào chắc chắn không tốt hơn lời giải đang có thì
+    cắt.
+  - Món nguyên tốt nhất được dùng làm lời giải ban đầu cho cơm phần.
+  - **Seed thay cho giới hạn thời gian:**
+    - Mỗi lần bấm, app bốc một seed ngẫu nhiên mới nên thực đơn vẫn mỗi lần
+      một khác.
+    - Giới hạn tìm kiếm đổi từ 1,5 giây sang tối đa 300.000 nút, nên cùng
+      seed thì máy nào cũng ra cùng thực đơn. Seed được lưu kèm thực đơn.
+- **Kết quả đo** (`dart run tool/bench_meal_planner.dart`, 150 hồ sơ thật
+  mỗi mục tiêu: 2 giới, 5 mức cân nặng, 3 mức vận động, 5 seed):
+
+  | Mục tiêu | Đạt mục tiêu | Số nút: chỉ cận protein | Số nút: thêm cận calo | Giảm | Chất lượng giống nhau |
+  |---|---|---|---|---|---|
+  | Giảm cân | 106/150 | 31.242 | 19.809 | 1,6 lần | 150/150 |
+  | Giữ cân | 129/150 | 17.576 | 8.435 | 2,1 lần | 150/150 |
+  | Tăng cân | 128/150 | 19.336 | 9.322 | 2,1 lần | 150/150 |
+
+  - Lập một thực đơn cả ngày mất khoảng 1 ms.
+  - "Đạt mục tiêu" nghĩa là calo trong ±5% và protein từ −10% đến +20%.
+- **Tinh chỉnh dựa trên số đo:**
+  - Bản đầu chỉ có 17/150 thực đơn giảm cân đạt. Lý do: người vận động
+    nhiều có mục tiêu giảm cân 2.200–2.700 kcal mà chỉ được 1 chén cơm mỗi
+    bữa. Đã sửa (cùng góp ý của nhóm: TDEE cao thì ăn 1,5–2 chén vẫn ổn):
+    - bữa sáng nhẹ hơn (25%), trưa và tối mỗi bữa 37,5%;
+    - cháo hoặc gỏi cuốn được tới 2 suất;
+    - cơm tính theo gram: bữa tới 600 kcal tối đa 200 g, bữa lớn hơn tới
+      300 g (khoảng 2 chén);
+    - bắp nướng làm bữa phụ.
+    - Kết quả lên 106/150; phần còn hụt là người vận động rất nhiều (hệ số
+      1,9).
+  - Mục tiêu từ 2.600 kcal có thêm **bữa phụ** (bắp nướng, bánh tét, xôi,
+    tàu hũ).
+  - **Ngưỡng protein thống nhất:** planner chấp nhận protein dư tới 20%
+    nhưng nhãn "đạt mục tiêu" chỉ cho 10%, nên có thực đơn planner coi là
+    tốt mà app lại báo chưa đạt. Giờ cả hai cùng dùng −10% đến +20%.
+- **Kiểm thử:** 145 test pass.
+  - Thêm `vn_meal_planner_test.dart`, gồm:
+    - cùng seed ra cùng thực đơn;
+    - giảm cân không có món nặng, cơm ≤ 1 chén;
+    - cận calo không làm đổi kết quả;
+    - hết ngân sách nút vẫn trả về thực đơn.
+  - `check_vn_food.py` kiểm tra thêm `meal_plan.csv`.
+
+### 2026-10-18 · Progressive Overload theo lịch sử tập (đợt 2, phần 2)
+- **Giữ bước tăng 2,5 kg** (theo góp ý của nhóm): ngoài phòng gym không có
+  bánh tạ nhỏ hơn, nên tăng theo % là không thực tế.
+- **Luật 2 buổi:** chỉ tăng tạ khi buổi này **và** buổi trước của cùng bài,
+  cùng mức tạ, đều đạt 3×12 với độ khó Dễ hoặc Vừa. Mới đạt lần đầu thì app
+  khuyên "tập lại mức này thêm một buổi". Tránh trường hợp hôm nay khoẻ bất
+  thường là tăng tạ liền.
+  - App lấy buổi gần nhất của bài đó trong lịch sử tập. Cột `difficulty`
+    đã có sẵn trong database, chỉ cần đọc ra.
+- **Bài không tạ (0 kg):** đạt 3×12 thì khuyên **thêm 2 lần mỗi hiệp** hoặc
+  chuyển biến thể khó hơn, thay vì "tăng 2,5 kg"; chưa đạt thì khuyên nhắm 8
+  lần đúng kỹ thuật, thay vì "giảm 2,5 kg".
+- **Sửa luật:** đạt đủ 3×12 nhưng chọn "Kiệt sức" trước đây bị khuyên giảm
+  tạ. Giờ đổi thành giữ nguyên mức tạ, vì mục tiêu đã đạt.
+- Bỏ điều kiện thừa `tổng số lần < 24`: điều kiện này chỉ đúng khi có hiệp
+  dưới 8 lần, mà trường hợp đó đã được kiểm tra riêng.
+- **Kiểm thử:** 138 test pass, gồm luật 2 buổi (khác mức tạ, buổi trước
+  nặng, buổi trước thiếu lần đều không tính) và bài không tạ.
+
+### 2026-10-18 · Gán lại cấp độ cho 96 bài tập (đợt 2, phần 3)
+- **Giữ bộ 96 bài** (quyết định của nhóm): bộ 2.918 bài có nhiều bài ít
+  người tập, nên chỉ giữ những bài phổ biến nhất cho mỗi nhóm cơ.
+- **Vấn đề:** trong 96 bài chỉ có 7 bài Beginner và 0 bài Pro, nên người chọn
+  Beginner hoặc Pro gần như luôn nhận bài Intermediate.
+- **Cách sửa:** gán lại cấp cho 42 bài theo nguyên tắc:
+  - máy, cáp, cô lập, thân người đơn giản là **Beginner**;
+  - bài nặng, đòi kỹ thuật (deadlift, front squat, dip, glute ham raise,
+    hanging leg raise…) là **Pro**.
+  - Nhóm đã duyệt từng dòng, chi tiết trong [CAP_DO_BAI_TAP.md](CAP_DO_BAI_TAP.md).
+  - Sau khi sửa: 38 Beginner, 49 Intermediate, 9 Pro; buổi nào cũng có đủ cả
+    3 cấp.
+  - Cấp độ trong app là **ưu tiên mềm**: đúng cấp 6 điểm, lệch 1 cấp 3 điểm.
+    Gán lại cấp không làm mất bài của ai.
+- **Nhóm cơ bị bỏ sót:** cầu vai (shrug) và đùi trong/ngoài (máy khép, mở
+  đùi) không nằm trong buổi nào nên không bao giờ được gợi ý. Đã cho cầu vai
+  vào Pull, đùi trong/ngoài vào Legs.
+- Sửa ở file gốc `backend/data/gym-ex-dataset.csv` rồi sinh lại asset. Đã
+  kiểm tra chỉ 42 dòng cấp độ thay đổi, dữ liệu thực phẩm giữ nguyên.
+- **Kiểm thử:** người mới tập Push giờ nhận toàn bài Beginner; Pro nhận được
+  bài Pro; shrug và máy khép/mở đùi được gợi ý.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.

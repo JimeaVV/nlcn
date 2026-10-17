@@ -134,6 +134,7 @@ class MealScreenState extends State<MealScreen> {
         goal: profile.goal,
         calorieOverride: profile.calorieOverride,
         proteinOverride: profile.proteinOverride,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
       if (mounted && generation == _generation) {
         setState(() => _result = result);

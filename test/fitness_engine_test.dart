@@ -215,16 +215,67 @@ void main() {
     });
 
     test('reduces load on failure or any low set, never below zero', () {
-      for (final reps in [
-        [12, 12, 12],
-        [10, 10, 10]
-      ]) {
-        expect(recommend(reps, 'Failure')['data']['action'], 'decrease_weight');
-      }
+      expect(recommend([10, 10, 10], 'Failure')['data']['action'],
+          'decrease_weight');
+      // Reaching 3x12 even at failure met the target: keep the load.
+      expect(recommend([12, 12, 12], 'Failure')['data']['action'],
+          'maintain_weight');
       expect(recommend([7, 12, 12], 'Easy')['data']['next_weight'], 47.5);
       final result = recommend([7, 8, 8], 'Hard', weight: 1)['data'];
       expect(result['next_weight'], 0.0);
       expect(result['next_rep_target'], 8);
+    });
+
+    test('with history, the load rises only after two good sessions', () {
+      Map<String, dynamic> next(Map<String, dynamic>? previous) =>
+          suggestProgressiveOverload(
+            exerciseName: 'Bench Press',
+            currentWeight: 50,
+            repsPerSet: const [12, 12, 12],
+            difficulty: 'Moderate',
+            twoSessionRule: true,
+            previousSession: previous,
+          )['data'] as Map<String, dynamic>;
+      final first = next(null);
+      expect(first['action'], 'confirm_increase');
+      expect(first['next_weight'], 50.0);
+      expect(
+          next({
+            'weight': 50.0,
+            'reps': [12, 13, 12],
+            'difficulty': 'Easy',
+          })['next_weight'],
+          52.5);
+      // A good session at another load, or a hard one, does not count.
+      for (final previous in [
+        {
+          'weight': 47.5,
+          'reps': [12, 12, 12],
+          'difficulty': 'Easy'
+        },
+        {
+          'weight': 50.0,
+          'reps': [12, 12, 12],
+          'difficulty': 'Hard'
+        },
+        {
+          'weight': 50.0,
+          'reps': [12, 11, 12],
+          'difficulty': 'Easy'
+        },
+      ]) {
+        expect(next(previous)['action'], 'confirm_increase');
+      }
+    });
+
+    test('bodyweight work progresses by reps, not by load', () {
+      final easy = recommend([12, 14, 12], 'Easy', weight: 0)['data'];
+      expect(easy['action'], 'increase_reps_bodyweight');
+      expect(easy['next_weight'], 0.0);
+      expect(easy['next_rep_target'], 16);
+      final failed = recommend([6, 5, 5], 'Failure', weight: 0)['data'];
+      expect(failed['action'], 'decrease_reps_bodyweight');
+      expect(failed['next_rep_target'], 8);
     });
 
     test('matches Python float rounding including halfway and binary cases',

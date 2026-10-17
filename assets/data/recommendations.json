@@ -1815,25 +1815,25 @@
       "name": "Pushups",
       "muscle_group": "Chest",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Chest dip",
       "muscle_group": "Chest",
       "equipment": "Other",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Machine chest press",
       "muscle_group": "Chest",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Machine chest fly",
       "muscle_group": "Chest",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Pullups",
@@ -1851,13 +1851,13 @@
       "name": "Lat pull-down",
       "muscle_group": "Lats",
       "equipment": "Cable",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Close-grip pull-down",
       "muscle_group": "Lats",
       "equipment": "Cable",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Straight-Arm Pulldown",
@@ -1875,7 +1875,7 @@
       "name": "One-Arm Dumbbell Row",
       "muscle_group": "Middle Back",
       "equipment": "Dumbbell",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "T-Bar Row",
@@ -1887,7 +1887,7 @@
       "name": "Seated Cable Rows",
       "muscle_group": "Middle Back",
       "equipment": "Cable",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Machine seated row",
@@ -1899,7 +1899,7 @@
       "name": "Barbell deadlift",
       "muscle_group": "Lower Back",
       "equipment": "Barbell",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Back extension",
@@ -1935,13 +1935,13 @@
       "name": "Dumbbell front raise",
       "muscle_group": "Shoulders",
       "equipment": "Dumbbell",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Dumbbell lateral raise",
       "muscle_group": "Shoulders",
       "equipment": "Dumbbell",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Side Lateral Raise",
@@ -1971,7 +1971,7 @@
       "name": "Machine shoulder press",
       "muscle_group": "Shoulders",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Barbell shrug",
@@ -2001,13 +2001,13 @@
       "name": "Dumbbell Bicep Curl",
       "muscle_group": "Biceps",
       "equipment": "Dumbbell",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Hammer Curls",
       "muscle_group": "Biceps",
       "equipment": "Dumbbell",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Alternate Incline Dumbbell Curl",
@@ -2031,7 +2031,7 @@
       "name": "Standing Biceps Cable Curl",
       "muscle_group": "Biceps",
       "equipment": "Cable",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Cable rope hammer curl",
@@ -2073,13 +2073,13 @@
       "name": "Triceps Pushdown",
       "muscle_group": "Triceps",
       "equipment": "Cable",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Cable V-bar push-down",
       "muscle_group": "Triceps",
       "equipment": "Cable",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Rope overhead triceps extension",
@@ -2091,19 +2091,19 @@
       "name": "Parallel Bar Dip",
       "muscle_group": "Triceps",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Bench Dips",
       "muscle_group": "Triceps",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Machine Triceps Extension",
       "muscle_group": "Triceps",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Barbell back squat",
@@ -2115,19 +2115,19 @@
       "name": "Barbell front squat",
       "muscle_group": "Quadriceps",
       "equipment": "Barbell",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Leg Press",
       "muscle_group": "Quadriceps",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Hack Squat",
       "muscle_group": "Quadriceps",
       "equipment": "Barbell",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Barbell walking lunge",
@@ -2145,19 +2145,19 @@
       "name": "Barbell Bulgarian split squat",
       "muscle_group": "Quadriceps",
       "equipment": "Barbell",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Goblet Squat",
       "muscle_group": "Quadriceps",
       "equipment": "Kettlebells",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Leg Extensions",
       "muscle_group": "Quadriceps",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Romanian Deadlift",
@@ -2169,7 +2169,7 @@
       "name": "Stiff-Legged Deadlift",
       "muscle_group": "Hamstrings",
       "equipment": "Barbell",
-      "level": "Beginner"
+      "level": "Intermediate"
     },
     {
       "name": "Lying Leg Curls",
@@ -2181,13 +2181,13 @@
       "name": "Seated Leg Curl",
       "muscle_group": "Hamstrings",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Glute Ham Raise",
       "muscle_group": "Hamstrings",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Barbell Hip Thrust",
@@ -2199,7 +2199,7 @@
       "name": "Glute bridge",
       "muscle_group": "Glutes",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Cable Pull-Through",
@@ -2211,13 +2211,13 @@
       "name": "Thigh adductor",
       "muscle_group": "Adductors",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Thigh abductor",
       "muscle_group": "Abductors",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Kettlebell swing",
@@ -2235,49 +2235,49 @@
       "name": "Seated Calf Raise",
       "muscle_group": "Calves",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Calf Press On The Leg Press Machine",
       "muscle_group": "Calves",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Machine seated calf raise",
       "muscle_group": "Calves",
       "equipment": "Machine",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Crunch",
       "muscle_group": "Abdominals",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Sit-up",
       "muscle_group": "Abdominals",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Elbow plank",
       "muscle_group": "Abdominals",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Hanging leg raise",
       "muscle_group": "Abdominals",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Ab Roller",
       "muscle_group": "Abdominals",
       "equipment": "Other",
-      "level": "Intermediate"
+      "level": "Pro"
     },
     {
       "name": "Standing cable crunch",
@@ -2301,13 +2301,13 @@
       "name": "Mountain climber",
       "muscle_group": "Abdominals",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "Ab bicycle",
       "muscle_group": "Abdominals",
       "equipment": "Body Only",
-      "level": "Intermediate"
+      "level": "Beginner"
     },
     {
       "name": "V-up",

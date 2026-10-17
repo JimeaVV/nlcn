@@ -7,89 +7,89 @@ Incline dumbbell bench press,Chest,Dumbbell,Intermediate
 Dumbbell Flyes,Chest,Dumbbell,Intermediate
 Incline Dumbbell Flyes,Chest,Dumbbell,Intermediate
 Cable Crossover,Chest,Cable,Intermediate
-Pushups,Chest,Body Only,Intermediate
-Chest dip,Chest,Other,Intermediate
-Machine chest press,Chest,Machine,Intermediate
-Machine chest fly,Chest,Machine,Intermediate
+Pushups,Chest,Body Only,Beginner
+Chest dip,Chest,Other,Pro
+Machine chest press,Chest,Machine,Beginner
+Machine chest fly,Chest,Machine,Beginner
 Pullups,Lats,Body Only,Intermediate
 Chin-Up,Lats,Body Only,Intermediate
-Lat pull-down,Lats,Cable,Intermediate
-Close-grip pull-down,Lats,Cable,Intermediate
+Lat pull-down,Lats,Cable,Beginner
+Close-grip pull-down,Lats,Cable,Beginner
 Straight-Arm Pulldown,Lats,Cable,Intermediate
 Bent Over Barbell Row,Middle Back,Barbell,Intermediate
-One-Arm Dumbbell Row,Middle Back,Dumbbell,Intermediate
+One-Arm Dumbbell Row,Middle Back,Dumbbell,Beginner
 T-Bar Row,Middle Back,Other,Intermediate
-Seated Cable Rows,Middle Back,Cable,Intermediate
+Seated Cable Rows,Middle Back,Cable,Beginner
 Machine seated row,Lats,Machine,Beginner
-Barbell deadlift,Lower Back,Barbell,Intermediate
+Barbell deadlift,Lower Back,Barbell,Pro
 Back extension,Lower Back,Body Only,Intermediate
 Military press,Shoulders,Barbell,Intermediate
 Barbell Shoulder Press,Shoulders,Barbell,Intermediate
 Seated Dumbbell Press,Shoulders,Dumbbell,Intermediate
 Arnold press,Shoulders,Dumbbell,Intermediate
-Dumbbell front raise,Shoulders,Dumbbell,Intermediate
-Dumbbell lateral raise,Shoulders,Dumbbell,Intermediate
+Dumbbell front raise,Shoulders,Dumbbell,Beginner
+Dumbbell lateral raise,Shoulders,Dumbbell,Beginner
 Side Lateral Raise,Shoulders,Dumbbell,Intermediate
 Seated rear delt fly,Shoulders,Dumbbell,Intermediate
 Standing face pull,Shoulders,Cable,Intermediate
 Barbell upright row,Shoulders,Barbell,Intermediate
-Machine shoulder press,Shoulders,Machine,Intermediate
+Machine shoulder press,Shoulders,Machine,Beginner
 Barbell shrug,Traps,Barbell,Intermediate
 Standing dumbbell shrug,Traps,Dumbbell,Intermediate
 Barbell Curl,Biceps,Barbell,Intermediate
 EZ-Bar Curl,Biceps,E-Z Curl Bar,Intermediate
-Dumbbell Bicep Curl,Biceps,Dumbbell,Intermediate
-Hammer Curls,Biceps,Dumbbell,Intermediate
+Dumbbell Bicep Curl,Biceps,Dumbbell,Beginner
+Hammer Curls,Biceps,Dumbbell,Beginner
 Alternate Incline Dumbbell Curl,Biceps,Dumbbell,Intermediate
 Preacher Curl,Biceps,Barbell,Intermediate
 Concentration curl,Biceps,Dumbbell,Intermediate
-Standing Biceps Cable Curl,Biceps,Cable,Intermediate
+Standing Biceps Cable Curl,Biceps,Cable,Beginner
 Cable rope hammer curl,Biceps,Cable,Intermediate
 Machine Bicep Curl,Biceps,Machine,Beginner
 Close-grip bench press,Triceps,Barbell,Intermediate
 EZ-Bar Skullcrusher,Triceps,E-Z Curl Bar,Intermediate
 Seated triceps press,Triceps,Dumbbell,Intermediate
 Tricep Dumbbell Kickback,Triceps,Dumbbell,Intermediate
-Triceps Pushdown,Triceps,Cable,Intermediate
-Cable V-bar push-down,Triceps,Cable,Intermediate
+Triceps Pushdown,Triceps,Cable,Beginner
+Cable V-bar push-down,Triceps,Cable,Beginner
 Rope overhead triceps extension,Triceps,Cable,Intermediate
-Parallel Bar Dip,Triceps,Body Only,Intermediate
-Bench Dips,Triceps,Body Only,Intermediate
-Machine Triceps Extension,Triceps,Machine,Intermediate
+Parallel Bar Dip,Triceps,Body Only,Pro
+Bench Dips,Triceps,Body Only,Beginner
+Machine Triceps Extension,Triceps,Machine,Beginner
 Barbell back squat,Quadriceps,Barbell,Intermediate
-Barbell front squat,Quadriceps,Barbell,Intermediate
-Leg Press,Quadriceps,Machine,Intermediate
-Hack Squat,Quadriceps,Barbell,Intermediate
+Barbell front squat,Quadriceps,Barbell,Pro
+Leg Press,Quadriceps,Machine,Beginner
+Hack Squat,Quadriceps,Barbell,Pro
 Barbell walking lunge,Quadriceps,Barbell,Intermediate
 Dumbbell split squat,Quadriceps,Dumbbell,Intermediate
-Barbell Bulgarian split squat,Quadriceps,Barbell,Intermediate
-Goblet Squat,Quadriceps,Kettlebells,Intermediate
-Leg Extensions,Quadriceps,Machine,Intermediate
+Barbell Bulgarian split squat,Quadriceps,Barbell,Pro
+Goblet Squat,Quadriceps,Kettlebells,Beginner
+Leg Extensions,Quadriceps,Machine,Beginner
 Romanian Deadlift,Hamstrings,Barbell,Intermediate
-Stiff-Legged Deadlift,Hamstrings,Barbell,Beginner
+Stiff-Legged Deadlift,Hamstrings,Barbell,Intermediate
 Lying Leg Curls,Hamstrings,Machine,Beginner
-Seated Leg Curl,Hamstrings,Machine,Intermediate
-Glute Ham Raise,Hamstrings,Machine,Intermediate
+Seated Leg Curl,Hamstrings,Machine,Beginner
+Glute Ham Raise,Hamstrings,Machine,Pro
 Barbell Hip Thrust,Glutes,Barbell,Intermediate
-Glute bridge,Glutes,Body Only,Intermediate
+Glute bridge,Glutes,Body Only,Beginner
 Cable Pull-Through,Glutes,Cable,Beginner
-Thigh adductor,Adductors,Machine,Intermediate
-Thigh abductor,Abductors,Machine,Intermediate
+Thigh adductor,Adductors,Machine,Beginner
+Thigh abductor,Abductors,Machine,Beginner
 Kettlebell swing,Abdominals,Kettlebells,Intermediate
 Standing barbell calf raise,Calves,Barbell,Beginner
-Seated Calf Raise,Calves,Machine,Intermediate
-Calf Press On The Leg Press Machine,Calves,Machine,Intermediate
-Machine seated calf raise,Calves,Machine,Intermediate
-Crunch,Abdominals,Body Only,Intermediate
-Sit-up,Abdominals,Body Only,Intermediate
-Elbow plank,Abdominals,Body Only,Intermediate
-Hanging leg raise,Abdominals,Body Only,Intermediate
-Ab Roller,Abdominals,Other,Intermediate
+Seated Calf Raise,Calves,Machine,Beginner
+Calf Press On The Leg Press Machine,Calves,Machine,Beginner
+Machine seated calf raise,Calves,Machine,Beginner
+Crunch,Abdominals,Body Only,Beginner
+Sit-up,Abdominals,Body Only,Beginner
+Elbow plank,Abdominals,Body Only,Beginner
+Hanging leg raise,Abdominals,Body Only,Pro
+Ab Roller,Abdominals,Other,Pro
 Standing cable crunch,Abdominals,Cable,Intermediate
 Russian twist,Abdominals,Body Only,Intermediate
 Decline Crunch,Abdominals,Body Only,Intermediate
-Mountain climber,Abdominals,Body Only,Intermediate
-Ab bicycle,Abdominals,Body Only,Intermediate
+Mountain climber,Abdominals,Body Only,Beginner
+Ab bicycle,Abdominals,Body Only,Beginner
 V-up,Abdominals,Body Only,Intermediate
 Palms-up wrist curl over bench,Forearms,Barbell,Intermediate
 Palms-down wrist curl over bench,Forearms,Barbell,Intermediate
