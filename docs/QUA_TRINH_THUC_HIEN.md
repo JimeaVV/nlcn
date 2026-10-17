@@ -131,6 +131,24 @@ commit và kết quả kiểm thử.
 - Bắt đầu làm theo branch (`chore/week1-setup`) và Pull Request như đã thống
   nhất.
 
+### 2026-10-17 · Cài GitHub CLI, PR đầu tiên và CI
+- Cài **GitHub CLI** (`gh` 2.102.0) để mở, gộp và theo dõi Pull Request từ
+  terminal. PR #1 (đổi Application ID, khung dữ liệu dinh dưỡng) được gộp
+  vào `main` tại commit `5788c7b`.
+- Thêm **CI bằng GitHub Actions** (`.github/workflows/ci.yml`), chạy cho mỗi
+  PR vào `main` và mỗi lần push lên `main`:
+  - job `flutter`:
+    - kiểm tra file dịch trong `lib/l10n` khớp với `flutter gen-l10n`
+      (tránh quên sinh lại);
+    - chạy `flutter analyze` và `flutter test` trên máy Ubuntu sạch, cùng
+      phiên bản Flutter 3.44.4 với máy phát triển;
+  - job `data`: chạy `tool/check_vn_food.py` để kiểm tra bảng dinh dưỡng.
+- **Lý do:**
+  - nhóm 2 người cùng gộp code vào `main`;
+  - CI chạy trên môi trường sạch, nên bắt được lỗi kiểu "máy tui chạy được"
+    và lỗi chỉ xuất hiện khi gộp hai branch, kể cả khi ai đó quên tự chạy
+    test.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
