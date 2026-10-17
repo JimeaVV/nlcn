@@ -1111,4 +1111,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repsRange => 'Enter 0 to 30';
+
+  @override
+  String get overloadConfirmIncrease =>
+      'First comfortable 3×12 at this load. Repeat it once more; if it is comfortable again, add 2.5 kg.';
+
+  @override
+  String get overloadBodyweightReps =>
+      'You completed 3×12 without added load. Next session add 2 reps per set, or move to a harder variation.';
+
+  @override
+  String get overloadBodyweightDecrease =>
+      'Reps fell below the target range. Aim for 8 clean reps per set, or use an easier variation.';
 }

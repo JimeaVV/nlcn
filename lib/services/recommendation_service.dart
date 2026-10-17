@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../engine/meal_planner.dart';
 import '../engine/nutrition_targets.dart';
 import '../engine/recommendation_engine.dart';
+import '../models/history_models.dart';
 import '../models/recommendation_models.dart';
 import '../models/user_profile.dart';
 import 'dataset_repository.dart';
@@ -122,6 +123,8 @@ class RecommendationService {
     required int set2Reps,
     required int set3Reps,
     required String difficulty,
+    bool twoSessionRule = false,
+    WorkoutLogEntry? previousSession,
   }) =>
       _recommend(
           'overload',
@@ -132,6 +135,17 @@ class RecommendationService {
             'set_2_reps': set2Reps,
             'set_3_reps': set3Reps,
             'difficulty': difficulty,
+            'two_session_rule': twoSessionRule,
+            if (previousSession != null)
+              'previous_session': {
+                'weight': previousSession.weight,
+                'reps': [
+                  previousSession.set1Reps,
+                  previousSession.set2Reps,
+                  previousSession.set3Reps,
+                ],
+                'difficulty': previousSession.difficulty,
+              },
           },
           ProgressiveOverloadRecommendation.fromJson);
 

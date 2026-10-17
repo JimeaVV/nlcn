@@ -123,6 +123,9 @@ extension AppLocalizationsLabels on AppLocalizations {
         'maintain_weight' => overloadMaintainWeight,
         'decrease_weight' => overloadDecreaseWeight,
         'increase_reps' => overloadIncreaseReps,
+        'confirm_increase' => overloadConfirmIncrease,
+        'increase_reps_bodyweight' => overloadBodyweightReps,
+        'decrease_reps_bodyweight' => overloadBodyweightDecrease,
         _ => fallback,
       };
 

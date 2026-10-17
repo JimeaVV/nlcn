@@ -62,6 +62,10 @@ Map<String, dynamic> runRecommendation(Map<String, dynamic> request) {
           request['set_3_reps'] as int,
         ],
         difficulty: request['difficulty'] as String,
+        twoSessionRule: request['two_session_rule'] as bool? ?? false,
+        previousSession: request['previous_session'] == null
+            ? null
+            : Map<String, dynamic>.from(request['previous_session'] as Map),
       );
     default:
       throw ArgumentError('Unknown recommendation operation.');

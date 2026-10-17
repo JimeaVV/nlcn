@@ -126,6 +126,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     setState(() => logging = true);
     try {
+      // The load only goes up after two good sessions in a row, so the
+      // last session of this exercise is part of the decision.
+      final history = await DatabaseService.instance.getWorkoutLogs();
+      final previous = history
+          .where((entry) => entry.exerciseName == exerciseName)
+          .firstOrNull;
       final recommendation =
           await widget.recommendations.recommendProgressiveOverload(
         exerciseName: exerciseName,
@@ -134,6 +140,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         set2Reps: input.set2Reps,
         set3Reps: input.set3Reps,
         difficulty: input.difficulty,
+        twoSessionRule: true,
+        previousSession: previous,
       );
       await DatabaseService.instance.saveWorkoutLog(
         exerciseName: exerciseName,

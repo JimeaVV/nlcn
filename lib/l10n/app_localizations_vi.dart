@@ -1102,4 +1102,16 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get repsRange => 'Nhập từ 0 đến 30';
+
+  @override
+  String get overloadConfirmIncrease =>
+      'Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.';
+
+  @override
+  String get overloadBodyweightReps =>
+      'Bạn đã hoàn thành 3×12 không cần tạ. Buổi sau thêm 2 lần mỗi hiệp, hoặc chuyển sang biến thể khó hơn.';
+
+  @override
+  String get overloadBodyweightDecrease =>
+      'Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.';
 }

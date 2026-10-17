@@ -665,6 +665,25 @@ commit và kết quả kiểm thử.
     - cận calo không làm đổi kết quả;
     - hết ngân sách nút vẫn trả về thực đơn.
   - `check_vn_food.py` kiểm tra thêm `meal_plan.csv`.
+
+### 2026-10-18 · Progressive Overload theo lịch sử tập (đợt 2, phần 2)
+- **Giữ bước tăng 2,5 kg** (theo góp ý của nhóm): ngoài phòng gym không có
+  bánh tạ nhỏ hơn, nên tăng theo % là không thực tế.
+- **Luật 2 buổi:** chỉ tăng tạ khi buổi này **và** buổi trước của cùng bài,
+  cùng mức tạ, đều đạt 3×12 với độ khó Dễ hoặc Vừa. Mới đạt lần đầu thì app
+  khuyên "tập lại mức này thêm một buổi". Tránh trường hợp hôm nay khoẻ bất
+  thường là tăng tạ liền.
+  - App lấy buổi gần nhất của bài đó trong lịch sử tập. Cột `difficulty`
+    đã có sẵn trong database, chỉ cần đọc ra.
+- **Bài không tạ (0 kg):** đạt 3×12 thì khuyên **thêm 2 lần mỗi hiệp** hoặc
+  chuyển biến thể khó hơn, thay vì "tăng 2,5 kg"; chưa đạt thì khuyên nhắm 8
+  lần đúng kỹ thuật, thay vì "giảm 2,5 kg".
+- **Sửa luật:** đạt đủ 3×12 nhưng chọn "Kiệt sức" trước đây bị khuyên giảm
+  tạ. Giờ đổi thành giữ nguyên mức tạ, vì mục tiêu đã đạt.
+- Bỏ điều kiện thừa `tổng số lần < 24`: điều kiện này chỉ đúng khi có hiệp
+  dưới 8 lần, mà trường hợp đó đã được kiểm tra riêng.
+- **Kiểm thử:** 138 test pass, gồm luật 2 buổi (khác mức tạ, buổi trước
+  nặng, buổi trước thiếu lần đều không tính) và bài không tạ.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.
