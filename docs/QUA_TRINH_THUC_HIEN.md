@@ -316,6 +316,40 @@ commit và kết quả kiểm thử.
 - **Lý do:** tự gộp chỉ chờ những check *bắt buộc*. Không đặt điều kiện thì
   bật tự gộp sẽ gộp ngay cả khi CI chưa chạy xong.
 
+### 2026-10-17 · Điền dữ liệu dinh dưỡng cho các thành phần món ăn
+- **Mục tiêu:** model chỉ nhận ra trong dĩa có gì; muốn ra calo thì app cần
+  dinh dưỡng trên 100 g của từng thành phần trong `components.csv`.
+- **Nguồn dữ liệu (theo thứ tự ưu tiên):**
+  1. **Viện Dinh dưỡng Quốc gia**, công cụ "Tra cứu giá trị dinh dưỡng thực
+     phẩm" (https://viendinhduong.vn/vi/cong-cu-va-tien-ich/gia-tri-dinh-duong-thuc-pham):
+     853 thực phẩm, mã số theo Bảng thành phần thực phẩm Việt Nam. Ưu tiên vì
+     là số liệu của thực phẩm Việt Nam.
+  2. **USDA FoodData Central** (https://fdc.nal.usda.gov), bộ FNDDS và SR
+     Legacy: dùng cho món đã nấu mà bảng Việt Nam không có (cơm, trứng ốp la,
+     hủ tiếu, cháo, sườn nướng).
+  - Công cụ "Tra cứu giá trị dinh dưỡng của món ăn" của Viện cho số liệu
+    **theo suất**, không ghi khối lượng, nên không quy ra 100 g được; chỉ
+    dùng để tham khảo.
+- **Kết quả:** 24/40 thành phần đã có số. Cột `source` ghi mã của từng số
+  liệu; dòng nào là **gần đúng** thì ghi rõ lý do. Ví dụ "Thịt kho" lấy theo
+  thịt luộc, chưa tính nước kho.
+  - Đơn vị có nguồn: 1 quả trứng ốp la = 55 g, 1 quả trứng luộc = 50 g
+    (USDA FNDDS).
+- **Chưa điền, có lý do:**
+  - **Xôi nếp:** USDA chỉ có nếp luộc (96 kcal/100 g), trong khi xôi hấp
+    đặc hơn nhiều (bảng Việt Nam ghi xôi gấc, xôi đỗ khoảng 230 kcal). Dùng
+    số USDA sẽ sai gần 2,5 lần.
+  - **Nước dùng, nước chấm** (13 dòng `_base_*`), **mỡ hành**, **chả trứng**:
+    không có nguồn cho riêng phần này. Mục phở của USDA đã gồm cả bánh phở
+    nên dùng sẽ bị tính hai lần. Cần tính theo công thức nấu từ nguyên liệu
+    có trong bảng.
+  - **Khối lượng 1 đơn vị** (chén cơm, ổ bánh mì, miếng sườn…) và khẩu phần
+    mặc định trong `dishes.csv`: cần cân thực tế.
+- **Sửa lỗi nhỏ:** `tool/check_vn_food.py --strict` bị lỗi khi in tiếng Việt
+  ra console Windows. Đã ép stdout dùng UTF-8.
+- **Kiểm thử:** `check_vn_food.py` báo OK; tất cả dòng đã điền đều khớp
+  calo ≈ 4·đạm + 4·bột đường + 9·béo; 114/114 test.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
