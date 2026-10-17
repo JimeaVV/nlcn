@@ -42,7 +42,15 @@ Build an installable Android APK:
 flutter build apk --release
 ```
 
-The output is `build/app/outputs/flutter-apk/app-release.apk`. Copy it to your
+The output is `build/app/outputs/flutter-apk/app-release.apk`.
+
+**Signing.** Release builds use the OptiFit key when `android/key.properties`
+exists (git-ignored; it points to a keystore kept outside the repository).
+Without it they fall back to the debug key, which still builds but cannot
+update an install signed with the real key. Every push to `main` also builds
+signed APKs in GitHub Actions and publishes them as the rolling
+[`latest` release](https://github.com/JimeaVV/nlcn/releases/tag/latest);
+pick `OptiFit-…-arm64-v8a.apk` for current phones. Copy it to your
 Android phone and install it. Initial dependency downloads during development
 may require internet; the installed application works offline, including on its
 first launch. The release manifest has no INTERNET permission. Debug/profile
@@ -54,9 +62,9 @@ the old current weight becomes one baseline on its original saved date.
 Earlier profiles retain a lose-weight goal and use the updated estimate until
 the user chooses a different goal or sets a manual target. Saved plans keep
 their original targets. Android also requires matching signing keys to update
-an existing installation. The current release build uses the
-project's debug signing configuration for personal installation; configure a
-private release key before publishing to a store.
+an existing installation. Release builds are signed with the
+project key described above; keep the keystore backed up, because without it
+no installed copy can ever be updated.
 
 ## Project structure
 
