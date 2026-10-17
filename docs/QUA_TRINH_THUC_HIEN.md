@@ -418,7 +418,30 @@ commit và kết quả kiểm thử.
     - Tôm: 1 con 20 g cả vỏ, thịt bóc vỏ 10–12 g, nên tính **11 g**.
     - Cá: 100 g còn da và xương, chưa trừ vì không có tỷ lệ; có thể hơi cao.
   - Các số này là ước lượng của nhóm. Khi cân thực tế thì cập nhật lại.
-- Còn thiếu: khẩu phần mặc định của 94 dòng trong `dishes.csv`.
+
+### 2026-10-17 · Khẩu phần mặc định của từng món
+- **Mục đích:** model báo dĩa có thành phần nào thì app điền sẵn lượng của
+  thành phần đó theo `dishes.csv`; người dùng chỉnh lại nếu dĩa nhiều hoặc
+  ít hơn.
+- **Cách làm:** nhóm **ước lượng** một suất bình thường ở quán cho cả 94
+  dòng. Đây là đồ án sinh viên nên không cân từng món. Ví dụ:
+  - cơm tấm: 1,5 chén cơm, 1 miếng sườn, 30 g bì, 1 miếng chả, 1 trứng;
+  - phở: 200 g bánh phở, 80 g thịt, 400 g nước dùng;
+  - bánh cuốn: 6 cuốn.
+- **Kiểm tra chéo** với công cụ tra cứu món ăn của Viện Dinh dưỡng (số liệu
+  theo suất):
+
+  | Món | App tính | Viện Dinh dưỡng |
+  |---|---|---|
+  | Phở bò | 480 kcal | 350–450 kcal |
+  | Bún chả | 809 kcal | 520–750 kcal |
+  | Hủ tiếu | 292 kcal | khoảng 450 kcal |
+
+  - Hủ tiếu thấp hơn vì nước dùng đang là ước tính thấp và chưa tính thịt.
+  - Bún chả hơi cao vì thịt nướng (401 kcal/100 g) là loại nửa nạc nửa mỡ.
+  - Nhìn chung cùng cỡ số, đủ dùng cho app ước tính.
+- **Kết quả:** `check_vn_food.py --strict` không còn ô trống: 40/40 thành
+  phần, 94/94 khẩu phần.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.
