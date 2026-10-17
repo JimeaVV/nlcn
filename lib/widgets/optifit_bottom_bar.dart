@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import 'scan_button_face.dart';
 
 class BottomBarItem {
   const BottomBarItem({
@@ -132,38 +133,17 @@ class _ScanButton extends StatelessWidget {
       button: true,
       label: label,
       excludeSemantics: true,
-      child: GestureDetector(
+      child: PressScale(
         key: const ValueKey('nav-scan'),
-        behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            // Raised above the bar so it reads as the main action.
+            // Raised above the bar so it reads as the main action; its look
+            // follows the interface style chosen in Settings.
             Transform.translate(
               offset: const Offset(0, -12),
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [CyberColors.cyan, CyberColors.magenta],
-                  ),
-                  border: Border.all(color: CyberColors.surface, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: CyberColors.cyan.withValues(alpha: 0.45),
-                      blurRadius: 16,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.photo_camera_rounded,
-                    color: Colors.white, size: 26),
-              ),
+              child: ScanButtonFace(style: CyberColors.style),
             ),
             Transform.translate(
               offset: const Offset(0, -4),

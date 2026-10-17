@@ -69,8 +69,13 @@ class AppPalette {
 
 class CyberColors {
   static AppPalette _palette = AppTheme.paletteFor(AppStyle.cyberpunk);
+  static AppStyle _style = AppStyle.cyberpunk;
+
+  /// The interface style in use, for widgets whose shape follows it.
+  static AppStyle get style => _style;
 
   static void apply(AppStyle style) {
+    _style = style;
     _palette = AppTheme.paletteFor(style);
   }
 

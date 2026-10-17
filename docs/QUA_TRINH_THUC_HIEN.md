@@ -212,6 +212,26 @@ commit và kết quả kiểm thử.
 - **Lưu ý:** app cài bằng khóa debug trên điện thoại phải gỡ một lần để
   chuyển sang khóa mới. Từ đó trở đi, mọi bản đều cài đè được và giữ dữ liệu.
 
+### 2026-10-17 · Nút Quét đổi kiểu theo giao diện
+- **Yêu cầu:** đổi giao diện trong Cài đặt thì nút Quét cũng đổi kiểu,
+  không chỉ đổi màu.
+- **Bốn kiểu** (`lib/widgets/scan_button_face.dart`):
+
+  | Giao diện | Kiểu nút Quét |
+  |---|---|
+  | Cyberpunk | tròn, gradient xanh neon → hồng, phát sáng hai màu |
+  | Minimal Light | tròn, một màu phẳng, bóng đổ nhẹ |
+  | Forest | vuông bo góc kiểu chiếc lá, gradient xanh lá → ngọc |
+  | Sunset | tròn, dải vàng → cam → tím, vầng sáng như mặt trời |
+
+- Bấm vào thì nút **nhún xuống** (thu nhỏ còn 90%).
+- Trong Cài đặt, mỗi ô giao diện hiện **xem trước nút Quét** của giao diện
+  đó.
+- Kiểu Sunset ban đầu đặt tâm màu vàng ngay dưới icon trắng nên icon bị
+  chìm. Đã đổi thành dải màu từ trên xuống, để icon nằm trên nền cam.
+- **Kiểm thử:** 101/101 test (thêm test hình dạng từng kiểu, thanh dưới đổi
+  theo giao diện, hiệu ứng nhún, ô xem trước trong Cài đặt).
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
