@@ -381,7 +381,28 @@ double _mealScore(
   double targetCalories,
   double targetProtein,
   int cheeseCount,
-) {
+) =>
+    scoreMeal(
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      targetCalories: targetCalories,
+      targetProtein: targetProtein,
+    ) +
+    math.max(0, cheeseCount - 1) * 20;
+
+/// How far a meal is from its targets; 0 is a perfect match. Protein
+/// shortage weighs most, protein beyond 120% of the target a little, and
+/// every kcal of error counts once. Shared by both meal planners.
+double scoreMeal({
+  required double calories,
+  required double protein,
+  required double carbs,
+  required double fat,
+  required double targetCalories,
+  required double targetProtein,
+}) {
   final shortage = math.max(0.0, targetProtein - protein);
   final excess = math.max(0.0, protein - targetProtein * _proteinExcessRatio);
   final calorieError = (calories - targetCalories).abs();
@@ -389,13 +410,17 @@ double _mealScore(
   final fatRatio = fat * 9 / math.max(calories, 1.0);
   final macroPenalty =
       (math.max(0.0, 0.20 - carbRatio) + math.max(0.0, fatRatio - 0.40)) * 50;
-  final repetitionPenalty = math.max(0, cheeseCount - 1) * 20;
   return shortage * _proteinShortageWeight +
       excess * _proteinExcessWeight +
       calorieError +
-      macroPenalty +
-      repetitionPenalty;
+      macroPenalty;
 }
+
+/// Weight of each gram of missing protein in [scoreMeal], for search bounds.
+const proteinShortageWeight = _proteinShortageWeight;
+
+/// A meal may exceed its calorie share by this ratio before it is rejected.
+const calorieOvershootRatio = _calorieOvershootRatio;
 
 Map<String, dynamic> _searchMeal(
   List<_PreparedGroup> groups,

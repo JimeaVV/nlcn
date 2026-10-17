@@ -13,6 +13,7 @@ cha_trung,Chả trứng hấp,Steamed egg meatloaf,167.7,10.95,4.8,11.63,miếng
 trung_op_la,Trứng ốp la,Fried egg,192,11.56,0.9,15.81,quả,55,"USDA FoodData Central FNDDS 2707158: Egg, whole, fried with oil; 1 quả = 55 g theo cùng nguồn"
 trung_kho,Trứng kho / trứng luộc,Braised or boiled egg,132,12.79,1.89,8.17,quả,50,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 9012: Trứng gà công nghiệp; 1 quả = 50 g theo USDA FNDDS 2707154 (Egg, whole, boiled)"
 ga,Thịt gà,Chicken,190,25,1.24,9.44,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7088002: Thịt gà công nghiệp, đùi, luộc"
+ga_chien,Gà chiên / xối mỡ,Fried chicken,260,19.04,5.98,17.2,miếng,165,"USDA FoodData Central FNDDS 2705996: Chicken leg, drumstick and thigh, fried, coated, skin / coating eaten; 1 miếng = 165 g theo cùng nguồn (1 small leg, bỏ xương); gần đúng cho gà chiên, gà xối mỡ"
 bo,Thịt bò,Beef,182,32.46,0,5.75,,,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 7094003: Thịt bò, bắp, hấp"
 ca,Cá,Fish,133,24.34,0,3.98,miếng,100,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 8020002: Cá nục, luộc; gần đúng, mỗi loại cá và cách nấu khác nhau; 1 khúc = 100 g (nhóm ước lượng), còn da và xương nên có thể cao hơn thực tế"
 tom,Tôm,Shrimp,82,17.6,0.9,0.9,con,11,"Viện Dinh dưỡng, tra cứu giá trị dinh dưỡng thực phẩm (viendinhduong.vn), mã 8051002: Tôm biển, luộc; 1 con cỡ vừa = 20 g cả vỏ, 10-12 g thịt bóc vỏ (nhóm ước lượng), tính 11 g"

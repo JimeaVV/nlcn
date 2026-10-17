@@ -35,7 +35,7 @@
   "caloriesLabel": "Calories",
   "proteinLabel": "Protein",
   "comparisonDifference": "Difference {difference} {unit} ({percent}%)",
-  "mealToleranceNote": "Tolerance: calories ±5%, protein ±10%. A suggested plan is not a record of what you ate.",
+  "mealToleranceNote": "Tolerance: calories ±5%, protein −10% to +20%. A suggested plan is not a record of what you ate.",
   "mealsTitle": "Meals",
   "breakfast": "Breakfast",
   "lunch": "Lunch",

@@ -125,7 +125,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mealToleranceNote =>
-      'Tolerance: calories ±5%, protein ±10%. A suggested plan is not a record of what you ate.';
+      'Tolerance: calories ±5%, protein −10% to +20%. A suggested plan is not a record of what you ate.';
 
   @override
   String get mealsTitle => 'Meals';

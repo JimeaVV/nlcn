@@ -600,6 +600,69 @@ commit và kết quả kiểm thử.
   - tìm món Việt trong Nhật ký;
   - chạy model không chồng lên nhau;
   - lưu thực đơn một lần.
+
+### 2026-10-18 · Thực đơn món Việt (đợt 2, phần 1)
+- **Vấn đề:** planner cũ chọn từ 160 nguyên liệu tiếng Anh, ra kiểu "75 g
+  yến mạch sống + ức gà", không ai ăn theo được.
+- **Cách làm, chốt cùng nhóm:**
+  - **Bữa sáng:** ăn nguyên món (phở, bánh mì, xôi…), chỉnh số suất.
+  - **Trưa/tối:** món nguyên, hoặc **cơm phần** do Branch & Bound ghép: cơm
+    (theo chén), 1–2 món mặn, rau, canh tuỳ chọn.
+  - **Bảng tag `meal_plan.csv`:** món nào hợp bữa nào và mục tiêu nào.
+    - Đang giảm cân thì **không** gợi ý phở, bánh mì, xôi, bánh cuốn, cơm
+      tấm…: không ai cutting mà ăn các món đó.
+    - Giảm cân: cơm tối đa 1 chén mỗi bữa và chỉ món nạc (gà, cá, tôm, đậu
+      hũ, trứng luộc, thịt bò).
+    - Tag nằm trong CSV, sửa được mà không cần sửa code.
+  - **Thêm thành phần `ga_chien`** (contract v1.2): cơm gà ở quán thường là
+    gà chiên hoặc xối mỡ. Tính như gà luộc sẽ thiếu nhiều calo. Số liệu
+    lấy theo USDA FNDDS 2705996.
+  - Planner cũ (nguyên liệu tiếng Anh) vẫn giữ trong code; app dùng planner
+    mới.
+- **Cải tiến Branch & Bound:**
+  - **Cận dưới theo calo:** từ calo ít nhất và nhiều nhất các nhóm còn lại
+    có thể thêm, tính được sai số calo nhỏ nhất còn có thể đạt. Cộng với
+    cận protein cũ, nhánh nào chắc chắn không tốt hơn lời giải đang có thì
+    cắt.
+  - Món nguyên tốt nhất được dùng làm lời giải ban đầu cho cơm phần.
+  - **Seed thay cho giới hạn thời gian:**
+    - Mỗi lần bấm, app bốc một seed ngẫu nhiên mới nên thực đơn vẫn mỗi lần
+      một khác.
+    - Giới hạn tìm kiếm đổi từ 1,5 giây sang tối đa 300.000 nút, nên cùng
+      seed thì máy nào cũng ra cùng thực đơn. Seed được lưu kèm thực đơn.
+- **Kết quả đo** (`dart run tool/bench_meal_planner.dart`, 150 hồ sơ thật
+  mỗi mục tiêu: 2 giới, 5 mức cân nặng, 3 mức vận động, 5 seed):
+
+  | Mục tiêu | Đạt mục tiêu | Số nút: chỉ cận protein | Số nút: thêm cận calo | Giảm | Chất lượng giống nhau |
+  |---|---|---|---|---|---|
+  | Giảm cân | 101/150 | 24.549 | 15.439 | 1,6 lần | 150/150 |
+  | Giữ cân | 129/150 | 17.576 | 8.435 | 2,1 lần | 150/150 |
+  | Tăng cân | 128/150 | 19.336 | 9.322 | 2,1 lần | 150/150 |
+
+  - Lập một thực đơn cả ngày mất khoảng 1 ms.
+  - "Đạt mục tiêu" nghĩa là calo trong ±5% và protein từ −10% đến +20%.
+- **Tinh chỉnh dựa trên số đo:**
+  - Bản đầu chỉ có 17/150 thực đơn giảm cân đạt. Lý do: người vận động
+    nhiều có mục tiêu giảm cân 2.200–2.700 kcal mà chỉ được 1 chén cơm mỗi
+    bữa. Đã sửa:
+    - bữa sáng nhẹ hơn (25%), trưa và tối mỗi bữa 37,5%;
+    - cháo hoặc gỏi cuốn được tới 2 suất;
+    - bữa trên 650 kcal mới được hơn 1 chén cơm;
+    - bắp nướng làm bữa phụ.
+    - Kết quả lên 101/150; phần còn hụt là người vận động rất nhiều (hệ số
+      1,9).
+  - Mục tiêu từ 2.600 kcal có thêm **bữa phụ** (bắp nướng, bánh tét, xôi,
+    tàu hũ).
+  - **Ngưỡng protein thống nhất:** planner chấp nhận protein dư tới 20%
+    nhưng nhãn "đạt mục tiêu" chỉ cho 10%, nên có thực đơn planner coi là
+    tốt mà app lại báo chưa đạt. Giờ cả hai cùng dùng −10% đến +20%.
+- **Kiểm thử:** 145 test pass.
+  - Thêm `vn_meal_planner_test.dart`, gồm:
+    - cùng seed ra cùng thực đơn;
+    - giảm cân không có món nặng, cơm ≤ 1 chén;
+    - cận calo không làm đổi kết quả;
+    - hết ngân sách nút vẫn trả về thực đơn.
+  - `check_vn_food.py` kiểm tra thêm `meal_plan.csv`.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.

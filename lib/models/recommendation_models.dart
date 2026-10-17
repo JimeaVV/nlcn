@@ -103,10 +103,13 @@ class MealPlan {
   double get proteinDeviationPercent =>
       proteinTarget > 0 ? proteinDifference / proteinTarget * 100 : 0;
 
-  // A product quality check for the generated plan, not a nutritional safety score.
+  // A product quality check for the generated plan, not a nutritional safety
+  // score. Protein may run up to 20% over, the same slack the planner allows
+  // before it starts to penalise excess.
   bool meetsTargets(double targetCalories) =>
       calorieDeviationPercent(targetCalories).abs() <= 5 &&
-      proteinDeviationPercent.abs() <= 10;
+      proteinDeviationPercent >= -10 &&
+      proteinDeviationPercent <= 20;
 }
 
 class MealRecommendation {

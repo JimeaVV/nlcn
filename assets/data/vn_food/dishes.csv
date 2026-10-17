@@ -13,10 +13,11 @@ com_phan,thit_kho,80,
 com_phan,trung_kho,,1
 com_phan,ca,,1
 com_phan,ga,80,
+com_phan,ga_chien,,1
 com_phan,dau_hu,,1
 com_phan,rau_nau,80,
 com_ga,com,,1.5
-com_ga,ga,120,
+com_ga,ga_chien,,1
 com_ga,dua_leo_ca_chua,30,
 com_ga,rau_song,20,
 com_chien,com,,2

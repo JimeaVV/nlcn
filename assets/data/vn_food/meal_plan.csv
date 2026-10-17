@@ -1,0 +1,45 @@
+code,kind,slots,goals,note
+pho_bo,dish,breakfast,maintain|gain,
+pho_ga,dish,breakfast,maintain|gain,
+banh_mi,dish,breakfast,maintain|gain,
+xoi,dish,breakfast|snack,maintain|gain,
+bun_bo_hue,dish,breakfast,maintain|gain,
+hu_tieu,dish,breakfast,maintain|gain,
+mi_quang,dish,breakfast,maintain|gain,
+banh_canh,dish,breakfast,maintain|gain,
+banh_cuon,dish,breakfast,maintain|gain,calo cao do chả và hành phi
+banh_mi_chao,dish,breakfast,maintain|gain,
+bo_kho,dish,breakfast,maintain|gain,
+chao,dish,breakfast,lose|maintain|gain,
+goi_cuon,dish,breakfast|lunch|dinner,lose|maintain|gain,
+com_phan,combo,lunch|dinner,lose|maintain|gain,cơm + món mặn + rau + canh; giảm cân tối đa 1 chén cơm và chỉ món nạc
+com_tam,dish,lunch|dinner,maintain|gain,
+com_ga,dish,lunch|dinner,maintain|gain,thường là gà chiên hoặc xối mỡ
+thit_kho_trung,dish,lunch|dinner,maintain|gain,
+com_chien,dish,lunch|dinner,gain,
+bun_cha,dish,lunch|dinner,maintain|gain,
+bun_thit_nuong,dish,lunch|dinner,maintain|gain,
+bun_rieu,dish,lunch|dinner,maintain|gain,
+ga_nuong,dish,lunch|dinner,lose|maintain|gain,
+goi_ga,dish,lunch|dinner,lose|maintain|gain,
+ca_ri,dish,lunch|dinner,maintain|gain,
+bo_la_lot,dish,lunch|dinner,maintain|gain,
+canh_kho_qua,soup,lunch|dinner,lose|maintain|gain,ăn kèm cơm phần
+canh_khoai_mo,soup,lunch|dinner,lose|maintain|gain,ăn kèm cơm phần
+com,staple,lunch|dinner,lose|maintain|gain,số chén cơm do planner chọn theo mục tiêu
+ga,main,lunch|dinner,lose|maintain|gain,
+ca,main,lunch|dinner,lose|maintain|gain,
+tom,main,lunch|dinner,lose|maintain|gain,
+dau_hu,main,lunch|dinner,lose|maintain|gain,
+trung_kho,main,lunch|dinner,lose|maintain|gain,
+bo,main,lunch|dinner,lose|maintain|gain,
+ga_chien,main,lunch|dinner,maintain|gain,
+thit_kho,main,lunch|dinner,maintain|gain,
+suon_nuong,main,lunch|dinner,maintain|gain,
+thit_nuong,main,lunch|dinner,maintain|gain,
+trung_op_la,main,lunch|dinner,maintain|gain,
+rau_nau,side,lunch|dinner,lose|maintain|gain,
+bap_nuong,dish,snack,lose|maintain|gain,bữa phụ duy nhất cho người giảm cân
+banh_tet,dish,snack,maintain|gain,
+banh_u,dish,snack,maintain|gain,
+tau_hu,dish,snack,maintain|gain,

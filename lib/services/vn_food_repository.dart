@@ -9,8 +9,27 @@ class VnFoodRepository {
   static const _folder = 'assets/data/vn_food';
   final AssetBundle _bundle;
   Future<VnFoodData>? _loaded;
+  Future<Map<String, String>>? _tables;
 
   Future<VnFoodData> load() => _loaded ??= _load();
+
+  /// The raw CSV text of every table, keyed by file name without `.csv`.
+  /// Text crosses to the planner's isolate, which parses it there.
+  Future<Map<String, String>> loadTables() => _tables ??= _loadTables();
+
+  Future<Map<String, String>> _loadTables() async {
+    try {
+      const names = ['components', 'dishes', 'dish_names', 'meal_plan'];
+      final files = await Future.wait([
+        for (final name in names)
+          _bundle.loadString('$_folder/$name.csv', cache: false),
+      ]);
+      return {for (var i = 0; i < names.length; i++) names[i]: files[i]};
+    } catch (_) {
+      _tables = null;
+      rethrow;
+    }
+  }
 
   Future<VnFoodData> _load() async {
     try {

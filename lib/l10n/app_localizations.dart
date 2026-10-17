@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @mealToleranceNote.
   ///
   /// In vi, this message translates to:
-  /// **'Mốc đối chiếu: calo ±5%, protein ±10%. Thực đơn gợi ý chưa phải lượng bạn đã ăn.'**
+  /// **'Mốc đối chiếu: calo ±5%, protein từ −10% đến +20%. Thực đơn gợi ý chưa phải lượng bạn đã ăn.'**
   String get mealToleranceNote;
 
   /// No description provided for @mealsTitle.

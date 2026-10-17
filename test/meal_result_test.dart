@@ -38,7 +38,9 @@ void main() {
         _result(calories: 1900, protein: 108).plan.meetsTargets(2000), isTrue);
     expect(_result(calories: 1899).plan.meetsTargets(2000), isFalse);
     expect(_result(protein: 107).plan.meetsTargets(2000), isFalse);
-    expect(_result(protein: 133).plan.meetsTargets(2000), isFalse);
+    // Protein may run up to 20% over its 120 g target, as the planner allows.
+    expect(_result(protein: 144).plan.meetsTargets(2000), isTrue);
+    expect(_result(protein: 145).plan.meetsTargets(2000), isFalse);
     expect(_result(calories: 2101).plan.meetsTargets(2000), isFalse);
   });
 

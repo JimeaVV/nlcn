@@ -81,8 +81,9 @@ void main() {
     expect(result.bmr, 1694);
     expect(result.tdee, 2625);
     expect(result.targetCalories, 2625);
+    // 2625 kcal is above the snack threshold of the Vietnamese planner.
     expect(result.plan.meals.keys,
-        unorderedEquals(['Breakfast', 'Lunch', 'Dinner']));
+        unorderedEquals(['Breakfast', 'Lunch', 'Dinner', 'Snack']));
     expect(result.plan.totalCalories, greaterThan(0));
     expect(result.plan.totalCalories, lessThanOrEqualTo(2625 * 1.12 + 0.1));
     final roundTrip = DietRecommendation.fromJson(

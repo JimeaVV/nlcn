@@ -56,6 +56,7 @@ extension AppLocalizationsLabels on AppLocalizations {
         'Breakfast' => breakfast,
         'Lunch' => lunch,
         'Dinner' => dinner,
+        'Snack' => mealSnack,
         _ => meal,
       };
 

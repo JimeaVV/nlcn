@@ -123,7 +123,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get mealToleranceNote =>
-      'Mốc đối chiếu: calo ±5%, protein ±10%. Thực đơn gợi ý chưa phải lượng bạn đã ăn.';
+      'Mốc đối chiếu: calo ±5%, protein từ −10% đến +20%. Thực đơn gợi ý chưa phải lượng bạn đã ăn.';
 
   @override
   String get mealsTitle => 'Các bữa ăn';

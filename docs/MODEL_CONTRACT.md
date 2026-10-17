@@ -5,10 +5,13 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.1**
+- `contract_version`: **1.2**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
-    tra khi nạp model (mục 6).
+    tra khi nạp model (mục 6);
+  - 1.2: thêm thành phần `ga_chien` (gà chiên / xối mỡ), lên 25 thành phần,
+    vì cơm gà ở quán thường là gà chiên; thêm bảng `meal_plan.csv` cho phần
+    gợi ý thực đơn (mục 4).
 - Cập nhật: 2026-10-17
 
 ---
@@ -81,7 +84,7 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
-dưỡng. Bản nháp gồm **24 thành phần**:
+dưỡng. Gồm **25 thành phần**:
 
 | Nhóm | Mã | Tên hiển thị (vi) |
 |---|---|---|
@@ -98,7 +101,8 @@ dưỡng. Bản nháp gồm **24 thành phần**:
 | | `cha_trung` | Chả trứng hấp |
 | | `trung_op_la` | Trứng ốp la |
 | | `trung_kho` | Trứng kho / trứng luộc |
-| | `ga` | Thịt gà |
+| | `ga` | Thịt gà (luộc, nướng, hấp) |
+| | `ga_chien` | Gà chiên / xối mỡ |
 | | `bo` | Thịt bò |
 | | `ca` | Cá |
 | | `tom` | Tôm |
@@ -142,6 +146,22 @@ com_tam,trung_op_la,,1
 com_tam,do_chua,30,
 pho_bo,_base,500,        ← nước dùng; dinh dưỡng ghi ở dòng `_base_pho_bo` trong components.csv
 ```
+**`meal_plan.csv`**: món nào được gợi ý trong thực đơn, cho bữa nào và mục
+tiêu nào (chỉ phần gợi ý thực đơn dùng; model không dùng).
+```
+code,kind,slots,goals,note
+pho_bo,dish,breakfast,maintain|gain,
+com_phan,combo,lunch|dinner,lose|maintain|gain,
+ga,main,lunch|dinner,lose|maintain|gain,
+```
+- `kind`: `dish` ăn nguyên món, `combo` là cơm phần do thuật toán ghép,
+  `soup` canh ăn kèm cơm phần; `staple`, `main`, `side` là cơm, món mặn,
+  rau dùng để ghép cơm phần.
+- `slots`: `breakfast`, `lunch`, `dinner`, `snack`; `goals`: `lose`,
+  `maintain`, `gain`, ngăn bằng `|`.
+- Món không có trong bảng thì không được gợi ý (vẫn quét và ghi nhật ký
+  được).
+
 Thành phần là hỗn hợp (nước chấm, mỡ hành, chả trứng…) được tính từ công
 thức nấu bằng `python tool/vn_food_recipes.py --write`. Script cộng dinh
 dưỡng của từng nguyên liệu rồi chia cho khối lượng thành phẩm.
