@@ -178,3 +178,153 @@ class _PressScaleState extends State<PressScale> {
     );
   }
 }
+
+/// A small round (or leaf, for Forest) camera-screen button that follows
+/// the interface style, used for the gallery and manual-log actions.
+class StyledCameraButton extends StatelessWidget {
+  const StyledCameraButton({
+    super.key,
+    required this.style,
+    required this.icon,
+    this.size = 52,
+  });
+
+  final AppStyle style;
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppTheme.paletteFor(style);
+    final leaf = BorderRadius.only(
+      topLeft: Radius.circular(size * 0.5),
+      bottomRight: Radius.circular(size * 0.5),
+      topRight: Radius.circular(size * 0.16),
+      bottomLeft: Radius.circular(size * 0.16),
+    );
+    final (fill, border, iconColor, glow) = switch (style) {
+      AppStyle.cyberpunk => (
+          Colors.black.withValues(alpha: 0.45),
+          p.primary,
+          p.primary,
+          p.primary.withValues(alpha: 0.5),
+        ),
+      AppStyle.minimalLight => (
+          Colors.white,
+          Colors.white,
+          p.primary,
+          Colors.black.withValues(alpha: 0.2),
+        ),
+      AppStyle.forest => (
+          p.primary.withValues(alpha: 0.3),
+          p.secondary,
+          Colors.white,
+          null,
+        ),
+      AppStyle.sunset => (
+          p.secondary.withValues(alpha: 0.4),
+          p.highlight,
+          p.highlight,
+          p.primary.withValues(alpha: 0.35),
+        ),
+    };
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: style == AppStyle.forest ? BoxShape.rectangle : BoxShape.circle,
+        borderRadius: style == AppStyle.forest ? leaf : null,
+        color: fill,
+        border: Border.all(color: border, width: 1.6),
+        boxShadow: glow == null
+            ? null
+            : [BoxShadow(color: glow, blurRadius: size * 0.3)],
+      ),
+      child: Icon(icon, color: iconColor, size: size * 0.46),
+    );
+  }
+}
+
+/// Corner brackets that frame the plate in the camera preview; colour and
+/// roundness follow the interface style.
+class ViewfinderFrame extends StatelessWidget {
+  const ViewfinderFrame({super.key, required this.style});
+
+  final AppStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppTheme.paletteFor(style);
+    return CustomPaint(
+      painter: _ViewfinderPainter(
+        color: style == AppStyle.minimalLight ? Colors.white : p.primary,
+        radius: style == AppStyle.forest ? 26 : 8,
+        glow: style == AppStyle.cyberpunk || style == AppStyle.sunset,
+      ),
+    );
+  }
+}
+
+class _ViewfinderPainter extends CustomPainter {
+  _ViewfinderPainter({
+    required this.color,
+    required this.radius,
+    required this.glow,
+  });
+
+  final Color color;
+  final double radius;
+  final bool glow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final arm = size.shortestSide * 0.18;
+    final rect = Offset.zero & size;
+    final r = radius;
+    // One bracket per corner: a rounded corner with two short arms.
+    final path = Path()
+      ..moveTo(rect.left, rect.top + arm)
+      ..lineTo(rect.left, rect.top + r)
+      ..arcToPoint(Offset(rect.left + r, rect.top), radius: Radius.circular(r))
+      ..lineTo(rect.left + arm, rect.top)
+      ..moveTo(rect.right - arm, rect.top)
+      ..lineTo(rect.right - r, rect.top)
+      ..arcToPoint(Offset(rect.right, rect.top + r), radius: Radius.circular(r))
+      ..lineTo(rect.right, rect.top + arm)
+      ..moveTo(rect.right, rect.bottom - arm)
+      ..lineTo(rect.right, rect.bottom - r)
+      ..arcToPoint(Offset(rect.right - r, rect.bottom),
+          radius: Radius.circular(r))
+      ..lineTo(rect.right - arm, rect.bottom)
+      ..moveTo(rect.left + arm, rect.bottom)
+      ..lineTo(rect.left + r, rect.bottom)
+      ..arcToPoint(Offset(rect.left, rect.bottom - r),
+          radius: Radius.circular(r))
+      ..lineTo(rect.left, rect.bottom - arm);
+    if (glow) {
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = color.withValues(alpha: 0.6)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 8
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+      );
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ViewfinderPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.radius != radius ||
+      oldDelegate.glow != glow;
+}

@@ -1804,12 +1804,6 @@ abstract class AppLocalizations {
   /// **'Đã xóa lịch sử thực đơn và buổi tập.'**
   String get historyCleared;
 
-  /// No description provided for @scanSubtitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'Chụp một dĩa hoặc tô, rồi xác nhận món và các thành phần để tính calo.'**
-  String get scanSubtitle;
-
   /// No description provided for @scanModelPending.
   ///
   /// In vi, this message translates to:
@@ -1941,6 +1935,66 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Ghi vào nhật ký'**
   String get scanSave;
+
+  /// No description provided for @scanFrameHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt dĩa hoặc tô vào giữa khung'**
+  String get scanFrameHint;
+
+  /// No description provided for @scanClose.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đóng'**
+  String get scanClose;
+
+  /// No description provided for @scanTorchOn.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bật đèn'**
+  String get scanTorchOn;
+
+  /// No description provided for @scanTorchOff.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tắt đèn'**
+  String get scanTorchOff;
+
+  /// No description provided for @scanGalleryShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thư viện'**
+  String get scanGalleryShort;
+
+  /// No description provided for @scanManualShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi tay'**
+  String get scanManualShort;
+
+  /// No description provided for @scanCaptureFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không chụp được ảnh. Hãy thử lại.'**
+  String get scanCaptureFailed;
+
+  /// No description provided for @scanCameraDenied.
+  ///
+  /// In vi, this message translates to:
+  /// **'OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.'**
+  String get scanCameraDenied;
+
+  /// No description provided for @scanNoCamera.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không mở được camera. Bạn vẫn có thể chọn ảnh có sẵn hoặc ghi món thủ công.'**
+  String get scanNoCamera;
+
+  /// No description provided for @scanRetryCamera.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử mở camera lại'**
+  String get scanRetryCamera;
 }
 
 class _AppLocalizationsDelegate

@@ -983,10 +983,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyCleared => 'Meal plan and workout history cleared.';
 
   @override
-  String get scanSubtitle =>
-      'Photograph one plate or bowl, then confirm the dish and its components to count calories.';
-
-  @override
   String get scanModelPending =>
       'Automatic recognition is still being trained. For now, choose the dish after taking the photo.';
 
@@ -1058,4 +1054,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanSave => 'Log to diary';
+
+  @override
+  String get scanFrameHint => 'Fit the plate or bowl inside the frame';
+
+  @override
+  String get scanClose => 'Close';
+
+  @override
+  String get scanTorchOn => 'Turn on light';
+
+  @override
+  String get scanTorchOff => 'Turn off light';
+
+  @override
+  String get scanGalleryShort => 'Gallery';
+
+  @override
+  String get scanManualShort => 'Log food';
+
+  @override
+  String get scanCaptureFailed => 'Could not take the photo. Please try again.';
+
+  @override
+  String get scanCameraDenied =>
+      'OptiFit is not allowed to use the camera. Grant access in the phone settings, or choose an existing photo.';
+
+  @override
+  String get scanNoCamera =>
+      'The camera could not be opened. You can still choose a photo or log food manually.';
+
+  @override
+  String get scanRetryCamera => 'Try the camera again';
 }

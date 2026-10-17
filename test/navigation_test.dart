@@ -12,6 +12,7 @@ import 'package:optifit/screens/settings_screen.dart';
 import 'package:optifit/screens/today_screen.dart';
 import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/dataset_repository.dart';
+import 'package:optifit/services/scan_camera.dart';
 import 'package:optifit/widgets/optifit_bottom_bar.dart';
 import 'package:optifit/widgets/section_tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -243,8 +244,11 @@ void main() {
               result = await Navigator.push<bool>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      ScanScreen(datasets: _Datasets(), database: database),
+                  builder: (_) => ScanScreen(
+                    datasets: _Datasets(),
+                    database: database,
+                    camera: _NoCamera.new,
+                  ),
                 ),
               );
             },
@@ -331,4 +335,35 @@ void main() {
     expect(notified, 1);
     expect(find.text('Đã xóa lịch sử thực đơn và buổi tập.'), findsOneWidget);
   });
+}
+
+/// A phone without a usable camera: Scan shows its fallback actions.
+class _NoCamera implements ScanCamera {
+  @override
+  Future<void> initialize() async =>
+      throw const ScanCameraException(ScanCameraProblem.noCamera);
+
+  @override
+  Widget buildPreview() => const SizedBox();
+
+  @override
+  double get aspectRatio => 1;
+
+  @override
+  bool get hasFlash => false;
+
+  @override
+  Future<void> setTorch(bool on) async {}
+
+  @override
+  Future<String> takePicture() async => throw UnimplementedError();
+
+  @override
+  Future<void> pause() async {}
+
+  @override
+  Future<void> resume() async {}
+
+  @override
+  Future<void> dispose() async {}
 }

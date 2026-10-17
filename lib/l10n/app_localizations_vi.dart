@@ -975,10 +975,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get historyCleared => 'Đã xóa lịch sử thực đơn và buổi tập.';
 
   @override
-  String get scanSubtitle =>
-      'Chụp một dĩa hoặc tô, rồi xác nhận món và các thành phần để tính calo.';
-
-  @override
   String get scanModelPending =>
       'Nhận diện tự động đang được huấn luyện. Tạm thời bạn chọn món sau khi chụp.';
 
@@ -1049,4 +1045,36 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get scanSave => 'Ghi vào nhật ký';
+
+  @override
+  String get scanFrameHint => 'Đặt dĩa hoặc tô vào giữa khung';
+
+  @override
+  String get scanClose => 'Đóng';
+
+  @override
+  String get scanTorchOn => 'Bật đèn';
+
+  @override
+  String get scanTorchOff => 'Tắt đèn';
+
+  @override
+  String get scanGalleryShort => 'Thư viện';
+
+  @override
+  String get scanManualShort => 'Ghi tay';
+
+  @override
+  String get scanCaptureFailed => 'Không chụp được ảnh. Hãy thử lại.';
+
+  @override
+  String get scanCameraDenied =>
+      'OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.';
+
+  @override
+  String get scanNoCamera =>
+      'Không mở được camera. Bạn vẫn có thể chọn ảnh có sẵn hoặc ghi món thủ công.';
+
+  @override
+  String get scanRetryCamera => 'Thử mở camera lại';
 }

@@ -268,6 +268,43 @@ commit và kết quả kiểm thử.
   - huỷ chụp ảnh;
   - đường đi từ màn Quét tới khi ghi nhật ký.
 
+### 2026-10-17 · Camera ngay trong app, theo phong cách giao diện
+- **Yêu cầu:** bấm Quét là mở camera ngay trong app (không nhảy sang app
+  camera của máy). Nút thư viện ảnh nằm bên trái nút chụp, nút ghi thủ công
+  bên phải, tất cả đổi kiểu theo giao diện.
+- **Làm gì:**
+  - Dùng plugin `camera` chính thức (CameraX trên Android), camera sau,
+    độ phân giải cao, chỉ chụp ảnh nên không bật âm thanh.
+  - Bố cục màn camera:
+    - camera chiếm toàn màn hình;
+    - **khung ngắm** dạng 4 góc, màu theo giao diện; Forest bo góc mềm,
+      Cyberpunk/Sunset có phát sáng;
+    - nút đóng và đèn flash ở trên;
+    - dòng nhắc "Đặt dĩa hoặc tô vào giữa khung";
+    - hàng dưới gồm **Thư viện · nút chụp · Ghi tay**.
+  - Nút chụp là nút Quét của giao diện đang chọn, thêm vòng trắng như camera
+    thật. Hai nút bên (`StyledCameraButton`) cũng đổi hình dạng và màu theo
+    giao diện.
+  - Lớp `ScanCamera` tách camera ra khỏi giao diện, để test dùng camera giả.
+  - Camera được giải phóng khi app chạy nền và mở lại khi quay về. Có cờ
+    chặn mở hai lần, vì hộp thoại xin quyền cũng làm app tạm dừng.
+  - Xem ảnh xong mà không ghi thì camera chạy tiếp; ghi xong thì đóng màn
+    Quét.
+  - **Dự phòng:** bị từ chối quyền, máy không có camera, hoặc lệnh liệt kê
+    camera bị treo quá 10 giây thì chuyển sang màn có *Chọn ảnh · Ghi thủ
+    công · Thử mở camera lại*.
+- **Quyền Android:**
+  - Gỡ quyền **ghi âm** (`RECORD_AUDIO`) mà plugin tự thêm, vì app không
+    dùng micro.
+  - Camera đặt là *không bắt buộc*, để máy không có camera vẫn cài được.
+  - App vẫn không có quyền INTERNET.
+- **Kiểm thử:** 113/113 test, thêm các trường hợp:
+  - chụp → xem kết quả → ghi → đóng camera;
+  - vị trí ba nút, đèn flash, quay lại thì camera chạy tiếp;
+  - huỷ chọn ảnh, nút đóng;
+  - bị từ chối quyền thì sang màn dự phòng.
+- Đã cài lên điện thoại thật (Xiaomi, HyperOS 4).
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera

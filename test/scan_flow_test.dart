@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:optifit/models/food_log_entry.dart';
 import 'package:optifit/screens/scan_result_screen.dart';
 import 'package:optifit/screens/scan_screen.dart';
 import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/dataset_repository.dart';
 import 'package:optifit/services/food_recognizer.dart';
+import 'package:optifit/services/scan_camera.dart';
 import 'package:optifit/services/vn_food_repository.dart';
+import 'package:optifit/widgets/scan_button_face.dart';
 
 import 'helpers/localized_app.dart';
 import 'helpers/vn_food_fixture.dart';
@@ -203,66 +204,189 @@ void main() {
     expect(database.added.any((entry) => entry.name.startsWith('Bì')), isFalse);
   });
 
-  testWidgets('a photo goes from the Scan screen to the result and back',
+  testWidgets('the shutter takes a photo, reviews it and closes Scan',
       (tester) async {
     _tall(tester);
     final database = _Database();
-    final sources = <ImageSource>[];
-    bool? result;
-    await tester.pumpWidget(localizedApp(
-      home: Builder(
-        builder: (context) => Scaffold(
-          body: FilledButton(
-            onPressed: () async {
-              result = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ScanScreen(
-                    datasets: _Datasets(),
-                    vnFood: VnFoodRepository(bundle: FixtureVnFoodBundle()),
-                    recognizer: _Recognizer(const FoodRecognition(
-                      dishes: {'pho_bo': 0.9},
-                      components: {'com': 0.9},
-                    )),
-                    pickImage: (source) async {
-                      sources.add(source);
-                      return 'bowl.jpg';
-                    },
-                    database: database,
-                  ),
-                ),
-              );
-            },
-            child: const Text('Mở'),
-          ),
-        ),
-      ),
-    ));
-    await tester.tap(find.text('Mở'));
+    final camera = _FakeCamera();
+    final result = await _openScan(
+      tester,
+      camera: camera,
+      database: database,
+      recognizer: _Recognizer(const FoodRecognition(
+        dishes: {'pho_bo': 0.9},
+        components: {'com': 0.9},
+      )),
+    );
+    expect(find.byKey(const ValueKey('camera-preview')), findsOneWidget);
+    expect(find.text('Đặt dĩa hoặc tô vào giữa khung'), findsOneWidget);
+    expect(find.byType(ViewfinderFrame), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('scan-shutter')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('scan-gallery')));
-    await tester.pumpAndSettle();
-    expect(sources, [ImageSource.gallery]);
+    expect(camera.shots, 1);
+    expect(camera.paused, isTrue, reason: 'preview pauses during review');
     expect(find.text('Kết quả quét'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('scan-save')));
     await tester.pumpAndSettle();
     expect(database.added.single.name, 'Cơm (Phở bò)');
-    expect(result, isTrue, reason: 'Scan closes after logging');
+    expect(result(), isTrue, reason: 'Scan closes after logging');
+    expect(camera.disposed, isTrue);
   });
 
-  testWidgets('a cancelled photo keeps the Scan screen open', (tester) async {
+  testWidgets('gallery and torch sit around the shutter; back resumes camera',
+      (tester) async {
     _tall(tester);
-    await tester.pumpWidget(localizedApp(
-      home: ScanScreen(
-        datasets: _Datasets(),
-        vnFood: VnFoodRepository(bundle: FixtureVnFoodBundle()),
-        pickImage: (_) async => null,
-      ),
-    ));
-    await tester.tap(find.byKey(const ValueKey('scan-camera')));
+    final camera = _FakeCamera();
+    var picks = 0;
+    await _openScan(
+      tester,
+      camera: camera,
+      database: _Database(),
+      recognizer: const NoModelRecognizer(),
+      pickFromGallery: () async {
+        picks++;
+        return 'old.jpg';
+      },
+    );
+    final gallery =
+        tester.getCenter(find.byKey(const ValueKey('scan-gallery')));
+    final shutter =
+        tester.getCenter(find.byKey(const ValueKey('scan-shutter')));
+    final manual = tester.getCenter(find.byKey(const ValueKey('scan-manual')));
+    expect(gallery.dx, lessThan(shutter.dx));
+    expect(manual.dx, greaterThan(shutter.dx));
+
+    await tester.tap(find.byKey(const ValueKey('scan-torch')));
     await tester.pumpAndSettle();
-    expect(find.text('Chụp ảnh'), findsOneWidget);
-    expect(find.text('Kết quả quét'), findsNothing);
+    expect(camera.torch, isTrue);
+    expect(find.byIcon(Icons.flash_on_rounded), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('scan-gallery')));
+    await tester.pumpAndSettle();
+    expect(picks, 1);
+    expect(find.text('Kết quả quét'), findsOneWidget);
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+    expect(camera.paused, isFalse, reason: 'camera resumes after review');
+    expect(find.byKey(const ValueKey('camera-preview')), findsOneWidget);
   });
+
+  testWidgets('a cancelled gallery pick and the close button behave',
+      (tester) async {
+    _tall(tester);
+    final camera = _FakeCamera();
+    final result = await _openScan(
+      tester,
+      camera: camera,
+      database: _Database(),
+      recognizer: const NoModelRecognizer(),
+      pickFromGallery: () async => null,
+    );
+    await tester.tap(find.byKey(const ValueKey('scan-gallery')));
+    await tester.pumpAndSettle();
+    expect(find.text('Kết quả quét'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('scan-close')));
+    await tester.pumpAndSettle();
+    expect(result(), isNull);
+    expect(camera.disposed, isTrue);
+  });
+
+  testWidgets('a denied camera falls back to gallery and manual logging',
+      (tester) async {
+    _tall(tester);
+    final camera = _FakeCamera(
+        failure: const ScanCameraException(ScanCameraProblem.permissionDenied));
+    await _openScan(
+      tester,
+      camera: camera,
+      database: _Database(),
+      recognizer: const NoModelRecognizer(),
+    );
+    expect(find.textContaining('chưa được phép dùng camera'), findsOneWidget);
+    expect(find.byKey(const ValueKey('scan-gallery')), findsOneWidget);
+    expect(find.byKey(const ValueKey('scan-manual')), findsOneWidget);
+    expect(find.byKey(const ValueKey('scan-shutter')), findsNothing);
+    expect(camera.disposed, isTrue);
+  });
+}
+
+class _FakeCamera implements ScanCamera {
+  _FakeCamera({this.failure});
+
+  final ScanCameraException? failure;
+  var shots = 0;
+  var torch = false;
+  var paused = false;
+  var disposed = false;
+
+  @override
+  Future<void> initialize() async {
+    if (failure != null) throw failure!;
+  }
+
+  @override
+  Widget buildPreview() => const ColoredBox(
+      key: ValueKey('camera-preview'), color: Color(0xFF335544));
+
+  @override
+  double get aspectRatio => 3 / 4;
+
+  @override
+  bool get hasFlash => true;
+
+  @override
+  Future<void> setTorch(bool on) async => torch = on;
+
+  @override
+  Future<String> takePicture() async => 'shot-${++shots}.jpg';
+
+  @override
+  Future<void> pause() async => paused = true;
+
+  @override
+  Future<void> resume() async => paused = false;
+
+  @override
+  Future<void> dispose() async => disposed = true;
+}
+
+/// Pushes Scan over a home page; returns a getter for the popped value.
+Future<bool? Function()> _openScan(
+  WidgetTester tester, {
+  required _FakeCamera camera,
+  required _Database database,
+  required FoodRecognizer recognizer,
+  GalleryPicker? pickFromGallery,
+}) async {
+  bool? result;
+  await tester.pumpWidget(localizedApp(
+    home: Builder(
+      builder: (context) => Scaffold(
+        body: FilledButton(
+          onPressed: () async {
+            result = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ScanScreen(
+                  datasets: _Datasets(),
+                  vnFood: VnFoodRepository(bundle: FixtureVnFoodBundle()),
+                  recognizer: recognizer,
+                  camera: () => camera,
+                  pickFromGallery: pickFromGallery ?? () async => null,
+                  database: database,
+                ),
+              ),
+            );
+          },
+          child: const Text('Mở'),
+        ),
+      ),
+    ),
+  ));
+  await tester.tap(find.text('Mở'));
+  await tester.pumpAndSettle();
+  return () => result;
 }

@@ -673,7 +673,6 @@
   "scanManual": "Ghi món thủ công",
   "dataTitle": "Dữ liệu",
   "historyCleared": "Đã xóa lịch sử thực đơn và buổi tập.",
-  "scanSubtitle": "Chụp một dĩa hoặc tô, rồi xác nhận món và các thành phần để tính calo.",
   "scanModelPending": "Nhận diện tự động đang được huấn luyện. Tạm thời bạn chọn món sau khi chụp.",
   "scanTakePhoto": "Chụp ảnh",
   "scanPickGallery": "Chọn từ thư viện",
@@ -712,5 +711,15 @@
     }
   },
   "scanNothingSelected": "Chọn ít nhất một thành phần.",
-  "scanSave": "Ghi vào nhật ký"
+  "scanSave": "Ghi vào nhật ký",
+  "scanFrameHint": "Đặt dĩa hoặc tô vào giữa khung",
+  "scanClose": "Đóng",
+  "scanTorchOn": "Bật đèn",
+  "scanTorchOff": "Tắt đèn",
+  "scanGalleryShort": "Thư viện",
+  "scanManualShort": "Ghi tay",
+  "scanCaptureFailed": "Không chụp được ảnh. Hãy thử lại.",
+  "scanCameraDenied": "OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.",
+  "scanNoCamera": "Không mở được camera. Bạn vẫn có thể chọn ảnh có sẵn hoặc ghi món thủ công.",
+  "scanRetryCamera": "Thử mở camera lại"
 }

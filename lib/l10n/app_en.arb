@@ -284,7 +284,6 @@
   "scanManual": "Log food manually",
   "dataTitle": "Data",
   "historyCleared": "Meal plan and workout history cleared.",
-  "scanSubtitle": "Photograph one plate or bowl, then confirm the dish and its components to count calories.",
   "scanModelPending": "Automatic recognition is still being trained. For now, choose the dish after taking the photo.",
   "scanTakePhoto": "Take photo",
   "scanPickGallery": "Choose from gallery",
@@ -306,5 +305,15 @@
   "scanMissingNutrition": "No nutrition data yet for: {names}. Untick them or add the data to log this plate.",
   "scanTotal": "Total: {calories} kcal • {protein} g protein",
   "scanNothingSelected": "Select at least one component.",
-  "scanSave": "Log to diary"
+  "scanSave": "Log to diary",
+  "scanFrameHint": "Fit the plate or bowl inside the frame",
+  "scanClose": "Close",
+  "scanTorchOn": "Turn on light",
+  "scanTorchOff": "Turn off light",
+  "scanGalleryShort": "Gallery",
+  "scanManualShort": "Log food",
+  "scanCaptureFailed": "Could not take the photo. Please try again.",
+  "scanCameraDenied": "OptiFit is not allowed to use the camera. Grant access in the phone settings, or choose an existing photo.",
+  "scanNoCamera": "The camera could not be opened. You can still choose a photo or log food manually.",
+  "scanRetryCamera": "Try the camera again"
 }
