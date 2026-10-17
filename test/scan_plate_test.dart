@@ -21,7 +21,7 @@ void main() {
       ]);
     });
 
-    test('the packaged tables parse and cover the 20 contract dishes', () {
+    test('the packaged tables parse and cover the 40 contract dishes', () {
       String read(String name) =>
           File('assets/data/vn_food/$name.csv').readAsStringSync();
       final data = parseVnFoodData(
@@ -29,10 +29,13 @@ void main() {
         dishesCsv: read('dishes'),
         dishNamesCsv: read('dish_names'),
       );
-      expect(data.dishes, hasLength(20));
+      expect(data.dishes, hasLength(40));
       expect(data.dish('com_tam')!.nameVi, 'Cơm tấm');
       expect(data.dish('com_tam')!.parts.map((part) => part.component),
           contains('bi'));
+      // A single-item dish keeps all of its nutrition in the base row.
+      expect(data.dish('banh_tet')!.parts.map((part) => part.component),
+          ['_base_banh_tet']);
       expect(data.addableComponents, hasLength(24));
     });
 

@@ -27,8 +27,12 @@ COMPONENTS = ROOT / 'assets' / 'data' / 'vn_food' / 'components.csv'
 FOODS = {
     '1010': ('Bánh đa nem (bánh tráng)', 335, 4, 79.4, 0.2),
     '1017': ('Bột gạo tẻ', 360, 6.6, 82.6, 0.4),
+    '2008002': ('Khoai lang luộc', 122, 0.78, 29.22, 0.2),
+    '2010': ('Khoai môn', 113, 1.5, 26.4, 0.2),
     '2015': ('Miến dong khô', 338, 0.6, 83.7, 0.1),
+    '3001': ('Cùi dừa già', 385, 4.8, 10.4, 36),
     '3017': ('Lạc hạt khô', 583, 27.5, 18, 44.5),
+    '3033': ('Tào phớ', 46, 3.8, 4.7, 1.2),
     '4005': ('Cà chua', 24, 0.6, 4.77, 0.23),
     '4007': ('Cà rốt tươi', 44, 1.5, 9.03, 0.17),
     '4033': ('Đu đủ xanh', 30, 0.8, 6.6, 0),
@@ -36,15 +40,22 @@ FOODS = {
     '4037': ('Hành củ', 29, 1.3, 5.22, 0.28),
     '4038': ('Hành lá', 26, 1.3, 5.2, 0),
     '4039': ('Hành tây', 45, 1.8, 9.29, 0.11),
+    '4055002': ('Mướp đắng luộc', 21, 0.91, 4.14, 0.1),
+    '4075': ('Rau húng', 34, 2.2, 5.08, 0.52),
     '4103': ('Tỏi ta', 126, 6, 24.65, 0.35),
     '4125': ('Mộc nhĩ khô', 332, 10.6, 72, 0.2),
     '5003': ('Chanh', 29, 0.9, 5.96, 0.14),
     '5046': ('Quất (tắc)', 42, 0.9, 9.6, 0),
     '6002': ('Dầu thảo mộc', 897, 0, 0, 99.7),
     '7018': ('Thịt lợn nửa nạc nửa mỡ', 260, 16.5, 0, 21.5),
+    '7034002': ('Dạ dày lợn luộc', 106, 18.25, 0, 3.63),
+    '7046': ('Lòng lợn (ruột già)', 167, 6.9, 0.8, 15.1),
     '8034': ('Cua đồng', 87, 12.3, 2, 3.3),
+    '8053': ('Tôm biển khô', 347, 75.6, 2.5, 3.8),
+    '9007': ('Trứng chim cút', 157, 12.78, 2.89, 10.47),
     '9012': ('Trứng gà công nghiệp', 132, 12.79, 1.89, 8.17),
     '12014': ('Đường kính', 397, 0, 99.3, 0),
+    '13003': ('Gừng tươi', 41, 0.4, 8.59, 0.51),
     '13004': ('Hạt tiêu', 365, 7, 67.6, 7.4),
     '13005': ('Muối', 1, 0, 0, 0),
     '13006': ('Bột nghệ', 380, 7.83, 64.91, 9.88),
@@ -154,10 +165,47 @@ RECIPES = {
         30, DMX + 'tong-hop-4-loai-nuoc-cham-goi-cuon-thom-ngon-dam-da-de-thuc-02901',
         '1 cuốn = 1 bánh tráng 15 g (USDA FNDDS 2708166) và 15 g tương đậu phộng '
         '(giả định 1 muỗng canh)'),
+    # VinaFood21 dishes without a usable table entry: recipes estimated by
+    # the team (no URL), cooked yields included.
+    '_base_tau_hu': (
+        {'3033': 200, '12014': 35, '13003': 5, 'water': 20},
+        260, None, 'tào phớ với nước đường gừng'),
+    '_base_pha_lau': (
+        {'7034002': 200, '7046': 200, '14006': 400, '3001': 50, '6002': 15,
+         '12014': 10, '13017': 15, '4103': 10},
+        750, None, 'lòng heo hầm nước dừa; cùi dừa thay cho nước cốt dừa'),
+    '_base_banh_can': (
+        {'1017': 100, 'water': 150, '9007': 50, '6002': 5, '4038': 5},
+        280, None, 'mẻ khoảng 12 cái, mỗi cái có trứng cút'),
+    '_base_banh_trang_tron': (
+        {'1010': 50, '9007': 30, '3017': 10, '6002': 10, '8053': 5,
+         '4075': 5, '5046': 10, '12014': 5},
+        120, None, 'bánh tráng, trứng cút, đậu phộng, sa tế, tôm khô, rau răm'),
+    '_base_bot_chien': (
+        {'1017': 150, '13046': 50, 'water': 300, '9012': 100, '6002': 30,
+         '4038': 10},
+        560, None, 'bột hấp cắt miếng chiên với trứng'),
+    '_base_ca_ri': (
+        {'14006': 500, '3001': 100, 'water': 500, '2008002': 300, '6002': 20,
+         '13006': 10, '12014': 10, '13017': 20, '4037': 20},
+        1300, None, 'nước cà ri có khoai lang, chưa tính thịt gà; cùi dừa thay '
+        'cho nước cốt dừa, bột nghệ thay cho bột cà ri'),
+    '_base_canh_khoai_mo': (
+        {'2010': 300, '7018': 100, '4038': 10, '13017': 20, 'water': 1000},
+        1350, None, 'khoai môn thay cho khoai mỡ, có thịt băm'),
+    '_base_canh_kho_qua': (
+        {'4055002': 300, '7018': 200, '4125': 5, '2015': 10, '13017': 20,
+         'water': 1000},
+        1500, None, 'khổ qua nhồi thịt băm, mộc nhĩ, miến'),
+    '_base_goi_ga': (
+        {'13017': 30, '12014': 30, '5003': 30, '4103': 10, '13039': 5,
+         '6002': 10},
+        115, None, 'nước trộn: nước mắm, đường, chanh, tỏi ớt, dầu hành phi'),
 }
 # Grams per natural unit: bánh xèo makes about 6 per batch, gỏi cuốn is the
 # 30 g roll above, and the team estimated a slice of chả trứng.
-UNITS = {'_base_banh_xeo': 835 / 6, '_base_goi_cuon': 30, 'cha_trung': 50}
+UNITS = {'_base_banh_xeo': 835 / 6, '_base_goi_cuon': 30, 'cha_trung': 50,
+         '_base_banh_can': 280 / 12}
 
 
 def per_100g(ingredients, cooked):
@@ -172,7 +220,8 @@ def source(code):
     ingredients, cooked, url, note = RECIPES[code]
     nin = ', '.join(c for c in ingredients if c[0].isdigit())
     usda = ', '.join(c[3:] for c in ingredients if c.startswith('fdc'))
-    text = (f'Tính theo công thức {url}, thành phẩm ước tính {cooked} g; '
+    recipe = url or 'nhóm ước lượng'
+    text = (f'Tính theo công thức {recipe}, thành phẩm ước tính {cooked} g; '
             f'nguyên liệu theo Viện Dinh dưỡng mã {nin}')
     if usda:
         text += f' và USDA FoodData Central {usda}'

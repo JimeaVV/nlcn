@@ -442,6 +442,44 @@ commit và kết quả kiểm thử.
   - Nhìn chung cùng cỡ số, đủ dùng cho app ước tính.
 - **Kết quả:** `check_vn_food.py --strict` không còn ô trống: 40/40 thành
   phần, 94/94 khẩu phần.
+
+### 2026-10-17 · Mở rộng lên 40 món theo bộ ảnh VinaFood21
+- **Phát hiện:** đối chiếu 20 món ban đầu với hai bộ ảnh công khai:
+  - **30VNFoods** (MIT, 30 món): có 13/20 món;
+  - **VinaFood21** (UIT, 21 món, khoảng 14 nghìn ảnh): chỉ trùng `bo_kho`;
+  - không bộ nào có cơm phần, cơm gà, cơm chiên, bún chả, cháo gà; phở chỉ
+    có chung "Phở", không tách bò và gà. Những món này phải tự chụp.
+- **Quyết định:** thêm 20 món còn lại của VinaFood21 (món 21–40 trong
+  contract), để dùng được hết bộ ảnh đó.
+- **Giữ chi phí gán nhãn thấp:**
+  - Món gồm nhiều thứ thì **dùng lại thành phần có sẵn**, không thêm mã thành
+    phần mới. Ví dụ: thịt kho trứng = `thit_kho` + `trung_kho`; gà nướng =
+    `ga`; bánh hỏi = `thit_nuong` + `mo_hanh`.
+  - Món chỉ có một thứ (bánh tét, bắp nướng, tàu hũ, há cảo…) thì để toàn
+    bộ dinh dưỡng ở dòng nền `_base_<món>`. Ảnh VinaFood21 đã có nhãn món,
+    nên không phải gán nhãn thành phần.
+- **Dinh dưỡng của 18 dòng nền mới:**
+  - Lấy món gần nhất trong bảng Viện Dinh dưỡng, ghi rõ "gần đúng":
+    - bánh tét theo bánh chưng (181 kcal/100 g);
+    - bánh ú theo bánh gio (173);
+    - bò lá lốt theo chả lá lốt rán (306);
+    - hoành thánh theo mỳ vằn thắn, tính cả nước (81);
+    - bánh ướt theo bánh cuốn (129);
+    - bánh hỏi theo bún tươi (116);
+    - bắp nướng theo ngô nướng (274).
+  - Lấy theo USDA: há cảo (113, FNDDS 2708708), pate của bánh mì chảo (319,
+    SR 172930).
+  - Tính theo **công thức nhóm ước lượng** bằng `vn_food_recipes.py`:
+    - tàu hũ 90, phá lấu 135, bánh căn 173, bánh tráng trộn 338, bột chiên
+      199 kcal/100 g;
+    - nước cà ri 87, canh khoai mỡ 45, canh khổ qua 43 kcal/100 g;
+    - nước trộn gỏi gà 210 kcal/100 g.
+  - Khối lượng 1 đơn vị và khẩu phần mặc định cũng do nhóm ước lượng, ví dụ
+    1 khoanh bánh tét 100 g, 1 trái bắp 120 g, 6 cái há cảo.
+- **Kết quả:** 40 món, 58 dòng thành phần (24 thành phần + 34 dòng nền), 133
+  dòng khẩu phần; `--strict` báo OK; 114/114 test.
+- **Cần người B đồng ý** vì đây là thay đổi contract: số lớp đầu ra `dish`
+  tăng từ 20 lên 40.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.

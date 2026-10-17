@@ -25,7 +25,13 @@ Quy tắc đặt mã: chữ thường, không dấu, nối bằng `_`. Mã dùng
 nhãn trong `labels.csv`, thứ tự trong `dishes.txt` và khoá trong bảng dinh
 dưỡng của app.
 
-Bản nháp gồm **20 món** để bắt đầu; khi dữ liệu đủ thì mở rộng lên 30.
+Gồm **40 món**:
+- món 1–20 là danh sách ban đầu, phần lớn có trong bộ ảnh 30VNFoods;
+- món 21–40 lấy theo bộ ảnh VinaFood21 (chỉ trùng `bo_kho` với danh sách
+  ban đầu).
+
+Món nào chỉ gồm một thứ (bánh tét, bắp nướng…) thì không cần gán nhãn thành
+phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 
 | # | Mã | Tên hiển thị (vi) | Ghi chú |
 |---|---|---|---|
@@ -49,6 +55,26 @@ Bản nháp gồm **20 món** để bắt đầu; khi dữ liệu đủ thì m�
 | 18 | `banh_xeo` | Bánh xèo | |
 | 19 | `goi_cuon` | Gỏi cuốn | |
 | 20 | `xoi` | Xôi | |
+| 21 | `bo_la_lot` | Bò lá lốt | VinaFood21 |
+| 22 | `ha_cao` | Há cảo | VinaFood21 |
+| 23 | `banh_uot` | Bánh ướt | VinaFood21 |
+| 24 | `banh_hoi` | Bánh hỏi | VinaFood21 |
+| 25 | `thit_kho_trung` | Thịt kho trứng | VinaFood21; thành phần `thit_kho`, `trung_kho` |
+| 26 | `banh_can` | Bánh căn | VinaFood21 |
+| 27 | `ca_ri` | Cà ri gà | VinaFood21 |
+| 28 | `bap_nuong` | Bắp nướng | VinaFood21 |
+| 29 | `banh_trang_tron` | Bánh tráng trộn | VinaFood21 |
+| 30 | `hoanh_thanh_nuoc` | Hoành thánh nước | VinaFood21 |
+| 31 | `pha_lau` | Phá lấu | VinaFood21 |
+| 32 | `tau_hu` | Tàu hũ nước đường | VinaFood21 |
+| 33 | `bot_chien` | Bột chiên | VinaFood21 |
+| 34 | `ga_nuong` | Gà nướng | VinaFood21; thành phần `ga` |
+| 35 | `banh_u` | Bánh ú | VinaFood21 |
+| 36 | `banh_tet` | Bánh tét | VinaFood21 |
+| 37 | `goi_ga` | Gỏi gà | VinaFood21 |
+| 38 | `canh_khoai_mo` | Canh khoai mỡ | VinaFood21 |
+| 39 | `canh_kho_qua` | Canh khổ qua | VinaFood21 |
+| 40 | `banh_mi_chao` | Bánh mì chảo | VinaFood21 |
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
