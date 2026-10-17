@@ -13,9 +13,16 @@ import '../widgets/neon_button.dart';
 import '../widgets/workout_result.dart';
 
 class WorkoutScreen extends StatefulWidget {
-  const WorkoutScreen({super.key, required this.recommendations});
+  const WorkoutScreen({
+    super.key,
+    required this.recommendations,
+    this.onHistoryChanged,
+  });
 
   final RecommendationService recommendations;
+
+  /// Called after a workout plan or an exercise log is saved.
+  final VoidCallback? onHistoryChanged;
 
   @override
   State<WorkoutScreen> createState() => _WorkoutScreenState();
@@ -95,6 +102,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         level: savedLevel,
         recommendation: recommendation,
       );
+      widget.onHistoryChanged?.call();
       if (mounted) _showMessage(context.l10n.workoutSaved);
     } catch (_) {
       if (mounted) _showMessage(context.l10n.workoutSaveFailed);
@@ -132,6 +140,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         recommendation: recommendation,
       );
 
+      widget.onHistoryChanged?.call();
       if (!mounted) return;
       await _showProgressiveOverloadResult(recommendation);
     } on RecommendationException catch (exception) {
@@ -200,11 +209,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         children: [
-          Text(
-            l10n.workoutTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 6),
           Text(l10n.workoutSubtitle,
               style: TextStyle(color: CyberColors.muted)),
           const SizedBox(height: 18),

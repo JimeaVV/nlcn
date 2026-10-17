@@ -156,9 +156,6 @@ class DiaryScreenState extends State<DiaryScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
           children: [
-            Text(l10n.diaryTitle,
-                style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 6),
             Text(l10n.diarySubtitle,
                 style: TextStyle(color: CyberColors.muted)),
             const SizedBox(height: 12),

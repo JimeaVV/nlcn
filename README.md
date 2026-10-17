@@ -14,6 +14,12 @@ The interface is available in Vietnamese (default) and English. Switch the
 language under Settings (gear icon in the top bar); the choice is saved on the
 device.
 
+Navigation: the bottom bar is *Today · Food · Scan · Workout · Profile*.
+Scan is a raised action button in the middle (manual logging until the
+on-device recognition model ships). Food has top tabs *Diary · Meal plan ·
+Saved*, Workout has *Session · History*. Settings (language, theme, clearing
+saved plans and logs) is the gear icon in the top bar.
+
 The Diary tab records what the user actually ate per day and meal: foods from
 the bundled dataset by weight, custom dishes by calories/macros, or a whole
 generated plan via "Log to today's diary". Totals are compared with the profile
@@ -59,6 +65,9 @@ private release key before publishing to a store.
 - `lib/engine/nutrition_targets.dart`: goal-based starting estimates and manual
   targets, shared by the profile preview and background meal planner.
 - `lib/screens/profile_screen.dart`: profile, daily weigh-ins and local chart.
+- `lib/screens/home_screen.dart`, `lib/widgets/optifit_bottom_bar.dart`,
+  `lib/widgets/section_tabs.dart`: navigation; `today_screen.dart` is the daily
+  overview and `scan_screen.dart` the Scan entry point.
 - `lib/screens/diary_screen.dart`, `lib/widgets/food_log_sheet.dart`,
   `lib/models/food_log_entry.dart`: the food diary (SQLite `food_log`).
 - `lib/l10n/`: Vietnamese (`app_vi.arb`, template) and English (`app_en.arb`)

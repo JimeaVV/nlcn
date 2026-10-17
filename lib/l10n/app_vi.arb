@@ -1,6 +1,5 @@
 {
   "@@locale": "vi",
-  "navMeal": "Bữa ăn",
   "navWorkout": "Tập luyện",
   "navHistory": "Lịch sử",
   "navProfile": "Hồ sơ",
@@ -14,7 +13,6 @@
   "savingButton": "ĐANG LƯU...",
   "sourceManual": "tự đặt",
   "sourceEstimated": "ước tính",
-  "mealTitle": "THỰC ĐƠN",
   "mealSubtitle": "Tạo thực đơn từ hồ sơ và mục tiêu đã lưu trên máy.",
   "mealProfileRequiredTitle": "Thiết lập hồ sơ trước",
   "mealProfileRequiredBody": "Chọn mục tiêu và lưu thông tin cơ thể trong tab Hồ sơ.",
@@ -78,7 +76,6 @@
   "breakfast": "Bữa sáng",
   "lunch": "Bữa trưa",
   "dinner": "Bữa tối",
-  "workoutTitle": "BUỔI TẬP",
   "workoutSubtitle": "Gợi ý bài tập theo nhóm cơ, trình độ và thời gian bạn có.",
   "trainingSetup": "Thiết lập buổi tập",
   "workoutSplit": "Nhóm bài tập (split)",
@@ -189,7 +186,6 @@
   "difficultyHard": "Khó",
   "difficultyFailure": "Kiệt sức (failure)",
   "calculate": "Tính toán",
-  "historyTitle": "LỊCH SỬ",
   "historyLoadFailed": "Không tải được lịch sử trên máy.",
   "clearAllHistory": "Xóa toàn bộ lịch sử",
   "clearAllTitle": "Xóa toàn bộ lịch sử?",
@@ -517,7 +513,6 @@
   "equipmentOther": "Khác",
   "navDiary": "Nhật ký",
   "mealSnack": "Bữa phụ",
-  "diaryTitle": "NHẬT KÝ ĂN UỐNG",
   "diarySubtitle": "Ghi lại những gì bạn đã ăn và so với mục tiêu trong hồ sơ.",
   "diaryToday": "Hôm nay",
   "diaryPreviousDay": "Ngày trước",
@@ -636,5 +631,47 @@
   "diarySaveFailed": "Không lưu được nhật ký. Hãy thử lại.",
   "mealLogPlan": "GHI VÀO NHẬT KÝ HÔM NAY",
   "mealPlanLogged": "Đã ghi thực đơn vào nhật ký hôm nay.",
-  "mealPlanAlreadyLogged": "ĐÃ GHI VÀO NHẬT KÝ"
+  "mealPlanAlreadyLogged": "ĐÃ GHI VÀO NHẬT KÝ",
+  "navToday": "Hôm nay",
+  "navFood": "Ăn uống",
+  "navScan": "Quét",
+  "tabMealPlan": "Thực đơn",
+  "tabSaved": "Đã lưu",
+  "tabWorkoutPlan": "Buổi tập",
+  "todayTitle": "HÔM NAY",
+  "todayLoadFailed": "Không tải được dữ liệu hôm nay. Kéo xuống để thử lại.",
+  "todayOpenDiary": "Mở nhật ký",
+  "todayWeightWeek": "Thay đổi 7 ngày: {change} kg",
+  "@todayWeightWeek": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "todayNoExercise": "Hôm nay chưa ghi bài tập nào.",
+  "todayExercisesLogged": "Đã ghi {count} bài tập hôm nay",
+  "@todayExercisesLogged": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "todayLastWorkout": "Buổi tập gần nhất: {plan} · {date}",
+  "@todayLastWorkout": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scanTitle": "Quét món",
+  "scanComingSoon": "Tính năng nhận diện món ăn bằng camera đang được phát triển. Trong lúc chờ, bạn có thể ghi món thủ công vào nhật ký hôm nay.",
+  "scanManual": "Ghi món thủ công",
+  "dataTitle": "Dữ liệu",
+  "historyCleared": "Đã xóa lịch sử thực đơn và buổi tập."
 }

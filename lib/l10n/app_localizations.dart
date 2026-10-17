@@ -98,12 +98,6 @@ abstract class AppLocalizations {
     Locale('vi')
   ];
 
-  /// No description provided for @navMeal.
-  ///
-  /// In vi, this message translates to:
-  /// **'Bữa ăn'**
-  String get navMeal;
-
   /// No description provided for @navWorkout.
   ///
   /// In vi, this message translates to:
@@ -181,12 +175,6 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'ước tính'**
   String get sourceEstimated;
-
-  /// No description provided for @mealTitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'THỰC ĐƠN'**
-  String get mealTitle;
 
   /// No description provided for @mealSubtitle.
   ///
@@ -349,12 +337,6 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Bữa tối'**
   String get dinner;
-
-  /// No description provided for @workoutTitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'BUỔI TẬP'**
-  String get workoutTitle;
 
   /// No description provided for @workoutSubtitle.
   ///
@@ -631,12 +613,6 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Tính toán'**
   String get calculate;
-
-  /// No description provided for @historyTitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'LỊCH SỬ'**
-  String get historyTitle;
 
   /// No description provided for @historyLoadFailed.
   ///
@@ -1474,12 +1450,6 @@ abstract class AppLocalizations {
   /// **'Bữa phụ'**
   String get mealSnack;
 
-  /// No description provided for @diaryTitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'NHẬT KÝ ĂN UỐNG'**
-  String get diaryTitle;
-
   /// No description provided for @diarySubtitle.
   ///
   /// In vi, this message translates to:
@@ -1731,6 +1701,114 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'ĐÃ GHI VÀO NHẬT KÝ'**
   String get mealPlanAlreadyLogged;
+
+  /// No description provided for @navToday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôm nay'**
+  String get navToday;
+
+  /// No description provided for @navFood.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ăn uống'**
+  String get navFood;
+
+  /// No description provided for @navScan.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quét'**
+  String get navScan;
+
+  /// No description provided for @tabMealPlan.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thực đơn'**
+  String get tabMealPlan;
+
+  /// No description provided for @tabSaved.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã lưu'**
+  String get tabSaved;
+
+  /// No description provided for @tabWorkoutPlan.
+  ///
+  /// In vi, this message translates to:
+  /// **'Buổi tập'**
+  String get tabWorkoutPlan;
+
+  /// No description provided for @todayTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'HÔM NAY'**
+  String get todayTitle;
+
+  /// No description provided for @todayLoadFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tải được dữ liệu hôm nay. Kéo xuống để thử lại.'**
+  String get todayLoadFailed;
+
+  /// No description provided for @todayOpenDiary.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở nhật ký'**
+  String get todayOpenDiary;
+
+  /// No description provided for @todayWeightWeek.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thay đổi 7 ngày: {change} kg'**
+  String todayWeightWeek(String change);
+
+  /// No description provided for @todayNoExercise.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôm nay chưa ghi bài tập nào.'**
+  String get todayNoExercise;
+
+  /// No description provided for @todayExercisesLogged.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã ghi {count} bài tập hôm nay'**
+  String todayExercisesLogged(String count);
+
+  /// No description provided for @todayLastWorkout.
+  ///
+  /// In vi, this message translates to:
+  /// **'Buổi tập gần nhất: {plan} · {date}'**
+  String todayLastWorkout(String plan, String date);
+
+  /// No description provided for @scanTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quét món'**
+  String get scanTitle;
+
+  /// No description provided for @scanComingSoon.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tính năng nhận diện món ăn bằng camera đang được phát triển. Trong lúc chờ, bạn có thể ghi món thủ công vào nhật ký hôm nay.'**
+  String get scanComingSoon;
+
+  /// No description provided for @scanManual.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi món thủ công'**
+  String get scanManual;
+
+  /// No description provided for @dataTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu'**
+  String get dataTitle;
+
+  /// No description provided for @historyCleared.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xóa lịch sử thực đơn và buổi tập.'**
+  String get historyCleared;
 }
 
 class _AppLocalizationsDelegate

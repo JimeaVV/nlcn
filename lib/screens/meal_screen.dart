@@ -21,6 +21,7 @@ class MealScreen extends StatefulWidget {
     this.database,
     this.onOpenProfile,
     this.onDiaryChanged,
+    this.onPlanSaved,
   });
 
   final RecommendationService recommendations;
@@ -29,6 +30,9 @@ class MealScreen extends StatefulWidget {
 
   /// Called after the current plan is written to today's diary.
   final VoidCallback? onDiaryChanged;
+
+  /// Called after the current plan is added to the saved meal plans.
+  final VoidCallback? onPlanSaved;
 
   @override
   State<MealScreen> createState() => MealScreenState();
@@ -148,6 +152,7 @@ class MealScreenState extends State<MealScreen> {
     setState(() => _saving = true);
     try {
       await _database.saveMealPlan(result);
+      widget.onPlanSaved?.call();
       if (mounted) _message(context.l10n.mealSaved);
     } catch (_) {
       if (mounted) _message(context.l10n.mealSaveFailed);
@@ -209,9 +214,6 @@ class MealScreenState extends State<MealScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         children: [
-          Text(l10n.mealTitle,
-              style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 6),
           Text(l10n.mealSubtitle, style: TextStyle(color: CyberColors.muted)),
           const SizedBox(height: 18),
           if (_loadingProfile)
