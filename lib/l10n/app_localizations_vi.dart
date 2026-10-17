@@ -966,10 +966,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get scanTitle => 'Quét món';
 
   @override
-  String get scanComingSoon =>
-      'Tính năng nhận diện món ăn bằng camera đang được phát triển. Trong lúc chờ, bạn có thể ghi món thủ công vào nhật ký hôm nay.';
-
-  @override
   String get scanManual => 'Ghi món thủ công';
 
   @override
@@ -977,4 +973,80 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get historyCleared => 'Đã xóa lịch sử thực đơn và buổi tập.';
+
+  @override
+  String get scanSubtitle =>
+      'Chụp một dĩa hoặc tô, rồi xác nhận món và các thành phần để tính calo.';
+
+  @override
+  String get scanModelPending =>
+      'Nhận diện tự động đang được huấn luyện. Tạm thời bạn chọn món sau khi chụp.';
+
+  @override
+  String get scanTakePhoto => 'Chụp ảnh';
+
+  @override
+  String get scanPickGallery => 'Chọn từ thư viện';
+
+  @override
+  String get scanPickFailed => 'Không mở được camera hoặc thư viện ảnh.';
+
+  @override
+  String get scanDataFailed =>
+      'Không đọc được dữ liệu món Việt đi kèm ứng dụng.';
+
+  @override
+  String get scanResultTitle => 'Kết quả quét';
+
+  @override
+  String get scanDishTitle => 'Món ăn';
+
+  @override
+  String get scanChooseDish => 'Chọn món';
+
+  @override
+  String get scanOtherDish => 'Món khác';
+
+  @override
+  String get scanNoGuess => 'Chưa nhận ra món, hãy chọn món đúng với ảnh.';
+
+  @override
+  String get scanLowConfidence => 'Model chưa chắc chắn, hãy chọn đúng món.';
+
+  @override
+  String get scanComponentsTitle => 'Thành phần';
+
+  @override
+  String get scanMaybe => 'Có thể có';
+
+  @override
+  String get scanAddComponent => 'Thêm thành phần';
+
+  @override
+  String get scanNoNutrition => 'chưa có số liệu';
+
+  @override
+  String get scanUnitFallback => 'phần';
+
+  @override
+  String get scanDecrease => 'Giảm';
+
+  @override
+  String get scanIncrease => 'Tăng';
+
+  @override
+  String scanMissingNutrition(String names) {
+    return 'Chưa có số liệu dinh dưỡng cho: $names. Bỏ chọn các phần này hoặc bổ sung số liệu để ghi vào nhật ký.';
+  }
+
+  @override
+  String scanTotal(String calories, String protein) {
+    return 'Tổng: $calories kcal • $protein g protein';
+  }
+
+  @override
+  String get scanNothingSelected => 'Chọn ít nhất một thành phần.';
+
+  @override
+  String get scanSave => 'Ghi vào nhật ký';
 }

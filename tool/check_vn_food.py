@@ -17,6 +17,7 @@ CONTRACT = ROOT / 'docs' / 'MODEL_CONTRACT.md'
 COMPONENT_HEADER = ['code', 'name_vi', 'name_en', 'kcal_per_100g', 'protein_g',
                     'carb_g', 'fat_g', 'unit_name_vi', 'unit_grams', 'source']
 DISH_HEADER = ['dish', 'component', 'default_grams', 'default_units']
+NAME_HEADER = ['code', 'name_vi', 'name_en']
 NUTRIENTS = ['kcal_per_100g', 'protein_g', 'carb_g', 'fat_g']
 
 
@@ -96,6 +97,15 @@ def main():
         if row['unit_name_vi'].strip() and not row['unit_grams'].strip():
             missing.append(f'{code}: grams per {row["unit_name_vi"]}')
         filled += 1
+
+    names = read(DATA / 'dish_names.csv', NAME_HEADER)
+    named = [row['code'] for row in names]
+    if named != dishes:
+        errors.append('dish_names.csv: codes must list the contract dishes '
+                      'in contract order')
+    for row in names:
+        if not row['name_vi'].strip() or not row['name_en'].strip():
+            errors.append(f'dish_names.csv {row["code"]}: both names are required')
 
     rows = read(DATA / 'dishes.csv', DISH_HEADER)
     known = set(codes)

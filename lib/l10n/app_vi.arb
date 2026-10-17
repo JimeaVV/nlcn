@@ -670,8 +670,47 @@
     }
   },
   "scanTitle": "Quét món",
-  "scanComingSoon": "Tính năng nhận diện món ăn bằng camera đang được phát triển. Trong lúc chờ, bạn có thể ghi món thủ công vào nhật ký hôm nay.",
   "scanManual": "Ghi món thủ công",
   "dataTitle": "Dữ liệu",
-  "historyCleared": "Đã xóa lịch sử thực đơn và buổi tập."
+  "historyCleared": "Đã xóa lịch sử thực đơn và buổi tập.",
+  "scanSubtitle": "Chụp một dĩa hoặc tô, rồi xác nhận món và các thành phần để tính calo.",
+  "scanModelPending": "Nhận diện tự động đang được huấn luyện. Tạm thời bạn chọn món sau khi chụp.",
+  "scanTakePhoto": "Chụp ảnh",
+  "scanPickGallery": "Chọn từ thư viện",
+  "scanPickFailed": "Không mở được camera hoặc thư viện ảnh.",
+  "scanDataFailed": "Không đọc được dữ liệu món Việt đi kèm ứng dụng.",
+  "scanResultTitle": "Kết quả quét",
+  "scanDishTitle": "Món ăn",
+  "scanChooseDish": "Chọn món",
+  "scanOtherDish": "Món khác",
+  "scanNoGuess": "Chưa nhận ra món, hãy chọn món đúng với ảnh.",
+  "scanLowConfidence": "Model chưa chắc chắn, hãy chọn đúng món.",
+  "scanComponentsTitle": "Thành phần",
+  "scanMaybe": "Có thể có",
+  "scanAddComponent": "Thêm thành phần",
+  "scanNoNutrition": "chưa có số liệu",
+  "scanUnitFallback": "phần",
+  "scanDecrease": "Giảm",
+  "scanIncrease": "Tăng",
+  "scanMissingNutrition": "Chưa có số liệu dinh dưỡng cho: {names}. Bỏ chọn các phần này hoặc bổ sung số liệu để ghi vào nhật ký.",
+  "@scanMissingNutrition": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "scanTotal": "Tổng: {calories} kcal • {protein} g protein",
+  "@scanTotal": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "scanNothingSelected": "Chọn ít nhất một thành phần.",
+  "scanSave": "Ghi vào nhật ký"
 }

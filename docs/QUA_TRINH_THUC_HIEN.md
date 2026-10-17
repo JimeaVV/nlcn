@@ -232,6 +232,42 @@ commit và kết quả kiểm thử.
 - **Kiểm thử:** 101/101 test (thêm test hình dạng từng kiểu, thanh dưới đổi
   theo giao diện, hiệu ứng nhún, ô xem trước trong Cài đặt).
 
+### 2026-10-17 · Luồng quét món bằng camera (chưa có model)
+- **Mục tiêu:** dựng xong toàn bộ luồng *chụp ảnh → nhận diện → xác nhận →
+  ghi nhật ký* trước khi có model. Khi Người B train xong, chỉ cần cài đặt
+  interface nhận diện, giao diện không phải sửa.
+- **Thành phần:**
+  - `image_picker`: chụp ảnh hoặc chọn từ thư viện, ảnh thu nhỏ còn tối đa
+    1280 px.
+  - `FoodRecognizer` (`lib/services/food_recognizer.dart`): interface theo
+    contract, gồm xác suất món (softmax) và xác suất từng thành phần
+    (sigmoid). Tạm dùng `NoModelRecognizer` (chưa đoán gì).
+  - `VnFoodRepository` + `parseVnFoodData`: đọc `components.csv`,
+    `dishes.csv` và file mới `dish_names.csv` (tên Việt/Anh của 20 món). Bộ
+    đọc CSV tự viết, xử lý được ô có ngoặc kép, dấu phẩy, xuống dòng, BOM.
+  - `ScanPlate`: áp ngưỡng của contract:
+    - ≥ 0,6: tick sẵn;
+    - 0,3–0,6: gắn nhãn "Có thể có", chờ người dùng xác nhận;
+    - thành phần ngoài công thức mà model thấy chắc thì tự thêm vào;
+    - phần nền (nước chấm, nước dùng) luôn được giữ.
+- **Màn kết quả:**
+  - Model chắc chắn (≥ 0,5) thì mở thẳng món; nếu không thì hiện top-3,
+    hoặc cho chọn trong 20 món.
+  - Mỗi thành phần có ô tick, nút −/+ (đơn vị tự nhiên như quả, miếng, hoặc
+    gram), calo; có thể thêm thành phần khác.
+  - Ghi vào nhật ký mỗi thành phần một dòng, tên dạng "Sườn nướng (Cơm
+    tấm)", `source = camera`, kèm `confidence`.
+- **Ràng buộc dữ liệu:** thành phần chưa có số liệu dinh dưỡng thì hiện
+  "chưa có số liệu" và chặn nút ghi, cho tới khi bỏ chọn hoặc điền số liệu.
+  App không bao giờ tự đoán số liệu.
+- **Kiểm thử:** 111/111 test, trong đó:
+  - CSV: ngoặc kép, CRLF, BOM; dữ liệu thật có đủ 20 món;
+  - ngưỡng tick và câu hỏi;
+  - quy đổi đơn vị sang gram;
+  - luồng có model và không có model;
+  - huỷ chụp ảnh;
+  - đường đi từ màn Quét tới khi ghi nhật ký.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
@@ -311,8 +347,9 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   `.tflite`) trong `tool/train/`.
 - [ ] Điền số liệu `assets/data/vn_food/components.csv` và khẩu phần
   `dishes.csv` (khung đã có; chạy `tool/check_vn_food.py`).
-- [ ] Màn chụp ảnh, xác nhận món và thành phần, chỉnh khẩu phần, gắn
-  `tflite_flutter`.
+- [x] Màn chụp ảnh, xác nhận món và thành phần, chỉnh khẩu phần (chạy
+  với `NoModelRecognizer`).
+- [ ] Gắn model thật: cài `FoodRecognizer` bằng `tflite_flutter`.
 - [ ] Giai đoạn YOLO (tuần 5–7): gán khung, train, đếm số lượng.
 - [ ] Mở rộng dữ liệu bài tập (đang 96/2918 bài, thiếu Beginner/Pro).
 - [ ] Benchmark Branch & Bound so với greedy/vét cạn (số node, thời gian,
