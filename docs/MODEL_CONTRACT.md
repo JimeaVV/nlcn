@@ -180,4 +180,4 @@ Mỗi thành phần người dùng xác nhận được ghi thành **một dòng
 - `confidence` = xác suất model đưa ra cho thành phần đó;
 - `name` là tên thành phần, kèm tên món, ví dụ "Sườn nướng (cơm tấm)".
 
-Bảng `food_log` đã có sẵn từ commit `714d4d4`, không cần đổi database.
+Bảng `food_log` đã có sẵn từ commit `d4806b1`, không cần đổi database.

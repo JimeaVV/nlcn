@@ -33,7 +33,7 @@ commit và kết quả kiểm thử.
     dùng lịch sử tập.
   - `applicationId` vẫn là `com.example.nlcsn`; bản release ký bằng debug key.
 
-### 2026-10-16 · Commit phần chạy offline (`797ba93`) và dọn repo (`18d0254`)
+### 2026-10-16 · Commit phần chạy offline (`c1680a5`) và dọn repo (`a058671`)
 - Chuyển engine gợi ý từ Python/FastAPI sang Dart chạy trên máy; dữ liệu
   đóng gói trong `assets/data/recommendations.json`; bỏ quyền INTERNET ở
   bản release.
@@ -42,7 +42,7 @@ commit và kết quả kiểm thử.
 - Dọn repo: gỡ `render.yaml`, file khoá Word, tài liệu cũ (vẫn còn trong
   lịch sử git).
 
-### 2026-10-16 · Đa ngôn ngữ Việt/Anh (`365963e`)
+### 2026-10-16 · Đa ngôn ngữ Việt/Anh (`9ab611d`)
 - **Làm gì:**
   - Dùng `flutter_localizations` và `gen-l10n`.
   - Chuỗi hiển thị nằm trong `lib/l10n/app_vi.arb` (file gốc) và
@@ -59,7 +59,7 @@ commit và kết quả kiểm thử.
   - Định dạng số theo locale: `1.800,5` (vi) và `1,800.5` (en).
 - **Kiểm thử:** analyze sạch, 79/79 test (thêm test đổi ngôn ngữ).
 
-### 2026-10-16 · Nhật ký ăn uống (`714d4d4`)
+### 2026-10-16 · Nhật ký ăn uống (`d4806b1`)
 - **Vì sao:** muốn có tính năng quét đồ ăn bằng camera thì trước tiên app
   phải có chỗ ghi lại *những gì đã ăn*. Trước đó app chỉ gợi ý thực đơn,
   không ghi nhận lượng ăn thực tế.
@@ -134,7 +134,7 @@ commit và kết quả kiểm thử.
 ### 2026-10-17 · Cài GitHub CLI, PR đầu tiên và CI
 - Cài **GitHub CLI** (`gh` 2.102.0) để mở, gộp và theo dõi Pull Request từ
   terminal. PR #1 (đổi Application ID, khung dữ liệu dinh dưỡng) được gộp
-  vào `main` tại commit `5788c7b`.
+  vào `main` tại commit `bafdf42`.
 - Thêm **CI bằng GitHub Actions** (`.github/workflows/ci.yml`), chạy cho mỗi
   PR vào `main` và mỗi lần push lên `main`:
   - job `flutter`:
@@ -148,6 +148,14 @@ commit và kết quả kiểm thử.
   - CI chạy trên môi trường sạch, nên bắt được lỗi kiểu "máy tui chạy được"
     và lỗi chỉ xuất hiện khi gộp hai branch, kể cả khi ai đó quên tự chạy
     test.
+
+### 2026-10-17 · Dọn lịch sử commit
+- Bỏ dòng đồng tác giả `Co-Authored-By` (do công cụ AI tự thêm) khỏi 9
+  commit trên `main` bằng `git filter-branch`, rồi force-push. Nội dung code
+  không đổi: so sánh cây thư mục trước và sau không có khác biệt.
+- Vì vậy mã commit đã đổi. Các mã ghi trong file này là mã mới.
+- Từ nay commit không thêm dòng đồng tác giả. Việc có dùng AI hỗ trợ lập
+  trình sẽ được nêu rõ trong báo cáo.
 
 ---
 
