@@ -478,8 +478,13 @@ commit và kết quả kiểm thử.
     1 khoanh bánh tét 100 g, 1 trái bắp 120 g, 6 cái há cảo.
 - **Kết quả:** 40 món, 58 dòng thành phần (24 thành phần + 34 dòng nền), 133
   dòng khẩu phần; `--strict` báo OK; 114/114 test.
-- **Cần người B đồng ý** vì đây là thay đổi contract: số lớp đầu ra `dish`
-  tăng từ 20 lên 40.
+- Đây là thay đổi contract: số lớp đầu ra `dish` tăng từ 20 lên 40.
+
+### 2026-10-17 · Họp nhóm: chốt contract v1.0
+- Hai thành viên đồng ý danh sách **40 món** và các thành phần hiện có.
+  `contract_version` tăng từ 0.1 lên **1.0**.
+- Từ nay muốn thêm hoặc bớt món, thành phần thì phải cả hai đồng ý và tăng
+  phiên bản contract.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.

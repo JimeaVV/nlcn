@@ -5,7 +5,8 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **0.1 (bản nháp, chờ hai người chốt danh sách ở mục 2–3)**
+- `contract_version`: **1.0** (hai người đã chốt 40 món ở mục 2 và các thành
+  phần ở mục 3)
 - Cập nhật: 2026-10-17
 
 ---
