@@ -85,6 +85,11 @@ flutter test
 flutter build apk --release
 ```
 
+GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request into
+`main` and every push to `main`: it checks that `lib/l10n` matches
+`flutter gen-l10n`, then runs `flutter analyze`, `flutter test` and
+`python tool/check_vn_food.py`. Merge a pull request only when CI is green.
+
 Install the release APK, enable airplane mode, save the profile and generate a
 meal. Check workout generation, exercise logging, a new/backdated weigh-in,
 and persisted profile/weight/plan histories after restarting.
