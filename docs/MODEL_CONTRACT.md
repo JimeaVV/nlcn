@@ -97,6 +97,12 @@ suon_nuong,Sườn nướng,Grilled pork chop,...,...,...,...,miếng,...,"Bản
 - Cột `source` **bắt buộc**: ghi rõ nguồn của từng số liệu. **Không tự đoán
   số.**
 
+**`dish_names.csv`**: tên hiển thị của từng món, đúng thứ tự mục 2.
+```
+code,name_vi,name_en
+com_tam,Cơm tấm,Broken rice
+```
+
 **`dishes.csv`**: thành phần mặc định của từng món, và phần "nền" như nước
 dùng hay nước chấm.
 ```

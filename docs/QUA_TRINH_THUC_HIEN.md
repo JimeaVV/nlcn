@@ -232,6 +232,79 @@ commit và kết quả kiểm thử.
 - **Kiểm thử:** 101/101 test (thêm test hình dạng từng kiểu, thanh dưới đổi
   theo giao diện, hiệu ứng nhún, ô xem trước trong Cài đặt).
 
+### 2026-10-17 · Luồng quét món bằng camera (chưa có model)
+- **Mục tiêu:** dựng xong toàn bộ luồng *chụp ảnh → nhận diện → xác nhận →
+  ghi nhật ký* trước khi có model. Khi Người B train xong, chỉ cần cài đặt
+  interface nhận diện, giao diện không phải sửa.
+- **Thành phần:**
+  - `image_picker`: chụp ảnh hoặc chọn từ thư viện, ảnh thu nhỏ còn tối đa
+    1280 px.
+  - `FoodRecognizer` (`lib/services/food_recognizer.dart`): interface theo
+    contract, gồm xác suất món (softmax) và xác suất từng thành phần
+    (sigmoid). Tạm dùng `NoModelRecognizer` (chưa đoán gì).
+  - `VnFoodRepository` + `parseVnFoodData`: đọc `components.csv`,
+    `dishes.csv` và file mới `dish_names.csv` (tên Việt/Anh của 20 món). Bộ
+    đọc CSV tự viết, xử lý được ô có ngoặc kép, dấu phẩy, xuống dòng, BOM.
+  - `ScanPlate`: áp ngưỡng của contract:
+    - ≥ 0,6: tick sẵn;
+    - 0,3–0,6: gắn nhãn "Có thể có", chờ người dùng xác nhận;
+    - thành phần ngoài công thức mà model thấy chắc thì tự thêm vào;
+    - phần nền (nước chấm, nước dùng) luôn được giữ.
+- **Màn kết quả:**
+  - Model chắc chắn (≥ 0,5) thì mở thẳng món; nếu không thì hiện top-3,
+    hoặc cho chọn trong 20 món.
+  - Mỗi thành phần có ô tick, nút −/+ (đơn vị tự nhiên như quả, miếng, hoặc
+    gram), calo; có thể thêm thành phần khác.
+  - Ghi vào nhật ký mỗi thành phần một dòng, tên dạng "Sườn nướng (Cơm
+    tấm)", `source = camera`, kèm `confidence`.
+- **Ràng buộc dữ liệu:** thành phần chưa có số liệu dinh dưỡng thì hiện
+  "chưa có số liệu" và chặn nút ghi, cho tới khi bỏ chọn hoặc điền số liệu.
+  App không bao giờ tự đoán số liệu.
+- **Kiểm thử:** 111/111 test, trong đó:
+  - CSV: ngoặc kép, CRLF, BOM; dữ liệu thật có đủ 20 món;
+  - ngưỡng tick và câu hỏi;
+  - quy đổi đơn vị sang gram;
+  - luồng có model và không có model;
+  - huỷ chụp ảnh;
+  - đường đi từ màn Quét tới khi ghi nhật ký.
+
+### 2026-10-17 · Camera ngay trong app, theo phong cách giao diện
+- **Yêu cầu:** bấm Quét là mở camera ngay trong app (không nhảy sang app
+  camera của máy). Nút thư viện ảnh nằm bên trái nút chụp, nút ghi thủ công
+  bên phải, tất cả đổi kiểu theo giao diện.
+- **Làm gì:**
+  - Dùng plugin `camera` chính thức (CameraX trên Android), camera sau,
+    độ phân giải cao, chỉ chụp ảnh nên không bật âm thanh.
+  - Bố cục màn camera:
+    - camera chiếm toàn màn hình;
+    - **khung ngắm** dạng 4 góc, màu theo giao diện; Forest bo góc mềm,
+      Cyberpunk/Sunset có phát sáng;
+    - nút đóng và đèn flash ở trên;
+    - dòng nhắc "Đặt dĩa hoặc tô vào giữa khung";
+    - hàng dưới gồm **Thư viện · nút chụp · Ghi tay**.
+  - Nút chụp là nút Quét của giao diện đang chọn, thêm vòng trắng như camera
+    thật. Hai nút bên (`StyledCameraButton`) cũng đổi hình dạng và màu theo
+    giao diện.
+  - Lớp `ScanCamera` tách camera ra khỏi giao diện, để test dùng camera giả.
+  - Camera được giải phóng khi app chạy nền và mở lại khi quay về. Có cờ
+    chặn mở hai lần, vì hộp thoại xin quyền cũng làm app tạm dừng.
+  - Xem ảnh xong mà không ghi thì camera chạy tiếp; ghi xong thì đóng màn
+    Quét.
+  - **Dự phòng:** bị từ chối quyền, máy không có camera, hoặc lệnh liệt kê
+    camera bị treo quá 10 giây thì chuyển sang màn có *Chọn ảnh · Ghi thủ
+    công · Thử mở camera lại*.
+- **Quyền Android:**
+  - Gỡ quyền **ghi âm** (`RECORD_AUDIO`) mà plugin tự thêm, vì app không
+    dùng micro.
+  - Camera đặt là *không bắt buộc*, để máy không có camera vẫn cài được.
+  - App vẫn không có quyền INTERNET.
+- **Kiểm thử:** 113/113 test, thêm các trường hợp:
+  - chụp → xem kết quả → ghi → đóng camera;
+  - vị trí ba nút, đèn flash, quay lại thì camera chạy tiếp;
+  - huỷ chọn ảnh, nút đóng;
+  - bị từ chối quyền thì sang màn dự phòng.
+- Đã cài lên điện thoại thật (Xiaomi, HyperOS 4).
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
@@ -311,8 +384,9 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   `.tflite`) trong `tool/train/`.
 - [ ] Điền số liệu `assets/data/vn_food/components.csv` và khẩu phần
   `dishes.csv` (khung đã có; chạy `tool/check_vn_food.py`).
-- [ ] Màn chụp ảnh, xác nhận món và thành phần, chỉnh khẩu phần, gắn
-  `tflite_flutter`.
+- [x] Màn chụp ảnh, xác nhận món và thành phần, chỉnh khẩu phần (chạy
+  với `NoModelRecognizer`).
+- [ ] Gắn model thật: cài `FoodRecognizer` bằng `tflite_flutter`.
 - [ ] Giai đoạn YOLO (tuần 5–7): gán khung, train, đếm số lượng.
 - [ ] Mở rộng dữ liệu bài tập (đang 96/2918 bài, thiếu Beginner/Pro).
 - [ ] Benchmark Branch & Bound so với greedy/vét cạn (số node, thời gian,

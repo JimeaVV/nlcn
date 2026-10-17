@@ -1,4 +1,17 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- The camera plugin also declares the microphone for video, but OptiFit
+         only takes photos (enableAudio: false), so the permission is removed. -->
+    <uses-permission
+        android:name="android.permission.RECORD_AUDIO"
+        tools:node="remove" />
+    <!-- Phones without a camera can still install the app; Scan then offers
+         the gallery and manual logging instead. -->
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false"
+        tools:replace="android:required" />
 
     <application
         android:label="OptiFit"

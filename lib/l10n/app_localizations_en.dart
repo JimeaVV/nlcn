@@ -974,10 +974,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanTitle => 'Scan food';
 
   @override
-  String get scanComingSoon =>
-      'Camera food recognition is in development. Meanwhile, you can log food manually to today\'s diary.';
-
-  @override
   String get scanManual => 'Log food manually';
 
   @override
@@ -985,4 +981,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get historyCleared => 'Meal plan and workout history cleared.';
+
+  @override
+  String get scanModelPending =>
+      'Automatic recognition is still being trained. For now, choose the dish after taking the photo.';
+
+  @override
+  String get scanTakePhoto => 'Take photo';
+
+  @override
+  String get scanPickGallery => 'Choose from gallery';
+
+  @override
+  String get scanPickFailed => 'Could not open the camera or photo library.';
+
+  @override
+  String get scanDataFailed =>
+      'Could not read the Vietnamese food data packaged with the app.';
+
+  @override
+  String get scanResultTitle => 'Scan result';
+
+  @override
+  String get scanDishTitle => 'Dish';
+
+  @override
+  String get scanChooseDish => 'Choose dish';
+
+  @override
+  String get scanOtherDish => 'Other dish';
+
+  @override
+  String get scanNoGuess =>
+      'The dish was not recognized; choose the one in the photo.';
+
+  @override
+  String get scanLowConfidence => 'The model is not sure; pick the right dish.';
+
+  @override
+  String get scanComponentsTitle => 'Components';
+
+  @override
+  String get scanMaybe => 'Maybe';
+
+  @override
+  String get scanAddComponent => 'Add component';
+
+  @override
+  String get scanNoNutrition => 'no data yet';
+
+  @override
+  String get scanUnitFallback => 'pc';
+
+  @override
+  String get scanDecrease => 'Decrease';
+
+  @override
+  String get scanIncrease => 'Increase';
+
+  @override
+  String scanMissingNutrition(String names) {
+    return 'No nutrition data yet for: $names. Untick them or add the data to log this plate.';
+  }
+
+  @override
+  String scanTotal(String calories, String protein) {
+    return 'Total: $calories kcal • $protein g protein';
+  }
+
+  @override
+  String get scanNothingSelected => 'Select at least one component.';
+
+  @override
+  String get scanSave => 'Log to diary';
+
+  @override
+  String get scanFrameHint => 'Fit the plate or bowl inside the frame';
+
+  @override
+  String get scanClose => 'Close';
+
+  @override
+  String get scanTorchOn => 'Turn on light';
+
+  @override
+  String get scanTorchOff => 'Turn off light';
+
+  @override
+  String get scanGalleryShort => 'Gallery';
+
+  @override
+  String get scanManualShort => 'Log food';
+
+  @override
+  String get scanCaptureFailed => 'Could not take the photo. Please try again.';
+
+  @override
+  String get scanCameraDenied =>
+      'OptiFit is not allowed to use the camera. Grant access in the phone settings, or choose an existing photo.';
+
+  @override
+  String get scanNoCamera =>
+      'The camera could not be opened. You can still choose a photo or log food manually.';
+
+  @override
+  String get scanRetryCamera => 'Try the camera again';
 }

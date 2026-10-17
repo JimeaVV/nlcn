@@ -1786,12 +1786,6 @@ abstract class AppLocalizations {
   /// **'Quét món'**
   String get scanTitle;
 
-  /// No description provided for @scanComingSoon.
-  ///
-  /// In vi, this message translates to:
-  /// **'Tính năng nhận diện món ăn bằng camera đang được phát triển. Trong lúc chờ, bạn có thể ghi món thủ công vào nhật ký hôm nay.'**
-  String get scanComingSoon;
-
   /// No description provided for @scanManual.
   ///
   /// In vi, this message translates to:
@@ -1809,6 +1803,198 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đã xóa lịch sử thực đơn và buổi tập.'**
   String get historyCleared;
+
+  /// No description provided for @scanModelPending.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhận diện tự động đang được huấn luyện. Tạm thời bạn chọn món sau khi chụp.'**
+  String get scanModelPending;
+
+  /// No description provided for @scanTakePhoto.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chụp ảnh'**
+  String get scanTakePhoto;
+
+  /// No description provided for @scanPickGallery.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn từ thư viện'**
+  String get scanPickGallery;
+
+  /// No description provided for @scanPickFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không mở được camera hoặc thư viện ảnh.'**
+  String get scanPickFailed;
+
+  /// No description provided for @scanDataFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không đọc được dữ liệu món Việt đi kèm ứng dụng.'**
+  String get scanDataFailed;
+
+  /// No description provided for @scanResultTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả quét'**
+  String get scanResultTitle;
+
+  /// No description provided for @scanDishTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Món ăn'**
+  String get scanDishTitle;
+
+  /// No description provided for @scanChooseDish.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn món'**
+  String get scanChooseDish;
+
+  /// No description provided for @scanOtherDish.
+  ///
+  /// In vi, this message translates to:
+  /// **'Món khác'**
+  String get scanOtherDish;
+
+  /// No description provided for @scanNoGuess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa nhận ra món, hãy chọn món đúng với ảnh.'**
+  String get scanNoGuess;
+
+  /// No description provided for @scanLowConfidence.
+  ///
+  /// In vi, this message translates to:
+  /// **'Model chưa chắc chắn, hãy chọn đúng món.'**
+  String get scanLowConfidence;
+
+  /// No description provided for @scanComponentsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thành phần'**
+  String get scanComponentsTitle;
+
+  /// No description provided for @scanMaybe.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có thể có'**
+  String get scanMaybe;
+
+  /// No description provided for @scanAddComponent.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm thành phần'**
+  String get scanAddComponent;
+
+  /// No description provided for @scanNoNutrition.
+  ///
+  /// In vi, this message translates to:
+  /// **'chưa có số liệu'**
+  String get scanNoNutrition;
+
+  /// No description provided for @scanUnitFallback.
+  ///
+  /// In vi, this message translates to:
+  /// **'phần'**
+  String get scanUnitFallback;
+
+  /// No description provided for @scanDecrease.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giảm'**
+  String get scanDecrease;
+
+  /// No description provided for @scanIncrease.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tăng'**
+  String get scanIncrease;
+
+  /// No description provided for @scanMissingNutrition.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có số liệu dinh dưỡng cho: {names}. Bỏ chọn các phần này hoặc bổ sung số liệu để ghi vào nhật ký.'**
+  String scanMissingNutrition(String names);
+
+  /// No description provided for @scanTotal.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tổng: {calories} kcal • {protein} g protein'**
+  String scanTotal(String calories, String protein);
+
+  /// No description provided for @scanNothingSelected.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn ít nhất một thành phần.'**
+  String get scanNothingSelected;
+
+  /// No description provided for @scanSave.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi vào nhật ký'**
+  String get scanSave;
+
+  /// No description provided for @scanFrameHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt dĩa hoặc tô vào giữa khung'**
+  String get scanFrameHint;
+
+  /// No description provided for @scanClose.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đóng'**
+  String get scanClose;
+
+  /// No description provided for @scanTorchOn.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bật đèn'**
+  String get scanTorchOn;
+
+  /// No description provided for @scanTorchOff.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tắt đèn'**
+  String get scanTorchOff;
+
+  /// No description provided for @scanGalleryShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thư viện'**
+  String get scanGalleryShort;
+
+  /// No description provided for @scanManualShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi tay'**
+  String get scanManualShort;
+
+  /// No description provided for @scanCaptureFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không chụp được ảnh. Hãy thử lại.'**
+  String get scanCaptureFailed;
+
+  /// No description provided for @scanCameraDenied.
+  ///
+  /// In vi, this message translates to:
+  /// **'OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.'**
+  String get scanCameraDenied;
+
+  /// No description provided for @scanNoCamera.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không mở được camera. Bạn vẫn có thể chọn ảnh có sẵn hoặc ghi món thủ công.'**
+  String get scanNoCamera;
+
+  /// No description provided for @scanRetryCamera.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thử mở camera lại'**
+  String get scanRetryCamera;
 }
 
 class _AppLocalizationsDelegate

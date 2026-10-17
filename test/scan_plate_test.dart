@@ -1,0 +1,154 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:optifit/models/food_log_entry.dart';
+import 'package:optifit/models/scan_plate.dart';
+import 'package:optifit/models/vn_food.dart';
+import 'package:optifit/services/food_recognizer.dart';
+
+import 'helpers/vn_food_fixture.dart';
+
+void main() {
+  group('CSV', () {
+    test('handles quotes, commas, CRLF, a BOM and blank lines', () {
+      final rows = parseCsv('﻿a,b,c\r\n'
+          '1,"x, y","say ""hi"""\r\n'
+          '\r\n'
+          '2,,"multi\nline"\n');
+      expect(rows, [
+        {'a': '1', 'b': 'x, y', 'c': 'say "hi"'},
+        {'a': '2', 'b': '', 'c': 'multi\nline'},
+      ]);
+    });
+
+    test('the packaged tables parse and cover the 20 contract dishes', () {
+      String read(String name) =>
+          File('assets/data/vn_food/$name.csv').readAsStringSync();
+      final data = parseVnFoodData(
+        componentsCsv: read('components'),
+        dishesCsv: read('dishes'),
+        dishNamesCsv: read('dish_names'),
+      );
+      expect(data.dishes, hasLength(20));
+      expect(data.dish('com_tam')!.nameVi, 'Cơm tấm');
+      expect(data.dish('com_tam')!.parts.map((part) => part.component),
+          contains('bi'));
+      expect(data.addableComponents, hasLength(24));
+    });
+
+    test('rejects unknown components and negative numbers', () {
+      expect(
+        () => parseVnFoodData(
+          componentsCsv: fixtureComponentsCsv,
+          dishesCsv: 'dish,component,default_grams,default_units\n'
+              'com_tam,banh_bao,100,\n',
+          dishNamesCsv: fixtureDishNamesCsv,
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => parseVnFoodData(
+          componentsCsv: 'code,name_vi,name_en,kcal_per_100g\nx,X,X,-5\n',
+          dishesCsv: 'dish,component\n',
+          dishNamesCsv: 'code,name_vi,name_en\n',
+        ),
+        throwsFormatException,
+      );
+    });
+  });
+
+  group('plate', () {
+    final data = fixtureVnFood();
+    final comTam = data.dish('com_tam')!;
+
+    test('without a model every usual component is ticked', () {
+      final plate = ScanPlate.forDish(data, comTam, FoodRecognition.empty);
+      expect(plate.items.map((item) => item.component.code),
+          ['com', 'suon_nuong', 'bi', 'trung_op_la', '_base_com_tam']);
+      expect(plate.items.every((item) => item.included), isTrue);
+      final ribs = plate.items[1];
+      expect(ribs.inUnits, isTrue);
+      expect(ribs.grams, 100);
+      // Bì has no nutrition yet, so the plate cannot be logged as is.
+      expect(plate.missingNutrition.single.component.code, 'bi');
+      expect(plate.canLog, isFalse);
+      expect(
+          () => plate.toEntries(
+              date: DateTime(2026, 10, 17),
+              meal: MealSlot.lunch,
+              languageCode: 'vi'),
+          throwsStateError);
+    });
+
+    test('contract thresholds decide ticks, questions and extra components',
+        () {
+      final plate = ScanPlate.forDish(
+        data,
+        comTam,
+        const FoodRecognition(
+          dishes: {'com_tam': 0.82, 'pho_bo': 0.18},
+          components: {
+            'com': 0.97,
+            'suon_nuong': 0.91,
+            'bi': 0.45,
+            'trung_op_la': 0.12,
+            'dua_leo_ca_chua': 0.7,
+            'tom': 0.35,
+          },
+        ),
+      );
+      PlateItem item(String code) =>
+          plate.items.firstWhere((item) => item.component.code == code);
+
+      expect(item('suon_nuong').included, isTrue);
+      expect(item('suon_nuong').confidence, 0.91);
+      expect(item('bi').included, isFalse);
+      expect(item('bi').uncertain, isTrue, reason: '0.3–0.6 asks the user');
+      expect(item('trung_op_la').included, isFalse);
+      expect(item('trung_op_la').uncertain, isFalse);
+      expect(item('_base_com_tam').included, isTrue, reason: 'bases stay');
+      expect(item('dua_leo_ca_chua').included, isTrue);
+      expect(item('tom').uncertain, isTrue);
+      expect(plate.canLog, isTrue, reason: 'unticked bì needs no data');
+
+      // 200 g rice 260 + one 100 g chop 250 + 100 g salad 16 + 20 g sauce 12.
+      expect(plate.calories, closeTo(538, 1e-9));
+      final entries = plate.toEntries(
+          date: DateTime(2026, 10, 17),
+          meal: MealSlot.lunch,
+          languageCode: 'vi');
+      expect(entries.map((entry) => entry.name), [
+        'Cơm (Cơm tấm)',
+        'Sườn nướng (Cơm tấm)',
+        'Nước mắm chấm (Cơm tấm)',
+        'Dưa leo / cà chua (Cơm tấm)',
+      ]);
+      expect(entries.every((entry) => entry.source == FoodLogSource.camera),
+          isTrue);
+      expect(entries[1].confidence, 0.91);
+      expect(entries[2].confidence, isNull);
+      for (final entry in entries) {
+        entry.validate();
+      }
+    });
+
+    test('amounts follow units, and unknown unit weights block logging', () {
+      final plate = ScanPlate.forDish(data, comTam, FoodRecognition.empty);
+      final egg = plate.items
+          .firstWhere((item) => item.component.code == 'trung_op_la');
+      egg.amount += egg.step * 2;
+      expect(egg.grams, 100, reason: '2 eggs × 50 g');
+      final rice = plate.items.first;
+      expect(rice.inUnits, isFalse);
+      expect(rice.step, 10);
+
+      plate.items.firstWhere((item) => item.component.code == 'bi').included =
+          false;
+      plate.add(data.components['tom']!);
+      plate.add(data.components['tom']!);
+      expect(plate.items.where((item) => item.component.code == 'tom'),
+          hasLength(1));
+      expect(plate.canLog, isTrue);
+    });
+  });
+}
