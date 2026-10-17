@@ -15,8 +15,9 @@ const defaultNodeBudget = 300000;
 
 const _gramsPerBowlOfRice = 150.0;
 
-/// A cutting meal up to this size keeps rice to one bowl.
-const _cutFullMeal = 650.0;
+/// A cutting meal up to this size keeps rice to 200 g; above it (people
+/// with a high TDEE) up to 300 g.
+const _cutFullMeal = 600.0;
 
 /// Which dishes and components the planner may use, read from
 /// `assets/data/vn_food/meal_plan.csv`.
@@ -99,7 +100,8 @@ class SearchStats {
 /// servings. Lunch and dinner are either a whole dish or a cơm phần that
 /// Branch & Bound builds from rice, one or two mains, vegetables and an
 /// optional soup. Which dishes fit which meal and goal comes from
-/// [tags]; losing weight also caps rice at one bowl.
+/// [tags]; losing weight also weighs rice, up to 200 g a meal (300 g for
+/// the large meals of a high TDEE).
 ///
 /// The [seed] shuffles the candidates, so each press gives a different day
 /// while the same seed always reproduces the same plan. The output has the
@@ -331,14 +333,23 @@ class _Planner {
         NutritionGoal.gain => const [1, 1.25, 1.5, 2],
       };
 
-  List<double> _riceBowls(double mealCalories) => switch (goal) {
-        // Cutting keeps rice to one bowl and fills up on protein instead;
-        // only a meal above [_cutFullMeal] (very active people) gets more.
-        NutritionGoal.lose => mealCalories <= _cutFullMeal
-            ? const [0.5, 1]
-            : const [0.5, 1, 1.5, 2],
-        NutritionGoal.maintain => const [1, 1.5, 2],
-        NutritionGoal.gain => const [1, 1.5, 2, 2.5, 3],
+  /// Rice as (grams, bowls or null). People cutting weigh their rice, so
+  /// they get grams; everyone else counts bowls.
+  List<(double, double?)> _rice(double mealCalories) => switch (goal) {
+        NutritionGoal.lose => [
+            for (final grams in mealCalories <= _cutFullMeal
+                ? const [100.0, 150.0, 200.0]
+                : const [100.0, 150.0, 200.0, 250.0, 300.0])
+              (grams, null),
+          ],
+        NutritionGoal.maintain => [
+            for (final bowls in const [1.0, 1.5, 2.0])
+              (bowls * _gramsPerBowlOfRice, bowls),
+          ],
+        NutritionGoal.gain => [
+            for (final bowls in const [1.0, 1.5, 2.0, 2.5, 3.0])
+              (bowls * _gramsPerBowlOfRice, bowls),
+          ],
       };
 
   List<double> _mainGrams() => switch (goal) {
@@ -405,9 +416,8 @@ class _Planner {
     return [
       _Group([
         for (final rice in staple)
-          for (final bowls in _riceBowls(mealCalories))
-            _componentChoice(rice, bowls * _gramsPerBowlOfRice, 'staple',
-                units: bowls),
+          for (final (grams, bowls) in _rice(mealCalories))
+            _componentChoice(rice, grams, 'staple', units: bowls),
       ]),
       _Group(mainChoices),
       _Group(mainChoices, optional: true),

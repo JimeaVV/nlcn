@@ -66,7 +66,7 @@ void main() {
     expect(within, greaterThanOrEqualTo(8));
   });
 
-  test('cutting skips heavy breakfasts and keeps rice to one bowl', () {
+  test('cutting skips heavy breakfasts and keeps rice to 200 g', () {
     const heavy = {
       'pho_bo',
       'pho_ga',
@@ -84,7 +84,7 @@ void main() {
       for (final meal in ['Lunch', 'Dinner']) {
         for (final item in items(day, meal)) {
           if (item['code'] == 'com') {
-            expect(item['portion_g'], lessThanOrEqualTo(150));
+            expect(item['portion_g'], lessThanOrEqualTo(200));
           }
           // Only lean mains are tagged for cutting.
           expect(['thit_kho', 'ga_chien', 'suon_nuong'],
@@ -133,7 +133,10 @@ void main() {
   test('names follow the language and portions read naturally', () {
     final vi = plan(goal: NutritionGoal.lose, calories: 1500, protein: 120);
     final rice = items(vi, 'Lunch').firstWhere((item) => item['code'] == 'com');
-    expect(rice['display_name'], matches(RegExp(r'^(0,5|1) chén Cơm$')));
+    // People cutting weigh rice; other goals count bowls.
+    expect(rice['display_name'], matches(RegExp(r'^\d+ g Cơm$')));
+    final bowls = items(plan(), 'Lunch').firstWhere((i) => i['code'] == 'com');
+    expect(bowls['display_name'], matches(RegExp(r'^[\d,]+ chén Cơm$')));
     final en = plan(language: 'en');
     for (final item in items(en, 'Breakfast')) {
       expect(item['name'], data.dish(item['code'] as String)!.nameEn);

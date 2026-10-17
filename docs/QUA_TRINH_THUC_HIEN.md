@@ -611,8 +611,9 @@ commit và kết quả kiểm thử.
   - **Bảng tag `meal_plan.csv`:** món nào hợp bữa nào và mục tiêu nào.
     - Đang giảm cân thì **không** gợi ý phở, bánh mì, xôi, bánh cuốn, cơm
       tấm…: không ai cutting mà ăn các món đó.
-    - Giảm cân: cơm tối đa 1 chén mỗi bữa và chỉ món nạc (gà, cá, tôm, đậu
-      hũ, trứng luộc, thịt bò).
+    - Giảm cân: cơm **tính theo gram** (người cutting thường cân cơm), mỗi
+      bữa 100–200 g; chỉ món nạc (gà, cá, tôm, đậu hũ, trứng luộc, thịt
+      bò).
     - Tag nằm trong CSV, sửa được mà không cần sửa code.
   - **Thêm thành phần `ga_chien`** (contract v1.2): cơm gà ở quán thường là
     gà chiên hoặc xối mỡ. Tính như gà luộc sẽ thiếu nhiều calo. Số liệu
@@ -635,7 +636,7 @@ commit và kết quả kiểm thử.
 
   | Mục tiêu | Đạt mục tiêu | Số nút: chỉ cận protein | Số nút: thêm cận calo | Giảm | Chất lượng giống nhau |
   |---|---|---|---|---|---|
-  | Giảm cân | 101/150 | 24.549 | 15.439 | 1,6 lần | 150/150 |
+  | Giảm cân | 106/150 | 31.242 | 19.809 | 1,6 lần | 150/150 |
   | Giữ cân | 129/150 | 17.576 | 8.435 | 2,1 lần | 150/150 |
   | Tăng cân | 128/150 | 19.336 | 9.322 | 2,1 lần | 150/150 |
 
@@ -644,12 +645,13 @@ commit và kết quả kiểm thử.
 - **Tinh chỉnh dựa trên số đo:**
   - Bản đầu chỉ có 17/150 thực đơn giảm cân đạt. Lý do: người vận động
     nhiều có mục tiêu giảm cân 2.200–2.700 kcal mà chỉ được 1 chén cơm mỗi
-    bữa. Đã sửa:
+    bữa. Đã sửa (cùng góp ý của nhóm: TDEE cao thì ăn 1,5–2 chén vẫn ổn):
     - bữa sáng nhẹ hơn (25%), trưa và tối mỗi bữa 37,5%;
     - cháo hoặc gỏi cuốn được tới 2 suất;
-    - bữa trên 650 kcal mới được hơn 1 chén cơm;
+    - cơm tính theo gram: bữa tới 600 kcal tối đa 200 g, bữa lớn hơn tới
+      300 g (khoảng 2 chén);
     - bắp nướng làm bữa phụ.
-    - Kết quả lên 101/150; phần còn hụt là người vận động rất nhiều (hệ số
+    - Kết quả lên 106/150; phần còn hụt là người vận động rất nhiều (hệ số
       1,9).
   - Mục tiêu từ 2.600 kcal có thêm **bữa phụ** (bắp nướng, bánh tét, xôi,
     tàu hũ).
