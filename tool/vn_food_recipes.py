@@ -102,7 +102,8 @@ RECIPES = {
         {'9012': 250, '7018': 150, '4125': 15, '2015': 10, '4037': 20,
          '6002': 10, '13017': 8, '13005': 1, '13004': 1},
         540, DMX + 'cach-lam-cha-trung-ngon-nhu-ngoai-hang-com-tam-02028',
-        'cách 2; thịt băm tính là nửa nạc nửa mỡ; mộc nhĩ và bún ngâm hút nước'),
+        'cách 2; thịt băm tính là nửa nạc nửa mỡ; mộc nhĩ và bún ngâm hút nước; '
+        '1 miếng = 50 g (nhóm ước lượng)'),
     '_base_banh_xeo': (
         {'1017': 200, '13046': 50, '14006': 400, '13006': 3, '13005': 4,
          '4038': 20, '4036': 300, '6002': 50},
@@ -155,8 +156,8 @@ RECIPES = {
         '(giả định 1 muỗng canh)'),
 }
 # Grams per natural unit: bánh xèo makes about 6 per batch, gỏi cuốn is the
-# 30 g roll above.
-UNITS = {'_base_banh_xeo': 835 / 6, '_base_goi_cuon': 30}
+# 30 g roll above, and the team estimated a slice of chả trứng.
+UNITS = {'_base_banh_xeo': 835 / 6, '_base_goi_cuon': 30, 'cha_trung': 50}
 
 
 def per_100g(ingredients, cooked):

@@ -398,9 +398,27 @@ commit và kết quả kiểm thử.
   - Phở bò, phở gà: link ChatGPT đưa (BlueStone, VnExpress) không tìm thấy,
     nên dẫn bài Điện máy XANH tương ứng. Phần chính là số USDA, gia vị nêm
     chỉ thêm vài kcal.
-- **Kết quả cuối: 40/40 thành phần có dinh dưỡng.** Còn thiếu khối lượng 1
-  đơn vị (chén cơm, miếng sườn…) và khẩu phần mặc định trong `dishes.csv`:
-  cần cân thực tế.
+- **Kết quả cuối: 40/40 thành phần có dinh dưỡng.**
+- **Khối lượng 1 đơn vị** (nhóm ước lượng):
+
+  | Đơn vị | Khối lượng |
+  |---|---|
+  | 1 chén cơm | 150 g |
+  | 1 ổ bánh mì | 80 g |
+  | 1 miếng chả trứng | 50 g |
+  | 1 khúc cá | 100 g |
+  | 1 miếng đậu hũ | 100 g |
+  | 1 lát chả lụa | 20 g |
+  | 1 cuốn bánh cuốn | 35 g |
+
+  - **Trừ phần không ăn được:** số dinh dưỡng trên 100 g tính cho phần ăn
+    được. Vì vậy:
+    - Sườn: 1 miếng 120 g kể cả xương. Theo USDA 167827 (miếng sườn 209 g
+      có xương cho 157 g thịt) phần ăn được là 75%, nên tính **90 g**.
+    - Tôm: 1 con 20 g cả vỏ, thịt bóc vỏ 10–12 g, nên tính **11 g**.
+    - Cá: 100 g còn da và xương, chưa trừ vì không có tỷ lệ; có thể hơi cao.
+  - Các số này là ước lượng của nhóm. Khi cân thực tế thì cập nhật lại.
+- Còn thiếu: khẩu phần mặc định của 94 dòng trong `dishes.csv`.
 - **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.
