@@ -157,6 +157,35 @@ commit và kết quả kiểm thử.
 - Từ nay commit không thêm dòng đồng tác giả. Việc có dùng AI hỗ trợ lập
   trình sẽ được nêu rõ trong báo cáo.
 
+### 2026-10-17 · Sắp xếp lại điều hướng, thêm màn Hôm nay và nút Quét
+- **Vấn đề khi chạy thử trên điện thoại:**
+  - thanh dưới có 5 nút, mỗi nút chỉ rộng khoảng 72 px nên chữ "Tập luyện"
+    bị xuống dòng;
+  - nếu thêm camera thì thành 6 nút.
+- **Quyết định:**
+  - Thanh dưới còn **Hôm nay · Ăn uống · 📷 Quét · Tập luyện · Hồ sơ**,
+    chia đều hai bên nút Quét.
+  - Quét là **nút hành động nổi** ở chính giữa (tròn, nổi lên khỏi thanh,
+    gradient), không phải một tab.
+  - Các màn cùng nhóm gộp lại bằng **tab con ở trên**:
+    - Ăn uống: *Nhật ký · Thực đơn · Đã lưu*;
+    - Tập luyện: *Buổi tập · Lịch sử*.
+  - Tab Lịch sử cũ được chia vào đúng nhóm; nút "Xóa toàn bộ lịch sử" chuyển
+    sang Cài đặt (mục Dữ liệu).
+- **Màn Hôm nay mới:** calo và protein đã ăn so với mục tiêu, cân nặng mới
+  nhất và thay đổi 7 ngày, số bài đã tập trong ngày, buổi tập gần nhất, kèm
+  các nút đi nhanh (Mở nhật ký, Quét, Ghi cân nặng, Tạo buổi tập).
+- **Màn Quét tạm thời:** trong lúc chưa có model, cho ghi món thủ công vào
+  nhật ký hôm nay. Sau này đây cũng là đường dự phòng khi model nhận sai.
+- **Chi tiết kỹ thuật:**
+  - Tab con giữ trạng thái khi lướt qua lại (`AutomaticKeepAliveClientMixin`),
+    nên thực đơn vừa tạo không bị mất.
+  - Chữ trên thanh dưới luôn một dòng, tự thu nhỏ khi hẹp; cỡ chữ hệ thống
+    được giới hạn ở 1,3 lần bên trong thanh.
+  - Test phát hiện thanh dưới bị tràn 9 px khi bật chữ cỡ lớn; đã sửa.
+- **Kiểm thử:** analyze sạch, 98/98 test (thêm test thanh điều hướng, tab
+  con, Hôm nay, Quét, Lịch sử tách đôi, xóa lịch sử trong Cài đặt).
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera

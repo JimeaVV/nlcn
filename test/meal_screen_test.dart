@@ -213,7 +213,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final log = find.byKey(const ValueKey('meal-log-plan'));
-    await tester.scrollUntilVisible(log, 350);
+    await tester.ensureVisible(log);
+    await tester.pumpAndSettle();
     await tester.tap(log);
     await tester.pumpAndSettle();
     final entry = database.logged.single;

@@ -9,9 +9,6 @@ class AppLocalizationsVi extends AppLocalizations {
   AppLocalizationsVi([String locale = 'vi']) : super(locale);
 
   @override
-  String get navMeal => 'Bữa ăn';
-
-  @override
   String get navWorkout => 'Tập luyện';
 
   @override
@@ -49,9 +46,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get sourceEstimated => 'ước tính';
-
-  @override
-  String get mealTitle => 'THỰC ĐƠN';
 
   @override
   String get mealSubtitle =>
@@ -142,9 +136,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get dinner => 'Bữa tối';
-
-  @override
-  String get workoutTitle => 'BUỔI TẬP';
 
   @override
   String get workoutSubtitle =>
@@ -303,9 +294,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get calculate => 'Tính toán';
-
-  @override
-  String get historyTitle => 'LỊCH SỬ';
 
   @override
   String get historyLoadFailed => 'Không tải được lịch sử trên máy.';
@@ -785,9 +773,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get mealSnack => 'Bữa phụ';
 
   @override
-  String get diaryTitle => 'NHẬT KÝ ĂN UỐNG';
-
-  @override
   String get diarySubtitle =>
       'Ghi lại những gì bạn đã ăn và so với mục tiêu trong hồ sơ.';
 
@@ -930,4 +915,66 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get mealPlanAlreadyLogged => 'ĐÃ GHI VÀO NHẬT KÝ';
+
+  @override
+  String get navToday => 'Hôm nay';
+
+  @override
+  String get navFood => 'Ăn uống';
+
+  @override
+  String get navScan => 'Quét';
+
+  @override
+  String get tabMealPlan => 'Thực đơn';
+
+  @override
+  String get tabSaved => 'Đã lưu';
+
+  @override
+  String get tabWorkoutPlan => 'Buổi tập';
+
+  @override
+  String get todayTitle => 'HÔM NAY';
+
+  @override
+  String get todayLoadFailed =>
+      'Không tải được dữ liệu hôm nay. Kéo xuống để thử lại.';
+
+  @override
+  String get todayOpenDiary => 'Mở nhật ký';
+
+  @override
+  String todayWeightWeek(String change) {
+    return 'Thay đổi 7 ngày: $change kg';
+  }
+
+  @override
+  String get todayNoExercise => 'Hôm nay chưa ghi bài tập nào.';
+
+  @override
+  String todayExercisesLogged(String count) {
+    return 'Đã ghi $count bài tập hôm nay';
+  }
+
+  @override
+  String todayLastWorkout(String plan, String date) {
+    return 'Buổi tập gần nhất: $plan · $date';
+  }
+
+  @override
+  String get scanTitle => 'Quét món';
+
+  @override
+  String get scanComingSoon =>
+      'Tính năng nhận diện món ăn bằng camera đang được phát triển. Trong lúc chờ, bạn có thể ghi món thủ công vào nhật ký hôm nay.';
+
+  @override
+  String get scanManual => 'Ghi món thủ công';
+
+  @override
+  String get dataTitle => 'Dữ liệu';
+
+  @override
+  String get historyCleared => 'Đã xóa lịch sử thực đơn và buổi tập.';
 }

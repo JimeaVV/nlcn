@@ -5,15 +5,23 @@ import '../core/locale_controller.dart';
 import '../l10n/l10n.dart';
 import '../services/dataset_repository.dart';
 import '../services/recommendation_service.dart';
+import '../widgets/optifit_bottom_bar.dart';
+import '../widgets/section_tabs.dart';
 import 'diary_screen.dart';
 import 'history_screen.dart';
 import 'meal_screen.dart';
 import 'profile_screen.dart';
+import 'scan_screen.dart';
 import 'settings_screen.dart';
+import 'today_screen.dart';
 import 'workout_screen.dart';
 
-/// Bottom-navigation tabs, in display order.
-enum _Tab { meal, diary, workout, history, profile }
+/// Bottom-navigation sections, in display order. Scan sits between
+/// [food] and [workout] but is an action, not a section.
+enum _Section { today, food, workout, profile }
+
+/// Top tabs inside the Food section.
+enum _FoodTab { diary, mealPlan, saved }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -30,48 +38,58 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  _Tab tab = _Tab.meal;
-  final historyKey = GlobalKey<HistoryScreenState>();
-  final mealKey = GlobalKey<MealScreenState>();
+  _Section section = _Section.today;
+  final todayKey = GlobalKey<TodayScreenState>();
+  final foodTabsKey = GlobalKey<SectionTabsState>();
   final diaryKey = GlobalKey<DiaryScreenState>();
-  late final List<Widget> pages;
+  final mealKey = GlobalKey<MealScreenState>();
+  final savedMealsKey = GlobalKey<HistoryScreenState>();
+  final workoutHistoryKey = GlobalKey<HistoryScreenState>();
+  // One cached copy of the packaged dataset serves every screen.
+  final datasets = DatasetRepository();
+  late final recommendations = RecommendationService(datasets: datasets);
 
-  @override
-  void initState() {
-    super.initState();
-    // One cached copy of the packaged dataset serves every screen.
-    final datasets = DatasetRepository();
-    final recommendations = RecommendationService(datasets: datasets);
-    pages = [
-      MealScreen(
-        key: mealKey,
-        recommendations: recommendations,
-        onOpenProfile: () => _select(_Tab.profile),
-        onDiaryChanged: () => diaryKey.currentState?.refresh(),
-      ),
-      DiaryScreen(key: diaryKey, datasets: datasets),
-      WorkoutScreen(recommendations: recommendations),
-      HistoryScreen(key: historyKey),
-      ProfileScreen(onProfileChanged: () {
-        mealKey.currentState?.refreshProfile();
-        diaryKey.currentState?.refresh();
-      }),
-    ];
-  }
-
-  void _select(_Tab value) {
-    setState(() => tab = value);
+  void _select(_Section value) {
+    setState(() => section = value);
     switch (value) {
-      case _Tab.meal:
-        mealKey.currentState?.refreshProfile();
-      case _Tab.diary:
+      case _Section.today:
+        todayKey.currentState?.refresh();
+      case _Section.food:
         diaryKey.currentState?.refresh();
-      case _Tab.history:
-        historyKey.currentState?.refresh();
-      case _Tab.workout:
-      case _Tab.profile:
+        mealKey.currentState?.refreshProfile();
+      case _Section.workout:
+        workoutHistoryKey.currentState?.refresh();
+      case _Section.profile:
         break;
     }
+  }
+
+  void _openFoodTab(_FoodTab tab) {
+    _select(_Section.food);
+    foodTabsKey.currentState?.show(tab.index);
+  }
+
+  void _onFoodTabChanged(int index) {
+    switch (_FoodTab.values[index]) {
+      case _FoodTab.diary:
+        diaryKey.currentState?.refresh();
+      case _FoodTab.mealPlan:
+        mealKey.currentState?.refreshProfile();
+      case _FoodTab.saved:
+        savedMealsKey.currentState?.refresh();
+    }
+  }
+
+  Future<void> _scan() async {
+    final logged = await Navigator.of(context).push<bool>(MaterialPageRoute(
+      builder: (_) => ScanScreen(datasets: datasets),
+    ));
+    if (logged != true || !mounted) return;
+    _openFoodTab(_FoodTab.diary);
+    diaryKey.currentState?.refresh();
+    todayKey.currentState?.refresh();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(context.l10n.diaryAdded)));
   }
 
   void _openSettings() {
@@ -81,14 +99,71 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SettingsScreen(
           themeController: widget.themeController,
           localeController: widget.localeController,
+          onHistoryCleared: () {
+            savedMealsKey.currentState?.refresh();
+            workoutHistoryKey.currentState?.refresh();
+            todayKey.currentState?.refresh();
+          },
         ),
       ),
     ));
   }
 
+  void _onProfileChanged() {
+    mealKey.currentState?.refreshProfile();
+    diaryKey.currentState?.refresh();
+    todayKey.currentState?.refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final pages = [
+      TodayScreen(
+        key: todayKey,
+        onOpenDiary: () => _openFoodTab(_FoodTab.diary),
+        onOpenWorkout: () => _select(_Section.workout),
+        onOpenProfile: () => _select(_Section.profile),
+        onScan: _scan,
+      ),
+      SectionTabs(
+        key: foodTabsKey,
+        labels: [l10n.navDiary, l10n.tabMealPlan, l10n.tabSaved],
+        onChanged: _onFoodTabChanged,
+        children: [
+          DiaryScreen(key: diaryKey, datasets: datasets),
+          MealScreen(
+            key: mealKey,
+            recommendations: recommendations,
+            onOpenProfile: () => _select(_Section.profile),
+            onDiaryChanged: () {
+              diaryKey.currentState?.refresh();
+              todayKey.currentState?.refresh();
+            },
+            onPlanSaved: () => savedMealsKey.currentState?.refresh(),
+          ),
+          HistoryScreen(key: savedMealsKey, section: HistorySection.meals),
+        ],
+      ),
+      SectionTabs(
+        labels: [l10n.tabWorkoutPlan, l10n.navHistory],
+        onChanged: (index) {
+          if (index == 1) workoutHistoryKey.currentState?.refresh();
+        },
+        children: [
+          WorkoutScreen(
+            recommendations: recommendations,
+            onHistoryChanged: () {
+              workoutHistoryKey.currentState?.refresh();
+              todayKey.currentState?.refresh();
+            },
+          ),
+          HistoryScreen(
+              key: workoutHistoryKey, section: HistorySection.workouts),
+        ],
+      ),
+      ProfileScreen(onProfileChanged: _onProfileChanged),
+    ];
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -114,29 +189,31 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(index: tab.index, children: pages),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: tab.index,
-        onDestinationSelected: (value) => _select(_Tab.values[value]),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.restaurant_menu_rounded),
-            label: l10n.navMeal,
+      body: IndexedStack(index: section.index, children: pages),
+      bottomNavigationBar: OptiFitBottomBar(
+        selectedIndex: section.index,
+        onSelected: (index) => _select(_Section.values[index]),
+        scanLabel: l10n.navScan,
+        onScan: _scan,
+        items: [
+          BottomBarItem(
+            icon: Icons.today_outlined,
+            selectedIcon: Icons.today_rounded,
+            label: l10n.navToday,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.menu_book_rounded),
-            label: l10n.navDiary,
+          BottomBarItem(
+            icon: Icons.restaurant_menu_outlined,
+            selectedIcon: Icons.restaurant_menu_rounded,
+            label: l10n.navFood,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.fitness_center_rounded),
+          BottomBarItem(
+            icon: Icons.fitness_center_outlined,
+            selectedIcon: Icons.fitness_center_rounded,
             label: l10n.navWorkout,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.history_rounded),
-            label: l10n.navHistory,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline_rounded),
+          BottomBarItem(
+            icon: Icons.person_outline_rounded,
+            selectedIcon: Icons.person_rounded,
             label: l10n.navProfile,
           ),
         ],

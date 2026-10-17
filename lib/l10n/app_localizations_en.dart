@@ -9,9 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get navMeal => 'Meals';
-
-  @override
   String get navWorkout => 'Workout';
 
   @override
@@ -49,9 +46,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sourceEstimated => 'estimated';
-
-  @override
-  String get mealTitle => 'MEAL PLAN';
 
   @override
   String get mealSubtitle =>
@@ -144,9 +138,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dinner => 'Dinner';
-
-  @override
-  String get workoutTitle => 'WORKOUT PROTOCOL';
 
   @override
   String get workoutSubtitle =>
@@ -305,9 +296,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calculate => 'Calculate';
-
-  @override
-  String get historyTitle => 'HISTORY ARCHIVE';
 
   @override
   String get historyLoadFailed => 'Could not load local history.';
@@ -792,9 +780,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mealSnack => 'Snack';
 
   @override
-  String get diaryTitle => 'FOOD DIARY';
-
-  @override
   String get diarySubtitle =>
       'Record what you ate and compare it with your profile targets.';
 
@@ -938,4 +923,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mealPlanAlreadyLogged => 'LOGGED TO DIARY';
+
+  @override
+  String get navToday => 'Today';
+
+  @override
+  String get navFood => 'Food';
+
+  @override
+  String get navScan => 'Scan';
+
+  @override
+  String get tabMealPlan => 'Meal plan';
+
+  @override
+  String get tabSaved => 'Saved';
+
+  @override
+  String get tabWorkoutPlan => 'Session';
+
+  @override
+  String get todayTitle => 'TODAY';
+
+  @override
+  String get todayLoadFailed =>
+      'Could not load today\'s data. Pull down to try again.';
+
+  @override
+  String get todayOpenDiary => 'Open diary';
+
+  @override
+  String todayWeightWeek(String change) {
+    return '7-day change: $change kg';
+  }
+
+  @override
+  String get todayNoExercise => 'No exercises logged today.';
+
+  @override
+  String todayExercisesLogged(String count) {
+    return '$count exercises logged today';
+  }
+
+  @override
+  String todayLastWorkout(String plan, String date) {
+    return 'Last workout: $plan · $date';
+  }
+
+  @override
+  String get scanTitle => 'Scan food';
+
+  @override
+  String get scanComingSoon =>
+      'Camera food recognition is in development. Meanwhile, you can log food manually to today\'s diary.';
+
+  @override
+  String get scanManual => 'Log food manually';
+
+  @override
+  String get dataTitle => 'Data';
+
+  @override
+  String get historyCleared => 'Meal plan and workout history cleared.';
 }

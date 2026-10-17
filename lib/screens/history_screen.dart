@@ -8,15 +8,22 @@ import '../widgets/meal_result.dart';
 import '../widgets/workout_result.dart';
 import '../services/database_service.dart';
 
+/// Which saved records a [HistoryScreen] lists: meal plans under the Food
+/// tab, or workout plans and Progressive Overload logs under Workout.
+enum HistorySection { meals, workouts }
+
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({super.key, required this.section, this.database});
+
+  final HistorySection section;
+  final DatabaseService? database;
 
   @override
   State<HistoryScreen> createState() => HistoryScreenState();
 }
 
 class HistoryScreenState extends State<HistoryScreen> {
-  final db = DatabaseService.instance;
+  DatabaseService get db => widget.database ?? DatabaseService.instance;
 
   bool loading = true;
   bool loadFailed = false;
@@ -24,24 +31,30 @@ class HistoryScreenState extends State<HistoryScreen> {
   List<WorkoutHistoryEntry> workouts = [];
   List<WorkoutLogEntry> workoutLogs = [];
 
-  bool get hasHistory {
-    return meals.isNotEmpty || workouts.isNotEmpty || workoutLogs.isNotEmpty;
-  }
-
   @override
   void initState() {
     super.initState();
     refresh();
   }
 
+  @override
+  void didUpdateWidget(HistoryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.section != widget.section ||
+        oldWidget.database != widget.database) {
+      refresh();
+    }
+  }
+
   Future<void> refresh() async {
     try {
-      final mealFuture = db.getMealHistory();
-      final workoutFuture = db.getWorkoutHistory();
-      final logFuture = db.getWorkoutLogs();
-      final mealRows = await mealFuture;
-      final workoutRows = await workoutFuture;
-      final logRows = await logFuture;
+      final showMeals = widget.section == HistorySection.meals;
+      final mealRows =
+          showMeals ? await db.getMealHistory() : <MealHistoryEntry>[];
+      final workoutRows =
+          showMeals ? <WorkoutHistoryEntry>[] : await db.getWorkoutHistory();
+      final logRows =
+          showMeals ? <WorkoutLogEntry>[] : await db.getWorkoutLogs();
       if (!mounted) return;
       setState(() {
         meals = mealRows;
@@ -179,20 +192,6 @@ class HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  Future<void> _clearAllHistory() async {
-    final confirmed = await _confirm(
-      context.l10n.clearAllTitle,
-      context.l10n.clearAllBody,
-    );
-    if (!confirmed) return;
-    try {
-      await db.clearAllHistory();
-      await refresh();
-    } catch (_) {
-      if (mounted) _showMessage(context.l10n.clearAllFailed);
-    }
-  }
-
   void _showMessage(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(
@@ -205,143 +204,131 @@ class HistoryScreenState extends State<HistoryScreen> {
     if (loading) return const Center(child: CircularProgressIndicator());
     final l10n = context.l10n;
 
+    final showMeals = widget.section == HistorySection.meals;
+
     return RefreshIndicator(
       onRefresh: refresh,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.historyTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              IconButton(
-                tooltip: l10n.clearAllHistory,
-                onPressed: hasHistory ? _clearAllHistory : null,
-                icon: const Icon(Icons.delete_sweep_outlined),
-              ),
-            ],
-          ),
           if (loadFailed) ...[
-            const SizedBox(height: 8),
             Text(l10n.historyLoadFailed,
                 style: TextStyle(color: CyberColors.danger)),
+            const SizedBox(height: 16),
           ],
-          const SizedBox(height: 16),
-          _HistoryHeading(
-              title: l10n.historyMealPlans, color: CyberColors.cyan),
-          const SizedBox(height: 8),
-          if (meals.isEmpty) Text(l10n.noMealPlans),
-          ...meals.map(
-            (row) => Card(
-              child: ListTile(
-                onTap: () => showMeal(row),
-                leading: Icon(
-                  Icons.restaurant_menu_rounded,
-                  color: CyberColors.cyan,
-                ),
-                title: Text(
-                  l10n.mealHistoryTitle(
-                    context.formatNumber(row.totalCalories.round()),
-                    context.formatNumber(row.totalProtein, decimals: 1),
+          if (showMeals) ...[
+            _HistoryHeading(
+                title: l10n.historyMealPlans, color: CyberColors.cyan),
+            const SizedBox(height: 8),
+            if (meals.isEmpty) Text(l10n.noMealPlans),
+            ...meals.map(
+              (row) => Card(
+                child: ListTile(
+                  onTap: () => showMeal(row),
+                  leading: Icon(
+                    Icons.restaurant_menu_rounded,
+                    color: CyberColors.cyan,
                   ),
-                ),
-                subtitle: Text(formatDateTime(row.createdAt)),
-                trailing: IconButton(
-                  tooltip: l10n.deleteMealPlan,
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _deleteRecord(
-                    label: l10n.recordMealPlan,
-                    delete: () => db.deleteMealPlan(row.id),
+                  title: Text(
+                    l10n.mealHistoryTitle(
+                      context.formatNumber(row.totalCalories.round()),
+                      context.formatNumber(row.totalProtein, decimals: 1),
+                    ),
                   ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 18),
-          _HistoryHeading(
-              title: l10n.historyWorkoutPlans, color: CyberColors.magenta),
-          const SizedBox(height: 8),
-          if (workouts.isEmpty) Text(l10n.noWorkoutPlans),
-          ...workouts.map(
-            (row) => Card(
-              child: ListTile(
-                onTap: () => showWorkout(row),
-                leading: Icon(
-                  Icons.fitness_center_rounded,
-                  color: CyberColors.magenta,
-                ),
-                title: Text('${row.split} • ${l10n.levelLabel(row.level)}'),
-                subtitle: Text(
-                  l10n.workoutHistorySubtitle(
-                    '${row.estimatedTime}',
-                    formatDateTime(row.createdAt),
-                  ),
-                ),
-                trailing: IconButton(
-                  tooltip: l10n.deleteWorkoutPlan,
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _deleteRecord(
-                    label: l10n.recordWorkoutPlan,
-                    delete: () => db.deleteWorkoutPlan(row.id),
+                  subtitle: Text(formatDateTime(row.createdAt)),
+                  trailing: IconButton(
+                    tooltip: l10n.deleteMealPlan,
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _deleteRecord(
+                      label: l10n.recordMealPlan,
+                      delete: () => db.deleteMealPlan(row.id),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 18),
-          _HistoryHeading(
-            title: l10n.historyOverloadLogs,
-            color: CyberColors.lime,
-          ),
-          const SizedBox(height: 8),
-          if (workoutLogs.isEmpty) Text(l10n.noExerciseLogs),
-          ...workoutLogs.map(
-            (row) => Card(
-              child: ListTile(
-                leading: Icon(
-                  Icons.trending_up_rounded,
-                  color: CyberColors.lime,
-                ),
-                title: Text(row.exerciseName),
-                subtitle: Text(
-                  l10n.exerciseLogSubtitle(
-                    context.formatMeasurement(row.weight),
-                    '${row.set1Reps}/${row.set2Reps}/${row.set3Reps}',
-                    context.formatMeasurement(row.suggestedWeight),
-                    '${row.suggestedReps}',
-                    formatDateTime(row.performedAt),
+          ] else ...[
+            _HistoryHeading(
+                title: l10n.historyWorkoutPlans, color: CyberColors.magenta),
+            const SizedBox(height: 8),
+            if (workouts.isEmpty) Text(l10n.noWorkoutPlans),
+            ...workouts.map(
+              (row) => Card(
+                child: ListTile(
+                  onTap: () => showWorkout(row),
+                  leading: Icon(
+                    Icons.fitness_center_rounded,
+                    color: CyberColors.magenta,
                   ),
-                ),
-                isThreeLine: true,
-                trailing: IconButton(
-                  tooltip: l10n.deleteExerciseLog,
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _deleteRecord(
-                    label: l10n.recordExerciseLog,
-                    delete: () => db.deleteWorkoutLog(row.id),
+                  title: Text('${row.split} • ${l10n.levelLabel(row.level)}'),
+                  subtitle: Text(
+                    l10n.workoutHistorySubtitle(
+                      '${row.estimatedTime}',
+                      formatDateTime(row.createdAt),
+                    ),
                   ),
-                ),
-                onTap: () => showDialog<void>(
-                  context: context,
-                  builder: (dialogContext) => AlertDialog(
-                    title: Text(row.exerciseName),
-                    content:
-                        Text(l10n.overloadMessage(row.action, row.message)),
-                    actions: [
-                      FilledButton(
-                        onPressed: () => Navigator.pop(dialogContext),
-                        child: Text(l10n.ok),
-                      ),
-                    ],
+                  trailing: IconButton(
+                    tooltip: l10n.deleteWorkoutPlan,
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _deleteRecord(
+                      label: l10n.recordWorkoutPlan,
+                      delete: () => db.deleteWorkoutPlan(row.id),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+            const SizedBox(height: 18),
+            _HistoryHeading(
+              title: l10n.historyOverloadLogs,
+              color: CyberColors.lime,
+            ),
+            const SizedBox(height: 8),
+            if (workoutLogs.isEmpty) Text(l10n.noExerciseLogs),
+            ...workoutLogs.map(
+              (row) => Card(
+                child: ListTile(
+                  leading: Icon(
+                    Icons.trending_up_rounded,
+                    color: CyberColors.lime,
+                  ),
+                  title: Text(row.exerciseName),
+                  subtitle: Text(
+                    l10n.exerciseLogSubtitle(
+                      context.formatMeasurement(row.weight),
+                      '${row.set1Reps}/${row.set2Reps}/${row.set3Reps}',
+                      context.formatMeasurement(row.suggestedWeight),
+                      '${row.suggestedReps}',
+                      formatDateTime(row.performedAt),
+                    ),
+                  ),
+                  isThreeLine: true,
+                  trailing: IconButton(
+                    tooltip: l10n.deleteExerciseLog,
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _deleteRecord(
+                      label: l10n.recordExerciseLog,
+                      delete: () => db.deleteWorkoutLog(row.id),
+                    ),
+                  ),
+                  onTap: () => showDialog<void>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: Text(row.exerciseName),
+                      content:
+                          Text(l10n.overloadMessage(row.action, row.message)),
+                      actions: [
+                        FilledButton(
+                          onPressed: () => Navigator.pop(dialogContext),
+                          child: Text(l10n.ok),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
