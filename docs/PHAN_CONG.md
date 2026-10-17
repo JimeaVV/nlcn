@@ -47,6 +47,11 @@ triển*.
   - **CI** (GitHub Actions) tự chạy analyze, test và kiểm tra bảng dinh
     dưỡng cho mỗi PR, mất khoảng 3–5 phút, chạy ngầm nên không ai phải
     ngồi chờ. Chỉ gộp khi CI hiện ✅.
+  - Từ 17/10/2026, nhánh `main` được bảo vệ: hai job CI là **điều kiện bắt
+    buộc**, GitHub không cho gộp khi chưa xanh.
+  - Repo cũng bật **tự gộp** (auto-merge): bấm "Enable auto-merge" trên PR,
+    hoặc chạy `gh pr merge <số> --auto --merge`, thì PR tự gộp đúng lúc CI
+    xanh.
 - **Khu vực code riêng:** A làm trong `lib/` và `assets/data/`; B làm trong
   `tool/train/` và `assets/models/`. Đụng vào khu vực của người kia thì báo
   trước.
