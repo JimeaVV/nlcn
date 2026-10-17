@@ -350,6 +350,46 @@ commit và kết quả kiểm thử.
 - **Kiểm thử:** `check_vn_food.py` báo OK; tất cả dòng đã điền đều khớp
   calo ≈ 4·đạm + 4·bột đường + 9·béo; 114/114 test.
 
+### 2026-10-17 · Tính dinh dưỡng cho nước chấm và món phụ theo công thức
+- **Vấn đề:** nước chấm, mỡ hành, chả trứng, vỏ bánh xèo là hỗn hợp nhiều
+  nguyên liệu. Bảng thành phần không có sẵn số cho chúng.
+- **Cách làm:**
+  1. Nhờ hai chatbot (ChatGPT và Gemini) liệt kê công thức nấu: nguyên liệu
+     tính bằng gram, khối lượng thành phẩm, link nguồn. **Không** lấy số calo
+     của chatbot.
+  2. So sánh hai bản:
+     - **Chọn bản ChatGPT** vì mỗi món dẫn về một bài công thức cụ thể và
+       tự ghi rõ chỗ nào là ước tính.
+     - **Không dùng bản Gemini:** nguồn mơ hồ ("Hướng Nghiệp Á Âu", sách
+       không ghi trang). Có số chính xác giả tạo, ví dụ "xương tiết 50–70 g
+       mỡ". Còn ghi Bảng thành phần thực phẩm là nguồn của tỷ lệ nếp ra xôi,
+       trong khi bảng này không có số đó.
+  3. Tự mở bài gốc trên Điện máy XANH để kiểm tra từng công thức:
+     - bánh xèo khớp định lượng (200 g bột gạo, 50 g bột năng, 400 ml nước
+       dừa);
+     - chả trứng: bài gốc ghi **20 g gia vị**, ChatGPT tự nâng lên 52 g. Đã
+       sửa theo bài gốc.
+  4. Script `tool/vn_food_recipes.py` cộng dinh dưỡng các nguyên liệu (số
+     của Viện Dinh dưỡng) rồi chia cho khối lượng thành phẩm, ra số trên
+     100 g. Chạy `--write` để ghi vào `components.csv`.
+- **Kết quả:** thêm 7 dòng, nâng lên **31/40**:
+  - nước mắm cơm tấm 122 kcal, nước chấm bún chả 53 kcal, nước mắm bún thịt
+    nướng 98 kcal (trên 100 g);
+  - mỡ hành 583 kcal, chả trứng 168 kcal, vỏ bánh xèo và giá 191 kcal
+    (1 cái khoảng 139 g, tính từ mẻ 6 cái);
+  - **xôi nếp:** không dùng tỷ lệ nếp ra xôi của chatbot (2,2 lần hoặc 1,62
+    lần, hai bên lệch nhau). Lấy "Xôi nếp cẩm" của Viện Dinh dưỡng (235 kcal)
+    làm số gần đúng, vì cùng là nếp đồ chín.
+- **Còn lại 9 dòng (7 loại nước dùng, sốt bò kho, gỏi cuốn):**
+  - Nước dùng hầm xương: phần lớn năng lượng đến từ mỡ và chất tan từ xương,
+    công thức không cho biết lượng này. Nếu chỉ cộng gia vị thì ra khoảng 2–3
+    kcal/100 g, thấp hơn thực tế nhiều.
+  - Gỏi cuốn: phần nền gồm cả bánh tráng và nước chấm, cần biết tỷ lệ trong
+    một cuốn.
+- **Hạn chế cần ghi trong báo cáo:** khối lượng thành phẩm là ước tính của
+  công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
+  chạy lại.
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera

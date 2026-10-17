@@ -113,6 +113,10 @@ com_tam,trung_op_la,,1
 com_tam,do_chua,30,
 pho_bo,_base,500,        ← nước dùng; dinh dưỡng ghi ở dòng `_base_pho_bo` trong components.csv
 ```
+Thành phần là hỗn hợp (nước chấm, mỡ hành, chả trứng…) được tính từ công
+thức nấu bằng `python tool/vn_food_recipes.py --write`. Script cộng dinh
+dưỡng của từng nguyên liệu rồi chia cho khối lượng thành phẩm.
+
 Kiểm tra hai file bằng `python tool/check_vn_food.py`; thêm `--strict` để
 liệt kê các ô còn trống. Script kiểm tra mã có khớp contract không, số liệu có
 hợp lý không (calo ≈ 4·protein + 4·carb + 9·fat, sai lệch ≤ 25%) và đã có
