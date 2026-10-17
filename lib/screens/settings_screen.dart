@@ -5,6 +5,7 @@ import '../core/locale_controller.dart';
 import '../l10n/l10n.dart';
 import '../services/database_service.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/scan_button_face.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
@@ -112,7 +113,13 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     for (final option in appStyleOptions)
                       _OptionTile(
+                        key: ValueKey('style-${option.style.name}'),
                         icon: option.icon,
+                        preview: ScanButtonFace(
+                          style: option.style,
+                          size: 40,
+                          ringColor: Colors.transparent,
+                        ),
                         title: option.name,
                         subtitle: _styleDescription(l10n, option.style),
                         selected: themeController.style == option.style,
@@ -156,9 +163,13 @@ class _OptionTile extends StatelessWidget {
     required this.subtitle,
     required this.selected,
     required this.onTap,
+    this.preview,
   });
 
   final IconData icon;
+
+  /// Shown instead of [icon] when given, e.g. a style's Scan button.
+  final Widget? preview;
   final String title;
   final String subtitle;
   final bool selected;
@@ -187,15 +198,18 @@ class _OptionTile extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: CyberColors.cyan.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: CyberColors.cyan),
-                ),
+                preview == null
+                    ? Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: CyberColors.cyan.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(icon, color: CyberColors.cyan),
+                      )
+                    : SizedBox.square(
+                        dimension: 44, child: Center(child: preview)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
