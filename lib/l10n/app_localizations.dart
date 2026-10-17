@@ -1983,6 +1983,24 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Thu gọn'**
   String get showFewerWeights;
+
+  /// No description provided for @goalLoseShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giảm mỡ'**
+  String get goalLoseShort;
+
+  /// No description provided for @goalMaintainShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giữ cân'**
+  String get goalMaintainShort;
+
+  /// No description provided for @goalGainShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tăng cân'**
+  String get goalGainShort;
 }
 
 class _AppLocalizationsDelegate

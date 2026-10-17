@@ -313,5 +313,8 @@
   "weightShort": "Weight (kg)",
   "genderShort": "Sex",
   "showAllWeights": "Show all ({count})",
-  "showFewerWeights": "Show less"
+  "showFewerWeights": "Show less",
+  "goalLoseShort": "Lose",
+  "goalMaintainShort": "Maintain",
+  "goalGainShort": "Gain"
 }

@@ -712,5 +712,8 @@
       }
     }
   },
-  "showFewerWeights": "Thu gọn"
+  "showFewerWeights": "Thu gọn",
+  "goalLoseShort": "Giảm mỡ",
+  "goalMaintainShort": "Giữ cân",
+  "goalGainShort": "Tăng cân"
 }

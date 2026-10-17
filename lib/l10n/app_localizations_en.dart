@@ -1078,4 +1078,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showFewerWeights => 'Show less';
+
+  @override
+  String get goalLoseShort => 'Lose';
+
+  @override
+  String get goalMaintainShort => 'Maintain';
+
+  @override
+  String get goalGainShort => 'Gain';
 }

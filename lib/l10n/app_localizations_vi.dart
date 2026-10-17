@@ -1069,4 +1069,13 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get showFewerWeights => 'Thu gọn';
+
+  @override
+  String get goalLoseShort => 'Giảm mỡ';
+
+  @override
+  String get goalMaintainShort => 'Giữ cân';
+
+  @override
+  String get goalGainShort => 'Tăng cân';
 }

@@ -664,7 +664,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                             value: goal,
                             label: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: Text(l10n.goalLabel(goal)),
+                              child: Text(l10n.goalShortLabel(goal)),
                             ),
                           ),
                       ],

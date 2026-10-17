@@ -270,6 +270,9 @@ void main() {
       expect(vi.goalLabel(NutritionGoal.gain), 'Tăng cân');
       expect(en.goalLabel(NutritionGoal.lose), 'Lose fat');
       expect(en.goalLabel(NutritionGoal.gain), 'Gain weight');
+      expect(en.goalShortLabel(NutritionGoal.maintain), 'Maintain',
+          reason: 'short enough for the three-way selector');
+      expect(vi.goalShortLabel(NutritionGoal.maintain), 'Giữ cân');
     });
 
     test('reports which target rule failed', () {
