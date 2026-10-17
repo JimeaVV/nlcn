@@ -12,7 +12,7 @@
 
 | | Người A: App và dinh dưỡng | Người B: Model nhận diện |
 |---|---|---|
-| Tên | _(điền)_ | _(điền)_ |
+| Tên | JimeaVV (chủ repo) | _(điền tên bạn cùng nhóm)_ |
 | Dữ liệu | `components.csv`, `dishes.csv` (dinh dưỡng, khẩu phần mặc định, có nguồn) | Gom ảnh, dọn dữ liệu, gán nhãn, chia tập (`labels.csv`, `splits.csv`) |
 | Kỹ thuật | Màn chụp ảnh, màn xác nhận món và thành phần, chỉnh khẩu phần, ghi Nhật ký, gắn `tflite_flutter` | Notebook Colab, các thí nghiệm, đánh giá, xuất `.tflite` + `MODEL_CARD.md` |
 | Việc khác | Mở rộng dữ liệu bài tập, Progressive Overload theo lịch sử, benchmark Branch & Bound | Đo tốc độ và kích thước model trên điện thoại |
@@ -60,8 +60,12 @@ triển*.
    - thêm người còn lại làm collaborator trên GitHub.
 2. **Người A:**
    - lấy *Bảng thành phần thực phẩm Việt Nam* (Viện Dinh dưỡng);
-   - điền `components.csv` cho các thành phần, có cột nguồn;
-   - điền khẩu phần mặc định trong `dishes.csv` cho 10 món đầu.
+   - điền `assets/data/vn_food/components.csv` (đã có khung: mã, tên, đơn
+     vị; cột số liệu để trống), mỗi dòng ghi cột `source`;
+   - điền khẩu phần mặc định trong `dishes.csv` cho 10 món đầu (đã có sẵn
+     danh sách thành phần thường gặp của mỗi món);
+   - sau mỗi lần điền, chạy `python tool/check_vn_food.py` để kiểm tra mã,
+     số liệu và nguồn.
 3. **Người B:**
    - tìm và kiểm tra license các bộ ảnh công khai, ghi vào `SOURCES.md`;
    - tải về `dataset/vnfood/images/`;

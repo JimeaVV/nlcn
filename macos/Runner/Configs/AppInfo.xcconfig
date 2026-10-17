@@ -8,7 +8,7 @@
 PRODUCT_NAME = nlcsn
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.nlcsn
+PRODUCT_BUNDLE_IDENTIFIER = io.github.jimeavv.optifit
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
