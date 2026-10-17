@@ -43,7 +43,10 @@ triển*.
   - không commit thẳng lên `main`;
   - mỗi việc một branch, ví dụ `feature/camera`, `data/nutrition`,
     `ml/baseline`;
-  - làm xong thì mở **Pull Request**, người kia xem rồi mới gộp.
+  - làm xong thì mở **Pull Request**, người kia xem rồi mới gộp;
+  - **CI** (GitHub Actions) tự chạy analyze, test và kiểm tra bảng dinh
+    dưỡng cho mỗi PR, mất khoảng 3–5 phút, chạy ngầm nên không ai phải
+    ngồi chờ. Chỉ gộp khi CI hiện ✅.
 - **Khu vực code riêng:** A làm trong `lib/` và `assets/data/`; B làm trong
   `tool/train/` và `assets/models/`. Đụng vào khu vực của người kia thì báo
   trước.
