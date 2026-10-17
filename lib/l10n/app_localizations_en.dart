@@ -392,9 +392,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get profileTitle => 'Profile & goals';
-
-  @override
   String get profileDisclaimer =>
       'Estimates are for adults aged 18 and over. Actual needs may differ; this is not medical advice.';
 
@@ -408,22 +405,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ageError => 'Enter an age from 18 to 100.';
 
   @override
-  String get genderFormula => 'Sex used in the formula';
-
-  @override
   String get male => 'Male';
 
   @override
   String get female => 'Female';
 
   @override
-  String get heightCm => 'Height (cm)';
-
-  @override
   String get heightName => 'Height';
-
-  @override
-  String get currentBodyWeight => 'Current weight (kg)';
 
   @override
   String get weightName => 'Weight';
@@ -476,16 +464,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualCalories => 'Manual calories (kcal/day)';
 
   @override
-  String get manualHint => 'Leave empty to use the estimate';
-
-  @override
-  String get useEstimatedCalories => 'Use estimated calories';
-
-  @override
   String get manualProtein => 'Manual protein (g/day)';
-
-  @override
-  String get useEstimatedProtein => 'Use estimated protein';
 
   @override
   String numberInvalid(String name) {
@@ -507,26 +486,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter valid details and goals to see the estimate. Protein energy (4 kcal/g) cannot exceed total calories.';
 
   @override
-  String caloriesPerDayValue(String value) {
-    return '$value kcal/day';
-  }
-
-  @override
-  String proteinPerDayValue(String value) {
-    return '$value g protein/day';
-  }
-
-  @override
   String get estimatedCalories => 'Estimated calories';
 
   @override
-  String get manualCaloriesSource => 'Manual calories';
-
-  @override
   String get estimatedProtein => 'Estimated protein';
-
-  @override
-  String get manualProteinSource => 'Manual protein';
 
   @override
   String get saveProfile => 'Save profile';
@@ -1086,4 +1049,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanRetryCamera => 'Try the camera again';
+
+  @override
+  String get dailyTargetsTitle => 'Daily targets';
+
+  @override
+  String get howCalculated => 'How it is calculated';
+
+  @override
+  String get customCalories => 'Set calories myself';
+
+  @override
+  String get customProtein => 'Set protein myself';
+
+  @override
+  String get heightShort => 'Height (cm)';
+
+  @override
+  String get weightShort => 'Weight (kg)';
+
+  @override
+  String get genderShort => 'Sex';
+
+  @override
+  String showAllWeights(String count) {
+    return 'Show all ($count)';
+  }
+
+  @override
+  String get showFewerWeights => 'Show less';
+
+  @override
+  String get goalLoseShort => 'Lose';
+
+  @override
+  String get goalMaintainShort => 'Maintain';
+
+  @override
+  String get goalGainShort => 'Gain';
 }

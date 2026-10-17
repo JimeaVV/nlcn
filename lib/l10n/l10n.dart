@@ -45,6 +45,13 @@ extension AppLocalizationsLabels on AppLocalizations {
         NutritionGoal.gain => goalGain,
       };
 
+  /// Fits a three-way goal selector; [goalLabel] is used everywhere else.
+  String goalShortLabel(NutritionGoal goal) => switch (goal) {
+        NutritionGoal.lose => goalLoseShort,
+        NutritionGoal.maintain => goalMaintainShort,
+        NutritionGoal.gain => goalGainShort,
+      };
+
   String mealLabel(String meal) => switch (meal) {
         'Breakfast' => breakfast,
         'Lunch' => lunch,

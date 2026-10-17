@@ -777,12 +777,6 @@ abstract class AppLocalizations {
   String exerciseLogSubtitle(String weight, String reps, String nextWeight,
       String nextReps, String date);
 
-  /// No description provided for @profileTitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'Hồ sơ & mục tiêu'**
-  String get profileTitle;
-
   /// No description provided for @profileDisclaimer.
   ///
   /// In vi, this message translates to:
@@ -807,12 +801,6 @@ abstract class AppLocalizations {
   /// **'Nhập tuổi từ 18 đến 100.'**
   String get ageError;
 
-  /// No description provided for @genderFormula.
-  ///
-  /// In vi, this message translates to:
-  /// **'Giới tính dùng trong công thức'**
-  String get genderFormula;
-
   /// No description provided for @male.
   ///
   /// In vi, this message translates to:
@@ -825,23 +813,11 @@ abstract class AppLocalizations {
   /// **'Nữ'**
   String get female;
 
-  /// No description provided for @heightCm.
-  ///
-  /// In vi, this message translates to:
-  /// **'Chiều cao (cm)'**
-  String get heightCm;
-
   /// No description provided for @heightName.
   ///
   /// In vi, this message translates to:
   /// **'Chiều cao'**
   String get heightName;
-
-  /// No description provided for @currentBodyWeight.
-  ///
-  /// In vi, this message translates to:
-  /// **'Cân nặng hiện tại (kg)'**
-  String get currentBodyWeight;
 
   /// No description provided for @weightName.
   ///
@@ -921,29 +897,11 @@ abstract class AppLocalizations {
   /// **'Calo tự đặt (kcal/ngày)'**
   String get manualCalories;
 
-  /// No description provided for @manualHint.
-  ///
-  /// In vi, this message translates to:
-  /// **'Để trống để dùng ước tính'**
-  String get manualHint;
-
-  /// No description provided for @useEstimatedCalories.
-  ///
-  /// In vi, this message translates to:
-  /// **'Dùng calo ước tính'**
-  String get useEstimatedCalories;
-
   /// No description provided for @manualProtein.
   ///
   /// In vi, this message translates to:
   /// **'Protein tự đặt (g/ngày)'**
   String get manualProtein;
-
-  /// No description provided for @useEstimatedProtein.
-  ///
-  /// In vi, this message translates to:
-  /// **'Dùng protein ước tính'**
-  String get useEstimatedProtein;
 
   /// No description provided for @numberInvalid.
   ///
@@ -969,41 +927,17 @@ abstract class AppLocalizations {
   /// **'Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.'**
   String get targetsInvalidHint;
 
-  /// No description provided for @caloriesPerDayValue.
-  ///
-  /// In vi, this message translates to:
-  /// **'{value} kcal/ngày'**
-  String caloriesPerDayValue(String value);
-
-  /// No description provided for @proteinPerDayValue.
-  ///
-  /// In vi, this message translates to:
-  /// **'{value} g protein/ngày'**
-  String proteinPerDayValue(String value);
-
   /// No description provided for @estimatedCalories.
   ///
   /// In vi, this message translates to:
   /// **'Calo ước tính'**
   String get estimatedCalories;
 
-  /// No description provided for @manualCaloriesSource.
-  ///
-  /// In vi, this message translates to:
-  /// **'Calo tự đặt'**
-  String get manualCaloriesSource;
-
   /// No description provided for @estimatedProtein.
   ///
   /// In vi, this message translates to:
   /// **'Protein ước tính'**
   String get estimatedProtein;
-
-  /// No description provided for @manualProteinSource.
-  ///
-  /// In vi, this message translates to:
-  /// **'Protein tự đặt'**
-  String get manualProteinSource;
 
   /// No description provided for @saveProfile.
   ///
@@ -1995,6 +1929,78 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Thử mở camera lại'**
   String get scanRetryCamera;
+
+  /// No description provided for @dailyTargetsTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu mỗi ngày'**
+  String get dailyTargetsTitle;
+
+  /// No description provided for @howCalculated.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cách tính'**
+  String get howCalculated;
+
+  /// No description provided for @customCalories.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tự đặt calo'**
+  String get customCalories;
+
+  /// No description provided for @customProtein.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tự đặt protein'**
+  String get customProtein;
+
+  /// No description provided for @heightShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cao (cm)'**
+  String get heightShort;
+
+  /// No description provided for @weightShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nặng (kg)'**
+  String get weightShort;
+
+  /// No description provided for @genderShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giới tính'**
+  String get genderShort;
+
+  /// No description provided for @showAllWeights.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xem tất cả ({count})'**
+  String showAllWeights(String count);
+
+  /// No description provided for @showFewerWeights.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu gọn'**
+  String get showFewerWeights;
+
+  /// No description provided for @goalLoseShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giảm mỡ'**
+  String get goalLoseShort;
+
+  /// No description provided for @goalMaintainShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giữ cân'**
+  String get goalMaintainShort;
+
+  /// No description provided for @goalGainShort.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tăng cân'**
+  String get goalGainShort;
 }
 
 class _AppLocalizationsDelegate

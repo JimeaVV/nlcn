@@ -389,9 +389,6 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get profileTitle => 'Hồ sơ & mục tiêu';
-
-  @override
   String get profileDisclaimer =>
       'Ước tính dành cho người trưởng thành từ 18 tuổi. Nhu cầu thực tế có thể khác; đây không phải chỉ định y khoa.';
 
@@ -405,22 +402,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get ageError => 'Nhập tuổi từ 18 đến 100.';
 
   @override
-  String get genderFormula => 'Giới tính dùng trong công thức';
-
-  @override
   String get male => 'Nam';
 
   @override
   String get female => 'Nữ';
 
   @override
-  String get heightCm => 'Chiều cao (cm)';
-
-  @override
   String get heightName => 'Chiều cao';
-
-  @override
-  String get currentBodyWeight => 'Cân nặng hiện tại (kg)';
 
   @override
   String get weightName => 'Cân nặng';
@@ -473,16 +461,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get manualCalories => 'Calo tự đặt (kcal/ngày)';
 
   @override
-  String get manualHint => 'Để trống để dùng ước tính';
-
-  @override
-  String get useEstimatedCalories => 'Dùng calo ước tính';
-
-  @override
   String get manualProtein => 'Protein tự đặt (g/ngày)';
-
-  @override
-  String get useEstimatedProtein => 'Dùng protein ước tính';
 
   @override
   String numberInvalid(String name) {
@@ -504,26 +483,10 @@ class AppLocalizationsVi extends AppLocalizations {
       'Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.';
 
   @override
-  String caloriesPerDayValue(String value) {
-    return '$value kcal/ngày';
-  }
-
-  @override
-  String proteinPerDayValue(String value) {
-    return '$value g protein/ngày';
-  }
-
-  @override
   String get estimatedCalories => 'Calo ước tính';
 
   @override
-  String get manualCaloriesSource => 'Calo tự đặt';
-
-  @override
   String get estimatedProtein => 'Protein ước tính';
-
-  @override
-  String get manualProteinSource => 'Protein tự đặt';
 
   @override
   String get saveProfile => 'Lưu hồ sơ';
@@ -1077,4 +1040,42 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get scanRetryCamera => 'Thử mở camera lại';
+
+  @override
+  String get dailyTargetsTitle => 'Mục tiêu mỗi ngày';
+
+  @override
+  String get howCalculated => 'Cách tính';
+
+  @override
+  String get customCalories => 'Tự đặt calo';
+
+  @override
+  String get customProtein => 'Tự đặt protein';
+
+  @override
+  String get heightShort => 'Cao (cm)';
+
+  @override
+  String get weightShort => 'Nặng (kg)';
+
+  @override
+  String get genderShort => 'Giới tính';
+
+  @override
+  String showAllWeights(String count) {
+    return 'Xem tất cả ($count)';
+  }
+
+  @override
+  String get showFewerWeights => 'Thu gọn';
+
+  @override
+  String get goalLoseShort => 'Giảm mỡ';
+
+  @override
+  String get goalMaintainShort => 'Giữ cân';
+
+  @override
+  String get goalGainShort => 'Tăng cân';
 }
