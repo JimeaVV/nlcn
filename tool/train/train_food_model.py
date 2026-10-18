@@ -300,6 +300,8 @@ def average_hash(path):
     return sum(1 << i for i, p in enumerate(pixels) if p > mean)
 
 
+# Sorted first, so every run (and every teammate) gets the same split.
+samples.sort(key=lambda s: s['path'])
 by_dish = defaultdict(list)
 seen = {}
 for s in samples:
@@ -314,8 +316,8 @@ for s in samples:
     by_dish[s['dish']].append(s)
 
 train, val, test = [], [], []
-for dish, items in by_dish.items():
-    random.shuffle(items)
+for dish, items in sorted(by_dish.items()):
+    random.Random(f'{SEED}-{dish}').shuffle(items)
     items = items[:MAX_PER_DISH]
     n_test = max(1, round(len(items) * 0.15)) if len(items) >= 3 else 0
     n_val = max(1, round(len(items) * 0.15)) if len(items) >= 3 else 0
