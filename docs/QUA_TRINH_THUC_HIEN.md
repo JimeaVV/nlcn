@@ -710,6 +710,46 @@ commit và kết quả kiểm thử.
   công thức, chưa cân thực tế. Khi nấu và cân được thì sửa số trong script và
   chạy lại.
 
+### 2026-10-19 · Notebook train trên Kaggle
+- **Bộ ảnh:** người B tìm được 4 bộ công khai. Đối chiếu với 40 món, 25
+  thành phần:
+
+  | Bộ ảnh | Trùng món | Ghi chú |
+  |---|---|---|
+  | VinaFood21 | 21 | 20 món mới của contract v1.0 lấy theo bộ này |
+  | VietFood67 (33.000 ảnh, 26 GB) | 17 | có khung cho khoảng 15 thành phần, CC BY-NC-SA 4.0 |
+  | 30VNFoods | 14 | phở bò và gà chung một lớp, MIT |
+  | 20FoodVN | 12 | có phở bò riêng, Apache 2.0 |
+
+  - Chỉ còn 4 món không bộ nào có, phải tự chụp: cơm phần, cơm gà, cháo gà,
+    phở gà.
+- **Chọn Kaggle Notebook thay cho Colab:** dữ liệu nằm sẵn trên Kaggle, gắn
+  vào notebook là dùng được, khỏi tải 26 GB. GPU miễn phí khoảng 30 giờ một
+  tuần. "Save & Run All" chạy trên server nên tắt trình duyệt vẫn chạy tiếp.
+- **Notebook `tool/train/train_food_model.ipynb`:**
+  - Gộp 4 bộ thành một tập train chung.
+  - Đổi tên lớp sang mã của app bằng cách so tên đã bỏ dấu; lớp app không
+    có thì bỏ.
+  - **Dùng khung của VietFood67 làm nhãn thành phần:**
+    - ảnh chỉ có cơm và món mặn, không có khung tên món, là cơm phần, nên
+      có thêm dữ liệu cho món còn thiếu;
+    - "Trứng", "Chả", "Rau" được đổi theo món chứa nó.
+  - **Masked loss:** ảnh chỉ có nhãn món thì không tính loss phần thành
+    phần, để "không biết" không bị học thành "không có".
+  - Bỏ ảnh trùng giữa các bộ bằng average hash, để không có ảnh vừa ở train
+    vừa ở test. Chia 70/15/15 theo từng món.
+  - Train 2 pha (đầu ra trước, rồi 40% lớp trên của backbone) và lưu
+    checkpoint mỗi epoch. Ba thí nghiệm (`scratch`, `linear`, `finetune`)
+    và hai backbone chỉ cần đổi một biến.
+  - Chỉnh ngưỡng tick thành phần trên tập val, ghi vào `MODEL_CARD.md`.
+  - Xuất tflite float16, rồi tự kiểm tra kích thước đầu vào, đầu ra và so
+    kết quả với Keras.
+- **Đã thử trên máy** với dữ liệu giả mô phỏng 4 kiểu thư mục:
+  - chạy trọn từ gom ảnh tới xuất file;
+  - nhãn đúng: "Bánh mì" có dấu nhận đúng, phở lẫn và cao lầu bị bỏ, ảnh
+    cơm + thịt kho + rau thành cơm phần, ảnh 2 món bị bỏ;
+  - file xuất ra qua được test của app (mã khớp bảng dinh dưỡng).
+
 ---
 
 ## 2. Kế hoạch nhận diện món ăn bằng camera
