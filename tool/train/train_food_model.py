@@ -177,7 +177,6 @@ def vf_resolve(dish, names):
 
 # %%
 import csv
-import glob
 import random
 from collections import Counter, defaultdict
 
@@ -198,8 +197,12 @@ def is_detection_root(folder):
 
 
 def load_vietfood67(root, source):
-    for label_path in glob.glob(os.path.join(root, 'labels', '**', '*.txt'),
-                                recursive=True):
+    label_paths = sorted(
+        os.path.join(folder, name)
+        for folder, _, names in os.walk(os.path.join(root, 'labels'),
+                                        followlinks=True)
+        for name in names if name.endswith('.txt'))
+    for label_path in label_paths:
         rel = os.path.relpath(label_path, os.path.join(root, 'labels'))
         stem = os.path.splitext(os.path.join(root, 'images', rel))[0]
         image = next((stem + ext for ext in ('.jpg', '.jpeg', '.png', '.JPG')
@@ -259,7 +262,8 @@ def source_name(path):
 # Each folder is handled by the first rule that matches: the team's
 # labels.csv, a detection dataset (images/ + labels/), or class folders.
 handled = []   # roots already loaded, whose subfolders are skipped below
-for folder, dirs, files in os.walk(INPUT_ROOT):
+# Kaggle may mount datasets as symlinks, which os.walk skips by default.
+for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
     dirs.sort()
     if any(folder == root or folder.startswith(root + os.sep) for root in handled):
         dirs[:] = []
@@ -287,7 +291,7 @@ for folder, dirs, files in os.walk(INPUT_ROOT):
 def show_tree(root, max_depth=4, max_dirs=8):
     """Prints the folder layout, to see how a dataset is organised."""
     base = root.rstrip(os.sep).count(os.sep)
-    for folder, dirs, files in os.walk(root):
+    for folder, dirs, files in os.walk(root, followlinks=True):
         depth = folder.count(os.sep) - base
         if depth > max_depth:
             dirs[:] = []
