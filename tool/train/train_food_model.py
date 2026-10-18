@@ -247,29 +247,42 @@ def load_team_labels(path, source):
             add(image, dish, source, parts, COMPONENTS)
 
 
-for entry in sorted(os.listdir(INPUT_ROOT)):
-    root = os.path.join(INPUT_ROOT, entry)
-    if not os.path.isdir(root):
+def source_name(path):
+    """The dataset a path belongs to. Kaggle mounts a dataset either at
+    /kaggle/input/<name> or at /kaggle/input/datasets/<owner>/<name>."""
+    parts = os.path.relpath(path, INPUT_ROOT).split(os.sep)
+    if parts[0] == 'datasets' and len(parts) > 2:
+        return parts[2]
+    return parts[0]
+
+
+# Each folder is handled by the first rule that matches: the team's
+# labels.csv, a detection dataset (images/ + labels/), or class folders.
+handled = []   # roots already loaded, whose subfolders are skipped below
+for folder, dirs, files in os.walk(INPUT_ROOT):
+    dirs.sort()
+    if any(folder == root or folder.startswith(root + os.sep) for root in handled):
+        dirs[:] = []
         continue
-    labels = glob.glob(os.path.join(root, '**', 'labels.csv'), recursive=True)
-    detection = [d for d, _, _ in os.walk(root) if is_detection_root(d)]
-    if labels:
-        for path in labels:
-            load_team_labels(path, entry)
-    elif detection:
-        for d in detection:
-            load_vietfood67(d, entry)
+    if 'labels.csv' in files:
+        load_team_labels(os.path.join(folder, 'labels.csv'), source_name(folder))
+        handled.append(folder)
+        dirs[:] = []
+    elif is_detection_root(folder):
+        load_vietfood67(folder, source_name(folder))
+        handled.append(folder)
+        dirs[:] = []
     else:
-        for folder, _, files in os.walk(root):
-            images = [f for f in files if os.path.splitext(f)[1].lower() in IMAGE_EXT]
-            if not images:
-                continue
-            dish = dish_for_folder(os.path.basename(folder))
-            if dish is None:
-                skipped[f'{entry}: {os.path.basename(folder)}'] += len(images)
-                continue
-            for name in images:
-                add(os.path.join(folder, name), dish, entry)
+        images = [f for f in files if os.path.splitext(f)[1].lower() in IMAGE_EXT]
+        if not images:
+            continue
+        dish = dish_for_folder(os.path.basename(folder))
+        source = source_name(folder)
+        if dish is None:
+            skipped[f'{source}: {os.path.basename(folder)}'] += len(images)
+            continue
+        for name in sorted(images):
+            add(os.path.join(folder, name), dish, source)
 
 def show_tree(root, max_depth=4, max_dirs=8):
     """Prints the folder layout, to see how a dataset is organised."""
