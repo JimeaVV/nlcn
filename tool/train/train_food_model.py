@@ -271,6 +271,26 @@ for entry in sorted(os.listdir(INPUT_ROOT)):
             for name in images:
                 add(os.path.join(folder, name), dish, entry)
 
+def show_tree(root, max_depth=4, max_dirs=8):
+    """Prints the folder layout, to see how a dataset is organised."""
+    base = root.rstrip(os.sep).count(os.sep)
+    for folder, dirs, files in os.walk(root):
+        depth = folder.count(os.sep) - base
+        if depth > max_depth:
+            dirs[:] = []
+            continue
+        print('  ' * depth + os.path.basename(folder) + f'/  ({len(files)} files)')
+        dirs[:] = sorted(dirs)[:max_dirs]
+
+
+if not samples:
+    show_tree(INPUT_ROOT)
+    raise RuntimeError(
+        f'No photos found under {INPUT_ROOT}. If the datasets were still being '
+        'attached, wait until all of them show in the Input panel and run '
+        'again; otherwise send the folder tree above so the class names can '
+        'be mapped.')
+
 per_dish = Counter(s['dish'] for s in samples)
 print(f'{len(samples)} photos from', dict(Counter(s['source'] for s in samples)))
 print('Dishes without photos (shoot these):',
@@ -364,7 +384,7 @@ def make_dataset(items, training):
     dish, comp = zip(*(targets(s) for s in items)) if items else ((), ())
     ds = tf.data.Dataset.from_tensor_slices(
         (paths, np.array(dish, np.int32), np.array(comp, np.float32)))
-    if training:
+    if training and items:
         ds = ds.shuffle(len(items), seed=SEED, reshuffle_each_iteration=True)
 
     def load(path, dish, comp):
