@@ -177,16 +177,54 @@ def vf_resolve(dish, names):
 
 # %%
 import csv
+import hashlib
 import random
+
+from PIL import Image
 from collections import Counter, defaultdict
 
-IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.bmp'}  # what TensorFlow decodes
+IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.bmp', '.webp'}
+# TensorFlow cannot decode WebP, so those photos are converted to JPEG here.
+CONVERTED_DIR = os.environ.get('CONVERTED_DIR', '/tmp/converted')
+# Folder names that hold photos but say nothing about the dish.
+GENERIC_FOLDERS = {'images', 'image', 'imgs', 'img', 'photos', 'pictures',
+                   'data', 'dataset', 'train', 'training', 'test', 'testing',
+                   'val', 'valid', 'validation'}
+
+
+def class_folder(folder):
+    """The nearest folder name above the photos that is not generic, e.g.
+    'goi_cuon' for 20FoodVN/goi_cuon/images/1.jpg."""
+    for name in reversed(os.path.relpath(folder, INPUT_ROOT).split(os.sep)):
+        if normalize(name) not in GENERIC_FOLDERS:
+            return name
+    return os.path.basename(folder)
+
+
+def readable(path):
+    """[path], or a JPEG copy of it when TensorFlow cannot read the format."""
+    if not path.lower().endswith('.webp'):
+        return path
+    os.makedirs(CONVERTED_DIR, exist_ok=True)
+    digest = hashlib.md5(path.encode('utf-8')).hexdigest()
+    target = os.path.join(CONVERTED_DIR, f'{digest}.jpg')
+    if not os.path.exists(target):
+        try:
+            with Image.open(path) as im:
+                im.convert('RGB').save(target, quality=92)
+        except Exception:
+            return None
+    return target
 random.seed(SEED)
 samples = []   # dicts: path, dish, present (set), observed (set), source
 skipped = Counter()
 
 
 def add(path, dish, source, present=(), observed=()):
+    path = readable(path)
+    if path is None:
+        skipped['unreadable'] += 1
+        return
     samples.append({'path': path, 'dish': dish, 'source': source,
                     'present': set(present), 'observed': set(observed)})
 
@@ -280,10 +318,11 @@ for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
         images = [f for f in files if os.path.splitext(f)[1].lower() in IMAGE_EXT]
         if not images:
             continue
-        dish = dish_for_folder(os.path.basename(folder))
+        name = class_folder(folder)
+        dish = dish_for_folder(name)
         source = source_name(folder)
         if dish is None:
-            skipped[f'{source}: {os.path.basename(folder)}'] += len(images)
+            skipped[f'{source}: {name}'] += len(images)
             continue
         for name in sorted(images):
             add(os.path.join(folder, name), dish, source)
