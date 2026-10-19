@@ -52,6 +52,19 @@ android {
             signingConfig = signingConfigs.getByName(if (hasReleaseKey) "release" else "debug")
         }
     }
+
+    packaging {
+        jniLibs {
+            // The model runs on the CPU; tflite_flutter opens LiteRT's GPU
+            // delegate library only when a GpuDelegate is created, which the
+            // app never does. It is 2.5 MB per CPU type.
+            excludes += "**/libtensorflowlite_gpu_jni.so"
+            // Compress native libraries inside the APK: the file people
+            // download and share shrinks by about a third, and Android
+            // unpacks them once at install.
+            useLegacyPackaging = true
+        }
+    }
 }
 
 kotlin {

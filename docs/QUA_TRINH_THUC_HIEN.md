@@ -1166,6 +1166,31 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - APK build được, shader được biên dịch và đóng gói vào APK.
   - Chưa xem hiệu ứng trên điện thoại thật.
 
+### 2026-10-20 · Giảm dung lượng APK từ 32,8 MB xuống 17,2 MB
+- **Đo các file lớn trong APK arm64:**
+
+  | File | Dung lượng |
+  |---|---|
+  | `libflutter.so` | 11,6 MB |
+  | `libapp.so` | 8,3 MB |
+  | `food_v1.tflite` | 6,2 MB |
+  | `libtensorflowlite_jni.so` (LiteRT) | 4,3 MB |
+  | `libtensorflowlite_gpu_jni.so` | 2,5 MB |
+
+  Các thư viện native được lưu không nén.
+- **Cách sửa** (`android/app/build.gradle.kts`):
+  - **Bỏ thư viện GPU của LiteRT.** App chạy model trên CPU. Gói
+    `tflite_flutter` chỉ mở thư viện này khi tạo `GpuDelegate`, mà app không
+    bao giờ tạo.
+  - **Nén thư viện native trong APK** (`useLegacyPackaging`). File APK để
+    tải và gửi nhỏ hơn; Android giải nén một lần khi cài. Đổi lại, app chiếm
+    nhiều chỗ hơn một chút sau khi cài.
+- **Kết quả:** APK arm64 giảm từ 32,8 MB xuống 17,2 MB, vẫn ký đúng khóa phát
+  hành. Giờ gửi được qua Zalo hay Telegram.
+- **Còn giảm thêm được:** lượng tử hóa model sang int8 (khoảng 6,2 xuống
+  3 MB). Việc này cần xuất lại từ checkpoint và đo lại độ chính xác, nên làm
+  sau khi chọn được model thắng.
+
 ---
 
 ## 3. Việc còn tồn đọng
