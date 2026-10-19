@@ -60,13 +60,17 @@ class ScanPlate {
     VnDish dish,
     FoodRecognition recognition,
   ) {
-    final seen = recognition.components;
+    // Without trusted component outputs the plate follows the recipe, as it
+    // does when no model is bundled.
+    final seen = recognition.knowsComponentsOf(dish.code)
+        ? recognition.components
+        : const <String, double>{};
     final items = <PlateItem>[];
     for (final part in dish.parts) {
       final component = data.components[part.component]!;
       final score = seen[component.code];
       final included = component.isBase ||
-          recognition.isEmpty ||
+          seen.isEmpty ||
           (score ?? 0) >= recognition.thresholds.checked;
       final inUnits = part.defaultUnits != null ||
           (part.defaultGrams == null && component.unitNameVi != null);

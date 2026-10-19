@@ -84,6 +84,28 @@ void main() {
       expect(parsed.thresholds.confidentDish, 0.4);
     });
 
+    test('reads which dishes the components can be trusted for', () {
+      ModelLabels parse(String card) => ModelLabels.parse(
+          dishesTxt: 'com_tam\npho_bo', componentsTxt: 'c', modelCard: card);
+      expect(
+          parse('## Thành phần\r\ncomponent_dishes: com_tam, com_phan\r\n')
+              .componentDishes,
+          {'com_tam', 'com_phan'});
+      expect(parse('- `component_dishes`: `com_tam`').componentDishes,
+          {'com_tam'});
+      expect(parse('component_dishes:\nthreshold_ask: 0.2').componentDishes,
+          isEmpty);
+      expect(parse('threshold_ask: 0.2').componentDishes, isEmpty,
+          reason: 'an older card trusts no dish');
+      final recognition = interpretOutputs([
+        Float32List.fromList([0.9, 0.1]),
+        Float32List.fromList([0.8]),
+      ], parse('component_dishes: com_tam'));
+      expect(recognition.knowsComponentsOf('com_tam'), isTrue);
+      expect(recognition.knowsComponentsOf('pho_bo'), isFalse);
+      expect(const FoodRecognition().knowsComponentsOf('pho_bo'), isTrue);
+    });
+
     test('rejects files the app could not map', () {
       expect(() => ModelLabels.parse(dishesTxt: '', componentsTxt: 'c'),
           throwsFormatException);

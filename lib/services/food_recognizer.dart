@@ -9,6 +9,7 @@ class FoodRecognition {
     this.dishes = const {},
     this.components = const {},
     this.thresholds = RecognitionThresholds.contract,
+    this.componentDishes,
   });
 
   static const empty = FoodRecognition();
@@ -21,6 +22,15 @@ class FoodRecognition {
 
   /// How the screen treats these probabilities; tuned per model.
   final RecognitionThresholds thresholds;
+
+  /// Dishes whose components the model learned well (MODEL_CARD.md
+  /// `component_dishes`). For any other dish the component outputs carry no
+  /// meaning, so they are ignored. Null trusts them for every dish.
+  final Set<String>? componentDishes;
+
+  /// Whether [components] can be used for a photo of [dish].
+  bool knowsComponentsOf(String dish) =>
+      componentDishes?.contains(dish) ?? true;
 
   bool get isEmpty => dishes.isEmpty && components.isEmpty;
 

@@ -820,6 +820,22 @@ results = {'experiment': EXPERIMENT, 'backbone': BACKBONE,
            'photos': {'train': len(train), 'val': len(val), 'test': len(test)},
            'params': int(model.count_params()),
            **thresholds}
+# Dishes whose components the model learned: enough validation photos with
+# component labels, and a good F1 on them. For every other dish the app
+# ignores the component outputs and ticks the recipe (contract §6): a phở
+# photo once got eggs and pork skin "seen" at over 60%, because no phở photo
+# had component labels.
+COMPONENT_MIN_PHOTOS, COMPONENT_MIN_F1 = 20, 0.7
+component_dishes = []
+if val_pred is not None:
+    for i, code in enumerate(DISHES):
+        rows = (val_pred[0] == i) & (val_pred[1][:, N_COMP:].sum(axis=1) > 0)
+        if (rows.sum() >= COMPONENT_MIN_PHOTOS and
+                component_f1(val_pred[1][rows], val_pred[3][rows],
+                             threshold) >= COMPONENT_MIN_F1):
+            component_dishes.append(code)
+results['component_dishes'] = component_dishes
+print('Components trusted for:', component_dishes or 'no dish')
 if val_pred is not None:
     # The backbones are compared on validation; test is reported only.
     results['val_dish_top1'] = float(
@@ -939,6 +955,7 @@ card = f"""# MODEL_CARD – food_v1
 threshold_checked: {thresholds['threshold_checked']}
 threshold_ask: {thresholds['threshold_ask']}
 threshold_confident_dish: {thresholds['threshold_confident_dish']}
+component_dishes: {', '.join(component_dishes)}
 
 ## Hạn chế
 - Tập test chưa có ảnh tự chụp: contract yêu cầu ít nhất 30%.

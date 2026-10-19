@@ -252,6 +252,22 @@ hamburger.
   chưa có trong app" và mở danh sách món cho người dùng chọn, không đoán bừa
   một món gần giống.
 
+**Món được tin phần thành phần** (từ v1.3, thêm sau khi thử thật): thẻ
+model có dòng `component_dishes: com_tam, com_phan, …`. Đó là các món mà
+phần thành phần đạt F1 từ 0,7 trở lên, đo trên ít nhất 20 ảnh val có nhãn
+thành phần.
+- Với món nằm trong danh sách: app dùng các ngưỡng ở trên.
+- Với món khác, hoặc thẻ model không có dòng này: app bỏ qua đầu ra thành
+  phần, tick các thành phần theo công thức món như khi chưa có model, và
+  không gợi ý thêm thành phần nào.
+- Thành phần nằm ngoài công thức món không bao giờ được tick sẵn. Nó chỉ
+  hiện ở dạng "Có thể" khi xác suất từ 0,6 trở lên.
+
+Vì sao cần: khi thử thật với một tô phở bò, model chắc trên 60% là có
+trứng, bì, chả trứng, nhưng lại bỏ tick thịt bò. Lý do là không ảnh phở
+nào có nhãn thành phần, nên với phở, đầu ra thành phần không mang ý nghĩa
+gì.
+
 **Cách ghi ngưỡng trong `MODEL_CARD.md`** (từ v1.1): mỗi ngưỡng một dòng
 dạng `khoá: giá trị`, giá trị trong khoảng 0–1. Thiếu dòng nào thì app dùng
 số mặc định ở trên.
@@ -259,6 +275,7 @@ số mặc định ở trên.
 threshold_checked: 0.6
 threshold_ask: 0.3
 threshold_confident_dish: 0.5
+component_dishes: com_tam, com_phan
 ```
 
 **App kiểm tra khi nạp model:**

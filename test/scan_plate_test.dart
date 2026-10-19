@@ -139,6 +139,23 @@ void main() {
       }
     });
 
+    test('components of a dish the model did not learn follow the recipe', () {
+      final plate = ScanPlate.forDish(
+        data,
+        comTam,
+        const FoodRecognition(
+          dishes: {'com_tam': 0.9},
+          components: {'suon_nuong': 0.1, 'dua_leo_ca_chua': 0.95},
+          componentDishes: {'pho_bo'},
+        ),
+      );
+      expect(plate.items.map((item) => item.component.code),
+          ['com', 'suon_nuong', 'bi', 'trung_op_la', '_base_com_tam'],
+          reason: 'no suggestions from outputs that mean nothing here');
+      expect(plate.items.every((item) => item.included), isTrue);
+      expect(plate.items.every((item) => item.confidence == null), isTrue);
+    });
+
     test('an added component starts at its usual portion in other dishes', () {
       final data = parseVnFoodData(
         componentsCsv: '$fixtureComponentsCsv'

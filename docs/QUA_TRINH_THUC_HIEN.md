@@ -1102,6 +1102,33 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   0,6 cho thành phần ngoài công thức. Đã build lại APK, ký đúng khóa phát
   hành.
 
+### 2026-10-19 · Chỉ tin phần thành phần ở món model đã học
+- **Thử lại tô phở** sau bản sửa trước:
+  - Đoán món: phở bò 99%.
+  - Thịt bò lại bị bỏ tick, nên tổng chỉ còn 335 kcal và 11,5 g protein.
+  - Model vẫn chắc trên 60% là có chả trứng, trứng, chả lụa, rau luộc, mỡ
+    hành.
+  - Kết luận: với phở, đầu ra thành phần không mang ý nghĩa gì, vì không
+    ảnh phở nào có nhãn thành phần. Chỉnh ngưỡng cũng không sửa được.
+- **Cách làm (contract v1.3, phần bổ sung):**
+  - `MODEL_CARD.md` có thêm dòng `component_dishes: …`, liệt kê các món
+    được tin phần thành phần.
+  - Notebook tự tính danh sách này trên tập val. Món được chọn phải có ít
+    nhất 20 ảnh có nhãn thành phần, và F1 thành phần đạt từ 0,7 trở lên.
+    Danh sách được ghi vào thẻ model và `results.json`.
+  - App chỉ dùng đầu ra thành phần cho các món trong danh sách. Món khác
+    thì tick theo công thức món (như khi chưa có model) và không gợi ý
+    thêm. Thẻ model không có dòng này thì không tin món nào.
+  - Model MobileNetV3 đang đi kèm app có thẻ cũ, chưa có dòng này. Vì vậy
+    app chỉ dùng model để đoán món; thành phần đi theo công thức. Tô phở
+    giờ ra bánh phở, thịt bò, rau thơm, nước dùng.
+- **Kiểm thử:**
+  - 153 test pass. Có thêm test đọc `component_dishes` (cả dạng có gạch đầu
+    dòng, dấu `` ` `` và CRLF) và test "món chưa học thì theo công thức".
+  - Chạy notebook trên dữ liệu giả, nới giới hạn: danh sách ra đúng hai món
+    có nhãn thành phần (cơm tấm, cơm phần).
+  - Đã build lại APK.
+
 ---
 
 ## 3. Việc còn tồn đọng

@@ -14,11 +14,14 @@ class ModelLabels {
     required this.dishes,
     required this.components,
     this.thresholds = RecognitionThresholds.contract,
+    this.componentDishes,
   });
 
   /// `dishes.txt` and `components.txt` hold one code per line in output
   /// order; `MODEL_CARD.md` may override the thresholds with lines such as
-  /// `threshold_checked: 0.55`.
+  /// `threshold_checked: 0.55`, and lists the dishes whose components the
+  /// model learned in `component_dishes: com_tam, com_phan`. A card without
+  /// that line trusts the components of no dish.
   factory ModelLabels.parse({
     required String dishesTxt,
     required String componentsTxt,
@@ -35,12 +38,27 @@ class ModelLabels {
       dishes: dishes,
       components: components,
       thresholds: _thresholds(modelCard),
+      componentDishes: _componentDishes(modelCard),
     );
   }
 
   final List<String> dishes;
   final List<String> components;
   final RecognitionThresholds thresholds;
+
+  /// See [FoodRecognition.componentDishes].
+  final Set<String>? componentDishes;
+
+  static Set<String> _componentDishes(String modelCard) {
+    final match = RegExp(r'^\s*(?:[-*]\s*)?`?component_dishes`?\s*:(.*)$',
+            multiLine: true)
+        .firstMatch(modelCard);
+    if (match == null) return const {};
+    return {
+      for (final code in match.group(1)!.split(RegExp(r'[,\s`]+')))
+        if (code.isNotEmpty) code,
+    };
+  }
 
   static List<String> _codes(String text, String file) {
     final codes = [
@@ -142,5 +160,6 @@ FoodRecognition interpretOutputs(
         labels.components[i]: probability(componentOut[i]),
     },
     thresholds: labels.thresholds,
+    componentDishes: labels.componentDishes,
   );
 }
