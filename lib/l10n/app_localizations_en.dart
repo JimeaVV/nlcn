@@ -1127,4 +1127,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scanNotInApp =>
       'This dish may not be in the app yet. Pick the closest dish, or log it by hand in the diary.';
+
+  @override
+  String get scanRecognizing => 'Recognizing the dish…';
+
+  @override
+  String get scanPortion => 'Whole-dish portion';
+
+  @override
+  String scanSuggestions(int count) {
+    return 'Might also be there ($count)';
+  }
+
+  @override
+  String scanSuggestionsChosen(int count, int chosen) {
+    return 'Might also be there ($count) · $chosen chosen';
+  }
+
+  @override
+  String scanMacroGrams(String protein, String carbs, String fat) {
+    return 'Protein $protein g · Carbs $carbs g · Fat $fat g';
+  }
 }

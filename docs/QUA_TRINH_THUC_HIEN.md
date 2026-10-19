@@ -1129,6 +1129,43 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     có nhãn thành phần (cơm tấm, cơm phần).
   - Đã build lại APK.
 
+### 2026-10-19 · Làm lại màn kết quả quét và thêm hiệu ứng
+- **Vấn đề khi thử thật:**
+  - Tổng calo và nút "Ghi vào nhật ký" nằm tận cuối danh sách, nên phải cuộn
+    xuống mới thấy tổng thay đổi.
+  - 6 dòng "Có thể có" chiếm gần hết màn hình.
+  - Muốn chỉnh một tô lớn hơn thì phải bấm ± cho từng thành phần.
+- **Màn kết quả quét:**
+  - **Thanh tổng cố định ở đáy:**
+    - tổng kcal và protein, số chạy dần tới giá trị mới;
+    - dòng gram đạm / tinh bột / béo;
+    - một thanh màu chia calo theo đạm, tinh bột, béo;
+    - chọn bữa và nút ghi.
+  - **Khẩu phần cả món:** các nút ×½, ×1, ×1½, ×2 nhân mọi thành phần cùng
+    lúc. Thành phần người dùng đã chỉnh vẫn giữ đúng tỉ lệ. Thành phần thêm
+    sau cũng được nhân theo.
+  - **Gợi ý ngoài công thức được gom vào mục thu gọn** "Có thể có thêm (n)",
+    kèm số món đã chọn. Thành phần trong công thức vẫn hiện như cũ, kể cả
+    dòng "Có thể có".
+- **Hiệu ứng:**
+  - Trong lúc model nhận diện, một vạch neon quét dọc ảnh. Hiệu ứng viết
+    bằng fragment shader của Flutter (`shaders/scan_sweep.frag`) và lấy màu
+    theo giao diện đang dùng.
+    - Máy nào không nạp được shader thì dùng một dải màu chuyển thay thế.
+    - Điện thoại bật "giảm chuyển động" thì vạch đứng yên.
+  - Thẻ món và thẻ thành phần trượt lên lần lượt khi hiện ra.
+  - Rung nhẹ khi:
+    - bấm chụp;
+    - nhận diện xong;
+    - chọn món, tick thành phần, đổi khẩu phần;
+    - ghi xong.
+- **Kiểm thử:**
+  - 157 test pass. Có thêm test mục gợi ý thu gọn, khẩu phần ×2 (tổng gấp
+    đôi, rau thêm sau cũng gấp đôi), và test hiệu ứng quét đứng yên khi tắt
+    chuyển động.
+  - APK build được, shader được biên dịch và đóng gói vào APK.
+  - Chưa xem hiệu ứng trên điện thoại thật.
+
 ---
 
 ## 3. Việc còn tồn đọng

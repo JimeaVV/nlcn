@@ -13,6 +13,7 @@ class PlateItem {
     required this.amount,
     this.confidence,
     this.uncertain = false,
+    this.suggested = false,
   });
 
   final VnComponent component;
@@ -27,6 +28,10 @@ class PlateItem {
 
   /// Shown as "maybe" because the model was not sure.
   bool uncertain;
+
+  /// Outside the dish's recipe, offered because the model saw it; the screen
+  /// lists these apart from the dish.
+  final bool suggested;
 
   double get step => inUnits ? 0.5 : 10;
 
@@ -105,6 +110,7 @@ class ScanPlate {
         amount: portion.amount,
         confidence: entry.value,
         uncertain: true,
+        suggested: true,
       ));
     }
     return ScanPlate._(data, dish, items);
@@ -113,6 +119,20 @@ class ScanPlate {
   final VnFoodData _data;
   final VnDish dish;
   final List<PlateItem> items;
+
+  /// Servings of the whole dish, 1 for the usual portion.
+  double get portion => _portion;
+  double _portion = 1;
+
+  /// Scales every component at once, e.g. 1.5 for a large bowl; amounts the
+  /// user changed keep their share.
+  set portion(double value) {
+    if (value <= 0 || value == _portion) return;
+    for (final item in items) {
+      item.amount = item.amount * value / _portion;
+    }
+    _portion = value;
+  }
 
   Iterable<PlateItem> get selected => items.where((item) => item.included);
 
@@ -132,15 +152,24 @@ class ScanPlate {
       .where((item) => item.hasNutrition)
       .fold(0, (sum, item) => sum + item.protein);
 
+  double get carbs => selected
+      .where((item) => item.hasNutrition)
+      .fold(0, (sum, item) => sum + item.carbs);
+
+  double get fat => selected
+      .where((item) => item.hasNutrition)
+      .fold(0, (sum, item) => sum + item.fat);
+
   /// Adds a component the user found on the plate; the model did not see it.
+  /// It starts at its usual portion, scaled like the rest of the dish.
   void add(VnComponent component) {
     if (items.any((item) => item.component.code == component.code)) return;
-    final portion = typicalPortion(_data, component);
+    final typical = typicalPortion(_data, component);
     items.add(PlateItem(
       component: component,
       included: true,
-      inUnits: portion.inUnits,
-      amount: portion.amount,
+      inUnits: typical.inUnits,
+      amount: typical.amount * _portion,
     ));
   }
 

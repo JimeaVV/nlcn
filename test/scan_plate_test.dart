@@ -202,6 +202,23 @@ void main() {
           (inUnits: false, amount: 100.0));
     });
 
+    test('the whole-dish portion scales every component', () {
+      final plate = ScanPlate.forDish(data, comTam, FoodRecognition.empty);
+      final rice = plate.items.first;
+      rice.amount = 250; // the user's own change keeps its share
+      plate.portion = 1.5;
+      expect(rice.amount, 375);
+      expect(plate.items[1].amount, 1.5, reason: 'one chop becomes 1.5');
+      plate.portion = 0.5;
+      expect(rice.amount, 125);
+      plate.add(data.components['tom']!);
+      expect(plate.items.last.amount, 0.5,
+          reason: 'one shrimp at half a serving');
+      plate.portion = 0;
+      expect(plate.portion, 0.5, reason: 'not a portion');
+      expect(plate.carbs, greaterThan(0));
+    });
+
     test('amounts follow units, and unknown unit weights block logging', () {
       final plate = ScanPlate.forDish(data, comTam, FoodRecognition.empty);
       final egg = plate.items

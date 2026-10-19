@@ -758,5 +758,40 @@
   "overloadConfirmIncrease": "Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.",
   "overloadBodyweightReps": "Bạn đã hoàn thành 3×12 không cần tạ. Buổi sau thêm 2 lần mỗi hiệp, hoặc chuyển sang biến thể khó hơn.",
   "overloadBodyweightDecrease": "Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.",
-  "scanNotInApp": "Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký."
+  "scanNotInApp": "Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.",
+  "scanRecognizing": "Đang nhận diện món…",
+  "scanPortion": "Khẩu phần cả món",
+  "scanSuggestions": "Có thể có thêm ({count})",
+  "@scanSuggestions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanSuggestionsChosen": "Có thể có thêm ({count}) · đã chọn {chosen}",
+  "@scanSuggestionsChosen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "chosen": {
+        "type": "int"
+      }
+    }
+  },
+  "scanMacroGrams": "Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g",
+  "@scanMacroGrams": {
+    "placeholders": {
+      "protein": {
+        "type": "String"
+      },
+      "carbs": {
+        "type": "String"
+      },
+      "fat": {
+        "type": "String"
+      }
+    }
+  }
 }

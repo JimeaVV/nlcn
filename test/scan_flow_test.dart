@@ -147,6 +147,39 @@ void main() {
     expect(popped, isTrue);
   });
 
+  testWidgets('suggestions stay folded and the portion scales the dish',
+      (tester) async {
+    _tall(tester);
+    await _openResult(
+      tester,
+      recognizer: _Recognizer(const FoodRecognition(
+        dishes: {'com_tam': 0.9},
+        components: {'com': 0.97, 'suon_nuong': 0.91, 'dua_leo_ca_chua': 0.9},
+      )),
+      database: _Database(),
+    );
+    // Rice 260 + chop 250 + sauce 12; bì and egg were not seen.
+    expect(find.text('Tổng: 522 kcal • 25,6 g protein'), findsOneWidget);
+    expect(find.text('Có thể có thêm (1)'), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('component-dua_leo_ca_chua')), findsNothing,
+        reason: 'outside the recipe: folded until asked for');
+
+    await tester.tap(find.byKey(const ValueKey('portion-2.0')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tổng: 1.044 kcal • 51,2 g protein'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('scan-suggestions')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(
+        of: find.byKey(const ValueKey('component-dua_leo_ca_chua')),
+        matching: find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+    expect(find.text('Có thể có thêm (1) · đã chọn 1'), findsOneWidget);
+    // The salad doubled with the dish: 200 g, 32 kcal.
+    expect(find.text('Tổng: 1.076 kcal • 52,6 g protein'), findsOneWidget);
+  });
+
   testWidgets(
       'without a model the user picks the dish and missing data '
       'blocks logging until unticked', (tester) async {

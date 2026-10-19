@@ -1118,4 +1118,25 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get scanNotInApp =>
       'Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.';
+
+  @override
+  String get scanRecognizing => 'Đang nhận diện món…';
+
+  @override
+  String get scanPortion => 'Khẩu phần cả món';
+
+  @override
+  String scanSuggestions(int count) {
+    return 'Có thể có thêm ($count)';
+  }
+
+  @override
+  String scanSuggestionsChosen(int count, int chosen) {
+    return 'Có thể có thêm ($count) · đã chọn $chosen';
+  }
+
+  @override
+  String scanMacroGrams(String protein, String carbs, String fat) {
+    return 'Đạm $protein g · Tinh bột $carbs g · Béo $fat g';
+  }
 }

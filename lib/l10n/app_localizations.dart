@@ -2061,6 +2061,36 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.'**
   String get scanNotInApp;
+
+  /// No description provided for @scanRecognizing.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang nhận diện món…'**
+  String get scanRecognizing;
+
+  /// No description provided for @scanPortion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khẩu phần cả món'**
+  String get scanPortion;
+
+  /// No description provided for @scanSuggestions.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có thể có thêm ({count})'**
+  String scanSuggestions(int count);
+
+  /// No description provided for @scanSuggestionsChosen.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có thể có thêm ({count}) · đã chọn {chosen}'**
+  String scanSuggestionsChosen(int count, int chosen);
+
+  /// No description provided for @scanMacroGrams.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g'**
+  String scanMacroGrams(String protein, String carbs, String fat);
 }
 
 class _AppLocalizationsDelegate

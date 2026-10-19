@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../core/cyber_theme.dart';
@@ -158,6 +159,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     String path;
     try {
       path = await camera.takePicture();
+      HapticFeedback.mediumImpact();
     } catch (_) {
       if (mounted) {
         setState(() => _busy = false);
