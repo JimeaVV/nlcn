@@ -818,6 +818,58 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Tuần 5–7 làm YOLO để đếm số lượng và gợi ý khẩu phần.
   - Chậm tiến độ thì bỏ YOLO, chuyển vào *hướng phát triển*.
 
+### 2026-10-19 · Contract v1.3: thêm 12 món và lớp "khác"
+- **Vấn đề:** chụp món app chưa có thì model vẫn buộc phải đoán một trong
+  40 món, và thường đoán sai mà rất tự tin.
+- **Thêm 12 món phổ biến có sẵn ảnh trong 4 bộ công khai** (tổng 52 món):
+  bánh chưng, bánh khọt, bánh bèo, cao lầu, bún đậu, bún mắm, cháo lòng, cá
+  kho, canh chua, trứng vịt lộn, chè, nước mía.
+  - Lấy thẳng từ bảng của Viện Dinh dưỡng: bánh chưng (15006, 1 miếng 150 g),
+    cháo lòng (15042), trứng vịt lộn (9010, 1 quả 60 g), nước mía (14040,
+    1 ly 300 g).
+  - Tính theo công thức trong `tool/vn_food_recipes.py`, ghi rõ là ước
+    lượng (kcal/100 g): bánh khọt 248, bánh bèo 125, nước sốt cao lầu 196,
+    phần nền bún đậu 213, nước bún mắm 50,5, cá kho 188, canh chua 28,7,
+    chè 146.
+  - Gắn tag bữa ăn và mục tiêu trong `meal_plan.csv` cho các món mới.
+- **Lớp `khac` (món app chưa có):**
+  - Là dòng cuối của `dishes.txt`, không có dinh dưỡng.
+  - App không bao giờ đưa `khac` ra làm gợi ý. Khi xác suất của nó từ
+    `threshold_confident_dish` trở lên, app không tự chọn món và báo "Có vẻ
+    món này chưa có trong app".
+  - Notebook gom ảnh của các lớp app không có (gỏi ngó sen, lẩu, hamburger,
+    bún chả cá…) vào `khac`, tối đa 3.000 ảnh để lớp này không lấn các lớp
+    khác. Đặt `USE_OTHER = False` để bỏ.
+  - Với VietFood67, ảnh có khung heo quay, mực, ốc, cua, lòng heo, chả
+    được tính như món mặn. Vì vậy ảnh cơm kèm các món đó thành cơm phần,
+    không bị đưa vào `khac`.
+- **Thực đơn chỉnh lại sau khi thêm món:** thêm món làm chất lượng giữ cân
+  tụt còn 107/150. Đã sửa:
+  - lập các bữa ăn nguyên món (sáng, phụ) trước; bữa trưa và tối dùng cơm
+    phần để bù phần calo còn thiếu hoặc dư;
+  - chia protein theo bữa: sáng 20%, phụ 5%, phần còn lại chia đều trưa và
+    tối;
+  - các món nguyên có điểm gần bằng nhau (lệch dưới 12% calo của bữa) thì
+    bốc ngẫu nhiên, nên thực đơn đa dạng hơn;
+  - mỗi lần chỉ thử 4 món mặn ngẫu nhiên, để cây tìm kiếm không phình ra.
+- **Kết quả đo lại** (`dart run tool/bench_meal_planner.dart`, 150 hồ sơ mỗi
+  mục tiêu):
+
+  | Mục tiêu | Đạt mục tiêu | Số nút: chỉ cận protein | Số nút: thêm cận calo | Giảm | Chất lượng giống nhau |
+  |---|---|---|---|---|---|
+  | Giảm cân | 100/150 | 18.315 | 12.602 | 1,5 lần | 150/150 |
+  | Giữ cân | 150/150 | 6.906 | 3.370 | 2,0 lần | 150/150 |
+  | Tăng cân | 150/150 | 7.878 | 3.965 | 2,0 lần | 150/150 |
+
+  - Lập một thực đơn cả ngày mất khoảng 0,7–1,2 ms.
+- **Kiểm thử:**
+  - 149 test pass. Test model thật bị bỏ qua vì chưa có model đi kèm app.
+  - Chạy thử notebook trên dữ liệu giả, có một lớp app không có (gỏi ngó
+    sen). Kết quả:
+    - 12 ảnh của lớp đó vào `khac`;
+    - `dishes.txt` có 53 dòng (52 món + `khac`);
+    - `results.json` có độ chính xác riêng của `khac`.
+
 ---
 
 ## 3. Việc còn tồn đọng

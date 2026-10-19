@@ -35,6 +35,10 @@ BATCH = 16 if QUICK_TEST else 64
 EPOCHS_HEAD = 1 if QUICK_TEST else 5    # backbone frozen
 EPOCHS_FINE = 1 if QUICK_TEST else 15   # top of the backbone unfrozen
 MAX_PER_DISH = 12 if QUICK_TEST else 1500  # caps the largest classes
+# Photos of food the app does not know become the extra class "khac", so the
+# model can say "not in the app" instead of forcing a close match.
+USE_OTHER = True
+MAX_OTHER = 24 if QUICK_TEST else 3000
 UNFREEZE_FRACTION = 0.4                 # share of backbone layers fine-tuned
 # 30VNFoods and VietFood67 have one "Phở" class for both beef and chicken.
 # 'skip' leaves those photos out; 'pho_bo' counts them as beef phở.
@@ -48,7 +52,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # which this notebook writes at the end.
 
 # %%
-CONTRACT_VERSION = '1.2'
+CONTRACT_VERSION = '1.3'
 DISHES = [
     'com_tam', 'com_phan', 'com_ga', 'com_chien', 'pho_bo', 'pho_ga',
     'bun_bo_hue', 'bun_cha', 'bun_rieu', 'bun_thit_nuong', 'hu_tieu',
@@ -57,16 +61,20 @@ DISHES = [
     'banh_hoi', 'thit_kho_trung', 'banh_can', 'ca_ri', 'bap_nuong',
     'banh_trang_tron', 'hoanh_thanh_nuoc', 'pha_lau', 'tau_hu', 'bot_chien',
     'ga_nuong', 'banh_u', 'banh_tet', 'goi_ga', 'canh_khoai_mo',
-    'canh_kho_qua', 'banh_mi_chao',
+    'canh_kho_qua', 'banh_mi_chao', 'banh_chung', 'banh_khot', 'banh_beo',
+    'cao_lau', 'bun_dau', 'bun_mam', 'chao_long', 'ca_kho', 'canh_chua',
+    'trung_vit_lon', 'che', 'nuoc_mia',
 ]
+OTHER = 'khac'   # last dish output; not an app dish (contract §6)
 COMPONENTS = [
     'com', 'bun', 'banh_pho', 'mi', 'banh_mi_o', 'xoi_nep', 'suon_nuong',
     'thit_nuong', 'thit_kho', 'bi', 'cha_trung', 'trung_op_la', 'trung_kho',
     'ga', 'ga_chien', 'bo', 'ca', 'tom', 'dau_hu', 'cha_lua', 'rau_song',
     'rau_nau', 'do_chua', 'dua_leo_ca_chua', 'mo_hanh',
 ]
-assert len(DISHES) == 40 and len(COMPONENTS) == 25
-DISH_INDEX = {code: i for i, code in enumerate(DISHES)}
+assert len(DISHES) == 52 and len(COMPONENTS) == 25
+OUTPUTS = DISHES + ([OTHER] if USE_OTHER else [])
+DISH_INDEX = {code: i for i, code in enumerate(OUTPUTS)}
 COMP_INDEX = {code: i for i, code in enumerate(COMPONENTS)}
 
 # %% [markdown]
@@ -86,15 +94,22 @@ def normalize(name):
 
 
 # Classification datasets: folder name (normalized) → dish code. A name that
-# already is a dish code maps to itself; anything not listed is skipped.
+# already is a dish code maps to itself. Anything else is food the app does
+# not know and becomes "khac", except the names mapped to None here.
 CLASS_ALIASES = {
     # 30VNFoods
     'xoi_xeo': 'xoi',
     'hu_tieu': 'hu_tieu',
+    'bun_dau_mam_tom': 'bun_dau',
+    'ca_kho_to': 'ca_kho',
+    # Beef and chicken phở in one class: an app dish, but which one is unknown.
     'pho': None if MIXED_PHO == 'skip' else MIXED_PHO,
     # 20FoodVN
     'banh_canh_ghe': 'banh_canh',
     'hu_tieu_nam_vang': 'hu_tieu',
+    'ca_loc_kho': 'ca_kho',
+    'che_thai': 'che',
+    'che_buoi': 'che',
 }
 
 
@@ -102,7 +117,9 @@ def dish_for_folder(folder):
     key = normalize(folder)
     if key in CLASS_ALIASES:
         return CLASS_ALIASES[key]
-    return key if key in DISH_INDEX else None
+    if key in DISH_INDEX and key != OTHER:
+        return key
+    return OTHER if USE_OTHER else None
 
 
 # VietFood67: class id → name (its data.yaml, 68 classes).
@@ -129,9 +146,14 @@ VF_DISH = {
     'Bun cha': 'bun_cha', 'Bun rieu': 'bun_rieu', 'Com tam': 'com_tam',
     'Goi cuon': 'goi_cuon', 'Hu tieu': 'hu_tieu', 'Mi Quang': 'mi_quang',
     'Xoi': 'xoi', 'Com chien Duong Chau': 'com_chien',
-    'Com chien ga': 'com_chien',
+    'Com chien ga': 'com_chien', 'Banh chung': 'banh_chung',
+    'Banh khot': 'banh_khot', 'Banh beo': 'banh_beo', 'Cao lau': 'cao_lau',
+    'Bun dau': 'bun_dau', 'Bun mam': 'bun_mam', 'Chao long': 'chao_long',
     'Pho': None if MIXED_PHO == 'skip' else MIXED_PHO,
 }
+# Whole dishes VietFood67 has but the app does not: photos of them are "khac".
+VF_OTHER = {'Lau', 'Bun cha ca', 'Nom hoa chuoi', 'Nui xao bo', 'Sup cua',
+            'Hamburger', 'Khoai tay chien', 'Salad'}
 # Boxes that name one component without ambiguity.
 VF_COMPONENT = {
     'Com': 'com', 'Bun': 'bun', 'Mi': 'mi', 'Ca': 'ca', 'Tom': 'tom',
@@ -144,7 +166,8 @@ VF_COMPONENT = {
 # unknown (masked) for its photos, so their absence is not learned as "no".
 VF_OBSERVED = set(VF_COMPONENT.values()) | {'banh_mi_o'}
 PROTEIN_BOXES = {'Ca', 'Tom', 'Dau hu', 'Thit kho', 'Thit nuong', 'Thit bo',
-                 'Thit ga', 'Trung', 'Thit heo'}
+                 'Thit ga', 'Trung', 'Thit heo', 'Heo quay', 'Muc', 'Oc',
+                 'Cua', 'Long heo', 'Cha'}
 
 
 def vf_resolve(dish, names):
@@ -262,6 +285,8 @@ def load_vietfood67(root, source):
             dish = dishes.pop()
         elif 'Com' in names and names & PROTEIN_BOXES:
             dish = 'com_phan'   # rice with mains and no dish box
+        elif USE_OTHER and names & VF_OTHER:
+            dish = OTHER        # a dish the app does not have
         else:
             skipped['vf67: no app dish'] += 1
             continue
@@ -351,6 +376,7 @@ per_dish = Counter(s['dish'] for s in samples)
 print(f'{len(samples)} photos from', dict(Counter(s['source'] for s in samples)))
 print('Dishes without photos (shoot these):',
       [d for d in DISHES if per_dish[d] == 0])
+print(f'"{OTHER}" (food the app does not know):', per_dish[OTHER])
 print('Fewest photos:', sorted(per_dish.items(), key=lambda kv: kv[1])[:8])
 print('Skipped:', skipped.most_common(12))
 
@@ -394,7 +420,7 @@ for s in samples:
 train, val, test = [], [], []
 for dish, items in sorted(by_dish.items()):
     random.Random(f'{SEED}-{dish}').shuffle(items)
-    items = items[:MAX_PER_DISH]
+    items = items[:MAX_OTHER if dish == OTHER else MAX_PER_DISH]
     n_test = max(1, round(len(items) * 0.15)) if len(items) >= 3 else 0
     n_val = max(1, round(len(items) * 0.15)) if len(items) >= 3 else 0
     test += items[:n_test]
@@ -422,7 +448,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 tf.random.set_seed(SEED)
-N_DISH, N_COMP = len(DISHES), len(COMPONENTS)
+N_DISH, N_COMP = len(OUTPUTS), len(COMPONENTS)
 
 
 def targets(s):
@@ -621,7 +647,7 @@ if test_pred is not None:
         float(component_f1(comp_true, comp_prob, threshold))
         if comp_true[:, N_COMP:].sum() > 0 else None)
     per_dish = {}
-    for i, code in enumerate(DISHES):
+    for i, code in enumerate(OUTPUTS):
         rows = dish_true == i
         if rows.any():
             per_dish[code] = round(float((top3[rows, 0] == i).mean()), 3)
@@ -662,7 +688,7 @@ keras_dish = model(sample, training=False)['dish'].numpy()
 assert np.abs(lite_dish - keras_dish).max() < 0.02, 'TFLite differs from Keras'
 
 with open(os.path.join(OUTPUT_DIR, 'dishes.txt'), 'w') as f:
-    f.write('\n'.join(DISHES) + '\n')
+    f.write('\n'.join(OUTPUTS) + '\n')
 with open(os.path.join(OUTPUT_DIR, 'components.txt'), 'w') as f:
     f.write('\n'.join(COMPONENTS) + '\n')
 
@@ -677,7 +703,7 @@ sources = Counter(s['source'] for s in train + val + test)
 card = f"""# MODEL_CARD – food_v1
 
 - Ngày train: {date.today().isoformat()}
-- Contract: {CONTRACT_VERSION} ({N_DISH} món, {N_COMP} thành phần)
+- Contract: {CONTRACT_VERSION} ({len(DISHES)} món{' + lớp khac' if USE_OTHER else ''}, {N_COMP} thành phần)
 - Kiến trúc: {BACKBONE}, thí nghiệm `{EXPERIMENT}`{' (CHẠY THỬ, KHÔNG DÙNG THẬT)' if QUICK_TEST else ''}
 - Dữ liệu: {len(train)} train / {len(val)} val / {len(test)} test
 - Nguồn ảnh: {', '.join(f'{k}: {v}' for k, v in sources.most_common())}
