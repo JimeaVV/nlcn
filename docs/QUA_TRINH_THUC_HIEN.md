@@ -905,6 +905,11 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Với JPEG, giải nén ở kích thước nhỏ (`draft`) vì hash chỉ cần 8×8.
   - Ảnh WebP chỉ đổi sang JPEG khi được giữ lại.
   - In ra số ảnh đã mở và thời gian.
+  - VietFood67 có 33.000 file nhãn. Bản cũ kiểm tra tới 4 lần xem ảnh có
+    tồn tại không cho mỗi nhãn. Giờ notebook liệt kê thư mục ảnh một lần,
+    còn file nhãn thì đọc song song.
+  - Log in một dòng khi bắt đầu đọc mỗi bộ ảnh, kèm số giây. Trước đây log
+    trống cho tới khi gom xong, nên không biết notebook đang chạy tới đâu.
   - Cách chia vẫn cố định theo seed. Thứ tự ảnh có đổi so với bản trước,
     nhưng lúc đó chưa có lần train thật nào nên không ảnh hưởng.
 - **Đã thử trên máy:** dữ liệu giả, 2 thiết bị ảo, chạy trọn tới bước xuất

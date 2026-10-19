@@ -207,7 +207,9 @@ import hashlib
 import random
 
 from PIL import Image
+import time
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 
 IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.bmp', '.webp'}
 # TensorFlow cannot decode WebP, so those photos are converted to JPEG here.
@@ -263,20 +265,34 @@ def load_vietfood67(root, source):
         for folder, _, names in os.walk(os.path.join(root, 'labels'),
                                         followlinks=True)
         for name in names if name.endswith('.txt'))
-    for label_path in label_paths:
-        rel = os.path.relpath(label_path, os.path.join(root, 'labels'))
-        stem = os.path.splitext(os.path.join(root, 'images', rel))[0]
-        image = next((stem + ext for ext in ('.jpg', '.jpeg', '.png', '.JPG')
-                      if os.path.exists(stem + ext)), None)
-        if image is None:
-            skipped['vf67: no image'] += 1
-            continue
+    # One listing of the images instead of a lookup per label: the datasets
+    # sit on a network disk, where every file check is slow.
+    images_root = os.path.join(root, 'images')
+    image_files = {}
+    for folder, _, names in os.walk(images_root, followlinks=True):
+        for name in sorted(names):
+            stem, ext = os.path.splitext(name)
+            if ext.lower() in IMAGE_EXT:
+                rel = os.path.relpath(os.path.join(folder, stem), images_root)
+                image_files.setdefault(rel, os.path.join(folder, name))
+
+    def box_names(label_path):
         names = set()
         with open(label_path) as f:
             for line in f:
                 parts = line.split()
                 if parts and parts[0].isdigit() and int(parts[0]) < len(VF_NAMES):
                     names.add(VF_NAMES[int(parts[0])])
+        return names
+
+    with ThreadPoolExecutor(32) as pool:
+        all_names = list(pool.map(box_names, label_paths))
+    for label_path, names in zip(label_paths, all_names):
+        rel = os.path.relpath(label_path, os.path.join(root, 'labels'))
+        image = image_files.get(os.path.splitext(rel)[0])
+        if image is None:
+            skipped['vf67: no image'] += 1
+            continue
         dishes = {VF_DISH[n] for n in names if n in VF_DISH} - {None}
         if len(dishes) > 1:
             skipped['vf67: several dishes'] += 1
@@ -325,6 +341,18 @@ def source_name(path):
 # Each folder is handled by the first rule that matches: the team's
 # labels.csv, a detection dataset (images/ + labels/), or class folders.
 handled = []   # roots already loaded, whose subfolders are skipped below
+announced = set()
+collect_started = time.time()
+
+
+def announce(source, folder):
+    """One log line per dataset, so a long run shows where it is."""
+    if source not in announced:
+        announced.add(source)
+        print(f'[{time.time() - collect_started:4.0f} s] reading {source} '
+              f'({folder})', flush=True)
+
+
 # Kaggle may mount datasets as symlinks, which os.walk skips by default.
 for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
     dirs.sort()
@@ -332,10 +360,12 @@ for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
         dirs[:] = []
         continue
     if 'labels.csv' in files:
+        announce(source_name(folder), folder)
         load_team_labels(os.path.join(folder, 'labels.csv'), source_name(folder))
         handled.append(folder)
         dirs[:] = []
     elif is_detection_root(folder):
+        announce(source_name(folder), folder)
         load_vietfood67(folder, source_name(folder))
         handled.append(folder)
         dirs[:] = []
@@ -346,11 +376,16 @@ for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
         name = class_folder(folder)
         dish = dish_for_folder(name)
         source = source_name(folder)
+        announce(source, folder)
         if dish is None:
             skipped[f'{source}: {name}'] += len(images)
             continue
         for name in sorted(images):
             add(os.path.join(folder, name), dish, source)
+
+print(f'[{time.time() - collect_started:4.0f} s] found {len(samples)} photos',
+      flush=True)
+
 
 def show_tree(root, max_depth=4, max_dirs=8):
     """Prints the folder layout, to see how a dataset is organised."""
@@ -387,9 +422,6 @@ print('Skipped:', skipped.most_common(12))
 # an 8×8 average hash.
 
 # %%
-import time
-from concurrent.futures import ThreadPoolExecutor
-
 import numpy as np
 from PIL import Image
 
@@ -448,7 +480,7 @@ with ThreadPoolExecutor(32) as pool:
                     seen[h] = path
                     kept.append({**s, 'path': path})
 print(f'Opened {opened} of {len(samples)} photos in '
-      f'{time.time() - started:.0f} s')
+      f'{time.time() - started:.0f} s', flush=True)
 
 train, val, test = [], [], []
 for dish, items in sorted(by_dish.items()):
