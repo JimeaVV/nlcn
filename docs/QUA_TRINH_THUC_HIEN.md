@@ -946,6 +946,47 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   Chạy lại kiểu Kaggle cũng vẫn chạy bình thường. Chưa chạy trên Colab
   thật.
 
+### 2026-10-19 · So sánh 3 backbone để chọn model cho app
+- **Kết quả chạy thử trên Colab** (`QUICK_TEST`, 12 ảnh mỗi món):
+  - Chạy trọn từ đầu tới cuối, ghi đủ 9 file lên Drive.
+  - Ảnh: 408 train / 102 val / 102 test. Nguồn: VietFood67 244, VinaFood21
+    209, 30VNFoods 90, 20FoodVN 69.
+  - Chỉ còn 3 món không có ảnh: cơm gà, phở gà, cháo gà (phải tự chụp).
+  - Top-1 6,9%, F1 thành phần 0,44. Mới train 1 epoch nên các số này chỉ
+    cho thấy notebook chạy đúng, chưa nói gì về độ chính xác.
+- **Ba ứng viên** (cùng thí nghiệm `finetune`, cùng cách chia dữ liệu):
+  MobileNetV3-Large, EfficientNetB0, EfficientNetV2-B0. Cả ba đều nhẹ, chạy
+  được trên điện thoại. EfficientNetB0 là ứng viên mới thêm.
+- **Cách chọn** (`tool/train/compare_results.py`):
+  - Lấy model có val top-1 cao nhất. Tập test chỉ dùng để báo cáo, không
+    dùng để chọn.
+  - Nếu các model lệch nhau không quá 0,5 điểm % thì lấy model nhỏ hơn.
+  - Bản chạy cũ chưa ghi val thì script lấy val từ log train. Đây là epoch
+    tốt nhất của pha cuối, cũng là trọng số được giữ lại nhờ early
+    stopping.
+- **`results.json` ghi thêm:** val top-1, số tham số, dung lượng TFLite và
+  thời gian chạy 1 ảnh trên CPU của máy train (chỉ để so tương đối).
+- **Lỗi gặp khi thêm EfficientNetB0:** TFLite cho kết quả khác Keras.
+  - Lúc xuất, notebook dựng lại một bản sao model không có trọng số
+    ImageNet. Nhưng Keras chỉ thêm lớp chuẩn hóa ảnh đầu vào khi model được
+    dựng có trọng số ImageNet, nên bản sao thiếu lớp này.
+  - Đổi sang dựng bản sao từ config của chính model đã train. Vẫn lệch,
+    vì `set_weights` chép mean/variance của lớp Normalization nhưng không
+    áp dụng chúng.
+  - Gọi thêm `finalize_state()` thì bản sao khớp tuyệt đối với model gốc.
+    Notebook giờ kiểm tra bản sao khớp model gốc trước khi chuyển sang
+    TFLite.
+  - Lỗi này không ảnh hưởng MobileNetV3 hay EfficientNetV2-B0, vì hai model
+    này không có lớp Normalization.
+- **Đã thử trên máy** (dữ liệu giả, 2 thiết bị ảo): cả 3 backbone chạy trọn
+  tới bước xuất TFLite.
+
+  | Backbone | TFLite | CPU máy thử / ảnh |
+  |---|---|---|
+  | MobileNetV3 | 6,1 MB | 6,8 ms |
+  | EfficientNetB0 | 8,3 MB | 17,8 ms |
+  | EfficientNetV2-B0 | 12,0 MB | 21,6 ms |
+
 ---
 
 ## 3. Việc còn tồn đọng

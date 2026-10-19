@@ -39,7 +39,7 @@ import os
 
 QUICK_TEST = True          # True: a few hundred images, 1 epoch per phase.
 EXPERIMENT = 'finetune'    # 'scratch' | 'linear' | 'finetune' (report §3)
-BACKBONE = 'mobilenetv3'   # 'mobilenetv3' | 'efficientnetv2b0'
+BACKBONE = 'mobilenetv3'   # 'mobilenetv3' | 'efficientnetb0' | 'efficientnetv2b0'
 
 INPUT_ROOT = os.environ.get('INPUT_ROOT', '/kaggle/input')
 OUTPUT_DIR = os.environ.get('OUTPUT_DIR', '/kaggle/working')
@@ -118,8 +118,11 @@ if ON_COLAB:
     if SAVE_TO_DRIVE:
         from google.colab import drive
         drive.mount(os.path.join(COLAB_ROOT, 'drive'))
-        OUTPUT_DIR = os.path.join(COLAB_ROOT, 'drive', 'MyDrive',
-                                  'macrorunner_train')
+        # One folder per run, so the three backbones do not overwrite each
+        # other's results.
+        OUTPUT_DIR = os.path.join(
+            COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train',
+            f"{BACKBONE}_{EXPERIMENT}{'_quick' if QUICK_TEST else ''}")
     else:
         OUTPUT_DIR = os.path.join(COLAB_ROOT, 'output')
 
@@ -657,13 +660,16 @@ test_ds = make_dataset(test, False)
 # ## Model: one backbone, two outputs
 
 # %%
-def build_model(weights='imagenet'):
-    if EXPERIMENT == 'scratch':
-        weights = None
+def build_model():
+    weights = None if EXPERIMENT == 'scratch' else 'imagenet'
     common = dict(input_shape=(IMG, IMG, 3), include_top=False,
                   weights=weights, include_preprocessing=True)
     if BACKBONE == 'mobilenetv3':
         base = keras.applications.MobileNetV3Large(**common)
+    elif BACKBONE == 'efficientnetb0':
+        # Always normalizes raw 0–255 RGB itself, so it has no switch for it.
+        del common['include_preprocessing']
+        base = keras.applications.EfficientNetB0(**common)
     elif BACKBONE == 'efficientnetv2b0':
         base = keras.applications.EfficientNetV2B0(**common)
     else:
@@ -792,7 +798,12 @@ thresholds = {
 results = {'experiment': EXPERIMENT, 'backbone': BACKBONE,
            'quick_test': QUICK_TEST, 'train_minutes': round(train_minutes, 1),
            'photos': {'train': len(train), 'val': len(val), 'test': len(test)},
+           'params': int(model.count_params()),
            **thresholds}
+if val_pred is not None:
+    # The backbones are compared on validation; test is reported only.
+    results['val_dish_top1'] = float(
+        (val_pred[2].argmax(axis=1) == val_pred[0]).mean())
 if test_pred is not None:
     dish_true, comp_true, dish_prob, comp_prob = test_pred
     top3 = np.argsort(-dish_prob, axis=1)[:, :3]
@@ -820,10 +831,28 @@ with open(os.path.join(OUTPUT_DIR, 'results.json'), 'w') as f:
 # %%
 from datetime import date
 
-# Copy the weights into a model built outside the GPU strategy, so the
-# converter sees plain variables instead of one copy per GPU.
-export_model, _ = build_model(weights=None)
+# Copy the trained model outside the GPU strategy, so the converter sees
+# plain variables instead of one copy per GPU. Built from the model's config,
+# the copy keeps every layer (EfficientNetB0 adds its input scaling only when
+# it loads ImageNet weights, so rebuilding it would not).
+export_model = keras.Model.from_config(model.get_config())
 export_model.set_weights(model.get_weights())
+
+
+def finalize_normalization(m):
+    """set_weights copies a Normalization layer's mean and variance but does
+    not apply them (EfficientNetB0 has one); finalize_state() does."""
+    for layer in m.layers:
+        if isinstance(layer, keras.layers.Normalization):
+            layer.finalize_state()
+        elif hasattr(layer, 'layers'):
+            finalize_normalization(layer)
+
+
+finalize_normalization(export_model)
+sample_check = next(iter(test_ds if test else val_ds))[0][:1]
+assert np.abs(export_model(sample_check, training=False)['dish'].numpy() -
+              model(sample_check, training=False)['dish'].numpy()).max() < 1e-4,     'The export copy differs from the trained model'
 converter = tf.lite.TFLiteConverter.from_keras_model(export_model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.target_spec.supported_types = [tf.float16]
@@ -853,6 +882,17 @@ with open(os.path.join(OUTPUT_DIR, 'components.txt'), 'w') as f:
     f.write('\n'.join(COMPONENTS) + '\n')
 
 size_mb = len(tflite) / 1e6
+# Speed on this machine's CPU: only for comparing backbones, a phone differs.
+for _ in range(5):
+    interpreter.invoke()
+timed = time.time()
+for _ in range(30):
+    interpreter.invoke()
+results['tflite_mb'] = round(size_mb, 2)
+results['cpu_ms'] = round((time.time() - timed) / 30 * 1000, 1)
+with open(os.path.join(OUTPUT_DIR, 'results.json'), 'w') as f:
+    json.dump(results, f, indent=2)
+print(f"TFLite {size_mb:.1f} MB, {results['cpu_ms']} ms per photo on this CPU")
 
 
 def metric(name):

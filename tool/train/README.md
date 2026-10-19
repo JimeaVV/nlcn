@@ -91,11 +91,42 @@ tab trình duyệt.
   - Mỗi món chỉ mở vừa đủ số ảnh cần lấy (`MAX_PER_DISH`), đọc song song
     32 luồng. Dòng `Opened … of … photos` cho biết đã mở bao nhiêu ảnh.
 - **Ba thí nghiệm cho báo cáo:** đổi `EXPERIMENT` thành `scratch`, `linear`
-  hoặc `finetune`; đổi `BACKBONE` thành `mobilenetv3` hoặc
-  `efficientnetv2b0`. Kết quả mỗi lần chạy nằm trong `results.json` và
+  hoặc `finetune`. Kết quả mỗi lần chạy nằm trong `results.json` và
   `training_log_*.csv`.
 - **Ngưỡng tick thành phần** được chỉnh trên tập val và ghi vào
   `MODEL_CARD.md`; app đọc từ đó.
+
+## So sánh 3 backbone, chọn model cho app
+
+Train cùng một notebook 3 lần (`EXPERIMENT = 'finetune'`), mỗi lần một
+`BACKBONE`:
+
+| `BACKBONE` | Tham số | TFLite (float16) | Ghi chú |
+|---|---|---|---|
+| `mobilenetv3` | khoảng 4 triệu | khoảng 6 MB | nhẹ nhất, nhanh nhất |
+| `efficientnetb0` | khoảng 5 triệu | khoảng 8 MB | |
+| `efficientnetv2b0` | khoảng 7 triệu | khoảng 12 MB | |
+
+- Cả 3 bản chạy dùng chung cách chia dữ liệu (seed cố định), nên so với
+  nhau được.
+- Trên Colab, mỗi bản chạy ghi vào một thư mục riêng trên Drive, ví dụ
+  `macrorunner_train/efficientnetb0_finetune`.
+
+Tải thư mục kết quả của cả 3 về máy, rồi chạy:
+
+```
+python tool/train/compare_results.py runs/mobilenetv3 runs/efficientnetb0 runs/efficientnetv2b0 --out runs/comparison.md
+```
+
+Cách chọn:
+- Lấy model có **val top-1** cao nhất. Tập test chỉ để báo cáo, không dùng
+  để chọn, để con số trên test vẫn khách quan.
+- Nếu các model lệch nhau không quá 0,5 điểm %, lấy model nhỏ hơn, vì nó
+  mở nhanh hơn và chạy nhanh hơn trên điện thoại.
+- Bảng in ra có thêm top-3, F1 thành phần, dung lượng, tốc độ trên CPU của
+  máy train (chỉ để so tương đối) và thời gian train.
+- Bản chạy cũ chưa ghi val vào `results.json` thì script lấy val từ
+  `training_log_*.csv`.
 
 ## Ảnh tự chụp
 
