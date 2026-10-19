@@ -59,6 +59,8 @@ Code gốc là `train_food_model.py`. Sửa file đó, rồi chạy
   món, loss của phần thành phần bỏ qua ảnh đó (masked loss).
 - **Bỏ ảnh trùng** giữa các bộ (average hash) và chia 70/15/15 theo từng
   món. Danh sách chia nằm trong `splits.csv`.
+  - Mỗi món chỉ mở vừa đủ số ảnh cần lấy (`MAX_PER_DISH`), đọc song song
+    32 luồng. Dòng `Opened … of … photos` cho biết đã mở bao nhiêu ảnh.
 - **Ba thí nghiệm cho báo cáo:** đổi `EXPERIMENT` thành `scratch`, `linear`
   hoặc `finetune`; đổi `BACKBONE` thành `mobilenetv3` hoặc
   `efficientnetv2b0`. Kết quả mỗi lần chạy nằm trong `results.json` và

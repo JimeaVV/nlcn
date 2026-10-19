@@ -891,6 +891,25 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   `QUICK_TEST = True`, vì bản này chạy trên máy riêng của Kaggle. Đã ghi
   vào README và phần đầu notebook.
 
+### 2026-10-19 · Notebook đọc ảnh nhanh hơn
+- **Vấn đề:** lần chạy thử đầu tiên trên Kaggle (`QUICK_TEST`, GPU T4 x2)
+  chạy gần 20 phút mà chưa xong.
+  - Bước bỏ ảnh trùng mở **toàn bộ** ảnh của 4 bộ, khoảng 70.000 ảnh, để
+    tính hash, rồi mới cắt xuống 12 ảnh mỗi món.
+  - Ảnh nằm trên ổ mạng của Kaggle nên mở từng ảnh một rất chậm.
+- **Cách sửa:**
+  - Với mỗi món, trộn ảnh bằng seed cố định trước, rồi mở lần lượt tới khi
+    đủ số ảnh cần (`MAX_PER_DISH`), mỗi đợt mở gấp đôi số còn thiếu để bù
+    ảnh trùng. Chạy thử giờ chỉ mở khoảng 32 ảnh mỗi món, thay vì tất cả.
+  - Mở ảnh song song 32 luồng.
+  - Với JPEG, giải nén ở kích thước nhỏ (`draft`) vì hash chỉ cần 8×8.
+  - Ảnh WebP chỉ đổi sang JPEG khi được giữ lại.
+  - In ra số ảnh đã mở và thời gian.
+  - Cách chia vẫn cố định theo seed. Thứ tự ảnh có đổi so với bản trước,
+    nhưng lúc đó chưa có lần train thật nào nên không ảnh hưởng.
+- **Đã thử trên máy:** dữ liệu giả, 2 thiết bị ảo, chạy trọn tới bước xuất
+  file.
+
 ---
 
 ## 3. Việc còn tồn đọng

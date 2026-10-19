@@ -247,10 +247,7 @@ skipped = Counter()
 
 
 def add(path, dish, source, present=(), observed=()):
-    path = readable(path)
-    if path is None:
-        skipped['unreadable'] += 1
-        return
+    # Photos are opened (and WebP converted) later, only for the ones kept.
     samples.append({'path': path, 'dish': dish, 'source': source,
                     'present': set(present), 'observed': set(observed)})
 
@@ -390,6 +387,9 @@ print('Skipped:', skipped.most_common(12))
 # an 8×8 average hash.
 
 # %%
+import time
+from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 from PIL import Image
 
@@ -397,6 +397,7 @@ from PIL import Image
 def average_hash(path):
     try:
         with Image.open(path) as im:
+            im.draft('L', (64, 64))   # JPEG: decode at a fraction of the size
             small = im.convert('L').resize((8, 8), Image.BILINEAR)
             pixels = np.asarray(small, dtype=np.float32).flatten().tolist()
     except Exception:
@@ -405,25 +406,52 @@ def average_hash(path):
     return sum(1 << i for i, p in enumerate(pixels) if p > mean)
 
 
-# Sorted first, so every run (and every teammate) gets the same split.
+def prepare(path):
+    """(readable path, hash) for one photo; None when it cannot be opened."""
+    h = average_hash(path)
+    return (readable(path), h) if h is not None else (None, None)
+
+
+# Sorted and shuffled with a fixed seed, so every run (and every teammate)
+# gets the same split. Each dish is read in that order only until it is full,
+# so the cap also saves opening photos that would be thrown away. The
+# datasets sit on a network disk, hence the threads.
 samples.sort(key=lambda s: s['path'])
+pending = defaultdict(list)
+for s in samples:
+    pending[s['dish']].append(s)
 by_dish = defaultdict(list)
 seen = {}
-for s in samples:
-    h = average_hash(s['path'])
-    if h is None:
-        skipped['unreadable'] += 1
-        continue
-    if h in seen:
-        skipped['duplicate'] += 1
-        continue
-    seen[h] = s['path']
-    by_dish[s['dish']].append(s)
+opened = 0
+started = time.time()
+with ThreadPoolExecutor(32) as pool:
+    for dish, items in sorted(pending.items()):
+        random.Random(f'{SEED}-{dish}').shuffle(items)
+        cap = MAX_OTHER if dish == OTHER else MAX_PER_DISH
+        kept = by_dish[dish]
+        start = 0
+        while start < len(items) and len(kept) < cap:
+            # A little more than the dish still needs, for duplicates.
+            size = min(256, max(32, 2 * (cap - len(kept))))
+            chunk = items[start:start + size]
+            start += size
+            opened += len(chunk)
+            for s, (path, h) in zip(chunk, pool.map(
+                    prepare, [s['path'] for s in chunk])):
+                if len(kept) >= cap:
+                    break
+                if path is None:
+                    skipped['unreadable'] += 1
+                elif h in seen:
+                    skipped['duplicate'] += 1
+                else:
+                    seen[h] = path
+                    kept.append({**s, 'path': path})
+print(f'Opened {opened} of {len(samples)} photos in '
+      f'{time.time() - started:.0f} s')
 
 train, val, test = [], [], []
 for dish, items in sorted(by_dish.items()):
-    random.Random(f'{SEED}-{dish}').shuffle(items)
-    items = items[:MAX_OTHER if dish == OTHER else MAX_PER_DISH]
     n_test = max(1, round(len(items) * 0.15)) if len(items) >= 3 else 0
     n_val = max(1, round(len(items) * 0.15)) if len(items) >= 3 else 0
     test += items[:n_test]
