@@ -292,8 +292,6 @@ from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.bmp', '.webp'}
-# TensorFlow cannot decode WebP, so those photos are converted to JPEG here.
-CONVERTED_DIR = os.environ.get('CONVERTED_DIR', '/tmp/converted')
 # Folder names that hold photos but say nothing about the dish.
 GENERIC_FOLDERS = {'images', 'image', 'imgs', 'img', 'photos', 'pictures',
                    'data', 'dataset', 'train', 'training', 'test', 'testing',
@@ -309,27 +307,14 @@ def class_folder(folder):
     return os.path.basename(folder)
 
 
-def readable(path):
-    """[path], or a JPEG copy of it when TensorFlow cannot read the format."""
-    if not path.lower().endswith('.webp'):
-        return path
-    os.makedirs(CONVERTED_DIR, exist_ok=True)
-    digest = hashlib.md5(path.encode('utf-8')).hexdigest()
-    target = os.path.join(CONVERTED_DIR, f'{digest}.jpg')
-    if not os.path.exists(target):
-        try:
-            with Image.open(path) as im:
-                im.convert('RGB').save(target, quality=92)
-        except Exception:
-            return None
-    return target
 random.seed(SEED)
 samples = []   # dicts: path, dish, present (set), observed (set), source
 skipped = Counter()
 
 
 def add(path, dish, source, present=(), observed=()):
-    # Photos are opened (and WebP converted) later, only for the ones kept.
+    # Photos are opened later, only for the ones kept; the small JPEG copies
+    # made then also cover WebP, which TensorFlow cannot decode.
     samples.append({'path': path, 'dish': dish, 'source': source,
                     'present': set(present), 'observed': set(observed)})
 
@@ -509,7 +494,7 @@ print('Skipped:', skipped.most_common(12))
 
 # %%
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 
 def average_hash(path):
@@ -524,10 +509,44 @@ def average_hash(path):
     return sum(1 << i for i, p in enumerate(pixels) if p > mean)
 
 
+# Training reads each photo every epoch. Full-size photos made Colab's two
+# CPU cores the bottleneck (about 40 photos/s, 15 minutes an epoch), so every
+# kept photo is decoded once here and saved with its short side SHRUNK_SIDE.
+# Random crops of 60–100% of that still cover the 224×224 input.
+SHRUNK_SIDE = 288
+SHRUNK_DIR = os.environ.get('SHRUNK_DIR', '/tmp/shrunk')
+os.makedirs(SHRUNK_DIR, exist_ok=True)
+
+
+def shrink(path):
+    """A small upright JPEG copy of [path] (reused if already made), or None
+    when the photo cannot be read."""
+    digest = hashlib.md5(path.encode('utf-8')).hexdigest()
+    target = os.path.join(SHRUNK_DIR, f'{digest}.jpg')
+    if os.path.exists(target):
+        return target
+    try:
+        with Image.open(path) as im:
+            # JPEG: decode straight at a fraction of the size, much faster.
+            im.draft('RGB', (SHRUNK_SIDE, SHRUNK_SIDE))
+            # Upright like the app's photos, which follow EXIF orientation.
+            im = ImageOps.exif_transpose(im).convert('RGB')
+            scale = SHRUNK_SIDE / min(im.size)
+            if scale < 1:
+                im = im.resize((max(1, round(im.width * scale)),
+                                max(1, round(im.height * scale))),
+                               Image.BILINEAR)
+            im.save(target, quality=90)
+    except Exception:
+        return None
+    return target
+
+
 def prepare(path):
-    """(readable path, hash) for one photo; None when it cannot be opened."""
+    """(small copy, hash) for one photo; (None, None) when it cannot be read."""
     h = average_hash(path)
-    return (readable(path), h) if h is not None else (None, None)
+    file = shrink(path) if h is not None else None
+    return (file, h) if file is not None else (None, None)
 
 
 # Sorted and shuffled with a fixed seed, so every run (and every teammate)
@@ -554,17 +573,17 @@ with ThreadPoolExecutor(32) as pool:
             chunk = items[start:start + size]
             start += size
             opened += len(chunk)
-            for s, (path, h) in zip(chunk, pool.map(
+            for s, (file, h) in zip(chunk, pool.map(
                     prepare, [s['path'] for s in chunk])):
                 if len(kept) >= cap:
                     break
-                if path is None:
+                if file is None:
                     skipped['unreadable'] += 1
                 elif h in seen:
                     skipped['duplicate'] += 1
                 else:
-                    seen[h] = path
-                    kept.append({**s, 'path': path})
+                    seen[h] = s['path']
+                    kept.append({**s, 'file': file})
 print(f'Opened {opened} of {len(samples)} photos in '
       f'{time.time() - started:.0f} s', flush=True)
 
@@ -618,7 +637,7 @@ def targets(s):
 
 
 def make_dataset(items, training):
-    paths = [s['path'] for s in items]
+    paths = [s['file'] for s in items]   # the small copies made above
     dish, comp = zip(*(targets(s) for s in items)) if items else ((), ())
     ds = tf.data.Dataset.from_tensor_slices(
         (paths, np.array(dish, np.int32), np.array(comp, np.float32)))

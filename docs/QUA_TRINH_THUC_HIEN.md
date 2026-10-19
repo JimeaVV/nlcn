@@ -987,6 +987,29 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   | EfficientNetB0 | 8,3 MB | 17,8 ms |
   | EfficientNetV2-B0 | 12,0 MB | 21,6 ms |
 
+### 2026-10-19 · Thu nhỏ ảnh một lần trước khi train
+- **Vấn đề:** bản train thật MobileNetV3 trên Colab chạy khoảng 15 phút mỗi
+  epoch, tức chừng 40 ảnh/giây.
+  - Theo log trên Drive: chuẩn bị dữ liệu xong lúc 14:53, pha 1 (5 epoch)
+    xong lúc 16:06. Val top-1 của pha 1 tăng từ 44,4% lên 50,6%.
+  - Mỗi epoch phải giải nén lại ảnh gốc độ phân giải cao, mà Colab chỉ có 2
+    nhân CPU. GPU phần lớn thời gian ngồi chờ. Cả 20 epoch có thể mất 4–6
+    giờ.
+- **Cách sửa:**
+  - Ở bước lọc ảnh trùng (vốn đã mở từng ảnh), lưu luôn một bản JPEG thu
+    nhỏ, cạnh ngắn 288 px. Lúc train chỉ đọc bản nhỏ này.
+  - Cắt ngẫu nhiên 60–100% của 288 px vẫn đủ cho đầu vào 224×224.
+  - Ảnh JPEG được giải nén thẳng ở kích thước nhỏ (`draft`).
+  - Ảnh được xoay đúng chiều theo EXIF, giống cách app xử lý ảnh chụp.
+  - Bản nhỏ là JPEG, nên không cần bước đổi WebP riêng nữa.
+- **Cách chia dữ liệu không đổi:** hash và thứ tự giữ nguyên, nên tập
+  train/val/test giống hệt bản trước. `splits.csv` vẫn ghi đường dẫn ảnh gốc.
+- **Ảnh hưởng tới so sánh:** bản MobileNetV3 đang chạy dùng ảnh gốc, còn 2
+  bản EfficientNet sẽ dùng ảnh thu nhỏ. Muốn so thật công bằng thì train lại
+  MobileNetV3 bằng notebook mới, lần này nhanh hơn nhiều.
+- **Đã thử trên máy:** dữ liệu giả, 2 thiết bị ảo. Chạy trọn tới bước xuất
+  TFLite, cách chia giống hệt trước.
+
 ---
 
 ## 3. Việc còn tồn đọng
