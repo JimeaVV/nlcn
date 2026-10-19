@@ -616,7 +616,10 @@ if test_pred is not None:
     top3 = np.argsort(-dish_prob, axis=1)[:, :3]
     results['dish_top1'] = float((top3[:, 0] == dish_true).mean())
     results['dish_top3'] = float((top3 == dish_true[:, None]).any(axis=1).mean())
-    results['component_f1'] = float(component_f1(comp_true, comp_prob, threshold))
+    # Only photos with component labels (VietFood67, the team's own) count.
+    results['component_f1'] = (
+        float(component_f1(comp_true, comp_prob, threshold))
+        if comp_true[:, N_COMP:].sum() > 0 else None)
     per_dish = {}
     for i, code in enumerate(DISHES):
         rows = dish_true == i
@@ -664,6 +667,12 @@ with open(os.path.join(OUTPUT_DIR, 'components.txt'), 'w') as f:
     f.write('\n'.join(COMPONENTS) + '\n')
 
 size_mb = len(tflite) / 1e6
+
+
+def metric(name):
+    value = results.get(name)
+    return 'chưa có nhãn thành phần' if value is None else f'{value:.3f}'
+
 sources = Counter(s['source'] for s in train + val + test)
 card = f"""# MODEL_CARD – food_v1
 
@@ -676,9 +685,9 @@ card = f"""# MODEL_CARD – food_v1
 - Thời gian train: {train_minutes:.0f} phút
 
 ## Kết quả trên tập test
-- Món, top-1: {results.get('dish_top1', float('nan')):.3f}
-- Món, top-3: {results.get('dish_top3', float('nan')):.3f}
-- Thành phần, F1: {results.get('component_f1', float('nan')):.3f}
+- Món, top-1: {metric('dish_top1')}
+- Món, top-3: {metric('dish_top3')}
+- Thành phần, F1: {metric('component_f1')}
 
 ## Ngưỡng (app đọc các dòng này)
 threshold_checked: {thresholds['threshold_checked']}
