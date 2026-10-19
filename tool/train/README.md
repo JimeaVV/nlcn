@@ -27,6 +27,10 @@ Code gốc là `train_food_model.py`. Sửa file đó, rồi chạy
 
 4. *Settings*: Accelerator **GPU T4 x2**, Internet **On**.
 5. Chạy thử với `QUICK_TEST = True` (vài phút) để chắc không lỗi.
+   - Phải thấy dòng `GPUs: 2 | training on 2 device(s)`: notebook chia mỗi
+     batch cho cả 2 GPU (`MirroredStrategy`).
+   - `BATCH` là tổng của cả 2 GPU, nên chạy trên 1 GPU cũng học giống
+     vậy và kết quả vẫn so sánh được.
 6. Đặt `QUICK_TEST = False`, rồi **Save Version → Save & Run All**.
    - Tắt trình duyệt vẫn chạy.
    - Xong thì vào tab *Output* tải 4 file, bỏ vào `assets/models/` và mở PR.

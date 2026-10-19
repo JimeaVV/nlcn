@@ -31,7 +31,7 @@ INPUT_ROOT = os.environ.get('INPUT_ROOT', '/kaggle/input')
 OUTPUT_DIR = os.environ.get('OUTPUT_DIR', '/kaggle/working')
 SEED = 42
 IMG = 224
-BATCH = 16 if QUICK_TEST else 64
+BATCH = 16 if QUICK_TEST else 64       # total, split across the GPUs
 EPOCHS_HEAD = 1 if QUICK_TEST else 5    # backbone frozen
 EPOCHS_FINE = 1 if QUICK_TEST else 15   # top of the backbone unfrozen
 MAX_PER_DISH = 12 if QUICK_TEST else 1500  # caps the largest classes
@@ -450,6 +450,13 @@ from tensorflow import keras
 tf.random.set_seed(SEED)
 N_DISH, N_COMP = len(OUTPUTS), len(COMPONENTS)
 
+# "GPU T4 x2" gives two GPUs, but Keras uses only the first unless training
+# runs under MirroredStrategy, which splits every batch between them. BATCH
+# stays the total, so a run on one GPU learns the same way.
+strategy = tf.distribute.MirroredStrategy()
+print('GPUs:', len(tf.config.list_physical_devices('GPU')),
+      '| training on', strategy.num_replicas_in_sync, 'device(s)')
+
 
 def targets(s):
     labels = np.zeros(N_COMP, np.float32)
@@ -504,8 +511,9 @@ test_ds = make_dataset(test, False)
 # ## Model: one backbone, two outputs
 
 # %%
-def build_model():
-    weights = None if EXPERIMENT == 'scratch' else 'imagenet'
+def build_model(weights='imagenet'):
+    if EXPERIMENT == 'scratch':
+        weights = None
     common = dict(input_shape=(IMG, IMG, 3), include_top=False,
                   weights=weights, include_preprocessing=True)
     if BACKBONE == 'mobilenetv3':
@@ -532,16 +540,18 @@ def masked_bce(y_true, y_pred):
         tf.reduce_sum(mask, axis=-1), 1.0)
 
 
-model, base = build_model()
+with strategy.scope():
+    model, base = build_model()
 
 
 def compile_model(learning_rate):
-    model.compile(
-        optimizer=keras.optimizers.Adam(learning_rate),
-        loss={'dish': 'sparse_categorical_crossentropy',
-              'components': masked_bce},
-        metrics={'dish': ['accuracy']},
-    )
+    with strategy.scope():
+        model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate),
+            loss={'dish': 'sparse_categorical_crossentropy',
+                  'components': masked_bce},
+            metrics={'dish': ['accuracy']},
+        )
 
 
 def callbacks(phase):
@@ -664,7 +674,11 @@ with open(os.path.join(OUTPUT_DIR, 'results.json'), 'w') as f:
 # %%
 from datetime import date
 
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
+# Copy the weights into a model built outside the GPU strategy, so the
+# converter sees plain variables instead of one copy per GPU.
+export_model, _ = build_model(weights=None)
+export_model.set_weights(model.get_weights())
+converter = tf.lite.TFLiteConverter.from_keras_model(export_model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.target_spec.supported_types = [tf.float16]
 tflite = converter.convert()

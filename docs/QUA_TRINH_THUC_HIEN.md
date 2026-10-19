@@ -870,6 +870,22 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     - `dishes.txt` có 53 dòng (52 món + `khac`);
     - `results.json` có độ chính xác riêng của `khac`.
 
+### 2026-10-19 · Train trên cả 2 GPU T4
+- **Vấn đề:** Kaggle cho "GPU T4 x2", nhưng Keras chỉ dùng GPU đầu tiên nếu
+  không có code chia việc, nên GPU thứ hai ngồi không.
+- **Cách làm:**
+  - Tạo và compile model trong `tf.distribute.MirroredStrategy`. Mỗi batch
+    được chia đôi cho 2 GPU, rồi gộp gradient lại.
+  - `BATCH = 64` vẫn là tổng của cả 2 GPU, không nhân đôi. Nhờ vậy chạy trên
+    1 GPU hay 2 GPU, model học cùng một kiểu, và kết quả của hai người vẫn
+    so sánh được.
+  - Lúc xuất, trọng số được chép sang một model tạo ngoài strategy rồi mới
+    chuyển sang TFLite, để converter chỉ thấy biến bình thường.
+  - Notebook in ra số GPU đang dùng, để kiểm tra ngay khi chạy thử.
+- **Đã thử trên máy:** chia CPU thành 2 thiết bị ảo để mô phỏng 2 GPU.
+  Chạy trọn tới bước xuất TFLite, và kết quả TFLite khớp với Keras. Bản
+  chạy 1 thiết bị vẫn chạy bình thường.
+
 ---
 
 ## 3. Việc còn tồn đọng
