@@ -354,8 +354,14 @@ def announce(source, folder):
 
 
 # Kaggle may mount datasets as symlinks, which os.walk skips by default.
+visited = set()   # real paths: a symlinked dataset is read once, never in a loop
 for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
     dirs.sort()
+    real = os.path.realpath(folder)
+    if real in visited:
+        dirs[:] = []
+        continue
+    visited.add(real)
     if any(folder == root or folder.startswith(root + os.sep) for root in handled):
         dirs[:] = []
         continue

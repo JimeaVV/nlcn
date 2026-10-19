@@ -910,6 +910,10 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     còn file nhãn thì đọc song song.
   - Log in một dòng khi bắt đầu đọc mỗi bộ ảnh, kèm số giây. Trước đây log
     trống cho tới khi gom xong, nên không biết notebook đang chạy tới đâu.
+  - Mỗi thư mục chỉ đọc một lần, theo đường dẫn thật. Kaggle có thể gắn một
+    bộ ảnh vừa bằng symlink vừa bằng thư mục thật, nên bản cũ có thể đọc
+    một bộ hai lần, hoặc đi mãi nếu có link vòng. Đã thử với một thư mục
+    trỏ ngược về thư mục cha: notebook vẫn chạy xong.
   - Cách chia vẫn cố định theo seed. Thứ tự ảnh có đổi so với bản trước,
     nhưng lúc đó chưa có lần train thật nào nên không ảnh hưởng.
 - **Đã thử trên máy:** dữ liệu giả, 2 thiết bị ảo, chạy trọn tới bước xuất
