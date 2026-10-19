@@ -997,8 +997,16 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     giờ.
 - **Cách sửa:**
   - Ở bước lọc ảnh trùng (vốn đã mở từng ảnh), lưu luôn một bản JPEG thu
-    nhỏ, cạnh ngắn 288 px. Lúc train chỉ đọc bản nhỏ này.
-  - Cắt ngẫu nhiên 60–100% của 288 px vẫn đủ cho đầu vào 224×224.
+    nhỏ, cạnh ngắn 384 px. Lúc train chỉ đọc bản nhỏ này.
+  - Có giảm độ chính xác không? Model chỉ nhìn ảnh 224×224, nên ảnh gốc
+    to bao nhiêu cũng bị thu nhỏ trước khi vào model.
+    - Bản đầu dùng 288 px: mảnh cắt nhỏ nhất (60%, tức 173 px) phải phóng
+      to lên 224 px, nên hơi mờ hơn bản dùng ảnh gốc.
+    - Đổi sang 384 px: mảnh nhỏ nhất là 230 px, vẫn lớn hơn 224 px. Mọi
+      mảnh cắt đều chỉ thu nhỏ, không phóng to, nên không mất chi tiết.
+    - Pillow thu nhỏ có khử răng cưa (antialias), còn `tf.image.resize`
+      mặc định thì không. Nên ảnh 224 px tạo ra có thể còn sạch hơn trước.
+    - Chưa đo trực tiếp ảnh hưởng tới độ chính xác.
   - Ảnh JPEG được giải nén thẳng ở kích thước nhỏ (`draft`).
   - Ảnh được xoay đúng chiều theo EXIF, giống cách app xử lý ảnh chụp.
   - Bản nhỏ là JPEG, nên không cần bước đổi WebP riêng nữa.

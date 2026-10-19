@@ -512,8 +512,9 @@ def average_hash(path):
 # Training reads each photo every epoch. Full-size photos made Colab's two
 # CPU cores the bottleneck (about 40 photos/s, 15 minutes an epoch), so every
 # kept photo is decoded once here and saved with its short side SHRUNK_SIDE.
-# Random crops of 60–100% of that still cover the 224×224 input.
-SHRUNK_SIDE = 288
+# 384 keeps even the smallest random crop (60%, 230 px) above the 224×224
+# input, so every crop is still scaled down, never up: no detail is lost.
+SHRUNK_SIDE = 384
 SHRUNK_DIR = os.environ.get('SHRUNK_DIR', '/tmp/shrunk')
 os.makedirs(SHRUNK_DIR, exist_ok=True)
 
