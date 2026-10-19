@@ -31,6 +31,10 @@ Code gốc là `train_food_model.py`. Sửa file đó, rồi chạy
      batch cho cả 2 GPU (`MirroredStrategy`).
    - `BATCH` là tổng của cả 2 GPU, nên chạy trên 1 GPU cũng học giống
      vậy và kết quả vẫn so sánh được.
+   - Nếu phiên nháp cứ báo "Draft Session Adding data" mãi: bỏ qua phiên
+     nháp. Để `QUICK_TEST = True`, bấm **Save Version → Save & Run All**.
+     Bản chạy này tự chạy trên một máy riêng của Kaggle, xong thì xem log
+     ở trang version.
 6. Đặt `QUICK_TEST = False`, rồi **Save Version → Save & Run All**.
    - Tắt trình duyệt vẫn chạy.
    - Xong thì vào tab *Output* tải 4 file, bỏ vào `assets/models/` và mở PR.

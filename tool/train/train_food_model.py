@@ -2,20 +2,23 @@
 # # MacroRunner – train the food recognition model
 #
 # Trains the two-output model described in `docs/MODEL_CONTRACT.md`
-# (contract 1.2): a softmax over 40 dishes and an independent probability per
-# component (25). The result is the four files the app reads from
-# `assets/models/`.
+# (contract 1.3): a softmax over 52 dishes plus "khac" (food the app does not
+# know) and an independent probability per component (25). The result is the
+# four files the app reads from `assets/models/`.
 #
 # **On Kaggle**
 # 1. *Add data*: VinaFood21, 30VNFoods (vietnamese-foods), 20FoodVN,
 #    VietFood67 (vietfood68), and the team's own photos if any.
 # 2. *Settings*: Accelerator **GPU T4 x2**, Internet **on**.
 # 3. Run once with `QUICK_TEST = True` (a few minutes) to check everything.
+#    If the draft session hangs on "Adding data", skip it: Save Version →
+#    Save & Run All with `QUICK_TEST = True` runs the same check on its own
+#    machine.
 # 4. Set `QUICK_TEST = False`, then **Save Version → Save & Run All**. It keeps
 #    running with the browser closed; take the files from the *Output* tab.
 #
 # The four public datasets are merged into one training set. Class folders are
-# renamed to the app's codes; classes the app does not have are skipped.
+# renamed to the app's codes; classes the app does not have become "khac".
 # VietFood67 has bounding boxes, which also give component labels: a plate
 # with boxes for rice, braised pork and vegetables but no dish box is a
 # *cơm phần*.
