@@ -1018,6 +1018,42 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Đã thử trên máy:** dữ liệu giả, 2 thiết bị ảo. Chạy trọn tới bước xuất
   TFLite, cách chia giống hệt trước.
 
+### 2026-10-19 · Kết quả train thật đầu tiên: MobileNetV3
+- **Thiết lập:** Colab, 1 GPU T4, thí nghiệm `finetune`, ảnh thu nhỏ 384 px.
+  - Ảnh: 38.677 train / 8.287 val / 8.287 test.
+  - Train hết 44,6 phút, khoảng 2 phút mỗi epoch. Bản đọc ảnh gốc trước đó
+    mất khoảng 15 phút mỗi epoch, nên thu nhỏ ảnh giúp nhanh khoảng 7 lần.
+- **Kết quả:**
+
+  | Chỉ số | Giá trị |
+  |---|---|
+  | Val top-1 | 67,8% |
+  | Test top-1 | 67,4% |
+  | Test top-3 | 82,5% |
+  | F1 thành phần | 0,48 |
+  | TFLite | 6,19 MB |
+
+- **Theo từng món:**
+  - Tốt: bánh mì chảo 96,7%, bánh hỏi 92%, há cảo 91,2%, bắp nướng 91,1%.
+  - Yếu: bún riêu và bánh canh 44,4%, hủ tiếu 45,8%, cơm phần 46,7%, xôi và
+    bún mắm 47,6%. Các món nước dạng sợi trông rất giống nhau.
+  - Lớp `khac` chỉ đạt 39,3%: lớp này gom nhiều món khác hẳn nhau nên khó
+    học.
+- **Đường học:**
+  - Pha 2 chạy đủ 15 epoch. Val top-1 gần như đứng yên khoảng 67–68% từ
+    epoch thứ 9.
+  - Train top-1 vẫn tăng lên 79%, còn val loss bắt đầu tăng: model đã bắt
+    đầu học thuộc dữ liệu train (overfit). Train thêm epoch sẽ không giúp
+    nhiều.
+- **Cần xem lại khi nâng cấp:**
+  - Ngưỡng tick thành phần được chỉnh xuống 0,3, đúng bằng mức thấp nhất
+    của lưới thử. Nghĩa là xác suất thành phần model đưa ra đang thấp, và
+    ngưỡng tốt nhất có thể còn thấp hơn 0,3.
+  - Cơm gà, phở gà, cháo gà không có ảnh, nên model chưa nhận ra được.
+  - Tập test chỉ gồm ảnh từ các bộ công khai. Với ảnh tự chụp bằng điện
+    thoại, độ chính xác có thể thấp hơn (contract yêu cầu ít nhất 30% ảnh
+    test là ảnh tự chụp).
+
 ---
 
 ## 3. Việc còn tồn đọng
