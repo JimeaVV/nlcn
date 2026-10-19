@@ -103,9 +103,9 @@ Train cùng một notebook 3 lần (`EXPERIMENT = 'finetune'`), mỗi lần mộ
 
 | `BACKBONE` | Tham số | TFLite (float16) | Ghi chú |
 |---|---|---|---|
-| `mobilenetv3` | khoảng 4 triệu | khoảng 6 MB | nhẹ nhất, nhanh nhất |
-| `efficientnetb0` | khoảng 5 triệu | khoảng 8 MB | |
-| `efficientnetv2b0` | khoảng 7 triệu | khoảng 12 MB | |
+| `mobilenetv3` | 3,1 triệu | 6,1 MB | nhẹ nhất, nhanh nhất |
+| `efficientnetb0` | 4,1 triệu | 8,3 MB | |
+| `efficientnetv2b0` | 6,0 triệu | 12,0 MB | |
 
 - Cả 3 bản chạy dùng chung cách chia dữ liệu (seed cố định), nên so với
   nhau được.
