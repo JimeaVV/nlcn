@@ -885,6 +885,11 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Đã thử trên máy:** chia CPU thành 2 thiết bị ảo để mô phỏng 2 GPU.
   Chạy trọn tới bước xuất TFLite, và kết quả TFLite khớp với Keras. Bản
   chạy 1 thiết bị vẫn chạy bình thường.
+- **Phiên nháp kẹt ở "Adding data":** khi gắn 4 bộ ảnh (VietFood67 nặng
+  26 GB), phiên nháp của Kaggle có lúc báo tải xong từng bộ, lặp vòng mãi
+  mà không vào được. Cách tránh: chạy thử bằng **Save & Run All** với
+  `QUICK_TEST = True`, vì bản này chạy trên máy riêng của Kaggle. Đã ghi
+  vào README và phần đầu notebook.
 
 ---
 
