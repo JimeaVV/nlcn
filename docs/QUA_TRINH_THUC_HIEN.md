@@ -926,8 +926,11 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   chạy hay đã kẹt. Nhóm quyết định chuyển sang Colab để xem log ngay lúc
   chạy.
 - **Ô mới "On Google Colab"** (trên Kaggle thì tự bỏ qua):
-  - Đọc `KAGGLE_USERNAME`, `KAGGLE_KEY` từ Secrets của Colab, nên key không
-    nằm trong notebook.
+  - Đọc key từ Secrets của Colab, nên key không nằm trong notebook.
+    Notebook nhận token kiểu mới của Kaggle (`KAGGLE_API_TOKEN`, dạng
+    `KGAT_...`) hoặc key cũ (`KAGGLE_USERNAME` + `KAGGLE_KEY`). Trước khi tải,
+    notebook cập nhật `kagglehub`, vì token kiểu mới cần bản `kagglehub` gần
+    đây.
   - Tải 4 bộ ảnh bằng `kagglehub` về ổ cứng của máy Colab, rồi tạo link
     `/content/datasets/<tên bộ>`. Tên nguồn ảnh vì vậy giống hệt trên Kaggle,
     và cách chia train/val/test không đổi.

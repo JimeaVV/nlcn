@@ -48,12 +48,14 @@ tab trình duyệt.
 1. Mở [colab.research.google.com](https://colab.research.google.com),
    chọn *File → Upload notebook*, rồi chọn `train_food_model.ipynb`.
 2. *Runtime → Change runtime type → T4 GPU*.
-3. Lấy key Kaggle: kaggle.com → *Settings → API → Create New Token*, máy
-   sẽ tải về file `kaggle.json`.
+3. Lấy token Kaggle: kaggle.com → *Settings → API Tokens → Generate New
+   Token*. Token có dạng `KGAT_...` và chỉ hiện một lần.
 4. Trong Colab, bấm biểu tượng chìa khóa (*Secrets*) ở thanh bên trái:
-   - thêm `KAGGLE_USERNAME` và `KAGGLE_KEY`, chép giá trị từ file
-     `kaggle.json`;
-   - bật *Notebook access* cho cả hai.
+   - thêm secret tên `KAGGLE_API_TOKEN`, dán token vào phần giá trị;
+   - bật *Notebook access*.
+
+   Nếu dùng key kiểu cũ (`kaggle.json`, nút *Create Legacy API Key*), thêm
+   `KAGGLE_USERNAME` và `KAGGLE_KEY` thay cho `KAGGLE_API_TOKEN`.
 
    Key nằm trong Secrets của tài khoản Google, không ghi vào notebook.
 5. *Runtime → Run all*:

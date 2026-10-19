@@ -19,9 +19,10 @@
 #
 # **On Google Colab** (output shows live, photos sit on a fast local disk)
 # 1. *Runtime → Change runtime type → T4 GPU*.
-# 2. Kaggle key: kaggle.com → *Settings → API → Create New Token*. In Colab,
-#    the key icon (*Secrets*) on the left: add `KAGGLE_USERNAME` and
-#    `KAGGLE_KEY` from that file, and turn on notebook access.
+# 2. Kaggle key: kaggle.com → *Settings → API Tokens → Generate New Token*.
+#    In Colab, the key icon (*Secrets*) on the left: add `KAGGLE_API_TOKEN`
+#    with the `KGAT_...` value and turn on notebook access. (A legacy
+#    `kaggle.json` works too: `KAGGLE_USERNAME` and `KAGGLE_KEY`.)
 # 3. *Runtime → Run all*. The datasets download once per session (VietFood67
 #    is 26 GB). Results go to Google Drive, folder `macrorunner_train`.
 # 4. After the quick test, set `QUICK_TEST = False` and run all again in the
@@ -86,13 +87,14 @@ if ON_COLAB:
             value = None
         if value:
             os.environ[key] = value
-    try:
-        import kagglehub
-    except ImportError:
-        import subprocess
-        subprocess.run([sys.executable, '-m', 'pip', 'install', '-q',
-                        'kagglehub'], check=True)
-        import kagglehub
+    if not os.environ.get('KAGGLE_API_TOKEN') and not os.environ.get('KAGGLE_KEY'):
+        print('No Kaggle key in Colab secrets: add KAGGLE_API_TOKEN '
+              '(or KAGGLE_USERNAME + KAGGLE_KEY) and turn on notebook access.')
+    # The new KGAT_ tokens need a recent kagglehub; Colab's may be older.
+    import subprocess
+    subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', '-U',
+                    'kagglehub'], check=True)
+    import kagglehub
 
     INPUT_ROOT = os.path.join(COLAB_ROOT, 'datasets')
     os.makedirs(INPUT_ROOT, exist_ok=True)
@@ -103,8 +105,9 @@ if ON_COLAB:
             path = kagglehub.dataset_download(ref)
         except Exception as error:
             raise RuntimeError(
-                f'Could not download {ref}: {error}. Check the Colab secrets '
-                'KAGGLE_USERNAME and KAGGLE_KEY (notebook access on).') from error
+                f'Could not download {ref}: {error}. Check the Colab secret '
+                'KAGGLE_API_TOKEN (or KAGGLE_USERNAME + KAGGLE_KEY), with '
+                'notebook access on.') from error
         # Named like on Kaggle, so the photos keep the same source names.
         link = os.path.join(INPUT_ROOT, ref.split('/')[1])
         if not os.path.lexists(link):
