@@ -254,6 +254,12 @@ void main() {
     expect(find.byKey(const ValueKey('camera-preview')), findsOneWidget);
     expect(find.text('Đặt dĩa hoặc tô vào giữa khung'), findsOneWidget);
     expect(find.byType(ViewfinderFrame), findsOneWidget);
+    // The frame sits on the photo's centre, which the model reads.
+    final frame = tester.getCenter(find.byType(ViewfinderFrame));
+    final preview =
+        tester.getCenter(find.byKey(const ValueKey('camera-preview')));
+    expect(frame.dx, closeTo(preview.dx, 1));
+    expect(frame.dy, closeTo(preview.dy, 1));
 
     await tester.tap(find.byKey(const ValueKey('scan-shutter')));
     await tester.pumpAndSettle();

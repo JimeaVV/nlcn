@@ -1191,6 +1191,19 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   3 MB). Việc này cần xuất lại từ checkpoint và đo lại độ chính xác, nên làm
   sau khi chọn được model thắng.
 
+### 2026-10-20 · Khung ngắm lệch so với ảnh chụp
+- **Vấn đề khi thử thật:** canh món vào khung ngắm rồi chụp, nhưng trong
+  ảnh chụp món lại lệch so với lúc canh.
+- **Nguyên nhân:** khung ngắm được đặt cao hơn tâm màn hình, khoảng 7% chiều
+  cao (`Alignment(0, -0.15)`). Trong khi đó ảnh xem trước luôn canh giữa, nên
+  tâm ảnh chụp nằm thấp hơn khung. Model chỉ đọc hình vuông chính giữa ảnh,
+  nên món canh trong khung có thể bị cắt mất một phần.
+- **Cách sửa:** đặt khung đúng tâm màn hình, trùng với tâm ảnh chụp và tâm
+  hình vuông model đọc.
+- **Kiểm thử:** thêm test kiểm tra tâm khung trùng tâm ảnh xem trước. Test
+  này fail với bố cục cũ và pass với bố cục mới. Đã build lại APK và cài lên
+  điện thoại qua adb.
+
 ---
 
 ## 3. Việc còn tồn đọng

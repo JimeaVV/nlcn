@@ -305,8 +305,10 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
               ),
             ),
           ),
+          // Centred like the preview: the photo's centre, and the centre
+          // square the model reads, sit exactly behind the frame. Placed
+          // higher, a plate framed here landed low in the photo.
           Align(
-            alignment: const Alignment(0, -0.15),
             child: FractionallySizedBox(
               widthFactor: 0.78,
               child: AspectRatio(
