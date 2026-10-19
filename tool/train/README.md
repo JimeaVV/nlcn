@@ -39,6 +39,33 @@ Code gốc là `train_food_model.py`. Sửa file đó, rồi chạy
    - Tắt trình duyệt vẫn chạy.
    - Xong thì vào tab *Output* tải 4 file, bỏ vào `assets/models/` và mở PR.
 
+## Chạy trên Google Colab
+
+Colab hiện log ngay lúc chạy. Ảnh được tải về ổ cứng của máy Colab nên đọc
+nhanh hơn ổ mạng của Kaggle. Đổi lại, Colab chỉ có 1 GPU T4, và phải để mở
+tab trình duyệt.
+
+1. Mở [colab.research.google.com](https://colab.research.google.com),
+   chọn *File → Upload notebook*, rồi chọn `train_food_model.ipynb`.
+2. *Runtime → Change runtime type → T4 GPU*.
+3. Lấy key Kaggle: kaggle.com → *Settings → API → Create New Token*, máy
+   sẽ tải về file `kaggle.json`.
+4. Trong Colab, bấm biểu tượng chìa khóa (*Secrets*) ở thanh bên trái:
+   - thêm `KAGGLE_USERNAME` và `KAGGLE_KEY`, chép giá trị từ file
+     `kaggle.json`;
+   - bật *Notebook access* cho cả hai.
+
+   Key nằm trong Secrets của tài khoản Google, không ghi vào notebook.
+5. *Runtime → Run all*:
+   - Notebook tự tải 4 bộ ảnh bằng `kagglehub`. VietFood67 nặng 26 GB, nên
+     lần đầu mất khoảng 10–20 phút.
+   - Colab hỏi quyền Google Drive: cho phép. Kết quả lưu ở Drive, thư mục
+     `macrorunner_train`, nên rớt kết nối cũng không mất.
+6. Chạy thử xong thì đặt `QUICK_TEST = False`, rồi *Run all* lại **trong
+   cùng phiên** để khỏi tải lại 26 GB.
+   - Đừng đóng tab.
+   - Bản Colab miễn phí tự ngắt nếu để yên lâu không thao tác.
+
 ## Notebook làm gì
 
 - **Đổi tên lớp sang mã của app:** so tên đã bỏ dấu, nên "Bánh Mì",

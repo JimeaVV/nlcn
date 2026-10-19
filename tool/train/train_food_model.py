@@ -17,6 +17,16 @@
 # 4. Set `QUICK_TEST = False`, then **Save Version → Save & Run All**. It keeps
 #    running with the browser closed; take the files from the *Output* tab.
 #
+# **On Google Colab** (output shows live, photos sit on a fast local disk)
+# 1. *Runtime → Change runtime type → T4 GPU*.
+# 2. Kaggle key: kaggle.com → *Settings → API → Create New Token*. In Colab,
+#    the key icon (*Secrets*) on the left: add `KAGGLE_USERNAME` and
+#    `KAGGLE_KEY` from that file, and turn on notebook access.
+# 3. *Runtime → Run all*. The datasets download once per session (VietFood67
+#    is 26 GB). Results go to Google Drive, folder `macrorunner_train`.
+# 4. After the quick test, set `QUICK_TEST = False` and run all again in the
+#    same session, so nothing downloads twice. Keep the tab open.
+#
 # The four public datasets are merged into one training set. Class folders are
 # renamed to the app's codes; classes the app does not have become "khac".
 # VietFood67 has bounding boxes, which also give component labels: a plate
@@ -47,7 +57,71 @@ UNFREEZE_FRACTION = 0.4                 # share of backbone layers fine-tuned
 # 'skip' leaves those photos out; 'pho_bo' counts them as beef phở.
 MIXED_PHO = 'skip'
 
+# %% [markdown]
+# ## On Google Colab: download the datasets
+# Skipped on Kaggle, which mounts them itself. Add the team's own photos
+# dataset to the list once it is on Kaggle.
+
+# %%
+import shutil
+import sys
+import time
+
+ON_COLAB = 'google.colab' in sys.modules
+KAGGLE_DATASETS = [
+    'lnguynanhnht/20foodvn',
+    'quandang/vietnamese-foods',
+    'sonbui25/vinafood21',
+    'thomasnguyen6868/vietfood68',   # 26 GB
+]
+SAVE_TO_DRIVE = True   # False: results stay in /content/output (lost on exit)
+COLAB_ROOT = os.environ.get('COLAB_ROOT', '/content')
+
+if ON_COLAB:
+    from google.colab import userdata
+    for key in ('KAGGLE_USERNAME', 'KAGGLE_KEY', 'KAGGLE_API_TOKEN'):
+        try:
+            value = userdata.get(key)
+        except Exception:   # not added, or notebook access is off
+            value = None
+        if value:
+            os.environ[key] = value
+    try:
+        import kagglehub
+    except ImportError:
+        import subprocess
+        subprocess.run([sys.executable, '-m', 'pip', 'install', '-q',
+                        'kagglehub'], check=True)
+        import kagglehub
+
+    INPUT_ROOT = os.path.join(COLAB_ROOT, 'datasets')
+    os.makedirs(INPUT_ROOT, exist_ok=True)
+    for ref in KAGGLE_DATASETS:
+        started = time.time()
+        print(f'Downloading {ref} ...', flush=True)
+        try:
+            path = kagglehub.dataset_download(ref)
+        except Exception as error:
+            raise RuntimeError(
+                f'Could not download {ref}: {error}. Check the Colab secrets '
+                'KAGGLE_USERNAME and KAGGLE_KEY (notebook access on).') from error
+        # Named like on Kaggle, so the photos keep the same source names.
+        link = os.path.join(INPUT_ROOT, ref.split('/')[1])
+        if not os.path.lexists(link):
+            os.symlink(path, link)
+        print(f'  done in {time.time() - started:.0f} s: {path}', flush=True)
+    print(f'Disk free: {shutil.disk_usage(COLAB_ROOT).free / 1e9:.0f} GB')
+
+    if SAVE_TO_DRIVE:
+        from google.colab import drive
+        drive.mount(os.path.join(COLAB_ROOT, 'drive'))
+        OUTPUT_DIR = os.path.join(COLAB_ROOT, 'drive', 'MyDrive',
+                                  'macrorunner_train')
+    else:
+        OUTPUT_DIR = os.path.join(COLAB_ROOT, 'output')
+
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+print('Photos from', INPUT_ROOT, '| results to', OUTPUT_DIR)
 
 # %% [markdown]
 # ## Contract

@@ -919,6 +919,30 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Đã thử trên máy:** dữ liệu giả, 2 thiết bị ảo, chạy trọn tới bước xuất
   file.
 
+### 2026-10-19 · Notebook chạy được cả trên Google Colab
+- **Vấn đề:** chạy thử trên Kaggle chạy gần 20 phút mà trang log vẫn trống.
+  Trang log của Kaggle hiện rất chậm: lần chạy trước, các dòng in ở giây
+  thứ 8 tới phút thứ 20 trở đi mới hiện. Vì vậy không biết notebook đang
+  chạy hay đã kẹt. Nhóm quyết định chuyển sang Colab để xem log ngay lúc
+  chạy.
+- **Ô mới "On Google Colab"** (trên Kaggle thì tự bỏ qua):
+  - Đọc `KAGGLE_USERNAME`, `KAGGLE_KEY` từ Secrets của Colab, nên key không
+    nằm trong notebook.
+  - Tải 4 bộ ảnh bằng `kagglehub` về ổ cứng của máy Colab, rồi tạo link
+    `/content/datasets/<tên bộ>`. Tên nguồn ảnh vì vậy giống hệt trên Kaggle,
+    và cách chia train/val/test không đổi.
+  - Lưu kết quả lên Google Drive (`MyDrive/macrorunner_train`), để rớt kết
+    nối không mất checkpoint.
+  - In thời gian tải từng bộ và dung lượng ổ còn trống.
+- **So với Kaggle:** Colab chỉ có 1 T4 và phải để mở tab. Bù lại, log hiện
+  ngay và đọc ảnh từ ổ cứng của máy nhanh hơn. Notebook vẫn chạy được trên
+  Kaggle như cũ.
+- **Đã thử trên máy:** giả lập `google.colab` và `kagglehub`. Notebook đã:
+  - tải đủ 4 bộ và đọc được key;
+  - ghi 9 file kết quả vào thư mục Drive.
+  Chạy lại kiểu Kaggle cũng vẫn chạy bình thường. Chưa chạy trên Colab
+  thật.
+
 ---
 
 ## 3. Việc còn tồn đọng
