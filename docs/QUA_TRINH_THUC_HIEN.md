@@ -1054,6 +1054,19 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     thoại, độ chính xác có thể thấp hơn (contract yêu cầu ít nhất 30% ảnh
     test là ảnh tự chụp).
 
+### 2026-10-19 · Gắn model MobileNetV3 vào app để thử trên điện thoại
+- Chép 4 file từ thư mục Drive `macrorunner_train/mobilenetv3_finetune` vào
+  `assets/models/`: `food_v1.tflite` (6,19 MB), `dishes.txt` (52 món +
+  `khac`), `components.txt` (25 thành phần), `MODEL_CARD.md`. Đây là model
+  tạm. Khi so xong 3 backbone, model thắng sẽ thay vào.
+- App tự đọc ngưỡng từ `MODEL_CARD.md`: tick sẵn từ 0,3, hỏi lại từ 0,15,
+  chắc chắn về món từ 0,5.
+- **Kiểm thử:** 150 test pass. Test "model đi kèm chỉ dùng mã có trong bảng
+  dinh dưỡng" trước đây bị bỏ qua vì chưa có model, giờ đã chạy và pass.
+- **APK:** build bản release arm64 (32,7 MB), build number 109. APK ký bằng
+  khóa phát hành: SHA-256 khớp `RELEASE_CERT_SHA256` của CI. Vì vậy cài đè
+  lên bản đang có được, không mất dữ liệu.
+
 ---
 
 ## 3. Việc còn tồn đọng
