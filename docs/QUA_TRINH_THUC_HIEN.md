@@ -1067,6 +1067,41 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   khóa phát hành: SHA-256 khớp `RELEASE_CERT_SHA256` của CI. Vì vậy cài đè
   lên bản đang có được, không mất dữ liệu.
 
+### 2026-10-19 · Thử quét thật: sửa lỗi tick dư thành phần
+- **Thử trên điện thoại** (chụp ảnh một tô phở bò):
+  - Đoán món đúng: phở bò 93%, tiếp theo là bún bò Huế 5%.
+  - Nhưng app tick thêm 8 thành phần không có trong món: sườn nướng, bì,
+    chả trứng, trứng ốp la, trứng kho, chả lụa, rau luộc, mỡ hành. Tổng ra
+    1.692 kcal, trong khi tô phở thật khoảng 500 kcal.
+- **Nguyên nhân:**
+  - Model chưa học thành phần của phở. Nhãn thành phần chỉ có ở ảnh
+    VietFood67, mà ảnh phở của bộ này đã bị bỏ (phở bò lẫn phở gà). Nên với
+    ảnh phở, đầu ra thành phần không có nghĩa, xác suất lơ lửng quanh
+    0,3–0,6.
+  - Ngưỡng tick được chỉnh xuống 0,3. App tự tick cả thành phần nằm ngoài
+    công thức món nếu xác suất từ ngưỡng này trở lên.
+  - Thành phần thêm vào mặc định 100 g: mỡ hành 100 g là 583 kcal.
+- **Sửa ở app** (`lib/models/scan_plate.dart`):
+  - Thành phần ngoài công thức món **không bao giờ được tick sẵn**. Nó chỉ
+    hiện ở dạng "Có thể" (chưa tick) khi xác suất từ 0,6 trở lên. Mốc 0,6 là
+    ngưỡng mặc định của contract; model có chỉnh ngưỡng thấp hơn thì vẫn
+    dùng 0,6. Ăn thiếu một món thì người dùng tự thêm được, còn cộng nhầm món
+    không ăn thì làm sai tổng calo.
+  - Thành phần thêm vào (do model gợi ý hoặc người dùng tự thêm) lấy khẩu
+    phần thường gặp: trung vị khẩu phần của thành phần đó trong các món có
+    nó. Ví dụ mỡ hành 10 g, bì 30 g, chả lụa 2 miếng. Thành phần không món
+    nào có thì mới dùng 1 đơn vị hoặc 100 g.
+  - Thành phần có trong công thức món vẫn tick theo ngưỡng của model như
+    cũ.
+- **Việc cho lần train sau:**
+  - Gán nhãn "không có" theo công thức món. Ví dụ ảnh phở thì chắc chắn
+    không có bì hay chả trứng. Như vậy ảnh nào cũng dạy được phần thành
+    phần, không chỉ ảnh VietFood67.
+  - Chọn ngưỡng tick theo độ chính xác (precision), thay vì theo F1.
+- **Kiểm thử:** 151 test pass, có thêm test khẩu phần thường gặp và mốc
+  0,6 cho thành phần ngoài công thức. Đã build lại APK, ký đúng khóa phát
+  hành.
+
 ---
 
 ## 3. Việc còn tồn đọng
