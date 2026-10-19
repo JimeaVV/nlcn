@@ -1114,4 +1114,8 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get overloadBodyweightDecrease =>
       'Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.';
+
+  @override
+  String get scanNotInApp =>
+      'Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.';
 }

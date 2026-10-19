@@ -1123,4 +1123,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get overloadBodyweightDecrease =>
       'Reps fell below the target range. Aim for 8 clean reps per set, or use an easier variation.';
+
+  @override
+  String get scanNotInApp =>
+      'This dish may not be in the app yet. Pick the closest dish, or log it by hand in the diary.';
 }

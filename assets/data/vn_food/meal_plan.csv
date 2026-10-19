@@ -43,3 +43,14 @@ bap_nuong,dish,snack,lose|maintain|gain,bữa phụ duy nhất cho người gi�
 banh_tet,dish,snack,maintain|gain,
 banh_u,dish,snack,maintain|gain,
 tau_hu,dish,snack,maintain|gain,
+banh_chung,dish,snack,maintain|gain,
+banh_khot,dish,breakfast|snack,maintain|gain,
+banh_beo,dish,breakfast|snack,maintain|gain,
+cao_lau,dish,breakfast|lunch|dinner,maintain|gain,
+bun_dau,dish,lunch|dinner,maintain|gain,
+bun_mam,dish,lunch|dinner,maintain|gain,
+chao_long,dish,breakfast,maintain|gain,
+ca_kho,dish,lunch|dinner,maintain|gain,cá kho ăn với cơm
+canh_chua,soup,lunch|dinner,lose|maintain|gain,ăn kèm cơm phần
+trung_vit_lon,dish,snack,maintain|gain,
+che,dish,snack,maintain|gain,

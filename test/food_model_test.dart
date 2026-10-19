@@ -145,6 +145,19 @@ void main() {
     });
   });
 
+  group('the other-dish output', () {
+    test('is never a guess and flags photos of unknown food', () {
+      const unknown = FoodRecognition(
+          dishes: {'com_tam': 0.2, otherDishCode: 0.7, 'pho_bo': 0.1});
+      expect(unknown.topDishes().map((e) => e.key), ['com_tam', 'pho_bo']);
+      expect(unknown.looksUnknown, isTrue);
+      const known =
+          FoodRecognition(dishes: {'com_tam': 0.8, otherDishCode: 0.2});
+      expect(known.looksUnknown, isFalse);
+      expect(known.topDishes(1).single.key, 'com_tam');
+    });
+  });
+
   group('interpretOutputs', () {
     test('matches outputs by length in either order', () {
       final result = interpretOutputs([
@@ -281,7 +294,10 @@ void main() {
       dishesTxt: dishesFile.readAsStringSync(),
       componentsTxt: File('$modelFolder/components.txt').readAsStringSync(),
     );
-    expect(labels.dishes.where((code) => data.dish(code) == null), isEmpty);
+    expect(
+        labels.dishes
+            .where((code) => code != otherDishCode && data.dish(code) == null),
+        isEmpty);
     final addable = {for (final c in data.addableComponents) c.code};
     expect(labels.components.where((code) => !addable.contains(code)), isEmpty);
   });

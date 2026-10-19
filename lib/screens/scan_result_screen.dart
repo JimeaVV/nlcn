@@ -60,6 +60,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
       final top = result.topDishes(1);
       // A confident guess opens directly; otherwise the user picks.
       if (top.isNotEmpty &&
+          !result.looksUnknown &&
           top.first.value >= result.thresholds.confidentDish) {
         _choose(top.first.key);
       }
@@ -253,6 +254,8 @@ class _DishCard extends StatelessWidget {
           if (!modelAvailable)
             Text(l10n.scanModelPending,
                 style: TextStyle(color: CyberColors.muted))
+          else if (recognition.looksUnknown)
+            Text(l10n.scanNotInApp, style: TextStyle(color: CyberColors.muted))
           else if (top.isEmpty)
             Text(l10n.scanNoGuess, style: TextStyle(color: CyberColors.muted))
           else if (top.first.value < recognition.thresholds.confidentDish)

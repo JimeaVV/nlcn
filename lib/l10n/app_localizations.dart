@@ -2055,6 +2055,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.'**
   String get overloadBodyweightDecrease;
+
+  /// No description provided for @scanNotInApp.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.'**
+  String get scanNotInApp;
 }
 
 class _AppLocalizationsDelegate

@@ -5,14 +5,16 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.2**
+- `contract_version`: **1.3**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
   - 1.2: thêm thành phần `ga_chien` (gà chiên / xối mỡ), lên 25 thành phần,
     vì cơm gà ở quán thường là gà chiên; thêm bảng `meal_plan.csv` cho phần
-    gợi ý thực đơn (mục 4).
-- Cập nhật: 2026-10-17
+    gợi ý thực đơn (mục 4);
+  - 1.3: thêm 12 món có nhiều ảnh trong các bộ công khai (món 41–52), và
+    lớp `khac` ở cuối đầu ra `dish` cho món không có trong app (mục 6).
+- Cập nhật: 2026-10-19
 
 ---
 
@@ -31,10 +33,15 @@ Quy tắc đặt mã: chữ thường, không dấu, nối bằng `_`. Mã dùng
 nhãn trong `labels.csv`, thứ tự trong `dishes.txt` và khoá trong bảng dinh
 dưỡng của app.
 
-Gồm **40 món**:
+Gồm **52 món**:
 - món 1–20 là danh sách ban đầu, phần lớn có trong bộ ảnh 30VNFoods;
 - món 21–40 lấy theo bộ ảnh VinaFood21 (chỉ trùng `bo_kho` với danh sách
-  ban đầu).
+  ban đầu);
+- món 41–52 là các món phổ biến có nhiều ảnh trong 30VNFoods, 20FoodVN và
+  VietFood67.
+
+Model có thêm một đầu ra cuối cùng `khac` (món không có trong app), không
+nằm trong bảng này; xem mục 6.
 
 Món nào chỉ gồm một thứ (bánh tét, bắp nướng…) thì không cần gán nhãn thành
 phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
@@ -81,6 +88,18 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 | 38 | `canh_khoai_mo` | Canh khoai mỡ | VinaFood21 |
 | 39 | `canh_kho_qua` | Canh khổ qua | VinaFood21 |
 | 40 | `banh_mi_chao` | Bánh mì chảo | VinaFood21 |
+| 41 | `banh_chung` | Bánh chưng | 30VNFoods, VietFood67 |
+| 42 | `banh_khot` | Bánh khọt | 30VNFoods, VietFood67 |
+| 43 | `banh_beo` | Bánh bèo | 30VNFoods, VietFood67 |
+| 44 | `cao_lau` | Cao lầu | 30VNFoods, VietFood67 |
+| 45 | `bun_dau` | Bún đậu mắm tôm | 30VNFoods, VietFood67 |
+| 46 | `bun_mam` | Bún mắm | 30VNFoods, VietFood67 |
+| 47 | `chao_long` | Cháo lòng | 30VNFoods, 20FoodVN, VietFood67 |
+| 48 | `ca_kho` | Cá kho | 30VNFoods (cá kho tộ), 20FoodVN (cá lóc kho) |
+| 49 | `canh_chua` | Canh chua | 30VNFoods |
+| 50 | `trung_vit_lon` | Trứng vịt lộn | 20FoodVN |
+| 51 | `che` | Chè | 20FoodVN (chè Thái, chè bưởi) |
+| 52 | `nuoc_mia` | Nước mía | 20FoodVN |
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
@@ -224,6 +243,14 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 - `< 0.3`: ẩn, người dùng vẫn tự thêm được.
 
 Món có xác suất cao nhất dưới `0.5` thì app hiện top-3 cho người dùng chọn.
+
+**Lớp `khac` (từ v1.3):** dòng cuối của `dishes.txt` là `khac`. Lớp này
+train bằng ảnh của các món không có trong app, ví dụ gỏi ngó sen, lẩu,
+hamburger.
+- `khac` không có dinh dưỡng và không hiện trong danh sách gợi ý.
+- `khac` từ `threshold_confident_dish` trở lên thì app báo "có thể món này
+  chưa có trong app" và mở danh sách món cho người dùng chọn, không đoán bừa
+  một món gần giống.
 
 **Cách ghi ngưỡng trong `MODEL_CARD.md`** (từ v1.1): mỗi ngưỡng một dòng
 dạng `khoá: giá trị`, giá trị trong khoảng 0–1. Thiếu dòng nào thì app dùng
