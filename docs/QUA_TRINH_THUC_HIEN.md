@@ -1204,6 +1204,24 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   này fail với bố cục cũ và pass với bố cục mới. Đã build lại APK và cài lên
   điện thoại qua adb.
 
+### 2026-10-20 · Rung và vạch quét chưa thấy khi thử thật
+- **Vạch quét:** chỉ hiện trong lúc model đang chạy. Trên điện thoại, model
+  trả lời chưa tới nửa giây, còn shader cần thời gian nạp lần đầu, nên vạch
+  gần như không kịp hiện.
+  - Sửa: vạch luôn chạy đủ một lượt, 1,4 giây. Kết quả vẫn hiện ngay bên
+    dưới, không phải chờ.
+  - Shader được nạp sẵn từ lúc mở camera.
+- **Rung:** điện thoại thử là Xiaomi, đã bật rung khi chạm
+  (`haptic_feedback_enabled=1`). Nhưng `selectionClick` ứng với
+  `CLOCK_TICK`, mà nhiều máy Android không rung với kiểu này.
+  - Gom các kiểu rung vào `lib/core/haptics.dart`:
+    - tick hoặc chọn: `lightImpact` (VIRTUAL_KEY);
+    - nhận ra món: `mediumImpact`;
+    - bấm chụp và ghi xong: `vibrate` (LONG_PRESS), kiểu máy Android nào
+      cũng rung.
+- **Kiểm thử:** 158 test pass, có thêm test "model trả lời ngay mà vạch quét
+  vẫn chạy đủ một lượt". Đã build và cài lên điện thoại qua adb.
+
 ---
 
 ## 3. Việc còn tồn đọng

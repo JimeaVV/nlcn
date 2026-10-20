@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../core/cyber_theme.dart';
+import '../core/haptics.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
 import '../models/scan_plate.dart';
@@ -38,6 +39,11 @@ class ScanResultScreen extends StatefulWidget {
 class _ScanResultScreenState extends State<ScanResultScreen> {
   FoodRecognition _recognition = FoodRecognition.empty;
   bool _recognizing = true;
+
+  // The model answers in a fraction of a second, which hid the scan sweep;
+  // it now plays at least one full pass over the photo.
+  bool _sweepShown = true;
+  Timer? _sweepTimer;
   ScanPlate? _plate;
   MealSlot _meal = mealSlotFor(DateTime.now());
   bool _saving = false;
@@ -45,7 +51,16 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   @override
   void initState() {
     super.initState();
+    _sweepTimer = Timer(ScanSweep.onePass, () {
+      if (mounted) setState(() => _sweepShown = false);
+    });
     _recognize();
+  }
+
+  @override
+  void dispose() {
+    _sweepTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _recognize() async {
@@ -65,7 +80,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
           !result.looksUnknown &&
           top.first.value >= result.thresholds.confidentDish) {
         _choose(top.first.key);
-        HapticFeedback.lightImpact();
+        Haptics.found();
       }
     });
   }
@@ -155,7 +170,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
           languageCode: Localizations.localeOf(context).languageCode,
         ),
       );
-      HapticFeedback.mediumImpact();
+      Haptics.strong();
       if (mounted) Navigator.pop(context, true);
     } catch (_) {
       if (!mounted) return;
@@ -203,7 +218,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                             color: CyberColors.muted, size: 48),
                       ),
                     ),
-                    if (_recognizing) const ScanSweep(),
+                    if (_recognizing || _sweepShown) const ScanSweep(),
                   ],
                 ),
               ),
@@ -223,7 +238,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   data: widget.data,
                   selected: plate?.dish.code,
                   onChoose: (code) {
-                    HapticFeedback.selectionClick();
+                    Haptics.tap();
                     setState(() => _choose(code));
                   },
                   onPickOther: _pickDish,
@@ -429,7 +444,7 @@ class _ComponentsCardState extends State<_ComponentsCard> {
                   label: Text(_portionLabel(servings)),
                   selected: plate.portion == servings,
                   onSelected: (_) {
-                    HapticFeedback.selectionClick();
+                    Haptics.tap();
                     plate.portion = servings;
                     widget.onChanged();
                   },
@@ -526,7 +541,7 @@ class _ComponentRow extends StatelessWidget {
           Checkbox(
             value: item.included,
             onChanged: (value) {
-              HapticFeedback.selectionClick();
+              Haptics.tap();
               item.included = value ?? false;
               item.uncertain = false;
               onChanged();

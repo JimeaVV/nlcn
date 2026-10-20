@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../core/cyber_theme.dart';
+import '../core/haptics.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
 import '../services/database_service.dart';
@@ -14,6 +14,7 @@ import '../services/scan_camera.dart';
 import '../services/vn_food_repository.dart';
 import '../widgets/food_log_sheet.dart';
 import '../widgets/scan_button_face.dart';
+import '../widgets/scan_sweep.dart';
 import 'scan_result_screen.dart';
 
 /// Returns the path of a photo picked from the gallery, or null when
@@ -77,6 +78,8 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    // Load the sweep's shader now, so it is ready when the photo is.
+    ScanSweep.warmUp();
     WidgetsBinding.instance.addObserver(this);
     _openCamera();
   }
@@ -159,7 +162,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     String path;
     try {
       path = await camera.takePicture();
-      HapticFeedback.mediumImpact();
+      Haptics.strong();
     } catch (_) {
       if (mounted) {
         setState(() => _busy = false);

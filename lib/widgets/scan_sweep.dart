@@ -11,6 +11,12 @@ import '../core/cyber_theme.dart';
 class ScanSweep extends StatefulWidget {
   const ScanSweep({super.key});
 
+  /// One sweep from the top of the photo to the bottom.
+  static const onePass = Duration(milliseconds: 1400);
+
+  /// Starts loading the shader, so the first sweep does not wait for it.
+  static void warmUp() => _ScanSweepState._program;
+
   @override
   State<ScanSweep> createState() => _ScanSweepState();
 }
@@ -22,8 +28,8 @@ class _ScanSweepState extends State<ScanSweep>
           .then<ui.FragmentProgram?>((program) => program,
               onError: (_) => null);
 
-  late final AnimationController _sweep = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1800));
+  late final AnimationController _sweep =
+      AnimationController(vsync: this, duration: ScanSweep.onePass);
   ui.FragmentShader? _shader;
 
   @override

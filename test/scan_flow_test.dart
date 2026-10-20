@@ -9,6 +9,7 @@ import 'package:optifit/services/food_recognizer.dart';
 import 'package:optifit/services/scan_camera.dart';
 import 'package:optifit/services/vn_food_repository.dart';
 import 'package:optifit/widgets/scan_button_face.dart';
+import 'package:optifit/widgets/scan_sweep.dart';
 
 import 'helpers/localized_app.dart';
 import 'helpers/vn_food_fixture.dart';
@@ -145,6 +146,26 @@ void main() {
     expect(database.added.first.source, FoodLogSource.camera);
     expect(database.added.first.confidence, 0.97);
     expect(popped, isTrue);
+  });
+
+  testWidgets('the scan sweep plays a full pass even for an instant answer',
+      (tester) async {
+    _tall(tester);
+    await tester.pumpWidget(localizedApp(
+      home: ScanResultScreen(
+        imagePath: 'plate.jpg',
+        data: fixtureVnFood(),
+        recognizer: _Recognizer(const FoodRecognition(
+            dishes: {'com_tam': 0.9}, components: {'com': 0.9})),
+        database: _Database(),
+      ),
+    ));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Cơm tấm · 90%'), findsOneWidget, reason: 'not blocked');
+    expect(find.byType(ScanSweep), findsOneWidget);
+    await tester.pump(ScanSweep.onePass);
+    await tester.pump();
+    expect(find.byType(ScanSweep), findsNothing);
   });
 
   testWidgets('suggestions stay folded and the portion scales the dish',
