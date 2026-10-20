@@ -1139,4 +1139,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String scanMacroGrams(String protein, String carbs, String fat) {
     return 'Đạm $protein g · Tinh bột $carbs g · Béo $fat g';
   }
+
+  @override
+  String scanTiming(String total, String photo, String model) {
+    return 'Nhận diện trong $total s (ảnh $photo s · model $model s)';
+  }
 }

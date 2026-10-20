@@ -227,6 +227,9 @@ void main() {
       expect(identical(runner.lastInput, input), isTrue);
       expect(result.dishes['com_tam'], closeTo(0.7, 1e-6));
       expect(result.thresholds.checked, 0.9);
+      expect(result.timing, isNotNull, reason: 'shown on the result screen');
+      expect(
+          result.timing!.total, result.timing!.prepare + result.timing!.model);
     });
 
     test('runs photos one after another, never overlapping', () async {

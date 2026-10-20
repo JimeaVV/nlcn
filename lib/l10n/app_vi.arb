@@ -793,5 +793,19 @@
         "type": "String"
       }
     }
+  },
+  "scanTiming": "Nhận diện trong {total} s (ảnh {photo} s · model {model} s)",
+  "@scanTiming": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "photo": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
   }
 }

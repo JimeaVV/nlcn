@@ -362,6 +362,17 @@ class _DishCard extends StatelessWidget {
             Text(chosen.name(language),
                 style: Theme.of(context).textTheme.titleLarge),
           ],
+          if (recognition.timing case final timing?) ...[
+            const SizedBox(height: 8),
+            Text(
+              key: const ValueKey('scan-timing'),
+              l10n.scanTiming(
+                  _seconds(context, timing.total),
+                  _seconds(context, timing.prepare),
+                  _seconds(context, timing.model)),
+              style: TextStyle(color: CyberColors.muted, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: 10),
           OutlinedButton.icon(
             key: const ValueKey('scan-pick-dish'),
@@ -385,6 +396,9 @@ String _portionLabel(double servings) {
   final half = servings - whole >= .5 ? '½' : '';
   return '×${whole == 0 ? '' : whole}$half';
 }
+
+String _seconds(BuildContext context, Duration time) =>
+    context.formatNumber(time.inMilliseconds / 1000, decimals: 2);
 
 class _ComponentsCard extends StatefulWidget {
   const _ComponentsCard({

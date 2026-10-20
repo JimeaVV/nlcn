@@ -1,5 +1,6 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:isolate';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -49,7 +50,9 @@ class TfliteFoodRecognizer implements FoodRecognizer {
 
   @override
   Future<FoodRecognition> recognize(String imagePath) async {
+    final clock = Stopwatch()..start();
     final input = await _prepare(imagePath);
+    final prepared = clock.elapsed;
     final ModelRunner runner;
     try {
       runner = await (_runner ??= _openRunner());
@@ -59,7 +62,13 @@ class TfliteFoodRecognizer implements FoodRecognizer {
     }
     final outputs = _previousRun.then((_) => runner.run(input));
     _previousRun = outputs.then<void>((_) {}, onError: (_) {});
-    return interpretOutputs(await outputs, labels);
+    final result = interpretOutputs(await outputs, labels);
+    // The model time includes opening the interpreter on the first photo.
+    final timing =
+        RecognitionTiming(prepare: prepared, model: clock.elapsed - prepared);
+    debugPrint('Scan timing: photo ${timing.prepare.inMilliseconds} ms, '
+        'model ${timing.model.inMilliseconds} ms');
+    return result.withTiming(timing);
   }
 }
 
@@ -69,8 +78,12 @@ class TfliteModelRunner implements ModelRunner {
 
   static Future<ModelRunner> open(AssetBundle bundle) async {
     final data = await bundle.load(modelAsset);
+    // One thread by default; most phones have at least four cores.
+    final options = InterpreterOptions()
+      ..threads = math.min(4, Platform.numberOfProcessors);
     final interpreter = Interpreter.fromBuffer(
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+        options: options);
     try {
       interpreter.allocateTensors();
       final input = interpreter.getInputTensors();

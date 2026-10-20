@@ -2091,6 +2091,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g'**
   String scanMacroGrams(String protein, String carbs, String fat);
+
+  /// No description provided for @scanTiming.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhận diện trong {total} s (ảnh {photo} s · model {model} s)'**
+  String scanTiming(String total, String photo, String model);
 }
 
 class _AppLocalizationsDelegate

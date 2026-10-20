@@ -331,5 +331,6 @@
   "scanPortion": "Whole-dish portion",
   "scanSuggestions": "Might also be there ({count})",
   "scanSuggestionsChosen": "Might also be there ({count}) · {chosen} chosen",
-  "scanMacroGrams": "Protein {protein} g · Carbs {carbs} g · Fat {fat} g"
+  "scanMacroGrams": "Protein {protein} g · Carbs {carbs} g · Fat {fat} g",
+  "scanTiming": "Recognized in {total} s (photo {photo} s · model {model} s)"
 }

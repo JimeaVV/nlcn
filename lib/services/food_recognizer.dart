@@ -10,6 +10,7 @@ class FoodRecognition {
     this.components = const {},
     this.thresholds = RecognitionThresholds.contract,
     this.componentDishes,
+    this.timing,
   });
 
   static const empty = FoodRecognition();
@@ -27,6 +28,17 @@ class FoodRecognition {
   /// `component_dishes`). For any other dish the component outputs carry no
   /// meaning, so they are ignored. Null trusts them for every dish.
   final Set<String>? componentDishes;
+
+  /// How long this photo took, when a model ran.
+  final RecognitionTiming? timing;
+
+  FoodRecognition withTiming(RecognitionTiming timing) => FoodRecognition(
+        dishes: dishes,
+        components: components,
+        thresholds: thresholds,
+        componentDishes: componentDishes,
+        timing: timing,
+      );
 
   /// Whether [components] can be used for a photo of [dish].
   bool knowsComponentsOf(String dish) =>
@@ -47,6 +59,16 @@ class FoodRecognition {
 
   /// True when the model thinks the photo shows a dish outside the app.
   bool get looksUnknown => otherProbability >= thresholds.confidentDish;
+}
+
+/// Time spent on one photo: decoding and resizing it, then the model.
+class RecognitionTiming {
+  const RecognitionTiming({required this.prepare, required this.model});
+
+  final Duration prepare;
+  final Duration model;
+
+  Duration get total => prepare + model;
 }
 
 /// Thresholds for showing components. The contract sets the defaults; a

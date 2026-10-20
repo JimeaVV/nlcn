@@ -1148,4 +1148,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String scanMacroGrams(String protein, String carbs, String fat) {
     return 'Protein $protein g · Carbs $carbs g · Fat $fat g';
   }
+
+  @override
+  String scanTiming(String total, String photo, String model) {
+    return 'Recognized in $total s (photo $photo s · model $model s)';
+  }
 }

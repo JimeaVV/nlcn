@@ -166,6 +166,23 @@ void main() {
     await tester.pump(ScanSweep.onePass);
     await tester.pump();
     expect(find.byType(ScanSweep), findsNothing);
+    expect(find.byKey(const ValueKey('scan-timing')), findsNothing,
+        reason: 'no timing without a model run');
+  });
+
+  testWidgets('the result shows how long recognition took', (tester) async {
+    _tall(tester);
+    await _openResult(
+      tester,
+      recognizer: _Recognizer(const FoodRecognition(
+              dishes: {'com_tam': 0.9}, components: {'com': 0.9})
+          .withTiming(const RecognitionTiming(
+              prepare: Duration(milliseconds: 640),
+              model: Duration(milliseconds: 180)))),
+      database: _Database(),
+    );
+    expect(find.text('Nhận diện trong 0,82 s (ảnh 0,64 s · model 0,18 s)'),
+        findsOneWidget);
   });
 
   testWidgets('suggestions stay folded and the portion scales the dish',

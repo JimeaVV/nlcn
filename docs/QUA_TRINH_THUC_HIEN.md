@@ -1289,6 +1289,23 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   top-1 của lần train (56,25%), nghĩa là cách xử lý ảnh khớp với lúc train.
   Kết quả thật phải chạy trên Colab với checkpoint EfficientNetB0.
 
+### 2026-10-20 · Đo thời gian nhận diện trên điện thoại
+- **Vấn đề:** người B nghe nói EfficientNetB0 chạy hơi lag trên máy yếu.
+  Đọc code thì thấy hai chỗ có thể chậm hơn cả model:
+  - Bước chuẩn bị ảnh giải nén nguyên tấm ảnh chụp bằng Dart thuần, rồi mới
+    thu nhỏ về 224×224. Theo ghi chú trong code, bước này mất 1–2 giây, và
+    không phụ thuộc model nào.
+  - Interpreter LiteRT chạy với mặc định 1 luồng.
+- **Cách làm:** đo trước, sửa sau.
+  - App đo thời gian chuẩn bị ảnh và thời gian chạy model. Kết quả in vào
+    log (`Scan timing: …`) và hiện một dòng nhỏ trên màn kết quả quét, ví dụ
+    "Nhận diện trong 0,82 s (ảnh 0,64 s · model 0,18 s)". Nhờ vậy máy của
+    người B cũng đo được mà không cần adb.
+    - Lần quét đầu tiên, thời gian model gồm cả lúc mở interpreter.
+  - Bật đa luồng cho model: dùng số nhân CPU, tối đa 4 luồng.
+- **Kiểm thử:** 159 test pass. Đã cài lên điện thoại thử (Xiaomi, 8 nhân)
+  để đo.
+
 ---
 
 ## 3. Việc còn tồn đọng
