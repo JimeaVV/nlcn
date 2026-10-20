@@ -1583,6 +1583,42 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Phiên 3 chạy tiếp epoch 3 và báo `finished: true`. Thời gian train cộng
     dồn được 2,7 phút.
 
+### 2026-10-20 · Hướng dẫn và công cụ cho Claude Code trong repo
+- Mục đích: những quy tắc và lệnh hay dùng trước đây chỉ nằm trong bộ nhớ
+  của Claude trên máy Người A. Đưa chúng vào repo để Người B dùng Claude
+  cũng theo cùng quy tắc.
+- `CLAUDE.md`: Claude đọc file này mỗi khi mở phiên trong repo. Nội dung:
+  cấu trúc dự án, các lệnh CI chạy, và các quy tắc:
+  - ghi nhật ký này;
+  - commit không ghi Claude là đồng tác giả, chỉ push khi được bảo;
+  - không đụng tới keystore;
+  - số liệu dinh dưỡng phải có nguồn;
+  - đổi contract thì cập nhật đủ 4 nơi.
+- `CLAUDE.local.md`: đường dẫn Flutter, Android SDK, điện thoại test và mã
+  chứng chỉ của máy Người A. File này nằm trong `.gitignore` cùng
+  `.claude/settings.local.json`.
+- Skill `/build-apk`:
+  - các bước build APK arm64, chọn build number lớn hơn bản đang cài,
+    kiểm tra chữ ký release, đặt tên `MacroRunner-<model>-arm64.apk`;
+  - chỉ người dùng gọi được, vì nó cài app lên điện thoại.
+- Skill `train-notebook`: quy trình sửa notebook, gồm sửa file `.py`, sinh
+  lại `.ipynb`, thử nhanh, và tạo bản QUICK hoặc FULL gửi lên Kaggle hoặc
+  Colab.
+- Agent `model-contract-reviewer`:
+  - chỉ đọc; so contract, notebook, code app đọc model, các CSV dinh dưỡng
+    và model đang dùng;
+  - báo chỗ lệch cùng hậu quả khi app chạy (ví dụ lệch thứ tự `dishes.txt`
+    làm app hiện sai tên món).
+- Thử nhanh notebook (`tool/train/test/`): các script trước nằm trong thư
+  mục tạm, nay đưa vào repo.
+  - `make_fake_input.py` tạo dữ liệu giả theo đúng cách Kaggle sắp thư mục.
+  - `run_two_devices.py` giả lập 2 GPU.
+  - `run_fake_colab.py` giả lập Colab và Drive.
+  - `smoke_test.py` chạy notebook 3 epoch fine-tune rồi kiểm tra: đủ file
+    xuất, `finished: true`, log đủ 3 epoch, không sót file tạm. Thêm
+    `--resume` để cắt sau epoch 1 rồi chạy tiếp.
+  - Đã chạy cả 4 chế độ: 1 thiết bị, chạy tiếp, 2 thiết bị, Colab giả.
+
 ---
 
 ## 3. Việc còn tồn đọng

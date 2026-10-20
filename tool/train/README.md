@@ -8,6 +8,12 @@ train model hai đầu ra theo `docs/MODEL_CONTRACT.md` (contract 1.3), rồi xu
 Code gốc là `train_food_model.py`. Sửa file đó, rồi chạy
 `python tool/train/make_notebook.py` để sinh lại `.ipynb`.
 
+Thử notebook trên máy trước khi đưa lên Kaggle hoặc Colab:
+`python tool/train/test/smoke_test.py`, cần Python có tensorflow 2.18 và
+pillow. Script chạy notebook trên vài chục ảnh giả trong 3–6 phút. Thêm
+`--resume`, `--two-devices` hoặc `--colab` để thử chạy tiếp sau khi bị ngắt,
+chạy 2 GPU, hoặc chạy trên Colab.
+
 ## Chạy trên Kaggle (khuyên dùng)
 
 1. Tài khoản Kaggle đã xác minh số điện thoại (bắt buộc để dùng GPU).
