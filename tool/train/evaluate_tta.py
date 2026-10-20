@@ -57,8 +57,12 @@ import subprocess
 
 
 def fetch(file_id, name):
-    """A Drive file shared by link, saved into WORK."""
-    target = os.path.join(WORK, name)
+    """A Drive file shared by link, saved into a scratch folder."""
+    # A scratch folder: on Kaggle, WORK is the Output tab, which should hold
+    # only the results, not a 45 MB copy of the checkpoint.
+    folder = os.environ.get('DOWNLOAD_DIR', '/tmp/tta_inputs')
+    os.makedirs(folder, exist_ok=True)
+    target = os.path.join(folder, name)
     if not os.path.exists(target):
         subprocess.run(['curl', '-sL', '-o', target,
                         'https://drive.usercontent.google.com/download?id='
