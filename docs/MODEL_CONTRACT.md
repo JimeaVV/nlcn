@@ -5,7 +5,7 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.3**
+- `contract_version`: **1.4**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
@@ -14,7 +14,10 @@ nào thì phải báo người kia, tăng `contract_version` và ghi vào
     gợi ý thực đơn (mục 4);
   - 1.3: thêm 12 món có nhiều ảnh trong các bộ công khai (món 41–52), và
     lớp `khac` ở cuối đầu ra `dish` cho món không có trong app (mục 6).
-- Cập nhật: 2026-10-19
+  - 1.4: thêm 13 món đã có ảnh trong các bộ công khai nhưng trước đó bị gom
+    vào `khac` (món 53–65); `khac` còn lẩu và gỏi ngó sen. Kích thước ảnh
+    vào do model quyết định, app đọc từ file `.tflite` (mục 6).
+- Cập nhật: 2026-10-20
 
 ---
 
@@ -100,6 +103,19 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 | 50 | `trung_vit_lon` | Trứng vịt lộn | 20FoodVN |
 | 51 | `che` | Chè | 20FoodVN (chè Thái, chè bưởi) |
 | 52 | `nuoc_mia` | Nước mía | 20FoodVN |
+| 53 | `banh_trang_nuong` | Bánh tráng nướng | 30VNFoods |
+| 54 | `banh_gio` | Bánh giò | 30VNFoods |
+| 55 | `banh_bot_loc` | Bánh bột lọc | 30VNFoods |
+| 56 | `banh_duc` | Bánh đúc | 30VNFoods |
+| 57 | `nem_chua` | Nem chua | 30VNFoods |
+| 58 | `banh_pia` | Bánh pía | 30VNFoods |
+| 59 | `bun_ca` | Bún cá | 20FoodVN (bún cá), VietFood67 (bún chả cá) |
+| 60 | `khoai_tay_chien` | Khoai tây chiên | VietFood67 |
+| 61 | `salad` | Salad | VietFood67 |
+| 62 | `hamburger` | Hamburger | VietFood67 |
+| 63 | `nui_xao_bo` | Nui xào bò | VietFood67 |
+| 64 | `sup_cua` | Súp cua | VietFood67 |
+| 65 | `nom_hoa_chuoi` | Nộm hoa chuối | VietFood67 |
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
@@ -245,8 +261,9 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 Món có xác suất cao nhất dưới `0.5` thì app hiện top-3 cho người dùng chọn.
 
 **Lớp `khac` (từ v1.3):** dòng cuối của `dishes.txt` là `khac`. Lớp này
-train bằng ảnh của các món không có trong app, ví dụ gỏi ngó sen, lẩu,
-hamburger.
+train bằng ảnh của các món không có trong app. Từ v1.4 đó là lẩu (món ăn
+chung nồi, không tính được khẩu phần một người) và gỏi ngó sen; nếu gắn
+thêm bộ ảnh khác, lớp nào không khớp món của app cũng vào `khac`.
 - `khac` không có dinh dưỡng và không hiện trong danh sách gợi ý.
 - `khac` từ `threshold_confident_dish` trở lên thì app báo "có thể món này
   chưa có trong app" và mở danh sách món cho người dùng chọn, không đoán bừa

@@ -1361,6 +1361,43 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Kiểm thử:** 159 test pass. Có thêm test chạm giữa ảnh xem trước thì
   camera lấy nét đúng tâm (0,5; 0,5). Đã cài lên điện thoại thử.
 
+### 2026-10-20 · Contract v1.4: thêm 13 món đã có ảnh
+- **Quyết định của nhóm:** không làm thêm thí nghiệm nữa. Chốt train một
+  model EfficientNetB3 thật kỹ. Trước khi train thì thêm món.
+- **Món nào thêm được:** chỉ món đã có ảnh trong 4 bộ công khai. Đọc
+  `splits.csv` của lần train EfficientNetB0 thì thấy các lớp đang bị gom vào
+  `khac`:
+  - 30VNFoods: bánh tráng nướng, bánh giò, bánh bột lọc, bánh đúc, nem chua,
+    bánh pía;
+  - 20FoodVN: bún cá, gỏi ngó sen;
+  - khung VietFood67: bún chả cá, nộm hoa chuối, nui xào bò, súp cua, khoai
+    tây chiên, salad, hamburger, lẩu.
+
+  Thêm 13 món (53–65). `khac` giữ lại lẩu (món ăn chung nồi, không tính được
+  khẩu phần một người) và gỏi ngó sen. Bún cá gộp ảnh bún cá của 20FoodVN
+  và bún chả cá của VietFood67.
+  - Đồng thời thấy 25/52 món đang bị chặn ở mức 1.500 ảnh, nên lần train
+    sau sẽ nâng giới hạn này.
+- **Số liệu dinh dưỡng:**
+  - Lấy thẳng từ bảng Viện Dinh dưỡng: bánh giò (15017), bánh bột lọc
+    (15003), bánh đúc (15014 bánh đúc nóng; bánh đúc nguội 15013 là 88
+    kcal), nem chua (7073).
+  - Lấy thẳng từ USDA: khoai tây chiên (FNDDS 2709461; 1 phần vừa 117 g theo
+    SR 170698), hamburger (FNDDS 2706920, 1 cái 145 g).
+  - Tính theo công thức, có ghi là ước lượng (kcal/100 g): bánh tráng nướng
+    389, bánh pía 377, nước dùng và chả cá 51,7, salad có 15 g mayonnaise
+    85,5, nui xào (chưa có bò) 159, súp cua 34,9, nộm hoa chuối 85,5.
+  - Không dùng số "Nui, luộc" của Viện (371 kcal/100 g): đó là số của nui
+    khô. Dùng số nui đã nấu của USDA (SR 169737, 158 kcal).
+  - Đơn vị do nhóm ước lượng: bánh giò 150 g, bánh bột lọc 15 g, nem chua
+    25 g, bánh tráng nướng 70 g, bánh pía 100 g một cái.
+- **Gợi ý thực đơn:** gắn tag cho 13 món. Nem chua, salad, súp cua, nộm hoa
+  chuối dùng được khi giảm cân; khoai tây chiên và bánh pía chỉ dùng khi tăng
+  cân. Đo lại chất lượng thực đơn: không đổi (giảm cân 100/150, giữ cân và
+  tăng cân 150/150).
+- **Kiểm thử:** `check_vn_food.py` OK (84/84 thành phần có số liệu), 159
+  test pass (bảng món giờ có 65 món).
+
 ---
 
 ## 3. Việc còn tồn đọng

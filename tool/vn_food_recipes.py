@@ -79,8 +79,19 @@ FOODS = {
     'water': ('Nước lọc', 0, 0, 0, 0),
     'fdc171538': ('Beef broth, canned, ready-to-serve', 7, 1.14, 0.04, 0.22),
     'fdc174536': ('Chicken broth, ready-to-serve', 6, 0.64, 0.44, 0.21),
+    # Contract 1.4 dishes.
+    '1018': ('Bột mì trắng', 347, 11, 73.2, 1.1),
+    '4043': ('Hoa chuối', 28, 1.5, 5.5, 0),
+    '7077': ('Xúc xích', 535, 27.2, 0, 47.4),
+    '8033': ('Cua bể', 103, 17.5, 7, 0.6),
+    '13023': ('Sốt mayonnaise', 701, 0, 0.1, 77.8),
+    'fdc169737': ('Pasta, cooked, enriched, without added salt', 158, 5.8, 30.9, 0.93),
+    'fdc171401': ('Lard', 902, 0, 0, 100),
+    'fdc171606': ('Fish broth', 16, 2.0, 0.4, 0.6),
+    'fdc2706550': ('Fish, cake or patty', 212, 13.63, 10.4, 12.64),
+    'fdc2709822': ('Lettuce, salad with assorted vegetables, no dressing', 24, 1.07, 4.58, 0.2),
 }
-BEEF, CHICKEN = 'fdc171538', 'fdc174536'
+BEEF, CHICKEN, FISH = 'fdc171538', 'fdc174536', 'fdc171606'
 
 
 def broth(base, cooked, seasonings):
@@ -244,11 +255,45 @@ RECIPES = {
          '3010': 30, 'water': 250},
         450, None, 'chè thập cẩm: nước đường, cốt dừa, trân châu, nhãn, mít, '
         'đậu xanh'),
+    # Contract 1.4 dishes, recipes estimated by the team.
+    '_base_banh_trang_nuong': (
+        {'1010': 20, '9007': 25, '4038': 5, '8053': 3, '7077': 15,
+         '13023': 8, '6002': 2},
+        70, None, 'bánh tráng, 2 trứng cút, hành lá, tôm khô, xúc xích, sốt '
+        'mayonnaise; 1 cái = 70 g'),
+    '_base_banh_pia': (
+        {'1018': 35, 'fdc171401': 12, '3010': 20, '12014': 18, '9012': 5,
+         'water': 20},
+        100, None, 'vỏ bột mì và mỡ heo; nhân đậu xanh, đường, trứng; chưa '
+        'tính sầu riêng; 1 cái = 100 g'),
+    '_base_bun_ca': (
+        broth(FISH, 3000, {'fdc2706550': 400, '4005': 300, '13017': 40,
+                           '12014': 20, '13005': 15, '6002': 20, '4037': 30}),
+        3000, None, 'ước tính thấp: nước dùng cá USDA cộng chả cá, cà chua, '
+        'gia vị; bún, cá và rau tính riêng'),
+    '_base_salad': (
+        {'fdc2709822': 150, '13023': 15},
+        165, None, 'rau trộn có cà chua, cà rốt với 15 g sốt mayonnaise'),
+    '_base_nui_xao_bo': (
+        {'fdc169737': 200, '6002': 10, '4039': 30, '4005': 40, '13022': 10,
+         '12014': 3},
+        280, None, 'nui luộc xào hành tây, cà chua, xì dầu; thịt bò tính riêng'),
+    '_base_sup_cua': (
+        broth(CHICKEN, 1500, {'8033': 150, '9012': 100, '13046': 45,
+                              '4038': 10, '13017': 15, '13005': 6, '13004': 1}),
+        1500, None, 'ước tính thấp: nước gà USDA cộng thịt cua (tính như cua '
+        'bể), trứng, bột năng'),
+    '_base_nom_hoa_chuoi': (
+        {'4043': 200, '4007': 30, '4075': 10, '3017': 20, '13017': 15,
+         '12014': 15, '5003': 15, '4103': 5, '13039': 3},
+        310, None, 'hoa chuối, cà rốt, rau thơm, lạc rang, nước trộn; chưa tính '
+        'thịt gà hay tai heo'),
 }
 # Grams per natural unit: bánh xèo makes about 6 per batch, gỏi cuốn is the
 # 30 g roll above, and the team estimated a slice of chả trứng.
 UNITS = {'_base_banh_xeo': 835 / 6, '_base_goi_cuon': 30, 'cha_trung': 50,
-         '_base_banh_can': 280 / 12, '_base_banh_khot': 320 / 16}
+         '_base_banh_can': 280 / 12, '_base_banh_khot': 320 / 16,
+         '_base_banh_trang_nuong': 70, '_base_banh_pia': 100}
 
 
 def per_100g(ingredients, cooked):
