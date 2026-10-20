@@ -30,6 +30,10 @@
 #    is 26 GB). Results go to Google Drive, folder `macrorunner_train`.
 # 4. After the quick test, set `QUICK_TEST = False` and run all again in the
 #    same session, so nothing downloads twice. Keep the tab open.
+# 5. If Colab cuts the session off (the free GPU time runs out, the tab
+#    closes), run all again with the same settings: each epoch saves
+#    `last.keras` to Drive, and fine-tuning continues after the last finished
+#    epoch instead of starting over.
 #
 # The four public datasets are merged into one training set. Class folders are
 # renamed to the app's codes; classes the app does not have become "khac".
@@ -769,6 +773,10 @@ if len(tf.config.list_physical_devices('GPU')) > 1:
         cross_device_ops=tf.distribute.HierarchicalCopyAllReduce())
 else:
     strategy = tf.distribute.MirroredStrategy()
+# Grappler's add-op rewrite gives the loss a temporary variable that is
+# still alive when the next epoch starts, and training stops with
+# ALREADY_EXISTS at epoch 2. Without that rewrite a step is no slower here.
+tf.config.optimizer.set_experimental_options({'arithmetic_optimization': False})
 if MIXED_PRECISION == 'always' or (
         MIXED_PRECISION == 'gpu' and tf.config.list_physical_devices('GPU')):
     keras.mixed_precision.set_global_policy('mixed_float16')
@@ -895,23 +903,58 @@ def compile_model(learning_rate, weight_decay=0.0):
         )
 
 
-def callbacks(phase):
+import json
+
+CHECKPOINT = os.path.join(OUTPUT_DIR, 'checkpoint.keras')   # best so far
+LAST = os.path.join(OUTPUT_DIR, 'last.keras')               # where to resume
+PROGRESS = os.path.join(OUTPUT_DIR, 'progress.json')
+
+
+def read_progress():
+    try:
+        with open(PROGRESS) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def save_progress(phase, epoch, logs):
+    best = max(read_progress().get('best', -1.0),
+               float(logs.get('val_dish_accuracy', -1.0)))
+    with open(PROGRESS, 'w') as f:
+        json.dump({'phase': phase, 'epochs_done': epoch + 1, 'best': best,
+                   'backbone': BACKBONE, 'recipe': RECIPE,
+                   'quick_test': QUICK_TEST}, f)
+
+
+first_step = []   # phases whose first training step was logged
+
+
+def callbacks(phase, best=None):
+    """[best]: the best validation accuracy before a resume, so the best
+    checkpoint is only replaced by a better epoch."""
     return [
         keras.callbacks.ModelCheckpoint(
-            os.path.join(OUTPUT_DIR, 'checkpoint.keras'),
-            monitor='val_dish_accuracy', mode='max', save_best_only=True),
+            CHECKPOINT, monitor='val_dish_accuracy', mode='max',
+            save_best_only=True, initial_value_threshold=best),
+        # Every epoch, with the optimizer, so a cut-off session continues.
+        keras.callbacks.ModelCheckpoint(LAST),
         keras.callbacks.CSVLogger(
-            os.path.join(OUTPUT_DIR, f'training_log_{phase}.csv')),
+            os.path.join(OUTPUT_DIR, f'training_log_{phase}.csv'),
+            append=best is not None),
         keras.callbacks.EarlyStopping(monitor='val_dish_accuracy', mode='max',
                                       patience=6 if FULL else 3,
                                       restore_best_weights=True),
         # The first step shows the GPUs work together; then one line an epoch.
         keras.callbacks.LambdaCallback(
-            on_train_batch_end=lambda batch, logs: stage(
-                f'{phase}: first training step done') if batch == 0 else None,
-            on_epoch_end=lambda epoch, logs: stage(
-                f"{phase} epoch {epoch + 1}: val dish accuracy "
-                f"{logs.get('val_dish_accuracy', 0):.3f}")),
+            on_train_batch_end=lambda batch, logs: (
+                stage(f'{phase}: first training step done'),
+                first_step.append(phase)) if batch == 0 and
+            phase not in first_step else None,
+            on_epoch_end=lambda epoch, logs: (
+                save_progress(phase, epoch, logs),
+                stage(f"{phase} epoch {epoch + 1}: val dish accuracy "
+                      f"{logs.get('val_dish_accuracy', 0):.3f}"))),
     ]
 
 # %% [markdown]
@@ -925,12 +968,35 @@ def callbacks(phase):
 import time
 
 started = time.time()
-if EXPERIMENT == 'scratch':
+# A session cut off during fine-tuning (Colab's free GPU time, a closed tab)
+# continues from its last epoch when the notebook runs again with the same
+# settings: last.keras holds the model and the optimizer, learning-rate
+# schedule included.
+progress = read_progress()
+resume = (EXPERIMENT == 'finetune' and progress.get('phase') == 'fine' and
+          os.path.exists(LAST) and
+          all(progress.get(k) == v for k, v in (
+              ('backbone', BACKBONE), ('recipe', RECIPE),
+              ('quick_test', QUICK_TEST))) and
+          progress.get('epochs_done', 0) < EPOCHS_FINE)
+if resume:
+    stage(f"resuming fine-tuning after epoch {progress['epochs_done']} "
+          f"(best val {progress['best']:.3f})")
+    with strategy.scope():
+        model = keras.models.load_model(
+            LAST, custom_objects={'masked_bce': masked_bce})
+    model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS_FINE,
+              initial_epoch=progress['epochs_done'],
+              callbacks=callbacks('fine', best=progress['best']))
+elif EXPERIMENT == 'scratch':
     base.trainable = True
     compile_model(1e-3)
     model.fit(train_ds, validation_data=val_ds,
               epochs=EPOCHS_HEAD + EPOCHS_FINE, callbacks=callbacks('scratch'))
 else:
+    for stale in (PROGRESS, LAST):   # a fresh run
+        if os.path.exists(stale):
+            os.remove(stale)
     base.trainable = False
     compile_model(1e-3)
     model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS_HEAD,
@@ -956,6 +1022,12 @@ else:
                   callbacks=callbacks('fine'))
 train_minutes = (time.time() - started) / 60
 print(f'Training took {train_minutes:.1f} min')
+# The best epoch over the whole run, also across resumed sessions.
+if os.path.exists(CHECKPOINT):
+    best_model = keras.models.load_model(
+        CHECKPOINT, custom_objects={'masked_bce': masked_bce}, compile=False)
+    model.set_weights(best_model.get_weights())
+    del best_model
 
 # %% [markdown]
 # ## Evaluate on the test set

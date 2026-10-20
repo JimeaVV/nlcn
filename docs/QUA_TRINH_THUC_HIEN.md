@@ -1498,6 +1498,40 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Theo dõi bằng phiên tương tác trong trình soạn notebook của Kaggle: kết
     quả hiện ngay dưới từng ô, không bị trễ như trang log.
 
+### 2026-10-20 · Train tiếp được khi Colab ngắt phiên, sửa lỗi dừng ở epoch 2
+- Kết quả bản QUICK của B3 trên Kaggle (bản trước khi sửa phần đọc nhãn):
+  chạy hết 64 phút, trong đó 57 phút chỉ để đọc nhãn VietFood67 trên ổ mạng.
+  Phần train chỉ mất 4 phút. Chuyển sang int8 và float16 đều chạy được.
+  - File float16 nặng 21,8 MB, chạy 89 ms một ảnh trên CPU của Kaggle.
+  - File int8 nặng 11,9 MB.
+  - Top-1 trên mẫu test là 0,203 (int8) so với 0,234 (float16). Đây là bản
+    QUICK (512 ảnh, 1 epoch) nên chỉ cho biết các bước chạy được, không nói
+    gì về độ chính xác thật.
+- Ba món chưa có ảnh nào: `com_ga`, `pho_ga`, `chao`.
+- Thử train 3 epoch fine-tune trên máy thì gặp lỗi `AlreadyExistsError ...
+  ArithmeticOptimizer/AddOpsRewrite ... tmp_var` ở đầu epoch thứ 2.
+  - Bản đã commit trước đó cũng bị, nên đây là lỗi có sẵn của cách train
+    `full` chứ không phải do phần chạy tiếp.
+  - Các lần chạy trước không thấy lỗi vì bản QUICK chỉ có 1 epoch fine-tune,
+    còn bản FULL của B3 chưa chạy lần nào. Nếu không sửa, bản FULL sẽ dừng
+    ngay sau epoch fine-tune đầu tiên.
+  - Sửa: tắt bước `arithmetic_optimization` của Grappler. Sau khi sửa, chạy
+    đủ 3 epoch cả trên 1 thiết bị lẫn 2 thiết bị (giả lập 2 T4).
+- Chạy tiếp khi bị ngắt phiên: bản FULL của B3 ước tính 7–8 giờ, dễ bị Colab
+  ngắt giữa chừng.
+  - Mỗi epoch lưu `last.keras` (model kèm optimizer và lịch learning rate)
+    và `progress.json` vào thư mục kết quả trên Drive.
+  - Chạy lại notebook với cùng backbone, cách train và `QUICK_TEST` thì nó
+    nạp `last.keras` và train tiếp từ epoch kế tiếp.
+  - `checkpoint.keras` vẫn giữ epoch tốt nhất của cả quá trình, kể cả qua
+    nhiều lần chạy tiếp. Khi train xong, model lấy lại trọng số của epoch đó
+    rồi mới đánh giá và xuất TFLite.
+  - Đã thử: cố ý dừng sau epoch 2, chạy lại thì nó báo "resuming fine-tuning
+    after epoch 2 (best val 0.833)", train epoch 3, và `training_log_fine.csv`
+    nối đủ 3 dòng.
+- Dòng "first training step done" chỉ in ở epoch đầu mỗi giai đoạn thay vì
+  mọi epoch.
+
 ---
 
 ## 3. Việc còn tồn đọng
