@@ -1222,6 +1222,44 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Kiểm thử:** 158 test pass, có thêm test "model trả lời ngay mà vạch quét
   vẫn chạy đủ một lượt". Đã build và cài lên điện thoại qua adb.
 
+### 2026-10-20 · So sánh 3 backbone: EfficientNetB0 thắng
+- **Thiết lập:**
+  - Cả 4 bản chạy dùng cùng notebook (ảnh thu nhỏ 384 px), cùng thí nghiệm
+    `finetune`, cùng cách chia dữ liệu (38.677 train / 8.287 val / 8.287
+    test). Đều train trên Colab, 1 GPU T4.
+  - Người A train MobileNetV3. Người B train EfficientNetB0,
+    EfficientNetV2-B0, và một bản MobileNetV3 nữa.
+- **Kết quả** (`tool/train/compare_results.py`):
+
+  | Backbone | Val top-1 | Test top-1 | Test top-3 | F1 thành phần | TFLite | CPU Colab / ảnh | Train |
+  |---|---|---|---|---|---|---|---|
+  | **EfficientNetB0 (chọn)** | **69,0%** | **68,8%** | **83,9%** | 0,497 | 8,3 MB | 21,9 ms | 55 phút |
+  | EfficientNetV2-B0 | 68,5% | 68,5% | 83,1% | 0,504 | 12,0 MB | 27,8 ms | 53 phút |
+  | MobileNetV3 (người A) | 67,8% | 67,4% | 82,5% | 0,482 | 6,2 MB | 11,4 ms | 45 phút |
+  | MobileNetV3 (người B) | 67,7% | 67,1% | 82,2% | 0,482 | 6,2 MB | 8,3 ms | 53 phút |
+
+- **Nhận xét:**
+  - Hai lần train MobileNetV3 độc lập chỉ lệch nhau 0,1 điểm % (val). Nên
+    khoảng cách 1,1 điểm % giữa EfficientNetB0 và MobileNetV3 lớn hơn nhiều
+    so với độ dao động giữa các lần chạy.
+  - EfficientNetB0 hơn EfficientNetV2-B0 0,5 điểm %, file nhỏ hơn
+    (8,3 so với 12 MB) và nhanh hơn. Theo luật chọn đã chốt, EfficientNetB0
+    thắng.
+  - Đổi lại, EfficientNetB0 chạy chậm gấp khoảng 2 lần MobileNetV3, file
+    nặng hơn 2,1 MB.
+  - Theo từng món, EfficientNetB0 tốt hơn rõ ở bún chả (66,7% so với
+    52,9%), hủ tiếu (58,2% so với 45,8%), xôi, bún riêu, bánh khọt. Nhưng
+    **cơm phần giảm từ 46,7% xuống 35,1%**, trong khi đây là món cơm nhà quan
+    trọng. Bò kho và bún bò Huế cũng giảm.
+  - Lớp `khac` của cả ba backbone đều chỉ khoảng 37–39%.
+  - Ngưỡng tick thành phần của cả ba đều bị chỉnh xuống mức thấp nhất của
+    lưới thử (0,3).
+- **Việc tiếp theo:** đưa EfficientNetB0 vào app, rồi nâng cấp contract
+  1.4:
+  - gán nhãn "không có" theo công thức món;
+  - chọn ngưỡng tick theo precision;
+  - thêm ảnh tự chụp, nhất là cơm phần, cơm gà, phở gà, cháo gà.
+
 ---
 
 ## 3. Việc còn tồn đọng
