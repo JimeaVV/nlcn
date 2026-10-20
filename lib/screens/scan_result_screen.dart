@@ -248,12 +248,26 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                 const SizedBox(height: 14),
                 _Appear(
                   delay: 1,
-                  child: _ComponentsCard(
-                    // Another dish starts with its suggestions folded.
-                    key: ValueKey('components-${plate.dish.code}'),
-                    plate: plate,
-                    onChanged: () => setState(() {}),
-                    onAdd: _addComponent,
+                  // Switching dish cross-fades the list and eases its height,
+                  // instead of shifting everything below in one frame.
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 180),
+                      layoutBuilder: (current, previous) => Stack(
+                        alignment: Alignment.topCenter,
+                        children: [...previous, if (current != null) current],
+                      ),
+                      child: _ComponentsCard(
+                        // Another dish starts with its suggestions folded.
+                        key: ValueKey('components-${plate.dish.code}'),
+                        plate: plate,
+                        onChanged: () => setState(() {}),
+                        onAdd: _addComponent,
+                      ),
+                    ),
                   ),
                 ),
                 if (plate.selected.isEmpty) ...[
@@ -346,6 +360,8 @@ class _DishCard extends StatelessWidget {
               children: [
                 for (final guess in top)
                   ChoiceChip(
+                    // A checkmark would widen the chip and re-wrap the row.
+                    showCheckmark: false,
                     key: ValueKey('guess-${guess.key}'),
                     selected: guess.key == selected,
                     label: Text(
@@ -454,6 +470,8 @@ class _ComponentsCardState extends State<_ComponentsCard> {
             children: [
               for (final servings in _portions)
                 ChoiceChip(
+                  // A checkmark would widen the chip and re-wrap the row.
+                  showCheckmark: false,
                   key: ValueKey('portion-$servings'),
                   label: Text(_portionLabel(servings)),
                   selected: plate.portion == servings,
@@ -662,7 +680,7 @@ class _TotalBar extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
             child: TweenAnimationBuilder<_Totals>(
               tween: _TotalsTween(end: _Totals.of(plate)),
-              duration: const Duration(milliseconds: 380),
+              duration: const Duration(milliseconds: 260),
               curve: Curves.easeOutCubic,
               builder: (context, totals, _) => Column(
                 mainAxisSize: MainAxisSize.min,

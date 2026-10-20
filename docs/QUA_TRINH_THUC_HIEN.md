@@ -1316,6 +1316,24 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Kiểm thử:** 159 test pass. Đã cài lên điện thoại thử (Xiaomi, 8 nhân)
   để đo.
 
+### 2026-10-20 · Màn kết quả quét bị giật khi đổi món
+- **Phân tích video quay màn hình** (4,6 giây, khoảng 31 khung/giây): khoảng
+  cách giữa các khung đều 32 ms, tức là không rớt khung. Cái "giật" là do bố
+  cục nhảy:
+  - Chip món đang chọn có dấu ✓ nên rộng ra, làm hàng chip xếp lại dòng.
+  - Danh sách thành phần đổi tức thì (Há cảo 1 dòng, Bò lá lốt 3 dòng), nên
+    mọi thứ bên dưới bị đẩy đi trong một khung hình.
+  - Số kcal chạy 380 ms đúng lúc bố cục đang nhảy.
+- **Cách sửa:**
+  - Bỏ dấu ✓ trên chip món và chip khẩu phần; chip đang chọn vẫn được tô màu.
+  - Khi đổi món, danh sách thành phần mờ dần sang danh sách mới (180 ms), và
+    chiều cao đổi từ từ (220 ms).
+  - Số kcal chạy nhanh hơn: 260 ms thay vì 380 ms.
+- **Kiểm thử:** 159 test pass. Đã cài lên điện thoại thử.
+  - Log `Scan timing` không đọc được qua adb trên máy Xiaomi này (có thể máy
+    chặn log của app bản release), nên dùng dòng thời gian hiện trên màn
+    hình.
+
 ---
 
 ## 3. Việc còn tồn đọng
