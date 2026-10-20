@@ -119,6 +119,11 @@ Mặc định notebook giờ train EfficientNetB3 với ảnh vào 300×300
 - xuất thêm `food_v1_int8.tflite` (nhỏ một nửa), kèm độ chính xác đo trên
   cùng ảnh test để so với bản float16.
 
+Muốn train model khác trong họ EfficientNet thì chỉ cần đổi tên, ví dụ
+`BACKBONE = 'efficientnetb1'` hoặc `'efficientnetb2'` (B0 tới B7 đều được).
+Notebook tự chọn kích thước ảnh vào theo đúng model đó: 224, 240, 260, 300,
+380, 456, 528, 600. Ảnh thu nhỏ cũng tự lớn theo, để mảnh cắt 60% vẫn đủ.
+
 `DISH_PARTS` và `DISHES` trong notebook phải khớp bảng dữ liệu:
 `python tool/check_vn_food.py` kiểm tra điều này.
 

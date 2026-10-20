@@ -1465,6 +1465,14 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   thẻ model (ví dụ `tta_views: photo, closer`). Mức lợi trên EfficientNetB3
   có thể khác B0, nên cần đo lại khi B3 train xong.
 
+### 2026-10-20 · Notebook train được mọi EfficientNet B0–B7
+- Chỉ cần đổi `BACKBONE = 'efficientnetbN'`. Notebook tự lấy kích thước ảnh
+  vào gốc của model đó (B0 224, B1 240, B2 260, B3 300, B4 380, B5 456, B6
+  528, B7 600). Ảnh thu nhỏ cũng tự lớn theo để mảnh cắt 60% vẫn đủ: B1
+  416 px, B2 448 px, B3 512 px.
+- Đã thử B2 trên dữ liệu giả: chạy trọn tới bước xuất file, ảnh vào 260×260,
+  float16 15,7 MB, int8 8,7 MB.
+
 ---
 
 ## 3. Việc còn tồn đọng

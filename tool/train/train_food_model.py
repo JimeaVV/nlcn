@@ -42,8 +42,9 @@ import os
 
 QUICK_TEST = True          # True: a few hundred images, 1 epoch per phase.
 EXPERIMENT = 'finetune'    # 'scratch' | 'linear' | 'finetune' (report §3)
-BACKBONE = 'efficientnetb3'  # 'efficientnetb3' (ships) | 'efficientnetb0' |
-                             # 'efficientnetv2b0' | 'mobilenetv3'
+BACKBONE = 'efficientnetb3'  # 'efficientnetb3' (ships); any 'efficientnetb0'
+                             # to 'efficientnetb7'; 'efficientnetv2b0';
+                             # 'mobilenetv3'
 # 'full': the whole backbone fine-tuned with a warm-up and cosine learning
 # rate, label smoothing and more photos per dish (the model the app ships).
 # 'light': the top 40% at a fixed rate (the backbone comparison of v1.3).
@@ -54,7 +55,11 @@ OUTPUT_DIR = os.environ.get('OUTPUT_DIR', '/kaggle/working')
 SEED = 42
 FULL = RECIPE == 'full'
 # Each backbone's own input size; the app reads it from the .tflite file.
-IMG = {'efficientnetb3': 300}.get(BACKBONE, 224)
+# EfficientNet B0–B7 use the sizes they were designed and pretrained for.
+EFFICIENTNET_SIZES = {0: 224, 1: 240, 2: 260, 3: 300, 4: 380, 5: 456, 6: 528,
+                      7: 600}
+IMG = (EFFICIENTNET_SIZES[int(BACKBONE[-1])]
+       if BACKBONE[:-1] == 'efficientnetb' else 224)
 BATCH = 16 if QUICK_TEST else 64       # total, split across the GPUs
 EPOCHS_HEAD = 1 if QUICK_TEST else (3 if FULL else 5)    # backbone frozen
 EPOCHS_FINE = 1 if QUICK_TEST else (30 if FULL else 15)  # backbone learning
@@ -816,13 +821,11 @@ def build_model():
                   weights=weights, include_preprocessing=True)
     if BACKBONE == 'mobilenetv3':
         base = keras.applications.MobileNetV3Large(**common)
-    elif BACKBONE == 'efficientnetb0':
+    elif BACKBONE[:-1] == 'efficientnetb' and BACKBONE[-1] in '01234567':
         # Always normalizes raw 0–255 RGB itself, so it has no switch for it.
         del common['include_preprocessing']
-        base = keras.applications.EfficientNetB0(**common)
-    elif BACKBONE == 'efficientnetb3':
-        del common['include_preprocessing']   # built in, like B0
-        base = keras.applications.EfficientNetB3(**common)
+        base = getattr(keras.applications,
+                       f'EfficientNetB{BACKBONE[-1]}')(**common)
     elif BACKBONE == 'efficientnetv2b0':
         base = keras.applications.EfficientNetV2B0(**common)
     else:
