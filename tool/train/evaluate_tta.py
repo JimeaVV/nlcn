@@ -87,9 +87,12 @@ if ON_COLAB:
         print(f'Downloading {ref} ...', flush=True)
         path = kagglehub.dataset_download(ref)
         link = os.path.join(INPUT_ROOT, ref.split('/')[1])
+        # A link left from an earlier session may point at a deleted cache.
+        if os.path.islink(link) and os.path.realpath(link) != os.path.realpath(path):
+            os.remove(link)
         if not os.path.lexists(link):
             os.symlink(path, link)
-        print(f'  done in {time.time() - started:.0f} s', flush=True)
+        print(f'  done in {time.time() - started:.0f} s: {path}', flush=True)
 
 # %% [markdown]
 # ## Test photos, prepared exactly like the training run's test set
@@ -128,14 +131,44 @@ def shrink(path):
     return target
 
 
+SLUGS = [ref.split('/')[1] for ref in KAGGLE_DATASETS]
+
+
+def locate(path):
+    """[path] if it exists, else the same file under this session's
+    INPUT_ROOT. splits.csv keeps the paths of the training session, which
+    may have been Kaggle (/kaggle/input/...) or another Colab session."""
+    if os.path.exists(path):
+        return path
+    parts = path.replace('\\', '/').split('/')
+    for i, part in enumerate(parts):
+        if part in SLUGS:
+            moved = os.path.join(INPUT_ROOT, part, *parts[i + 1:])
+            if os.path.exists(moved):
+                return moved
+    return None
+
+
 OUTPUTS = [line.strip() for line in open(DISHES_TXT, encoding='utf-8')
            if line.strip()]
 INDEX = {code: i for i, code in enumerate(OUTPUTS)}
 with open(SPLITS, encoding='utf-8') as f:
     rows = [r for r in csv.DictReader(f) if r['split'] == 'test']
+found = [locate(r['file']) for r in rows]
+missing = [r['file'] for r, f in zip(rows, found) if f is None]
+if missing:
+    print(f'{len(missing)} test photos not found, e.g. {missing[0]}')
+    for slug in SLUGS:
+        root = os.path.join(INPUT_ROOT, slug)
+        print(f'  {root}:', sorted(os.listdir(root))[:5]
+              if os.path.isdir(root) else 'missing')
+if len(missing) == len(rows):
+    raise RuntimeError(
+        'None of the test photos were found. Check that the download cell '
+        'above finished for all four datasets, then run this cell again.')
 started = time.time()
 with ThreadPoolExecutor(32) as pool:
-    files = list(pool.map(shrink, [r['file'] for r in rows]))
+    files = list(pool.map(lambda f: f and shrink(f), found))
 test = [(file, INDEX[r['dish']]) for r, file in zip(rows, files)
         if file is not None and r['dish'] in INDEX]
 print(f'{len(test)} of {len(rows)} test photos ready in '

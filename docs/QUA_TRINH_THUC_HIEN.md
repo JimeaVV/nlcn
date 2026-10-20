@@ -1288,6 +1288,16 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Đã thử trên máy** (dữ liệu giả): dòng "ảnh như hiện tại" ra đúng test
   top-1 của lần train (56,25%), nghĩa là cách xử lý ảnh khớp với lúc train.
   Kết quả thật phải chạy trên Colab với checkpoint EfficientNetB0.
+- **Lần chạy đầu trên Colab báo "0 of 8287 test photos":** không tìm thấy
+  ảnh nào theo đường dẫn trong `splits.csv`.
+  - Sửa: notebook tìm lại từng ảnh theo tên bộ ảnh dưới thư mục dữ liệu của
+    phiên hiện tại. Cách này chạy đúng cả khi lần train chạy trên Kaggle
+    hoặc ở một phiên Colab khác.
+  - Link cũ trỏ vào cache đã bị xóa thì được tạo lại.
+  - Nếu vẫn thiếu ảnh, notebook in ra ảnh bị thiếu và nội dung các thư mục
+    dữ liệu. Không thấy ảnh nào thì dừng với thông báo rõ ràng, thay vì lỗi
+    TensorFlow khó hiểu.
+  - Đã thử với đường dẫn kiểu Kaggle trên dữ liệu giả: vẫn ra đúng 56,25%.
 
 ### 2026-10-20 · Đo thời gian nhận diện trên điện thoại
 - **Vấn đề:** người B nghe nói EfficientNetB0 chạy hơi lag trên máy yếu.
