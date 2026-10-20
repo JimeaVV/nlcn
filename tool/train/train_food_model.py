@@ -39,16 +39,30 @@ import os
 
 QUICK_TEST = True          # True: a few hundred images, 1 epoch per phase.
 EXPERIMENT = 'finetune'    # 'scratch' | 'linear' | 'finetune' (report §3)
-BACKBONE = 'mobilenetv3'   # 'mobilenetv3' | 'efficientnetb0' | 'efficientnetv2b0'
+BACKBONE = 'efficientnetb3'  # 'efficientnetb3' (ships) | 'efficientnetb0' |
+                             # 'efficientnetv2b0' | 'mobilenetv3'
+# 'full': the whole backbone fine-tuned with a warm-up and cosine learning
+# rate, label smoothing and more photos per dish (the model the app ships).
+# 'light': the top 40% at a fixed rate (the backbone comparison of v1.3).
+RECIPE = 'full'
 
 INPUT_ROOT = os.environ.get('INPUT_ROOT', '/kaggle/input')
 OUTPUT_DIR = os.environ.get('OUTPUT_DIR', '/kaggle/working')
 SEED = 42
-IMG = 224
+FULL = RECIPE == 'full'
+# Each backbone's own input size; the app reads it from the .tflite file.
+IMG = {'efficientnetb3': 300}.get(BACKBONE, 224)
 BATCH = 16 if QUICK_TEST else 64       # total, split across the GPUs
-EPOCHS_HEAD = 1 if QUICK_TEST else 5    # backbone frozen
-EPOCHS_FINE = 1 if QUICK_TEST else 15   # top of the backbone unfrozen
-MAX_PER_DISH = 12 if QUICK_TEST else 1500  # caps the largest classes
+EPOCHS_HEAD = 1 if QUICK_TEST else (3 if FULL else 5)    # backbone frozen
+EPOCHS_FINE = 1 if QUICK_TEST else (30 if FULL else 15)  # backbone learning
+# Caps the largest classes. 1,500 held 25 dishes back in v1.3.
+MAX_PER_DISH = 12 if QUICK_TEST else (4000 if FULL else 1500)
+# Dishes with fewer training photos are repeated up to this many, so the
+# large classes do not drown them (random crops make the repeats differ).
+MIN_TRAIN_PER_DISH = 0 if QUICK_TEST or not FULL else 300
+# float16 maths on the T4's tensor cores: about twice as fast. Weights and
+# the exported model stay float32.
+MIXED_PRECISION = os.environ.get('MIXED_PRECISION', 'gpu')
 # Photos of food the app does not know become the extra class "khac", so the
 # model can say "not in the app" instead of forcing a close match.
 USE_OTHER = True
@@ -135,7 +149,7 @@ print('Photos from', INPUT_ROOT, '| results to', OUTPUT_DIR)
 # which this notebook writes at the end.
 
 # %%
-CONTRACT_VERSION = '1.3'
+CONTRACT_VERSION = '1.4'
 DISHES = [
     'com_tam', 'com_phan', 'com_ga', 'com_chien', 'pho_bo', 'pho_ga',
     'bun_bo_hue', 'bun_cha', 'bun_rieu', 'bun_thit_nuong', 'hu_tieu',
@@ -147,6 +161,10 @@ DISHES = [
     'canh_kho_qua', 'banh_mi_chao', 'banh_chung', 'banh_khot', 'banh_beo',
     'cao_lau', 'bun_dau', 'bun_mam', 'chao_long', 'ca_kho', 'canh_chua',
     'trung_vit_lon', 'che', 'nuoc_mia',
+    # 1.4: dishes the public datasets have, which were "khac" before.
+    'banh_trang_nuong', 'banh_gio', 'banh_bot_loc', 'banh_duc', 'nem_chua',
+    'banh_pia', 'bun_ca', 'khoai_tay_chien', 'salad', 'hamburger',
+    'nui_xao_bo', 'sup_cua', 'nom_hoa_chuoi',
 ]
 OTHER = 'khac'   # last dish output; not an app dish (contract §6)
 COMPONENTS = [
@@ -155,8 +173,80 @@ COMPONENTS = [
     'ga', 'ga_chien', 'bo', 'ca', 'tom', 'dau_hu', 'cha_lua', 'rau_song',
     'rau_nau', 'do_chua', 'dua_leo_ca_chua', 'mo_hanh',
 ]
-assert len(DISHES) == 52 and len(COMPONENTS) == 25
+assert len(DISHES) == 65 and len(COMPONENTS) == 25
 OUTPUTS = DISHES + ([OTHER] if USE_OTHER else [])
+# Components each dish's recipe lists (assets/data/vn_food/dishes.csv; checked
+# by tool/check_vn_food.py). A component outside a dish's recipe is taken as
+# absent from its photos, so every photo teaches the component output, not
+# only the VietFood67 ones with boxes.
+DISH_PARTS = {
+    'com_tam': ('com', 'suon_nuong', 'bi', 'cha_trung', 'trung_op_la', 'do_chua', 'dua_leo_ca_chua', 'mo_hanh'),
+    'com_phan': ('com', 'thit_kho', 'trung_kho', 'ca', 'ga', 'ga_chien', 'dau_hu', 'rau_nau'),
+    'com_ga': ('com', 'ga_chien', 'dua_leo_ca_chua', 'rau_song'),
+    'com_chien': ('com', 'trung_op_la', 'ga', 'tom', 'dua_leo_ca_chua'),
+    'pho_bo': ('banh_pho', 'bo', 'rau_song'),
+    'pho_ga': ('banh_pho', 'ga', 'rau_song'),
+    'bun_bo_hue': ('bun', 'bo', 'cha_lua', 'rau_song'),
+    'bun_cha': ('bun', 'thit_nuong', 'rau_song', 'do_chua'),
+    'bun_rieu': ('bun', 'dau_hu', 'cha_lua', 'rau_song'),
+    'bun_thit_nuong': ('bun', 'thit_nuong', 'rau_song', 'do_chua', 'mo_hanh'),
+    'hu_tieu': ('mi', 'tom', 'rau_song'),
+    'mi_quang': ('mi', 'tom', 'trung_kho', 'rau_song'),
+    'banh_canh': ('mi', 'tom', 'cha_lua'),
+    'bo_kho': ('bo', 'banh_mi_o'),
+    'chao': ('ga',),
+    'banh_mi': ('banh_mi_o', 'cha_lua', 'thit_nuong', 'trung_op_la', 'do_chua', 'dua_leo_ca_chua', 'rau_song'),
+    'banh_cuon': ('cha_lua', 'rau_song'),
+    'banh_xeo': ('tom', 'rau_song'),
+    'goi_cuon': ('bun', 'tom', 'rau_song'),
+    'xoi': ('xoi_nep', 'cha_lua', 'trung_kho', 'mo_hanh'),
+    'bo_la_lot': ('bun', 'rau_song'),
+    'ha_cao': (),
+    'banh_uot': ('cha_lua', 'rau_song'),
+    'banh_hoi': ('thit_nuong', 'rau_song', 'mo_hanh'),
+    'thit_kho_trung': ('thit_kho', 'trung_kho', 'com'),
+    'banh_can': (),
+    'ca_ri': ('ga', 'banh_mi_o'),
+    'bap_nuong': (),
+    'banh_trang_tron': (),
+    'hoanh_thanh_nuoc': (),
+    'pha_lau': ('banh_mi_o',),
+    'tau_hu': (),
+    'bot_chien': (),
+    'ga_nuong': ('ga', 'rau_song', 'dua_leo_ca_chua'),
+    'banh_u': (),
+    'banh_tet': (),
+    'goi_ga': ('ga', 'rau_song'),
+    'canh_khoai_mo': (),
+    'canh_kho_qua': (),
+    'banh_mi_chao': ('banh_mi_o', 'trung_op_la', 'cha_lua'),
+    'banh_chung': (),
+    'banh_khot': ('rau_song',),
+    'banh_beo': ('mo_hanh',),
+    'cao_lau': ('mi', 'thit_nuong', 'rau_song'),
+    'bun_dau': ('bun', 'dau_hu', 'cha_lua', 'rau_song'),
+    'bun_mam': ('bun', 'tom', 'ca', 'rau_song'),
+    'chao_long': (),
+    'ca_kho': ('com', 'rau_nau'),
+    'canh_chua': (),
+    'trung_vit_lon': (),
+    'che': (),
+    'nuoc_mia': (),
+    'banh_trang_nuong': (),
+    'banh_gio': (),
+    'banh_bot_loc': (),
+    'banh_duc': (),
+    'nem_chua': (),
+    'banh_pia': (),
+    'bun_ca': ('bun', 'ca', 'rau_song'),
+    'khoai_tay_chien': (),
+    'salad': (),
+    'hamburger': (),
+    'nui_xao_bo': ('bo',),
+    'sup_cua': (),
+    'nom_hoa_chuoi': (),
+}
+assert set(DISH_PARTS) == set(DISHES)
 DISH_INDEX = {code: i for i, code in enumerate(OUTPUTS)}
 COMP_INDEX = {code: i for i, code in enumerate(COMPONENTS)}
 
@@ -233,10 +323,16 @@ VF_DISH = {
     'Banh khot': 'banh_khot', 'Banh beo': 'banh_beo', 'Cao lau': 'cao_lau',
     'Bun dau': 'bun_dau', 'Bun mam': 'bun_mam', 'Chao long': 'chao_long',
     'Pho': None if MIXED_PHO == 'skip' else MIXED_PHO,
+    'Bun cha ca': 'bun_ca', 'Nom hoa chuoi': 'nom_hoa_chuoi',
+    'Nui xao bo': 'nui_xao_bo', 'Sup cua': 'sup_cua',
+    'Hamburger': 'hamburger', 'Khoai tay chien': 'khoai_tay_chien',
+    'Salad': 'salad',
 }
+# Sides: the dish only when nothing else is (fries next to a burger, a salad
+# next to rice are not the meal).
+VF_SIDES = {'Khoai tay chien', 'Salad'}
 # Whole dishes VietFood67 has but the app does not: photos of them are "khac".
-VF_OTHER = {'Lau', 'Bun cha ca', 'Nom hoa chuoi', 'Nui xao bo', 'Sup cua',
-            'Hamburger', 'Khoai tay chien', 'Salad'}
+VF_OTHER = {'Lau'}
 # Boxes that name one component without ambiguity.
 VF_COMPONENT = {
     'Com': 'com', 'Bun': 'bun', 'Mi': 'mi', 'Ca': 'ca', 'Tom': 'tom',
@@ -358,7 +454,8 @@ def load_vietfood67(root, source):
         if image is None:
             skipped['vf67: no image'] += 1
             continue
-        dishes = {VF_DISH[n] for n in names if n in VF_DISH} - {None}
+        dishes = {VF_DISH[n] for n in names - VF_SIDES if n in VF_DISH} - {None}
+        sides = {VF_DISH[n] for n in names & VF_SIDES}
         if len(dishes) > 1:
             skipped['vf67: several dishes'] += 1
             continue
@@ -366,6 +463,8 @@ def load_vietfood67(root, source):
             dish = dishes.pop()
         elif 'Com' in names and names & PROTEIN_BOXES:
             dish = 'com_phan'   # rice with mains and no dish box
+        elif len(sides) == 1:
+            dish = sides.pop()  # fries or a salad on their own
         elif USE_OTHER and names & VF_OTHER:
             dish = OTHER        # a dish the app does not have
         else:
@@ -514,7 +613,9 @@ def average_hash(path):
 # kept photo is decoded once here and saved with its short side SHRUNK_SIDE.
 # 384 keeps even the smallest random crop (60%, 230 px) above the 224×224
 # input, so every crop is still scaled down, never up: no detail is lost.
-SHRUNK_SIDE = 384
+# Large enough that the smallest random crop (60% of the short side) still
+# covers the input: 384 for 224-pixel models, 512 for B3's 300.
+SHRUNK_SIDE = max(384, -(-IMG * 10 // 6 // 32) * 32)
 SHRUNK_DIR = os.environ.get('SHRUNK_DIR', '/tmp/shrunk')
 os.makedirs(SHRUNK_DIR, exist_ok=True)
 
@@ -597,6 +698,7 @@ for dish, items in sorted(by_dish.items()):
     train += items[n_test + n_val:]
 print(f'train {len(train)}, val {len(val)}, test {len(test)}; '
       f'duplicates dropped {skipped["duplicate"]}')
+unique_train = list(train)
 with open(os.path.join(OUTPUT_DIR, 'splits.csv'), 'w', newline='',
           encoding='utf-8') as f:
     writer = csv.writer(f)
@@ -604,6 +706,17 @@ with open(os.path.join(OUTPUT_DIR, 'splits.csv'), 'w', newline='',
     for split, items in (('train', train), ('val', val), ('test', test)):
         for s in items:
             writer.writerow([s['path'], split, s['dish'], s['source']])
+
+if MIN_TRAIN_PER_DISH:
+    # After splits.csv, which lists each photo once.
+    grouped = defaultdict(list)
+    for s in train:
+        grouped[s['dish']].append(s)
+    train = []
+    for dish, items in sorted(grouped.items()):
+        repeat = max(1, -(-MIN_TRAIN_PER_DISH // len(items)))
+        train += (items * repeat)[:max(len(items), MIN_TRAIN_PER_DISH)]
+    print(f'Training on {len(train)} photos after repeating small dishes')
 
 # %% [markdown]
 # ## Input pipeline
@@ -623,25 +736,37 @@ N_DISH, N_COMP = len(OUTPUTS), len(COMPONENTS)
 # runs under MirroredStrategy, which splits every batch between them. BATCH
 # stays the total, so a run on one GPU learns the same way.
 strategy = tf.distribute.MirroredStrategy()
+if MIXED_PRECISION == 'always' or (
+        MIXED_PRECISION == 'gpu' and tf.config.list_physical_devices('GPU')):
+    keras.mixed_precision.set_global_policy('mixed_float16')
+print('Precision:', keras.mixed_precision.global_policy().name)
 print('GPUs:', len(tf.config.list_physical_devices('GPU')),
       '| training on', strategy.num_replicas_in_sync, 'device(s)')
 
 
 def targets(s):
+    """(one-hot dish, component labels + mask) for one photo."""
     labels = np.zeros(N_COMP, np.float32)
     mask = np.zeros(N_COMP, np.float32)
+    absent = set()
+    if s['dish'] in DISH_PARTS:
+        # Off the dish's recipe: known absent (unless a box shows it).
+        absent = set(COMPONENTS) - set(DISH_PARTS[s['dish']]) - set(s['present'])
     for c in s['present']:
         labels[COMP_INDEX[c]] = 1
-    for c in s['observed']:
+    for c in set(s['observed']) | absent:
         mask[COMP_INDEX[c]] = 1
-    return DISH_INDEX[s['dish']], np.concatenate([labels, mask])
+    dish = np.zeros(N_DISH, np.float32)
+    dish[DISH_INDEX[s['dish']]] = 1
+    return dish, np.concatenate([labels, mask])
 
 
 def make_dataset(items, training):
     paths = [s['file'] for s in items]   # the small copies made above
     dish, comp = zip(*(targets(s) for s in items)) if items else ((), ())
     ds = tf.data.Dataset.from_tensor_slices(
-        (paths, np.array(dish, np.int32), np.array(comp, np.float32)))
+        (paths, np.array(dish, np.float32).reshape(-1, N_DISH),
+         np.array(comp, np.float32).reshape(-1, 2 * N_COMP)))
     if training and items:
         ds = ds.shuffle(len(items), seed=SEED, reshuffle_each_iteration=True)
 
@@ -659,6 +784,8 @@ def make_dataset(items, training):
             image = tf.image.random_flip_left_right(image)
             image = tf.image.random_brightness(image, 20.0)
             image = tf.image.random_contrast(image, 0.85, 1.15)
+            if FULL:
+                image = tf.image.random_saturation(image, 0.85, 1.15)
         else:
             image = tf.image.crop_to_bounding_box(
                 image, (h - side) // 2, (w - side) // 2, side, side)
@@ -690,6 +817,9 @@ def build_model():
         # Always normalizes raw 0–255 RGB itself, so it has no switch for it.
         del common['include_preprocessing']
         base = keras.applications.EfficientNetB0(**common)
+    elif BACKBONE == 'efficientnetb3':
+        del common['include_preprocessing']   # built in, like B0
+        base = keras.applications.EfficientNetB3(**common)
     elif BACKBONE == 'efficientnetv2b0':
         base = keras.applications.EfficientNetV2B0(**common)
     else:
@@ -699,8 +829,11 @@ def build_model():
     x = base(inputs, training=EXPERIMENT == 'scratch')
     x = keras.layers.GlobalAveragePooling2D()(x)
     x = keras.layers.Dropout(0.2)(x)
-    dish = keras.layers.Dense(N_DISH, activation='softmax', name='dish')(x)
-    comp = keras.layers.Dense(N_COMP, activation='sigmoid', name='components')(x)
+    # float32 outputs, also under mixed precision, for stable losses.
+    dish = keras.layers.Dense(N_DISH, activation='softmax', name='dish',
+                              dtype='float32')(x)
+    comp = keras.layers.Dense(N_COMP, activation='sigmoid', name='components',
+                              dtype='float32')(x)
     return keras.Model(inputs, {'dish': dish, 'components': comp}), base
 
 
@@ -716,11 +849,15 @@ with strategy.scope():
     model, base = build_model()
 
 
-def compile_model(learning_rate):
+def compile_model(learning_rate, weight_decay=0.0):
     with strategy.scope():
+        optimizer = (keras.optimizers.AdamW(learning_rate,
+                                            weight_decay=weight_decay)
+                     if weight_decay else keras.optimizers.Adam(learning_rate))
         model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate),
-            loss={'dish': 'sparse_categorical_crossentropy',
+            optimizer=optimizer,
+            loss={'dish': keras.losses.CategoricalCrossentropy(
+                      label_smoothing=0.1 if FULL else 0.0),
                   'components': masked_bce},
             metrics={'dish': ['accuracy']},
         )
@@ -734,7 +871,8 @@ def callbacks(phase):
         keras.callbacks.CSVLogger(
             os.path.join(OUTPUT_DIR, f'training_log_{phase}.csv')),
         keras.callbacks.EarlyStopping(monitor='val_dish_accuracy', mode='max',
-                                      patience=3, restore_best_weights=True),
+                                      patience=6 if FULL else 3,
+                                      restore_best_weights=True),
     ]
 
 # %% [markdown]
@@ -760,13 +898,21 @@ else:
               callbacks=callbacks('head'))
     if EXPERIMENT == 'finetune':
         base.trainable = True
-        cut = int(len(base.layers) * (1 - UNFREEZE_FRACTION))
+        cut = 0 if FULL else int(len(base.layers) * (1 - UNFREEZE_FRACTION))
         for layer in base.layers[:cut]:
             layer.trainable = False
         for layer in base.layers:
             if isinstance(layer, keras.layers.BatchNormalization):
                 layer.trainable = False
-        compile_model(1e-4)
+        if FULL:
+            # A short warm-up, then cosine decay to zero over the epochs.
+            steps = max(1, -(-len(train) // BATCH)) * EPOCHS_FINE
+            warmup = max(1, steps // 20)
+            compile_model(keras.optimizers.schedules.CosineDecay(
+                0.0, steps - warmup, warmup_target=3e-4,
+                warmup_steps=warmup), weight_decay=1e-5)
+        else:
+            compile_model(1e-4)
         model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS_FINE,
                   callbacks=callbacks('fine'))
 train_minutes = (time.time() - started) / 60
@@ -786,7 +932,7 @@ def predict(ds):
     dish_true, comp_true, dish_prob, comp_prob = [], [], [], []
     for images, y in ds:
         out = model(images, training=False)
-        dish_true.append(y['dish'].numpy())
+        dish_true.append(y['dish'].numpy().argmax(axis=-1))
         comp_true.append(y['components'].numpy())
         dish_prob.append(out['dish'].numpy())
         comp_prob.append(out['components'].numpy())
@@ -804,18 +950,34 @@ def component_f1(comp_true, comp_prob, threshold):
     return 2 * tp / max(1, 2 * tp + fp + fn)
 
 
+def component_precision(comp_true, comp_prob, threshold):
+    labels, mask = comp_true[:, :N_COMP], comp_true[:, N_COMP:]
+    guess = (comp_prob >= threshold) & (mask > 0)
+    truth = (labels > 0) & (mask > 0)
+    return (guess & truth).sum() / max(1, guess.sum())
+
+
 val_pred, test_pred = predict(val_ds), predict(test_ds)
 threshold = 0.6
 if val_pred is not None and val_pred[1][:, N_COMP:].sum() > 0:
-    grid = [round(t, 2) for t in np.arange(0.3, 0.81, 0.05)]
-    threshold = max(grid, key=lambda t: component_f1(val_pred[1], val_pred[3], t))
+    grid = [round(t, 2) for t in np.arange(0.3, 0.91, 0.05)]
+    if FULL:
+        # A wrong tick adds food the user did not eat, so ticking needs 85%
+        # precision; among those thresholds the lowest keeps the most ticks.
+        precise = [t for t in grid if component_precision(
+            val_pred[1], val_pred[3], t) >= 0.85]
+        threshold = min(precise) if precise else max(grid)
+    else:
+        threshold = max(grid, key=lambda t: component_f1(
+            val_pred[1], val_pred[3], t))
 thresholds = {
     'threshold_checked': float(threshold),
     'threshold_ask': float(round(max(0.15, threshold - 0.3), 2)),
     'threshold_confident_dish': 0.5,
 }
 
-results = {'experiment': EXPERIMENT, 'backbone': BACKBONE,
+results = {'experiment': EXPERIMENT, 'backbone': BACKBONE, 'recipe': RECIPE,
+           'img': IMG, 'contract': CONTRACT_VERSION,
            'quick_test': QUICK_TEST, 'train_minutes': round(train_minutes, 1),
            'photos': {'train': len(train), 'val': len(val), 'test': len(test)},
            'params': int(model.count_params()),
@@ -871,7 +1033,19 @@ from datetime import date
 # plain variables instead of one copy per GPU. Built from the model's config,
 # the copy keeps every layer (EfficientNetB0 adds its input scaling only when
 # it loads ImageNet weights, so rebuilding it would not).
-export_model = keras.Model.from_config(model.get_config())
+def float32_config(config):
+    """[config] with every mixed-precision layer turned float32."""
+    if isinstance(config, dict):
+        if config.get('config', {}).get('name') == 'mixed_float16':
+            config = {**config, 'config': {**config['config'], 'name': 'float32'}}
+        return {k: float32_config(v) for k, v in config.items()}
+    if isinstance(config, list):
+        return [float32_config(v) for v in config]
+    return config
+
+
+keras.mixed_precision.set_global_policy('float32')
+export_model = keras.Model.from_config(float32_config(model.get_config()))
 export_model.set_weights(model.get_weights())
 
 
@@ -888,7 +1062,8 @@ def finalize_normalization(m):
 finalize_normalization(export_model)
 sample_check = next(iter(test_ds if test else val_ds))[0][:1]
 assert np.abs(export_model(sample_check, training=False)['dish'].numpy() -
-              model(sample_check, training=False)['dish'].numpy()).max() < 1e-4,     'The export copy differs from the trained model'
+              model(sample_check, training=False)['dish'].numpy()).max() < (
+                  0.02 if model.dtype_policy.name == 'mixed_float16' else 1e-4),     'The export copy differs from the trained model'
 converter = tf.lite.TFLiteConverter.from_keras_model(export_model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.target_spec.supported_types = [tf.float16]
@@ -926,6 +1101,38 @@ for _ in range(30):
     interpreter.invoke()
 results['tflite_mb'] = round(size_mb, 2)
 results['cpu_ms'] = round((time.time() - timed) / 30 * 1000, 1)
+
+# An int8-weight copy (dynamic range), half the size. It ships only if a
+# phone runs it as fast and it scores as well, so it is measured here on the
+# same test photos as the float16 file.
+converter = tf.lite.TFLiteConverter.from_keras_model(export_model)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+int8 = converter.convert()
+with open(os.path.join(OUTPUT_DIR, 'food_v1_int8.tflite'), 'wb') as f:
+    f.write(int8)
+
+
+def lite_top1(content, limit=1000):
+    lite = tf.lite.Interpreter(model_content=content)
+    lite.allocate_tensors()
+    (inp,) = lite.get_input_details()
+    out = next(o for o in lite.get_output_details() if o['shape'][-1] == N_DISH)
+    hits = total = 0
+    for images, y in test_ds:
+        for image, truth in zip(images.numpy(), y['dish'].numpy().argmax(-1)):
+            lite.set_tensor(inp['index'], image[None])
+            lite.invoke()
+            hits += int(lite.get_tensor(out['index'])[0].argmax() == truth)
+            total += 1
+            if total >= limit:
+                return hits / total
+    return hits / max(1, total)
+
+
+results['int8'] = {'tflite_mb': round(len(int8) / 1e6, 2),
+                   'test_top1_sample': round(lite_top1(int8), 4),
+                   'float16_test_top1_sample': round(lite_top1(tflite), 4)}
+print('int8 copy:', results['int8'])
 with open(os.path.join(OUTPUT_DIR, 'results.json'), 'w') as f:
     json.dump(results, f, indent=2)
 print(f"TFLite {size_mb:.1f} MB, {results['cpu_ms']} ms per photo on this CPU")
@@ -940,7 +1147,7 @@ card = f"""# MODEL_CARD – food_v1
 
 - Ngày train: {date.today().isoformat()}
 - Contract: {CONTRACT_VERSION} ({len(DISHES)} món{' + lớp khac' if USE_OTHER else ''}, {N_COMP} thành phần)
-- Kiến trúc: {BACKBONE}, thí nghiệm `{EXPERIMENT}`{' (CHẠY THỬ, KHÔNG DÙNG THẬT)' if QUICK_TEST else ''}
+- Kiến trúc: {BACKBONE} ({IMG}×{IMG}), thí nghiệm `{EXPERIMENT}`, cách train `{RECIPE}`{' (CHẠY THỬ, KHÔNG DÙNG THẬT)' if QUICK_TEST else ''}
 - Dữ liệu: {len(train)} train / {len(val)} val / {len(test)} test
 - Nguồn ảnh: {', '.join(f'{k}: {v}' for k, v in sources.most_common())}
 - Kích thước: {size_mb:.1f} MB (float16)

@@ -96,6 +96,32 @@ tab trình duyệt.
 - **Ngưỡng tick thành phần** được chỉnh trên tập val và ghi vào
   `MODEL_CARD.md`; app đọc từ đó.
 
+## Model chính thức: EfficientNetB3, cách train `full` (contract 1.4)
+
+Mặc định notebook giờ train EfficientNetB3 với ảnh vào 300×300
+(`BACKBONE = 'efficientnetb3'`, `RECIPE = 'full'`). Cách train `full`:
+- mở băng **toàn bộ** backbone (BatchNorm vẫn đóng băng);
+- learning rate khởi động từ 0 lên 3e-4 trong 5% số bước đầu, rồi giảm dần
+  theo cosine về 0; dùng AdamW;
+- label smoothing 0,1; thêm tăng cường độ bão hoà màu;
+- 3 epoch đầu chỉ train phần đầu ra, sau đó 30 epoch train cả model; dừng
+  sớm nếu 6 epoch liền val không tăng;
+- tối đa 4.000 ảnh mỗi món, thay vì 1.500;
+- món có dưới 300 ảnh train thì ảnh được lặp lại cho đủ 300; mỗi lần lặp bị
+  cắt ngẫu nhiên khác nhau;
+- **gán nhãn "không có" theo công thức món:** thành phần không nằm trong
+  công thức của món (`DISH_PARTS`, lấy từ `dishes.csv`) được tính là không
+  có trong ảnh. Nhờ vậy ảnh nào cũng dạy được phần thành phần;
+- ngưỡng tick thành phần chọn theo **precision ≥ 85%** trên tập val (tick
+  nhầm làm tổng calo sai);
+- mixed precision trên GPU (nhanh khoảng 2 lần trên T4);
+- ảnh thu nhỏ cạnh ngắn 512 px, để mảnh cắt 60% vẫn lớn hơn 300;
+- xuất thêm `food_v1_int8.tflite` (nhỏ một nửa), kèm độ chính xác đo trên
+  cùng ảnh test để so với bản float16.
+
+`DISH_PARTS` và `DISHES` trong notebook phải khớp bảng dữ liệu:
+`python tool/check_vn_food.py` kiểm tra điều này.
+
 ## So sánh 3 backbone, chọn model cho app
 
 Train cùng một notebook 3 lần (`EXPERIMENT = 'finetune'`), mỗi lần một

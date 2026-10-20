@@ -1398,6 +1398,47 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - **Kiểm thử:** `check_vn_food.py` OK (84/84 thành phần có số liệu), 159
   test pass (bảng món giờ có 65 món).
 
+### 2026-10-20 · Notebook train EfficientNetB3 ("full") và app đọc kích thước ảnh từ model
+- **Vì sao B3:** trong nhóm EfficientNet, B3 (ảnh 300 px, 12 triệu tham số,
+  ImageNet 81,6%) là model lớn nhất còn chạy được trên điện thoại. Ước tính
+  khoảng 150–250 ms trên máy thử, suy từ 30–50 ms đo thật của B0. B7 (ảnh
+  600 px, 66 triệu tham số) bị loại: file khoảng 130 MB, máy yếu mất cả chục
+  giây, mà train 20 epoch trên Kaggle 2×T4 mất 8–13 giờ, sát giới hạn 12 giờ
+  mỗi phiên.
+- **Vì sao đổi cách train:** đường học của B0 cho thấy train top-1 chỉ 78%,
+  val 69%. Model chưa học hết dữ liệu train (chỉ mở 40% lớp, learning rate
+  cố định, 15 epoch), chứ chưa phải học thuộc.
+- **Notebook (`RECIPE = 'full'`):**
+  - mở băng toàn bộ backbone;
+  - learning rate khởi động rồi giảm theo cosine; AdamW; label smoothing 0,1;
+  - 3 + 30 epoch, dừng sớm sau 6 epoch không tiến bộ;
+  - tối đa 4.000 ảnh mỗi món; món ít ảnh được lặp lại cho đủ 300 ảnh train;
+  - nhãn "không có" theo công thức món, cho mọi ảnh;
+  - ngưỡng tick theo precision ≥ 85%;
+  - mixed precision;
+  - ảnh thu nhỏ 512 px;
+  - xuất thêm bản int8.
+- **VietFood67:** khoai tây chiên và salad là món phụ. Ảnh hamburger kèm
+  khoai tây chiên tính là hamburger; ảnh cơm kèm salad vẫn tính là cơm phần.
+  Chỉ khi ảnh chỉ có khoai tây chiên hoặc chỉ có salad thì mới tính là món
+  đó.
+- **Xuất model khi train bằng mixed precision:** bản sao để chuyển sang
+  TFLite được dựng lại ở float32, bằng cách đổi kiểu `mixed_float16` trong
+  config của từng lớp. Khi đó Keras và TFLite cho kết quả lệch nhau dưới
+  0,02.
+- **App:** kích thước ảnh vào giờ đọc từ file `.tflite`. Model phải nhận ảnh
+  vuông float32 `[1, N, N, 3]`. App mở interpreter trước, rồi mới chuẩn bị
+  ảnh theo N. Contract mục 6 đã sửa theo.
+- **`check_vn_food.py`** kiểm tra thêm `DISHES` và `DISH_PARTS` trong
+  notebook có khớp bảng dữ liệu không.
+- **Notebook TTA:** đọc kích thước ảnh từ checkpoint và thu nhỏ ảnh đúng như
+  lần train.
+- **Kiểm thử:**
+  - Chạy B3 trên dữ liệu giả với 2 thiết bị ảo và mixed precision: chạy trọn
+    tới bước xuất file; float16 21,8 MB, int8 11,9 MB.
+  - Notebook TTA với checkpoint B3: dòng "ảnh như hiện tại" khớp test top-1.
+  - 160 test pass. Có thêm test chuẩn bị ảnh cho model 300×300.
+
 ---
 
 ## 3. Việc còn tồn đọng

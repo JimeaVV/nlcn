@@ -244,8 +244,8 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 
 | Mục | Quy định |
 |---|---|
-| Đầu vào | `float32 [1, 224, 224, 3]`, ảnh **RGB, giá trị 0–255** |
-| Tiền xử lý | App: cắt vuông ở giữa ảnh rồi resize về 224×224 (bilinear). **Việc chuẩn hoá pixel nằm trong model** (lớp `Rescaling`/preprocess), app không tự chuẩn hoá |
+| Đầu vào | `float32 [1, N, N, 3]`, ảnh **RGB, giá trị 0–255**. N do model quyết định (từ v1.4): 224 cho MobileNetV3/EfficientNetB0, 300 cho EfficientNetB3; app đọc N từ file `.tflite` |
+| Tiền xử lý | App: cắt vuông ở giữa ảnh rồi resize về N×N (bilinear). **Việc chuẩn hoá pixel nằm trong model** (lớp `Rescaling`/preprocess), app không tự chuẩn hoá |
 | Đầu ra 1 `dish` | `float32 [1, số_món]`, softmax (tổng bằng 1) |
 | Đầu ra 2 `components` | `float32 [1, số_thành_phần]`, sigmoid (mỗi giá trị 0–1, độc lập) |
 | Lượng tử hoá | float16 |
@@ -296,7 +296,7 @@ component_dishes: com_tam, com_phan
 ```
 
 **App kiểm tra khi nạp model:**
-- đầu vào phải là `float32 [1, 224, 224, 3]`, mọi đầu ra là float32;
+- đầu vào phải là `float32 [1, N, N, 3]` (ảnh vuông, N ≥ 32), mọi đầu ra là float32;
 - hai đầu ra được nhận ra theo **độ dài**, khớp với số dòng của
   `dishes.txt` và `components.txt`, nên thứ tự đầu ra trong file `.tflite`
   không quan trọng; vì vậy hai file này phải có số dòng khác nhau;

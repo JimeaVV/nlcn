@@ -113,9 +113,16 @@ import glob
 import hashlib
 from concurrent.futures import ThreadPoolExecutor
 
+import tensorflow as tf
 from PIL import Image, ImageOps
+from tensorflow import keras
 
-SHRUNK_SIDE = 384
+# The model decides its input size (224, or 300 for EfficientNetB3), and the
+# training run shrank photos to match it.
+model = keras.models.load_model(CHECKPOINT, compile=False)
+IMG = model.input_shape[1]
+SHRUNK_SIDE = max(384, -(-IMG * 10 // 6 // 32) * 32)
+print(f'Model input {IMG}x{IMG}; photos shrunk to {SHRUNK_SIDE} px')
 os.makedirs(SHRUNK_DIR, exist_ok=True)
 
 
@@ -207,10 +214,7 @@ if len(test) < len(rows):
 
 # %%
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
 
-IMG = 224
 VIEWS = ['photo', 'mirror', 'closer', 'closer mirror']
 
 
@@ -232,7 +236,6 @@ def load_views(path):
     return tf.clip_by_value(views, 0.0, 255.0)
 
 
-model = keras.models.load_model(CHECKPOINT, compile=False)
 # A compiled graph needs far less GPU memory than calling the model eagerly.
 infer = tf.function(lambda images: model(images, training=False)['dish'])
 paths = [file for file, _ in test]

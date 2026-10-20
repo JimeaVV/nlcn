@@ -29,9 +29,12 @@ class _FakeBundle extends CachingAssetBundle {
 }
 
 class _FakeRunner implements ModelRunner {
-  _FakeRunner(this.outputs);
+  _FakeRunner(this.outputs, {this.inputSize = modelInputSize});
 
   final List<Float32List> outputs;
+
+  @override
+  final int inputSize;
   Float32List? lastInput;
 
   @override
@@ -45,6 +48,9 @@ class _SlowRunner implements ModelRunner {
   _SlowRunner(this.body);
 
   final Future<List<Float32List>> Function() body;
+
+  @override
+  int get inputSize => modelInputSize;
 
   @override
   Future<List<Float32List>> run(Float32List input) => body();
@@ -161,6 +167,12 @@ void main() {
       expect(rgbAt(input, 112, 213), near([0, 0, 255]));
     });
 
+    test('resizes to the size the model asks for', () {
+      final photo = img.Image(width: 640, height: 480);
+      expect(preprocessPhoto(img.encodePng(photo), size: 300),
+          hasLength(300 * 300 * 3));
+    });
+
     test('rejects bytes that are not an image', () {
       expect(() => preprocessPhoto(Uint8List.fromList([1, 2, 3])),
           throwsFormatException);
@@ -205,11 +217,12 @@ void main() {
   group('TfliteFoodRecognizer', () {
     test('prepares the photo, runs the model and keeps its thresholds',
         () async {
+      // A 300x300 model, like EfficientNetB3: the photo is prepared to fit.
       final runner = _FakeRunner([
         Float32List.fromList([0.7, 0.3]),
         Float32List.fromList([0.95, 0.4, 0.1]),
-      ]);
-      final input = Float32List(modelInputSize * modelInputSize * 3);
+      ], inputSize: 300);
+      final input = Float32List(300 * 300 * 3);
       final recognizer = TfliteFoodRecognizer(
         labels: const ModelLabels(
           dishes: ['com_tam', 'pho_bo'],
@@ -217,8 +230,9 @@ void main() {
           thresholds: RecognitionThresholds(checked: 0.9),
         ),
         openRunner: () async => runner,
-        prepare: (path) async {
+        prepare: (path, size) async {
           expect(path, 'plate.jpg');
+          expect(size, 300);
           return input;
         },
       );
@@ -246,7 +260,7 @@ void main() {
       final recognizer = TfliteFoodRecognizer(
         labels: labels,
         openRunner: () async => runner,
-        prepare: (_) async => Float32List(0),
+        prepare: (_, __) async => Float32List(0),
       );
       final results = await Future.wait(
           [for (var i = 0; i < 3; i++) recognizer.recognize('$i.jpg')]);
@@ -263,7 +277,7 @@ void main() {
           if (++attempts == 1) throw StateError('busy');
           return _FakeRunner([Float32List(2), Float32List(3)]);
         },
-        prepare: (_) async => Float32List(0),
+        prepare: (_, __) async => Float32List(0),
       );
       await expectLater(recognizer.recognize('a.jpg'), throwsStateError);
       await recognizer.recognize('a.jpg');

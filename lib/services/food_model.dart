@@ -5,7 +5,9 @@ import 'package:image/image.dart' as img;
 
 import 'food_recognizer.dart';
 
-/// Side of the square image the model takes (docs/MODEL_CONTRACT.md §6).
+/// Side of the square image most models take. Each model sets its own
+/// (EfficientNetB3 reads 300); the app reads it from the .tflite file
+/// (docs/MODEL_CONTRACT.md §6).
 const modelInputSize = 224;
 
 /// The label files that ship next to the model, parsed.
@@ -100,7 +102,7 @@ class ModelLabels {
 /// float32 in row-major HWC order. Normalisation happens inside the model.
 ///
 /// Pure Dart so it can run in a background isolate.
-Float32List preprocessPhoto(Uint8List encoded) {
+Float32List preprocessPhoto(Uint8List encoded, {int size = modelInputSize}) {
   final decoded = img.decodeImage(encoded);
   if (decoded == null) throw const FormatException('Not a readable image');
   // Phone cameras store rotation in EXIF instead of turning the pixels.
@@ -115,14 +117,14 @@ Float32List preprocessPhoto(Uint8List encoded) {
   );
   final resized = img.copyResize(
     square,
-    width: modelInputSize,
-    height: modelInputSize,
+    width: size,
+    height: size,
     interpolation: img.Interpolation.linear,
   );
-  final input = Float32List(modelInputSize * modelInputSize * 3);
+  final input = Float32List(size * size * 3);
   var i = 0;
-  for (var y = 0; y < modelInputSize; y++) {
-    for (var x = 0; x < modelInputSize; x++) {
+  for (var y = 0; y < size; y++) {
+    for (var x = 0; x < size; x++) {
       final pixel = resized.getPixel(x, y);
       input[i++] = pixel.r.toDouble();
       input[i++] = pixel.g.toDouble();

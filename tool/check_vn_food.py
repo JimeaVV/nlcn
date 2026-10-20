@@ -6,6 +6,7 @@ Run from the project root:
 
 It never fills in numbers: every nutrition value must come from a cited source.
 """
+import ast
 import csv
 import re
 import sys
@@ -14,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / 'assets' / 'data' / 'vn_food'
 CONTRACT = ROOT / 'docs' / 'MODEL_CONTRACT.md'
+NOTEBOOK = ROOT / 'tool' / 'train' / 'train_food_model.py'
 COMPONENT_HEADER = ['code', 'name_vi', 'name_en', 'kcal_per_100g', 'protein_g',
                     'carb_g', 'fat_g', 'unit_name_vi', 'unit_grams', 'source']
 DISH_HEADER = ['dish', 'component', 'default_grams', 'default_units']
@@ -163,6 +165,26 @@ def main():
             values = [v for v in row[name].split('|') if v]
             if not values or any(v not in allowed for v in values):
                 errors.append(f'{where}: {name} must be from {sorted(allowed)}')
+
+    # The training notebook carries its own copy of the dish list and each
+    # dish's recipe components (it runs on Kaggle without this repository).
+    notebook = {}
+    for node in ast.parse(NOTEBOOK.read_text(encoding='utf-8')).body:
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1 and
+                getattr(node.targets[0], 'id', None) in ('DISHES', 'DISH_PARTS')):
+            notebook[node.targets[0].id] = ast.literal_eval(node.value)
+    if notebook.get('DISHES') != dishes:
+        errors.append('train_food_model.py: DISHES must list the contract '
+                      'dishes in contract order')
+    recipe = {}
+    for row in rows:
+        if not row['component'].startswith('_base_'):
+            recipe.setdefault(row['dish'], []).append(row['component'])
+    for dish in dishes:
+        if tuple(notebook.get('DISH_PARTS', {}).get(dish, ())) != tuple(
+                recipe.get(dish, ())):
+            errors.append(f'train_food_model.py: DISH_PARTS[{dish!r}] must be '
+                          f'{tuple(recipe.get(dish, ()))}, as in dishes.csv')
 
     print(f'Components with nutrition: {filled}/{len(components)}')
     print(f'Dish rows with a default portion: {defaults}/{len(rows)}')

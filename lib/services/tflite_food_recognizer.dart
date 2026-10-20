@@ -15,15 +15,21 @@ const modelAsset = '$modelFolder/food_v1.tflite';
 
 /// Runs the model on one prepared input; returns every output as float32.
 abstract interface class ModelRunner {
+  /// Side of the square photo the model takes, read from the model file.
+  int get inputSize;
+
   Future<List<Float32List>> run(Float32List input);
 }
 
-typedef PhotoPreparer = Future<Float32List> Function(String imagePath);
+/// Turns the photo at a path into the model input for a [size]×[size] model.
+typedef PhotoPreparer = Future<Float32List> Function(
+    String imagePath, int size);
 
 /// Decodes and resizes off the UI isolate: a phone photo takes a second or
 /// two in pure Dart.
-Future<Float32List> preparePhotoInBackground(String imagePath) =>
-    Isolate.run(() => preprocessPhoto(File(imagePath).readAsBytesSync()));
+Future<Float32List> preparePhotoInBackground(String imagePath, int size) =>
+    Isolate.run(
+        () => preprocessPhoto(File(imagePath).readAsBytesSync(), size: size));
 
 /// Recognizes dishes with the bundled `.tflite` model. The interpreter opens
 /// on the first photo, not at app start.
@@ -51,8 +57,7 @@ class TfliteFoodRecognizer implements FoodRecognizer {
   @override
   Future<FoodRecognition> recognize(String imagePath) async {
     final clock = Stopwatch()..start();
-    final input = await _prepare(imagePath);
-    final prepared = clock.elapsed;
+    // Opened first: the model says what size the photo must be.
     final ModelRunner runner;
     try {
       runner = await (_runner ??= _openRunner());
@@ -60,6 +65,9 @@ class TfliteFoodRecognizer implements FoodRecognizer {
       _runner = null; // Try again on the next photo.
       rethrow;
     }
+    final opened = clock.elapsed;
+    final input = await _prepare(imagePath, runner.inputSize);
+    final prepared = clock.elapsed - opened;
     final outputs = _previousRun.then((_) => runner.run(input));
     _previousRun = outputs.then<void>((_) {}, onError: (_) {});
     final result = interpretOutputs(await outputs, labels);
@@ -74,7 +82,7 @@ class TfliteFoodRecognizer implements FoodRecognizer {
 
 /// [ModelRunner] backed by tflite_flutter, invoking in a background isolate.
 class TfliteModelRunner implements ModelRunner {
-  TfliteModelRunner._(this._interpreter, this._isolate);
+  TfliteModelRunner._(this._interpreter, this._isolate, this.inputSize);
 
   static Future<ModelRunner> open(AssetBundle bundle) async {
     final data = await bundle.load(modelAsset);
@@ -87,11 +95,15 @@ class TfliteModelRunner implements ModelRunner {
     try {
       interpreter.allocateTensors();
       final input = interpreter.getInputTensors();
-      const shape = [1, modelInputSize, modelInputSize, 3];
+      final shape = input.length == 1 ? input.first.shape : const <int>[];
       if (input.length != 1 ||
           input.first.type != TensorType.float32 ||
-          !listEquals(input.first.shape, shape)) {
-        throw FormatException('Model input must be float32 $shape, got '
+          shape.length != 4 ||
+          shape[0] != 1 ||
+          shape[1] != shape[2] ||
+          shape[1] < 32 ||
+          shape[3] != 3) {
+        throw FormatException('Model input must be float32 [1, N, N, 3], got '
             '${input.map((t) => '${t.type} ${t.shape}').join(', ')}');
       }
       if (interpreter
@@ -101,7 +113,7 @@ class TfliteModelRunner implements ModelRunner {
       }
       final isolate =
           await IsolateInterpreter.create(address: interpreter.address);
-      return TfliteModelRunner._(interpreter, isolate);
+      return TfliteModelRunner._(interpreter, isolate, shape[1]);
     } catch (_) {
       interpreter.close();
       rethrow;
@@ -110,6 +122,9 @@ class TfliteModelRunner implements ModelRunner {
 
   final Interpreter _interpreter;
   final IsolateInterpreter _isolate;
+
+  @override
+  final int inputSize;
 
   @override
   Future<List<Float32List>> run(Float32List input) async {
