@@ -1557,6 +1557,32 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Lần 2 dùng thư mục output trống, chỉ có output lần 1 làm dữ liệu. Nó báo
     "Previous run found", train tiếp epoch 2–3 và `finished: true`.
 
+### 2026-10-20 · B3 FULL chuyển sang Colab, chia thành nhiều phiên 5 giờ
+- Lượt FULL đầu tiên trên Kaggle đọc nhãn VietFood67 quá chậm: khoảng 9 phút
+  cho 5.000 nhãn, tức khoảng 5 giờ cho cả 171.619 nhãn. Lần QUICK trước, đọc
+  đủ số nhãn đó chỉ mất 56 phút, nên chậm là do ổ dữ liệu của Kaggle hôm đó.
+  - Ước tính phải đến khoảng giờ thứ 8 mới bắt đầu train, chỉ kịp vài epoch
+    trước mốc 11 giờ.
+  - Version sau lại phải đọc dữ liệu từ đầu.
+  - Vì vậy dừng lượt đó và chuyển sang Colab, nơi dữ liệu nằm trên ổ cục bộ.
+- Colab miễn phí chỉ cho mỗi phiên khoảng 5 giờ, còn B3 cần 7–8 giờ train,
+  nên phải chạy 2–3 phiên.
+  - Trên Colab `TIME_LIMIT_HOURS = 4.75`. Train dừng khi epoch kế tiếp có
+    thể vượt mốc đó trừ 20 phút. Notebook vẫn đánh giá và xuất model tốt
+    nhất, rồi phiên sau chạy tiếp.
+  - Lưu model an toàn: `last.keras`, `checkpoint.keras` và `progress.json`
+    được ghi ra file tạm rồi mới đổi tên. Nếu phiên bị cắt đúng lúc đang ghi,
+    file cũ vẫn còn nguyên.
+  - Cuối notebook gọi `drive.flush_and_unmount()`, chờ mọi file lên hết Drive.
+  - Định dạng `progress.json` giữ nguyên, nên phiên đang chạy bằng notebook
+    trước đó vẫn chạy tiếp được bằng notebook mới.
+- Đã thử trên máy, giả lập 3 phiên:
+  - Phiên 1 bị cắt ngang sau epoch 1.
+  - Phiên 2 chạy tiếp, dừng vì hết giờ sau epoch 2 và vẫn xuất file
+    (`finished: false`).
+  - Phiên 3 chạy tiếp epoch 3 và báo `finished: true`. Thời gian train cộng
+    dồn được 2,7 phút.
+
 ---
 
 ## 3. Việc còn tồn đọng

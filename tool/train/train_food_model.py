@@ -36,10 +36,12 @@
 #    is 26 GB). Results go to Google Drive, folder `macrorunner_train`.
 # 4. After the quick test, set `QUICK_TEST = False` and run all again in the
 #    same session, so nothing downloads twice. Keep the tab open.
-# 5. If Colab cuts the session off (the free GPU time runs out, the tab
-#    closes), run all again with the same settings: each epoch saves
-#    `last.keras` to Drive, and fine-tuning continues after the last finished
-#    epoch instead of starting over.
+# 5. Free Colab gives a session about 5 hours, less than B3 needs (7–8 hours
+#    of training). At 4¾ hours (`TIME_LIMIT_HOURS`) training stops by itself
+#    after an epoch and the notebook evaluates and exports the best epoch so
+#    far. Then, or if the session was cut off anyway, run all again with the
+#    same settings: each epoch saves `last.keras` to Drive, and fine-tuning
+#    continues after the last finished epoch instead of starting over.
 #
 # The four public datasets are merged into one training set. Class folders are
 # renamed to the app's codes; classes the app does not have become "khac".
@@ -113,11 +115,12 @@ import time
 
 ON_COLAB = 'google.colab' in sys.modules
 ON_KAGGLE = bool(os.environ.get('KAGGLE_KERNEL_RUN_TYPE'))
-# Kaggle stops a run at 12 hours and may keep none of its files. Training
-# stops on its own before that, keeping time to evaluate and export the best
-# epoch; a new version continues it (see "Resume" below). 0: no limit.
-TIME_LIMIT_HOURS = float(os.environ.get('TIME_LIMIT_HOURS',
-                                        11 if ON_KAGGLE else 0))
+# Kaggle stops a run at 12 hours and may keep none of its files; free Colab
+# disconnects after about 5. Training stops on its own before that, keeping
+# time to evaluate and export the best epoch, and the next run continues it
+# (see "Resume" below). 0: no limit.
+TIME_LIMIT_HOURS = float(os.environ.get(
+    'TIME_LIMIT_HOURS', 11 if ON_KAGGLE else 4.75 if ON_COLAB else 0))
 KAGGLE_DATASETS = [
     'lnguynanhnht/20foodvn',
     'quandang/vietnamese-foods',
@@ -935,11 +938,12 @@ def save_progress(phase, epoch, logs):
     best = max(read_progress().get('best', -1.0),
                float(logs.get('val_dish_accuracy', -1.0)))
     minutes = earlier_minutes + (time.time() - started) / 60
-    with open(PROGRESS, 'w') as f:
+    with open(PROGRESS + '.tmp', 'w') as f:
         json.dump({'phase': phase, 'epochs_done': epoch + 1, 'best': best,
                    'backbone': BACKBONE, 'recipe': RECIPE,
                    'quick_test': QUICK_TEST,
                    'train_minutes': round(minutes, 1)}, f)
+    os.replace(PROGRESS + '.tmp', PROGRESS)
 
 
 out_of_time = []   # set once training stopped for the time limit
@@ -948,31 +952,50 @@ epoch_started = [time.time()]
 
 def check_time(phase, epoch):
     """Stops training when one more epoch would leave too little time to
-    evaluate and export: about 30 minutes before TIME_LIMIT_HOURS. The short
-    head phase always runs to the end."""
+    evaluate and export: 20 minutes before TIME_LIMIT_HOURS. The short head
+    phase always runs to the end."""
     if not TIME_LIMIT_HOURS or phase == 'head' or model.stop_training:
         return
     epoch_minutes = (time.time() - epoch_started[0]) / 60
     used = (time.time() - NOTEBOOK_STARTED) / 60
-    if used + epoch_minutes > TIME_LIMIT_HOURS * 60 - 30:
+    if used + epoch_minutes > TIME_LIMIT_HOURS * 60 - 20:
         model.stop_training = True
         out_of_time.append(epoch + 1)
-        stage(f'time limit near after epoch {epoch + 1}: stopping here, '
-              'keeping the best epoch; a new version continues it')
+        stage(f'time limit near after epoch {epoch + 1}: stopping here and '
+              'keeping the best epoch; the next run continues')
 
 
 first_step = []   # phases whose first training step was logged
+
+
+class SaveModel(keras.callbacks.Callback):
+    """Saves the model, optimizer included, after each epoch, or only after
+    a better one with [best_only]. It writes a temporary file and then
+    renames it, so a session cut off while saving keeps the previous file
+    whole."""
+
+    def __init__(self, path, best_only=False, best=None):
+        super().__init__()
+        self.path, self.best_only, self.best = path, best_only, best
+
+    def on_epoch_end(self, epoch, logs=None):
+        value = (logs or {}).get('val_dish_accuracy')
+        if self.best_only:
+            if value is None or (self.best is not None and value <= self.best):
+                return
+            self.best = value
+        temporary = self.path[:-len('.keras')] + '.tmp.keras'
+        self.model.save(temporary)
+        os.replace(temporary, self.path)
 
 
 def callbacks(phase, best=None):
     """[best]: the best validation accuracy before a resume, so the best
     checkpoint is only replaced by a better epoch."""
     return [
-        keras.callbacks.ModelCheckpoint(
-            CHECKPOINT, monitor='val_dish_accuracy', mode='max',
-            save_best_only=True, initial_value_threshold=best),
+        SaveModel(CHECKPOINT, best_only=True, best=best),
         # Every epoch, with the optimizer, so a cut-off session continues.
-        keras.callbacks.ModelCheckpoint(LAST),
+        SaveModel(LAST),
         keras.callbacks.CSVLogger(
             os.path.join(OUTPUT_DIR, f'training_log_{phase}.csv'),
             append=best is not None),
@@ -1090,8 +1113,9 @@ FINISHED = not out_of_time
 if not FINISHED:
     print(f"Stopped for the time limit after fine-tuning epoch "
           f"{progress.get('epochs_done')} of {EPOCHS_FINE}. These files are "
-          "usable; to train on, run a new version with this version's output "
-          "added as data.")
+          "usable. To train on, " + (
+              "run all again in a new session." if ON_COLAB else
+              "run a new version with this version's output added as data."))
 # The best epoch over the whole run, also across resumed sessions.
 if os.path.exists(CHECKPOINT):
     best_model = keras.models.load_model(
@@ -1361,3 +1385,7 @@ with open(os.path.join(OUTPUT_DIR, 'MODEL_CARD.md'), 'w', encoding='utf-8') as f
 print(card)
 stage('done')
 print('Download from Output:', sorted(os.listdir(OUTPUT_DIR)))
+if ON_COLAB and SAVE_TO_DRIVE:
+    # Drive uploads in the background; this waits until every file is there.
+    drive.flush_and_unmount()
+    print('All files are on Google Drive.')
