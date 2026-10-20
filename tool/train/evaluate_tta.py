@@ -27,7 +27,7 @@ RUN_DIR = ''          # e.g. '/content/drive/MyDrive/macrorunner_train/efficient
 CHECKPOINT_ID = ''    # Drive file ids, used when RUN_DIR is empty
 SPLITS_ID = ''
 DISHES_ID = ''
-BATCH = 64
+BATCH = 16           # photos per step; each brings 4 views, so 64 images
 
 INPUT_ROOT = os.environ.get('INPUT_ROOT', '/kaggle/input')
 WORK = os.environ.get('WORK_DIR', '/content/tta')
@@ -211,6 +211,8 @@ def load_views(path):
 
 
 model = keras.models.load_model(CHECKPOINT, compile=False)
+# A compiled graph needs far less GPU memory than calling the model eagerly.
+infer = tf.function(lambda images: model(images, training=False)['dish'])
 paths = [file for file, _ in test]
 truth = np.array([dish for _, dish in test])
 data = (tf.data.Dataset.from_tensor_slices(paths)
@@ -220,7 +222,7 @@ probs = []   # [photos, views, dishes]
 started = time.time()
 for batch in data:
     n = batch.shape[0]
-    out = model(tf.reshape(batch, [-1, IMG, IMG, 3]), training=False)['dish']
+    out = infer(tf.reshape(batch, [-1, IMG, IMG, 3]))
     probs.append(tf.reshape(out, [n, len(VIEWS), -1]).numpy())
 probs = np.concatenate(probs)
 print(f'Ran {len(VIEWS)} views of {len(paths)} photos in '
