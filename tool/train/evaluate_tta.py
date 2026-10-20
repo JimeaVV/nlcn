@@ -7,6 +7,12 @@
 # accuracy on the **same test photos** the training run reported, with the
 # **trained checkpoint**, without training again.
 #
+# **On Kaggle** (the datasets are already there, nothing to download)
+# 1. *Add Input*: the four datasets of the training notebook. Accelerator
+#    GPU, Internet on (to fetch the checkpoint).
+# 2. Fill in the Drive file ids below, then *Save Version → Save & Run All*.
+#    `results_tta.json` appears in the version's *Output* tab.
+#
 # **On Google Colab**
 # 1. *Runtime → Change runtime type → T4 GPU*.
 # 2. Fill in where the training run is: `RUN_DIR` on your Drive, or the Drive
@@ -30,7 +36,9 @@ DISHES_ID = ''
 BATCH = 16           # photos per step; each brings 4 views, so 64 images
 
 INPUT_ROOT = os.environ.get('INPUT_ROOT', '/kaggle/input')
-WORK = os.environ.get('WORK_DIR', '/content/tta')
+# Kaggle keeps files in /kaggle/working (its Output tab); Colab in /content.
+WORK = os.environ.get('WORK_DIR', '/kaggle/working'
+                      if os.path.isdir('/kaggle/working') else '/content/tta')
 SHRUNK_DIR = os.environ.get('SHRUNK_DIR', '/tmp/shrunk')
 ON_COLAB = 'google.colab' in sys.modules
 KAGGLE_DATASETS = [
@@ -101,6 +109,7 @@ if ON_COLAB:
 
 # %%
 import csv
+import glob
 import hashlib
 from concurrent.futures import ThreadPoolExecutor
 
@@ -134,16 +143,29 @@ def shrink(path):
 SLUGS = [ref.split('/')[1] for ref in KAGGLE_DATASETS]
 
 
+def dataset_root(slug):
+    """Where this session keeps a dataset: INPUT_ROOT/<slug> on Colab, or on
+    Kaggle either that or INPUT_ROOT/datasets/<owner>/<slug>."""
+    for root in [os.path.join(INPUT_ROOT, slug),
+                 *glob.glob(os.path.join(INPUT_ROOT, 'datasets', '*', slug))]:
+        if os.path.isdir(root):
+            return root
+    return os.path.join(INPUT_ROOT, slug)
+
+
+ROOTS = {slug: dataset_root(slug) for slug in SLUGS}
+
+
 def locate(path):
-    """[path] if it exists, else the same file under this session's
-    INPUT_ROOT. splits.csv keeps the paths of the training session, which
-    may have been Kaggle (/kaggle/input/...) or another Colab session."""
+    """[path] if it exists, else the same file under this session's dataset
+    folders. splits.csv keeps the paths of the training session, which may
+    have been Kaggle (/kaggle/input/...) or another Colab session."""
     if os.path.exists(path):
         return path
     parts = path.replace('\\', '/').split('/')
     for i, part in enumerate(parts):
-        if part in SLUGS:
-            moved = os.path.join(INPUT_ROOT, part, *parts[i + 1:])
+        if part in ROOTS:
+            moved = os.path.join(ROOTS[part], *parts[i + 1:])
             if os.path.exists(moved):
                 return moved
     return None
