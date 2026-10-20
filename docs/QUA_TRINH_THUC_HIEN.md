@@ -1260,6 +1260,18 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - chọn ngưỡng tick theo precision;
   - thêm ảnh tự chụp, nhất là cơm phần, cơm gà, phở gà, cháo gà.
 
+### 2026-10-20 · Đưa EfficientNetB0 vào app
+- Thay 4 file trong `assets/models/` bằng bản EfficientNetB0 của người B
+  (Drive `macrorunner_train/efficientnetb0_finetune`).
+  - Danh sách món và thành phần giống hệt model cũ (52 món + `khac`, 25
+    thành phần).
+  - Đã kiểm tra bằng LiteRT: đầu vào `[1, 224, 224, 3]`, hai đầu ra 53 và
+    25, xác suất món cộng lại bằng 1.
+- Thẻ model được train trước khi có dòng `component_dishes`, nên app chỉ
+  dùng model này để đoán món. Thành phần đi theo công thức món.
+- 158 test pass. APK arm64 tăng từ 17,2 MB lên 19,3 MB vì model nặng hơn
+  2,1 MB. APK vẫn ký đúng khóa phát hành, đã cài lên điện thoại qua adb.
+
 ---
 
 ## 3. Việc còn tồn đọng

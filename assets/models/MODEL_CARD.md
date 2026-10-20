@@ -2,16 +2,16 @@
 
 - Ngày train: 2026-10-19
 - Contract: 1.3 (52 món + lớp khac, 25 thành phần)
-- Kiến trúc: mobilenetv3, thí nghiệm `finetune`
+- Kiến trúc: efficientnetb0, thí nghiệm `finetune`
 - Dữ liệu: 38677 train / 8287 val / 8287 test
 - Nguồn ảnh: vietfood68: 29595, vinafood21: 12713, vietnamese-foods: 10801, 20foodvn: 2142
-- Kích thước: 6.2 MB (float16)
-- Thời gian train: 45 phút
+- Kích thước: 8.3 MB (float16)
+- Thời gian train: 55 phút
 
 ## Kết quả trên tập test
-- Món, top-1: 0.674
-- Món, top-3: 0.825
-- Thành phần, F1: 0.482
+- Món, top-1: 0.688
+- Món, top-3: 0.839
+- Thành phần, F1: 0.497
 
 ## Ngưỡng (app đọc các dòng này)
 threshold_checked: 0.3
