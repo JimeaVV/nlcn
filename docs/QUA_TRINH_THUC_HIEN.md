@@ -1334,6 +1334,33 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     chặn log của app bản release), nên dùng dòng thời gian hiện trên màn
     hình.
 
+### 2026-10-20 · Thời gian nhận diện đo trên điện thoại; camera 1080p
+- **Số đo trên máy thử** (Xiaomi, 8 nhân, EfficientNetB0, 4 luồng, ảnh 720p):
+
+  | Lần quét | Tổng | Chuẩn bị ảnh | Model |
+  |---|---|---|---|
+  | 1 | 0,14 s | 0,09 s | 0,05 s |
+  | 2 | 0,16 s | 0,12 s | 0,04 s |
+  | 3 | 0,15 s | 0,12 s | 0,03 s |
+
+  - Model chỉ mất 30–50 ms. Chuyện "B0 lag trên máy yếu" không đến từ model
+    trên máy này. Máy yếu cần đo riêng bằng dòng thời gian trên màn hình.
+  - Một ảnh chụp lại màn hình (tô bún bò Huế) bị đoán sai, xác suất cao nhất
+    chỉ 16%. App đúng là đã hỏi lại người dùng. Ảnh chụp màn hình có vân
+    sọc và màu lệch, nên không đại diện cho ảnh món ăn thật.
+- **Camera mờ:** `ResolutionPreset.high` trên Android chỉ là 720p, và app chưa
+  có chạm để lấy nét.
+  - Đổi sang 1080p (`veryHigh`). Model chỉ đọc 224×224, nên độ phân giải cao
+    hơn nữa cũng không giúp gì. Bước chuẩn bị ảnh sẽ lâu hơn một chút, cần
+    đo lại.
+  - Chạm vào ảnh xem trước để lấy nét và đo sáng tại chỗ chạm, có vòng tròn
+    báo vị trí. Vị trí chạm được đổi ngược từ ảnh đã bị cắt (BoxFit.cover)
+    về toạ độ của ảnh xem trước gốc.
+  - Khung ngắm trước đây nuốt mất lượt chạm ở giữa màn hình, đúng chỗ đặt
+    món. Đã cho khung bỏ qua chạm.
+- **Kiểm thử:** 159 test pass. Có thêm test chạm giữa ảnh xem trước thì
+  camera lấy nét đúng tâm (0,5; 0,5). Đã cài lên điện thoại thử.
+
 ---
 
 ## 3. Việc còn tồn đọng

@@ -26,6 +26,11 @@ abstract interface class ScanCamera {
 
   Future<void> setTorch(bool on);
 
+  /// Focuses and meters on [point], from (0, 0) at the preview's top left to
+  /// (1, 1) at its bottom right, in portrait. Does nothing where the camera
+  /// cannot.
+  Future<void> focusAt(Offset point);
+
   /// Takes a photo and returns the path of the saved file.
   Future<String> takePicture();
 
@@ -68,7 +73,9 @@ class DeviceScanCamera implements ScanCamera {
       );
       final controller = CameraController(
         back,
-        ResolutionPreset.high,
+        // 1080p. "high" is only 720p, which looked soft on the preview and
+        // in the photo; the model reads 224x224, so larger buys nothing.
+        ResolutionPreset.veryHigh,
         // Photos only: the app never asks for the microphone.
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
@@ -109,6 +116,21 @@ class DeviceScanCamera implements ScanCamera {
   @override
   Future<void> setTorch(bool on) =>
       _ready.setFlashMode(on ? FlashMode.torch : FlashMode.off);
+
+  @override
+  Future<void> focusAt(Offset point) async {
+    final controller = _ready;
+    try {
+      if (controller.value.focusPointSupported) {
+        await controller.setFocusPoint(point);
+      }
+      if (controller.value.exposurePointSupported) {
+        await controller.setExposurePoint(point);
+      }
+    } on CameraException {
+      // Focus stays automatic; not worth interrupting the user.
+    }
+  }
 
   @override
   Future<String> takePicture() async => (await _ready.takePicture()).path;

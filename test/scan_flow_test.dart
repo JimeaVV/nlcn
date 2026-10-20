@@ -335,6 +335,13 @@ void main() {
     expect(gallery.dx, lessThan(shutter.dx));
     expect(manual.dx, greaterThan(shutter.dx));
 
+    // Tapping the picture focuses there, mapped onto the uncropped preview.
+    await tester.tapAt(preview(tester));
+    await tester.pump();
+    expect(camera.focused.single.dx, closeTo(0.5, 0.01));
+    expect(camera.focused.single.dy, closeTo(0.5, 0.01));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byKey(const ValueKey('scan-torch')));
     await tester.pumpAndSettle();
     expect(camera.torch, isTrue);
@@ -398,6 +405,7 @@ class _FakeCamera implements ScanCamera {
   var torch = false;
   var paused = false;
   var disposed = false;
+  final focused = <Offset>[];
 
   @override
   Future<void> initialize() async {
@@ -418,6 +426,9 @@ class _FakeCamera implements ScanCamera {
   Future<void> setTorch(bool on) async => torch = on;
 
   @override
+  Future<void> focusAt(Offset point) async => focused.add(point);
+
+  @override
   Future<String> takePicture() async => 'shot-${++shots}.jpg';
 
   @override
@@ -429,6 +440,9 @@ class _FakeCamera implements ScanCamera {
   @override
   Future<void> dispose() async => disposed = true;
 }
+
+Offset preview(WidgetTester tester) =>
+    tester.getCenter(find.byKey(const ValueKey('camera-preview')));
 
 /// Pushes Scan over a home page; returns a getter for the popped value.
 Future<bool? Function()> _openScan(

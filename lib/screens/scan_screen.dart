@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -70,6 +71,10 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   bool _opening = false;
   ScanCameraProblem? _problem;
   bool _torch = false;
+
+  /// Where the user last tapped to focus, for the focus ring.
+  Offset? _focusAt;
+  int _focusTaps = 0;
   bool _busy = false;
 
   /// True while the result screen covers the camera.
@@ -153,6 +158,27 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     } catch (_) {
       // A torch that cannot switch is not worth interrupting the user.
     }
+  }
+
+  /// Focuses where the user tapped. The preview fills the screen like
+  /// BoxFit.cover, so the tap is mapped back onto the uncropped preview.
+  void _focus(TapUpDetails details, Size screen) {
+    final camera = _camera;
+    if (camera == null || !_cameraReady) return;
+    final preview = Size(1, 1 / camera.aspectRatio);
+    final scale =
+        math.max(screen.width / preview.width, screen.height / preview.height);
+    final shown = preview * scale;
+    final corner = Offset(
+        (screen.width - shown.width) / 2, (screen.height - shown.height) / 2);
+    final point = details.localPosition - corner;
+    Haptics.tap();
+    setState(() {
+      _focusAt = details.localPosition;
+      _focusTaps++;
+    });
+    camera.focusAt(Offset((point.dx / shown.width).clamp(0.0, 1.0),
+        (point.dy / shown.height).clamp(0.0, 1.0)));
   }
 
   Future<void> _capture() async {
@@ -311,12 +337,28 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
           // Centred like the preview: the photo's centre, and the centre
           // square the model reads, sit exactly behind the frame. Placed
           // higher, a plate framed here landed low in the photo.
+          // Tap anywhere on the picture to focus there; the controls above
+          // keep their own taps.
+          LayoutBuilder(
+            builder: (context, box) => GestureDetector(
+              key: const ValueKey('scan-focus'),
+              behavior: HitTestBehavior.opaque,
+              onTapUp: (details) => _focus(details, box.biggest),
+            ),
+          ),
+          if (_focusAt case final at?)
+            Positioned(
+              left: at.dx - 32,
+              top: at.dy - 32,
+              child: _FocusRing(key: ValueKey(_focusTaps)),
+            ),
           Align(
             child: FractionallySizedBox(
               widthFactor: 0.78,
               child: AspectRatio(
                 aspectRatio: 1,
-                child: ViewfinderFrame(style: style),
+                // Taps on the frame focus the camera, like the rest of the picture.
+                child: IgnorePointer(child: ViewfinderFrame(style: style)),
               ),
             ),
           ),
@@ -589,4 +631,31 @@ class _Fallback extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A ring that shrinks onto the focus point and fades out.
+class _FocusRing extends StatelessWidget {
+  const _FocusRing({super.key});
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 900),
+          builder: (context, t, _) => Opacity(
+            opacity: t < .7 ? 1 : (1 - t) / .3,
+            child: Transform.scale(
+              scale: 1.4 - .4 * Curves.easeOut.transform(math.min(1, t * 2)),
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: CyberColors.cyan, width: 2),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }

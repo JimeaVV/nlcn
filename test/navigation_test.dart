@@ -356,6 +356,9 @@ class _NoCamera implements ScanCamera {
   Future<void> setTorch(bool on) async {}
 
   @override
+  Future<void> focusAt(Offset point) async {}
+
+  @override
   Future<String> takePicture() async => throw UnimplementedError();
 
   @override
