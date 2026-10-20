@@ -1439,6 +1439,32 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Notebook TTA với checkpoint B3: dòng "ảnh như hiện tại" khớp test top-1.
   - 160 test pass. Có thêm test chuẩn bị ảnh cho model 300×300.
 
+### 2026-10-20 · Kết quả TTA của EfficientNetB0
+- Chạy `evaluate_tta.ipynb` trên Kaggle với checkpoint EfficientNetB0, cùng
+  8.287 ảnh test của lần train:
+
+  | Cách xem | Số lần chạy model | Top-1 | Top-3 | So với hiện tại |
+  |---|---|---|---|---|
+  | Ảnh gốc (app đang dùng) | 1 | 68,84% | 83,93% | — |
+  | Ảnh gốc + lật ngang | 2 | 68,96% | 84,06% | +0,12 |
+  | Ảnh gốc + mảnh 80% ở giữa | 2 | 69,63% | 84,31% | +0,79 |
+  | Cả 4 cách | 4 | 69,82% | 84,46% | +0,98 |
+
+- **Nhận xét:**
+  - Dòng đầu khớp test top-1 của lần train (68,84%), tức notebook xử lý
+    ảnh đúng y như lúc train.
+  - Lật ngang gần như không giúp, vì lúc train đã lật ngang ngẫu nhiên.
+  - Nhìn gần hơn (mảnh 80% ở giữa) giúp nhiều nhất. Model thấy rõ món hơn,
+    bớt nền.
+  - Hai cách xem (ảnh gốc + nhìn gần) được 80% lợi ích của cả 4 cách, mà
+    chỉ tốn nửa thời gian.
+  - Có món tăng rõ: cà ri +5,5, canh chua +5,0, cơm tấm +4,9, bò kho +2,6
+    điểm %. Cơm phần lại giảm nhẹ (35,1% xuống 32,9%), vì đĩa cơm phần bày
+    nhiều món tới tận mép đĩa.
+- **Quyết định:** đưa TTA vào app theo từng model, đọc từ một dòng trong
+  thẻ model (ví dụ `tta_views: photo, closer`). Mức lợi trên EfficientNetB3
+  có thể khác B0, nên cần đo lại khi B3 train xong.
+
 ---
 
 ## 3. Việc còn tồn đọng
