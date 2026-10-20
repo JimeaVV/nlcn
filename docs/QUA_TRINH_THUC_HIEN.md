@@ -1532,6 +1532,31 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Dòng "first training step done" chỉ in ở epoch đầu mỗi giai đoạn thay vì
   mọi epoch.
 
+### 2026-10-20 · Train B3 FULL trên Kaggle: tự dừng trước 12 giờ, version sau train tiếp
+- Bản QUICK chạy thành công trên Kaggle nên bản FULL của B3 cũng chạy trên
+  Kaggle (2 GPU T4).
+- Kaggle dừng mỗi lần chạy ở 12 giờ và có thể không giữ file nào. Bản FULL
+  ước tính 7–8 giờ train, cộng khoảng 1–1,5 giờ đọc ảnh, nên khá sát giới hạn.
+- Giới hạn thời gian: trên Kaggle `TIME_LIMIT_HOURS = 11`.
+  - Sau mỗi epoch fine-tune, notebook ước lượng epoch kế tiếp có xong trước
+    mốc 11 giờ trừ 30 phút hay không. Nếu không, nó dừng train.
+  - Phần còn lại vẫn chạy: đánh giá, xuất float16 và int8 từ epoch tốt nhất.
+  - `results.json` ghi `finished: false` và số epoch đã xong; `MODEL_CARD.md`
+    ghi "DỪNG VÌ HẾT GIỜ".
+  - Trên Colab mặc định không giới hạn, vì Colab đã chạy tiếp được qua Drive.
+- Chạy tiếp trên Kaggle: mỗi version bắt đầu với `/kaggle/working` trống.
+  - Thêm output của version trước làm dữ liệu (Add Input → Your Work →
+    Notebooks).
+  - Notebook tìm `progress.json` ở tối đa 3 tầng thư mục trong
+    `/kaggle/input`, không tìm sâu hơn vì đó là các bộ ảnh rất nhiều file.
+  - Nó chép `last.keras`, `checkpoint.keras`, `progress.json` và hai file log
+    sang thư mục làm việc rồi train tiếp. Thời gian train được cộng dồn qua
+    các lần chạy.
+- Đã thử trên máy, giả lập Kaggle:
+  - Lần 1 dừng vì hết giờ sau epoch 1 và vẫn xuất đủ file.
+  - Lần 2 dùng thư mục output trống, chỉ có output lần 1 làm dữ liệu. Nó báo
+    "Previous run found", train tiếp epoch 2–3 và `finished: true`.
+
 ---
 
 ## 3. Việc còn tồn đọng

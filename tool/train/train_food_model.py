@@ -19,6 +19,12 @@
 #    machine.
 # 4. Set `QUICK_TEST = False`, then **Save Version → Save & Run All**. It keeps
 #    running with the browser closed; take the files from the *Output* tab.
+# 5. Kaggle stops a run at 12 hours. At 11 hours (`TIME_LIMIT_HOURS`) training
+#    stops by itself after an epoch and the notebook still evaluates and
+#    exports the best epoch so far; the log and `MODEL_CARD.md` say so. To
+#    train on: *Add Input → Your Work → Notebooks*, add this notebook's
+#    finished version, then **Save & Run All** again with the same settings.
+#    Fine-tuning continues from its `last.keras`.
 #
 # **On Google Colab** (output shows live, photos sit on a fast local disk)
 # 1. *Runtime → Change runtime type → T4 GPU*.
@@ -100,11 +106,18 @@ MIXED_PHO = 'skip'
 # dataset to the list once it is on Kaggle.
 
 # %%
+import glob
 import shutil
 import sys
 import time
 
 ON_COLAB = 'google.colab' in sys.modules
+ON_KAGGLE = bool(os.environ.get('KAGGLE_KERNEL_RUN_TYPE'))
+# Kaggle stops a run at 12 hours and may keep none of its files. Training
+# stops on its own before that, keeping time to evaluate and export the best
+# epoch; a new version continues it (see "Resume" below). 0: no limit.
+TIME_LIMIT_HOURS = float(os.environ.get('TIME_LIMIT_HOURS',
+                                        11 if ON_KAGGLE else 0))
 KAGGLE_DATASETS = [
     'lnguynanhnht/20foodvn',
     'quandang/vietnamese-foods',
@@ -921,10 +934,31 @@ def read_progress():
 def save_progress(phase, epoch, logs):
     best = max(read_progress().get('best', -1.0),
                float(logs.get('val_dish_accuracy', -1.0)))
+    minutes = earlier_minutes + (time.time() - started) / 60
     with open(PROGRESS, 'w') as f:
         json.dump({'phase': phase, 'epochs_done': epoch + 1, 'best': best,
                    'backbone': BACKBONE, 'recipe': RECIPE,
-                   'quick_test': QUICK_TEST}, f)
+                   'quick_test': QUICK_TEST,
+                   'train_minutes': round(minutes, 1)}, f)
+
+
+out_of_time = []   # set once training stopped for the time limit
+epoch_started = [time.time()]
+
+
+def check_time(phase, epoch):
+    """Stops training when one more epoch would leave too little time to
+    evaluate and export: about 30 minutes before TIME_LIMIT_HOURS. The short
+    head phase always runs to the end."""
+    if not TIME_LIMIT_HOURS or phase == 'head' or model.stop_training:
+        return
+    epoch_minutes = (time.time() - epoch_started[0]) / 60
+    used = (time.time() - NOTEBOOK_STARTED) / 60
+    if used + epoch_minutes > TIME_LIMIT_HOURS * 60 - 30:
+        model.stop_training = True
+        out_of_time.append(epoch + 1)
+        stage(f'time limit near after epoch {epoch + 1}: stopping here, '
+              'keeping the best epoch; a new version continues it')
 
 
 first_step = []   # phases whose first training step was logged
@@ -951,10 +985,13 @@ def callbacks(phase, best=None):
                 stage(f'{phase}: first training step done'),
                 first_step.append(phase)) if batch == 0 and
             phase not in first_step else None,
+            on_epoch_begin=lambda epoch, logs: epoch_started.__setitem__(
+                0, time.time()),
             on_epoch_end=lambda epoch, logs: (
                 save_progress(phase, epoch, logs),
                 stage(f"{phase} epoch {epoch + 1}: val dish accuracy "
-                      f"{logs.get('val_dish_accuracy', 0):.3f}"))),
+                      f"{logs.get('val_dish_accuracy', 0):.3f}"),
+                check_time(phase, epoch))),
     ]
 
 # %% [markdown]
@@ -968,10 +1005,35 @@ def callbacks(phase, best=None):
 import time
 
 started = time.time()
+earlier_minutes = 0.0
 # A session cut off during fine-tuning (Colab's free GPU time, a closed tab)
 # continues from its last epoch when the notebook runs again with the same
 # settings: last.keras holds the model and the optimizer, learning-rate
 # schedule included.
+#
+# On Kaggle each version starts with an empty /kaggle/working. To continue,
+# add the previous version's output as data (Add Input → Your Work →
+# Notebooks); its files are copied here first.
+RESUME_FILES = [PROGRESS, LAST, CHECKPOINT,
+                os.path.join(OUTPUT_DIR, 'training_log_head.csv'),
+                os.path.join(OUTPUT_DIR, 'training_log_fine.csv')]
+if not os.path.exists(PROGRESS):
+    # Notebook outputs sit at most three folders deep in /kaggle/input;
+    # deeper folders are the photo datasets, too many files to search.
+    found = sorted(
+        glob.glob(os.path.join(INPUT_ROOT, 'progress.json')) +
+        glob.glob(os.path.join(INPUT_ROOT, '*', 'progress.json')) +
+        glob.glob(os.path.join(INPUT_ROOT, '*', '*', 'progress.json')) +
+        glob.glob(os.path.join(INPUT_ROOT, '*', '*', '*', 'progress.json')))
+    for path in found:
+        folder = os.path.dirname(path)
+        if os.path.exists(os.path.join(folder, 'last.keras')):
+            print('Previous run found in', folder)
+            for target in RESUME_FILES:
+                source = os.path.join(folder, os.path.basename(target))
+                if os.path.exists(source):
+                    shutil.copy(source, target)
+            break
 progress = read_progress()
 resume = (EXPERIMENT == 'finetune' and progress.get('phase') == 'fine' and
           os.path.exists(LAST) and
@@ -982,6 +1044,7 @@ resume = (EXPERIMENT == 'finetune' and progress.get('phase') == 'fine' and
 if resume:
     stage(f"resuming fine-tuning after epoch {progress['epochs_done']} "
           f"(best val {progress['best']:.3f})")
+    earlier_minutes = progress.get('train_minutes', 0.0)
     with strategy.scope():
         model = keras.models.load_model(
             LAST, custom_objects={'masked_bce': masked_bce})
@@ -1020,8 +1083,15 @@ else:
             compile_model(1e-4)
         model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS_FINE,
                   callbacks=callbacks('fine'))
-train_minutes = (time.time() - started) / 60
+train_minutes = earlier_minutes + (time.time() - started) / 60
 print(f'Training took {train_minutes:.1f} min')
+progress = read_progress()
+FINISHED = not out_of_time
+if not FINISHED:
+    print(f"Stopped for the time limit after fine-tuning epoch "
+          f"{progress.get('epochs_done')} of {EPOCHS_FINE}. These files are "
+          "usable; to train on, run a new version with this version's output "
+          "added as data.")
 # The best epoch over the whole run, also across resumed sessions.
 if os.path.exists(CHECKPOINT):
     best_model = keras.models.load_model(
@@ -1091,6 +1161,8 @@ thresholds = {
 results = {'experiment': EXPERIMENT, 'backbone': BACKBONE, 'recipe': RECIPE,
            'img': IMG, 'contract': CONTRACT_VERSION,
            'quick_test': QUICK_TEST, 'train_minutes': round(train_minutes, 1),
+           'finished': FINISHED,
+           'epochs_fine_done': progress.get('epochs_done'),
            'photos': {'train': len(train), 'val': len(val), 'test': len(test)},
            'params': int(model.count_params()),
            **thresholds}
@@ -1266,7 +1338,7 @@ card = f"""# MODEL_CARD – food_v1
 - Dữ liệu: {len(train)} train / {len(val)} val / {len(test)} test
 - Nguồn ảnh: {', '.join(f'{k}: {v}' for k, v in sources.most_common())}
 - Kích thước: {size_mb:.1f} MB (float16)
-- Thời gian train: {train_minutes:.0f} phút
+- Thời gian train: {train_minutes:.0f} phút{'' if FINISHED else f" (DỪNG VÌ HẾT GIỜ sau epoch {progress.get('epochs_done')}/{EPOCHS_FINE}, chạy version mới để train tiếp)"}
 
 ## Kết quả trên tập test
 - Món, top-1: {metric('dish_top1')}
