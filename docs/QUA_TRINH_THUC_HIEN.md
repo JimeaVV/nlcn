@@ -1488,6 +1488,15 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     sang int8, đo hai file TFLite. Lần sau nhìn dòng cuối là biết kẹt ở đâu.
 - Đã thử trên dữ liệu giả với 2 thiết bị ảo: đủ các mốc, chạy xong trong 3
   phút.
+- **Log của bản chạy nền trên Kaggle trễ rất nhiều:** chạy được 7.400 giây mà
+  log mới hiện tới giây thứ 22, dòng `reading vietfood68`. Vì vậy không biết
+  notebook kẹt ở bước đọc 33.000 file nhãn VietFood67 trên ổ mạng hay chỉ là
+  log hiện chậm.
+  - Bước đọc VietFood67 in thêm tiến độ: liệt kê nhãn xong, liệt kê ảnh xong,
+    và cứ mỗi 5.000 nhãn lại in một dòng.
+  - Bản QUICK chỉ đọc 1/10 số nhãn, vẫn đủ 12 ảnh mỗi món.
+  - Theo dõi bằng phiên tương tác trong trình soạn notebook của Kaggle: kết
+    quả hiện ngay dưới từng ô, không bị trễ như trang log.
 
 ---
 

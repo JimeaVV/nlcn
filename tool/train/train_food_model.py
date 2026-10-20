@@ -444,6 +444,11 @@ def load_vietfood67(root, source):
         for folder, _, names in os.walk(os.path.join(root, 'labels'),
                                         followlinks=True)
         for name in names if name.endswith('.txt'))
+    if QUICK_TEST:
+        # A tenth of the labels still gives every dish its 12 photos, and
+        # the quick test then does not wait on 33,000 reads.
+        label_paths = label_paths[::10]
+    stage(f'{source}: {len(label_paths)} label files listed')
     # One listing of the images instead of a lookup per label: the datasets
     # sit on a network disk, where every file check is slow.
     images_root = os.path.join(root, 'images')
@@ -454,6 +459,7 @@ def load_vietfood67(root, source):
             if ext.lower() in IMAGE_EXT:
                 rel = os.path.relpath(os.path.join(folder, stem), images_root)
                 image_files.setdefault(rel, os.path.join(folder, name))
+    stage(f'{source}: {len(image_files)} images listed')
 
     def box_names(label_path):
         names = set()
@@ -464,8 +470,11 @@ def load_vietfood67(root, source):
                     names.add(VF_NAMES[int(parts[0])])
         return names
 
+    all_names = []
     with ThreadPoolExecutor(32) as pool:
-        all_names = list(pool.map(box_names, label_paths))
+        for start in range(0, len(label_paths), 5000):
+            all_names += pool.map(box_names, label_paths[start:start + 5000])
+            stage(f'{source}: {len(all_names)} of {len(label_paths)} labels read')
     for label_path, names in zip(label_paths, all_names):
         rel = os.path.relpath(label_path, os.path.join(root, 'labels'))
         image = image_files.get(os.path.splitext(rel)[0])
