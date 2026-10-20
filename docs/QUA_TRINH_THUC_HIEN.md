@@ -1272,6 +1272,23 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - 158 test pass. APK arm64 tăng từ 17,2 MB lên 19,3 MB vì model nặng hơn
   2,1 MB. APK vẫn ký đúng khóa phát hành, đã cài lên điện thoại qua adb.
 
+### 2026-10-20 · Notebook đo TTA (xem một ảnh theo nhiều góc)
+- **Ý tưởng:** EfficientNetB0 chạy 22 ms một ảnh trên CPU của Colab, còn
+  nhóm chấp nhận tới khoảng 1 giây mỗi lần quét. Vì vậy có thể đổi thời gian
+  lấy độ chính xác: chạy model trên vài cách xem của cùng một ảnh, rồi lấy
+  trung bình xác suất.
+- **`tool/train/evaluate_tta.ipynb`:**
+  - Nạp checkpoint của một lần train, chạy lại đúng tập test trong
+    `splits.csv`. Ảnh được thu nhỏ y như notebook train.
+  - So 4 cách xem: ảnh gốc, lật ngang, mảnh 80% ở giữa, mảnh 80% lật ngang.
+    Đây là các cách xem app làm được dễ dàng từ một ảnh.
+  - Không train lại.
+- `make_notebook.py` nhận thêm tên file nguồn, để build được notebook khác
+  ngoài notebook train.
+- **Đã thử trên máy** (dữ liệu giả): dòng "ảnh như hiện tại" ra đúng test
+  top-1 của lần train (56,25%), nghĩa là cách xử lý ảnh khớp với lúc train.
+  Kết quả thật phải chạy trên Colab với checkpoint EfficientNetB0.
+
 ---
 
 ## 3. Việc còn tồn đọng

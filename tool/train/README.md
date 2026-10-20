@@ -128,6 +128,25 @@ Cách chọn:
 - Bản chạy cũ chưa ghi val vào `results.json` thì script lấy val từ
   `training_log_*.csv`.
 
+## Đo TTA: cho model xem một ảnh theo nhiều góc
+
+`evaluate_tta.ipynb` lấy checkpoint của một lần train, chạy lại trên **đúng
+tập test** của lần train đó, không train lại. Notebook so 4 cách xem ảnh:
+- ảnh như app đang đọc;
+- ảnh lật ngang;
+- mảnh 80% ở giữa (nhìn gần hơn);
+- mảnh 80% lật ngang.
+
+Notebook lấy trung bình xác suất của các cách xem, in ra top-1, top-3, độ
+chính xác của cơm phần và `khac` cho từng tổ hợp, rồi lưu `results_tta.json`.
+Dòng đầu tiên phải khớp test top-1 của lần train (chạy thử trên dữ liệu giả
+đã khớp).
+
+- Trên Colab: điền `RUN_DIR` (thư mục kết quả trên Drive của mình), hoặc ID
+  file Drive của `checkpoint.keras`, `splits.csv`, `dishes.txt` nếu thư mục
+  do người khác chia sẻ. Rồi *Run all*.
+- Mỗi cách xem thêm vào là app phải chạy model thêm một lần.
+
 ## Ảnh tự chụp
 
 Tạo một dataset Kaggle riêng gồm `labels.csv` (định dạng ở contract mục 5)

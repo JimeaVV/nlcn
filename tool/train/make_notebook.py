@@ -3,13 +3,16 @@
 The .py file is the source (readable diffs in git); cells start with
 `# %%`, markdown cells with `# %% [markdown]`. Run after editing it:
     python tool/train/make_notebook.py
+Another source in this folder, e.g. evaluate_tta.py, is passed by name:
+    python tool/train/make_notebook.py evaluate_tta.py
 """
 import json
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SOURCE = HERE / 'train_food_model.py'
-TARGET = HERE / 'train_food_model.ipynb'
+SOURCE = HERE / (sys.argv[1] if len(sys.argv) > 1 else 'train_food_model.py')
+TARGET = SOURCE.with_suffix('.ipynb')
 
 
 def cells(text):
