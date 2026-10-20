@@ -2,15 +2,18 @@
 # # MacroRunner – train the food recognition model
 #
 # Trains the two-output model described in `docs/MODEL_CONTRACT.md`
-# (contract 1.3): a softmax over 52 dishes plus "khac" (food the app does not
-# know) and an independent probability per component (25). The result is the
-# four files the app reads from `assets/models/`.
+# (contract 1.4): a softmax over 65 dishes plus "khac" (food the app does not
+# know) and an independent probability per component (25). By default it
+# trains EfficientNetB3 at 300×300 with the `full` recipe. The result is the
+# four files the app reads from `assets/models/`, plus an int8 copy.
 #
 # **On Kaggle**
 # 1. *Add data*: VinaFood21, 30VNFoods (vietnamese-foods), 20FoodVN,
 #    VietFood67 (vietfood68), and the team's own photos if any.
 # 2. *Settings*: Accelerator **GPU T4 x2**, Internet **on**.
-# 3. Run once with `QUICK_TEST = True` (a few minutes) to check everything.
+# 3. Run once with `QUICK_TEST = True` to check everything. For B3 on Kaggle
+#    this still takes 30–60 minutes: attaching the data, reading VietFood67's
+#    labels, compiling for two GPUs and two TFLite conversions do not shrink.
 #    If the draft session hangs on "Adding data", skip it: Save Version →
 #    Save & Run All with `QUICK_TEST = True` runs the same check on its own
 #    machine.
