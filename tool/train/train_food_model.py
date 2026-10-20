@@ -39,6 +39,16 @@
 
 # %%
 import os
+import time
+
+NOTEBOOK_STARTED = time.time()
+
+
+def stage(text):
+    """One timestamped log line, so a long run shows where it is."""
+    minutes = (time.time() - NOTEBOOK_STARTED) / 60
+    print(f'[{minutes:6.1f} min] {text}', flush=True)
+
 
 QUICK_TEST = True          # True: a few hundred images, 1 epoch per phase.
 EXPERIMENT = 'finetune'    # 'scratch' | 'linear' | 'finetune' (report §3)
@@ -743,7 +753,13 @@ N_DISH, N_COMP = len(OUTPUTS), len(COMPONENTS)
 # "GPU T4 x2" gives two GPUs, but Keras uses only the first unless training
 # runs under MirroredStrategy, which splits every batch between them. BATCH
 # stays the total, so a run on one GPU learns the same way.
-strategy = tf.distribute.MirroredStrategy()
+if len(tf.config.list_physical_devices('GPU')) > 1:
+    # NCCL all-reduce, the default, can hang at the first step on Kaggle's
+    # T4 x2; copying gradients through the host is slower but safe.
+    strategy = tf.distribute.MirroredStrategy(
+        cross_device_ops=tf.distribute.HierarchicalCopyAllReduce())
+else:
+    strategy = tf.distribute.MirroredStrategy()
 if MIXED_PRECISION == 'always' or (
         MIXED_PRECISION == 'gpu' and tf.config.list_physical_devices('GPU')):
     keras.mixed_precision.set_global_policy('mixed_float16')
@@ -807,6 +823,7 @@ def make_dataset(items, training):
             .prefetch(tf.data.AUTOTUNE))
 
 
+stage('photos ready, building the input pipeline')
 train_ds = make_dataset(train, True)
 val_ds = make_dataset(val, False)
 test_ds = make_dataset(test, False)
@@ -879,6 +896,13 @@ def callbacks(phase):
         keras.callbacks.EarlyStopping(monitor='val_dish_accuracy', mode='max',
                                       patience=6 if FULL else 3,
                                       restore_best_weights=True),
+        # The first step shows the GPUs work together; then one line an epoch.
+        keras.callbacks.LambdaCallback(
+            on_train_batch_end=lambda batch, logs: stage(
+                f'{phase}: first training step done') if batch == 0 else None,
+            on_epoch_end=lambda epoch, logs: stage(
+                f"{phase} epoch {epoch + 1}: val dish accuracy "
+                f"{logs.get('val_dish_accuracy', 0):.3f}")),
     ]
 
 # %% [markdown]
@@ -963,6 +987,7 @@ def component_precision(comp_true, comp_prob, threshold):
     return (guess & truth).sum() / max(1, guess.sum())
 
 
+stage('training done, evaluating')
 val_pred, test_pred = predict(val_ds), predict(test_ds)
 threshold = 0.6
 if val_pred is not None and val_pred[1][:, N_COMP:].sum() > 0:
@@ -1070,6 +1095,7 @@ sample_check = next(iter(test_ds if test else val_ds))[0][:1]
 assert np.abs(export_model(sample_check, training=False)['dish'].numpy() -
               model(sample_check, training=False)['dish'].numpy()).max() < (
                   0.02 if model.dtype_policy.name == 'mixed_float16' else 1e-4),     'The export copy differs from the trained model'
+stage('converting to float16 TFLite')
 converter = tf.lite.TFLiteConverter.from_keras_model(export_model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.target_spec.supported_types = [tf.float16]
@@ -1111,9 +1137,11 @@ results['cpu_ms'] = round((time.time() - timed) / 30 * 1000, 1)
 # An int8-weight copy (dynamic range), half the size. It ships only if a
 # phone runs it as fast and it scores as well, so it is measured here on the
 # same test photos as the float16 file.
+stage('converting to int8 TFLite')
 converter = tf.lite.TFLiteConverter.from_keras_model(export_model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 int8 = converter.convert()
+stage('measuring both TFLite files on test photos')
 with open(os.path.join(OUTPUT_DIR, 'food_v1_int8.tflite'), 'wb') as f:
     f.write(int8)
 
@@ -1178,4 +1206,5 @@ component_dishes: {', '.join(component_dishes)}
 with open(os.path.join(OUTPUT_DIR, 'MODEL_CARD.md'), 'w', encoding='utf-8') as f:
     f.write(card)
 print(card)
+stage('done')
 print('Download from Output:', sorted(os.listdir(OUTPUT_DIR)))

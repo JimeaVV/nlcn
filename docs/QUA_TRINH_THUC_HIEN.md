@@ -1473,6 +1473,22 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Đã thử B2 trên dữ liệu giả: chạy trọn tới bước xuất file, ảnh vào 260×260,
   float16 15,7 MB, int8 8,7 MB.
 
+### 2026-10-20 · Bản QUICK của B3 trên Kaggle chạy 2 giờ chưa xong
+- Bản QUICK lẽ ra chỉ mất tối đa khoảng 1 giờ 15 phút. Trang log của Kaggle
+  hiện trễ, nên không biết notebook đang kẹt ở bước nào.
+- **Nghi vấn chính:** chế độ 2 GPU (MirroredStrategy) chưa từng chạy trên 2 GPU
+  thật. Các lần train trước đều trên Colab 1 GPU, còn lần thử trên máy dùng 2
+  thiết bị CPU ảo. Bước đồng bộ gradient mặc định (NCCL) có lúc bị treo ngay
+  bước train đầu tiên trên Kaggle T4×2.
+- **Cách sửa:**
+  - Khi có từ 2 GPU, đồng bộ bằng `HierarchicalCopyAllReduce`: chép gradient
+    qua bộ nhớ máy chủ, chậm hơn một chút nhưng không bị treo.
+  - Thêm dòng log có mốc thời gian ở từng bước: ảnh sẵn sàng, xong bước train
+    đầu tiên, xong từng epoch, đánh giá, chuyển sang TFLite float16, chuyển
+    sang int8, đo hai file TFLite. Lần sau nhìn dòng cuối là biết kẹt ở đâu.
+- Đã thử trên dữ liệu giả với 2 thiết bị ảo: đủ các mốc, chạy xong trong 3
+  phút.
+
 ---
 
 ## 3. Việc còn tồn đọng
