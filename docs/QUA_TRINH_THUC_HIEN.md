@@ -1659,6 +1659,25 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - `--resume` và chạy thường: vẫn như trước, nên bản sửa không làm hỏng
     tính năng cũ.
 
+### 2026-10-21 · Colab hỏi quyền Google Drive ngay khi bắt đầu chạy
+- Vấn đề: trước đây notebook tải hết dữ liệu (khoảng 40 phút) rồi mới kết
+  nối Drive. Người dùng bấm *Run all* rồi để máy chạy một mình, nên hộp
+  thoại xin quyền Drive hiện ra lúc không có ai bấm. Phiên đó coi như mất,
+  phải chạy lại từ đầu.
+- Sửa:
+  - Kết nối Drive là việc đầu tiên trên Colab, trước khi đọc secret Kaggle
+    và tải dữ liệu. Notebook in "Allow Google Drive access in the window
+    that opens now."
+  - Ngay sau khi kết nối, notebook in tiến độ cũ tìm thấy trên Drive (số
+    epoch đã train, val tốt nhất), hoặc báo là train từ đầu. Nhờ vậy người
+    dùng biết ngay phiên này sẽ chạy tiếp, khỏi đợi 40 phút mới thấy dòng
+    `resuming`.
+  - Phần hướng dẫn đầu notebook nhắc bấm cho phép Drive và secret trong vài
+    giây đầu, rồi mới để máy tự chạy.
+- Kiểm tra: `smoke_test.py --colab` và `--colab --resume` đều PASS. Lượt chạy
+  tiếp in đúng "Earlier progress on Drive: {... epochs_done: 1 ...}" trước
+  khi tải dữ liệu.
+
 ---
 
 ## 3. Việc còn tồn đọng

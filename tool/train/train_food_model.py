@@ -32,8 +32,10 @@
 #    In Colab, the key icon (*Secrets*) on the left: add `KAGGLE_API_TOKEN`
 #    with the `KGAT_...` value and turn on notebook access. (A legacy
 #    `kaggle.json` works too: `KAGGLE_USERNAME` and `KAGGLE_KEY`.)
-# 3. *Runtime → Run all*. The datasets download once per session (VietFood67
-#    is 26 GB). Results go to Google Drive, folder `macrorunner_train`.
+# 3. *Runtime → Run all*, then allow Google Drive (and the secret) in the
+#    windows that open within the first seconds; only then leave it alone.
+#    The datasets download once per session (VietFood67 is 26 GB). Results
+#    go to Google Drive, folder `macrorunner_train`.
 # 4. After the quick test, set `QUICK_TEST = False` and run all again in the
 #    same session, so nothing downloads twice. Keep the tab open.
 # 5. Free Colab gives a session about 5 hours, less than B3 needs (7–8 hours
@@ -131,6 +133,27 @@ SAVE_TO_DRIVE = True   # False: results stay in /content/output (lost on exit)
 COLAB_ROOT = os.environ.get('COLAB_ROOT', '/content')
 
 if ON_COLAB:
+    # Drive first: Colab asks for access here, so the question comes at the
+    # start, not after 40 minutes of downloads with nobody at the screen.
+    if SAVE_TO_DRIVE:
+        from google.colab import drive
+        print('Allow Google Drive access in the window that opens now.',
+              flush=True)
+        drive.mount(os.path.join(COLAB_ROOT, 'drive'))
+        # One folder per run, so the backbones do not overwrite each other's
+        # results.
+        OUTPUT_DIR = os.path.join(
+            COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train',
+            f"{BACKBONE}_{EXPERIMENT}{'_quick' if QUICK_TEST else ''}")
+        try:
+            with open(os.path.join(OUTPUT_DIR, 'progress.json')) as f:
+                print('Earlier progress on Drive:', f.read(), '- training '
+                      'continues from there after the downloads.', flush=True)
+        except OSError:
+            print('No earlier progress on Drive: training starts fresh.')
+    else:
+        OUTPUT_DIR = os.path.join(COLAB_ROOT, 'output')
+
     from google.colab import userdata
     for key in ('KAGGLE_USERNAME', 'KAGGLE_KEY', 'KAGGLE_API_TOKEN'):
         try:
@@ -166,17 +189,6 @@ if ON_COLAB:
             os.symlink(path, link)
         print(f'  done in {time.time() - started:.0f} s: {path}', flush=True)
     print(f'Disk free: {shutil.disk_usage(COLAB_ROOT).free / 1e9:.0f} GB')
-
-    if SAVE_TO_DRIVE:
-        from google.colab import drive
-        drive.mount(os.path.join(COLAB_ROOT, 'drive'))
-        # One folder per run, so the three backbones do not overwrite each
-        # other's results.
-        OUTPUT_DIR = os.path.join(
-            COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train',
-            f"{BACKBONE}_{EXPERIMENT}{'_quick' if QUICK_TEST else ''}")
-    else:
-        OUTPUT_DIR = os.path.join(COLAB_ROOT, 'output')
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 print('Photos from', INPUT_ROOT, '| results to', OUTPUT_DIR)
