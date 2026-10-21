@@ -9,6 +9,21 @@ import '../models/user_profile.dart';
 import '../models/weight_entry.dart';
 
 class DatabaseService {
+  /// The SQLite schema version; a backup records it.
+  static const schemaVersion = 6;
+
+  /// Every table a backup holds, in an order that restores cleanly.
+  static const backupTables = [
+    'user_profile',
+    'weight_history',
+    'meal_plan_history',
+    'workout_plan_history',
+    'workout_logs',
+    'food_log',
+    'favorite_food',
+    'water_log',
+  ];
+
   DatabaseService._()
       : _factory = null,
         _path = null;
@@ -47,19 +62,21 @@ class DatabaseService {
     return factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 5,
+        version: schemaVersion,
         onCreate: (db, _) async {
           await _createBaseTables(db);
           await _createWorkoutLogTable(db);
           await _createWeightTable(db);
           await _createFoodLogTable(db);
           await _createFavoriteFoodTable(db);
+          await _createWaterTable(db);
         },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) await _createWorkoutLogTable(db);
           if (oldVersion < 3) await _upgradeProfileAndWeights(db);
           if (oldVersion < 4) await _createFoodLogTable(db);
           if (oldVersion < 5) await _createFavoriteFoodTable(db);
+          if (oldVersion < 6) await _createWaterTable(db);
         },
       ),
     );
@@ -179,6 +196,17 @@ class DatabaseService {
         carbs real not null,
         fat real not null,
         created_at text not null
+      )
+    ''');
+  }
+
+  /// Version 6: millilitres of water drunk, one row per day.
+  Future<void> _createWaterTable(Database db) async {
+    await db.execute('''
+      create table if not exists water_log(
+        logged_date text primary key,
+        ml integer not null,
+        updated_at text not null
       )
     ''');
   }
@@ -531,6 +559,30 @@ class DatabaseService {
         where: 'food_name=?', whereArgs: [name.trim()]);
   }
 
+  /// Calories, protein, carbs and fat eaten per day from [from] to [to],
+  /// both included; days with no entries are missing from the map.
+  Future<Map<DateTime, FoodLogTotals>> getDailyTotals(
+      DateTime from, DateTime to) async {
+    final db = await database;
+    final rows = await db.rawQuery('''
+      select logged_date, sum(calories) as calories, sum(protein) as protein,
+        sum(carbs) as carbs, sum(fat) as fat
+      from food_log
+      where logged_date between ? and ?
+      group by logged_date
+    ''', [diaryDateKey(from), diaryDateKey(to)]);
+    double number(Object? value) => (value as num).toDouble();
+    return {
+      for (final row in rows)
+        DateTime.parse('${row['logged_date']}'): FoodLogTotals(
+          calories: number(row['calories']),
+          protein: number(row['protein']),
+          carbs: number(row['carbs']),
+          fat: number(row['fat']),
+        ),
+    };
+  }
+
   /// Calories eaten per day from [from] to [to], both included; days with
   /// no entries are missing from the map.
   Future<Map<DateTime, double>> getDailyCalories(
@@ -594,6 +646,75 @@ class DatabaseService {
   Future<void> deleteWorkoutLog(int id) async {
     final db = await database;
     await db.delete('workout_logs', where: 'id=?', whereArgs: [id]);
+  }
+
+  /// Water drunk on [day], in millilitres; 0 when nothing was logged.
+  Future<int> getWater(DateTime day) async {
+    final db = await database;
+    final rows = await db.query('water_log',
+        where: 'logged_date=?', whereArgs: [diaryDateKey(day)], limit: 1);
+    return rows.isEmpty ? 0 : (rows.first['ml'] as num).toInt();
+  }
+
+  /// Sets the water drunk on [day]; values are kept between 0 and 10 litres.
+  Future<void> setWater(DateTime day, int ml) async {
+    final db = await database;
+    await db.insert(
+      'water_log',
+      {
+        'logged_date': diaryDateKey(day),
+        'ml': ml.clamp(0, 10000),
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Every row of every table, for a backup file the user keeps.
+  Future<Map<String, dynamic>> exportBackup() async {
+    final db = await database;
+    return {
+      'app': 'optifit',
+      'schema': schemaVersion,
+      'exported_at': DateTime.now().toIso8601String(),
+      'tables': {
+        for (final table in backupTables) table: await db.query(table),
+      },
+    };
+  }
+
+  /// Replaces all data with a backup from [exportBackup], in one transaction:
+  /// a file that does not fit leaves the current data untouched. Tables a
+  /// backup from an older version lacks are left empty.
+  Future<void> restoreBackup(Map<String, dynamic> backup) async {
+    final schema = backup['schema'];
+    final tables = backup['tables'];
+    if (backup['app'] != 'optifit' ||
+        schema is! int ||
+        schema < 1 ||
+        schema > schemaVersion ||
+        tables is! Map) {
+      throw const FormatException('Not an OptiFit backup.');
+    }
+    final unknown = tables.keys.where((name) => !backupTables.contains(name));
+    if (unknown.isNotEmpty) {
+      throw FormatException('Unknown tables in the backup: $unknown');
+    }
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final table in backupTables.reversed) {
+        await txn.delete(table);
+      }
+      for (final table in backupTables) {
+        final rows = tables[table];
+        if (rows == null) continue;
+        if (rows is! List) throw FormatException('Invalid rows in $table.');
+        for (final row in rows) {
+          if (row is! Map) throw FormatException('Invalid row in $table.');
+          await txn.insert(table, Map<String, Object?>.from(row));
+        }
+      }
+    });
   }
 
   Future<void> clearAllHistory() async {

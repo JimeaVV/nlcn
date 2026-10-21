@@ -6,12 +6,22 @@
     <uses-permission
         android:name="android.permission.RECORD_AUDIO"
         tools:node="remove" />
+    <!-- LiteRT's GPU library declares an old targetSdk, so Android would add
+         READ_PHONE_STATE for it; the app never reads the phone's state. -->
+    <uses-permission
+        android:name="android.permission.READ_PHONE_STATE"
+        tools:node="remove" />
     <!-- Phones without a camera can still install the app; Scan then offers
          the gallery and manual logging instead. -->
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="false"
         tools:replace="android:required" />
+    <!-- Meal reminders: local notifications, asked for when switched on, and
+         rescheduled after a restart. No exact-alarm permission: reminders
+         are inexact and may come a few minutes late. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:label="OptiFit"
@@ -39,6 +49,31 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+        <!-- Home-screen widget with today's numbers. -->
+        <receiver
+            android:name=".TodayWidgetProvider"
+            android:exported="true"
+            android:label="@string/today_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_widget_info" />
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

@@ -1749,6 +1749,74 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - `check_vn_food.py`: OK.
   - Chưa chạy thử trên điện thoại thật.
 
+### 2026-10-21 · Nước uống, chuỗi ngày, tổng kết tuần, nhắc ghi bữa, sao lưu, widget
+- Lý do: đây là nhóm 2 và 3 trong danh sách so sánh với các app cùng loại.
+  Đó là những tính năng giữ người dùng quay lại mỗi ngày và giữ an toàn dữ
+  liệu cho một app chạy offline.
+- Màn Hôm nay:
+  - **Chuỗi ngày ghi ăn**: số ngày liên tiếp có ghi món, tính đến hôm nay.
+    Hôm nay chưa ghi thì chuỗi vẫn giữ tới hôm qua, kèm nhắc "Ghi bữa hôm nay
+    để giữ chuỗi".
+  - **Nước uống**: nút ± từng ly 250 ml, thanh tiến độ tới 2 lít.
+    - 2 lít là mức tham khảo chung, không phải chỉ định cá nhân; app ghi rõ
+      cần nhiều hơn khi trời nóng hoặc tập nặng.
+    - Lưu ở bảng mới `water_log`, nên database lên phiên bản 6.
+    - Bấm nhanh hai lần được cộng đủ hai ly: test phát hiện bản đầu chỉ cộng
+      một ly, đã sửa.
+  - **7 ngày qua**:
+    - số ngày ghi ăn;
+    - calo và protein trung bình, chỉ tính trên những ngày có ghi;
+    - chênh lệch so với mục tiêu calo;
+    - số ngày tập;
+    - thay đổi cân nặng giữa lần cân đầu và cuối trong tuần.
+  - Hai phần chuỗi ngày và tổng kết tuần là phần thêm: nếu lỗi thì phần còn
+    lại của màn vẫn hiện.
+- Cài đặt:
+  - **Nhắc ghi bữa**: thông báo hằng ngày lúc 8:00, 12:30 và 19:30, đổi được
+    giờ.
+    - Dùng `flutter_local_notifications` kiểu không chính xác tuyệt đối, có
+      thể đến trễ vài phút. Nhờ vậy không cần quyền báo thức chính xác, và
+      không gửi gì qua mạng.
+    - Android 13 trở lên hỏi quyền khi bật. Nếu bị từ chối, nhắc nhở vẫn tắt
+      và app báo cách bật lại.
+    - Cài lại lịch nhắc sau khi máy khởi động lại (`RECEIVE_BOOT_COMPLETED`).
+    - Thêm desugaring vào Gradle theo yêu cầu của thư viện.
+  - **Sao lưu dữ liệu**:
+    - Xuất mọi bảng ra một file `optifit_backup_YYYY-MM-DD.json` rồi chia sẻ
+      qua Drive, Zalo… Bản thân app không tải lên đâu cả.
+    - "Khôi phục từ file" hỏi xác nhận, rồi thay toàn bộ dữ liệu trong một
+      transaction.
+    - File sai (app khác, phiên bản mới hơn, bảng lạ, cột lạ) bị từ chối và
+      dữ liệu hiện có giữ nguyên.
+    - Bản sao lưu từ phiên bản cũ thiếu bảng nước uống hay yêu thích vẫn khôi
+      phục được.
+- **Widget màn hình chính** (Android):
+  - Hiện "OptiFit hôm nay", calo ăn so với mục tiêu, nước uống và chuỗi ngày.
+    Chạm vào thì mở app.
+  - App cập nhật widget mỗi lần màn Hôm nay tải lại, qua `home_widget`; chữ
+    được dịch sẵn theo ngôn ngữ app.
+  - Phần Android: `TodayWidgetProvider.java`, layout `today_widget.xml`, thêm
+    vào manifest.
+- Thư viện mới: `flutter_local_notifications`, `timezone`, `flutter_timezone`,
+  `share_plus`, `file_picker`, `home_widget`. Bản release vẫn không có quyền
+  INTERNET.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 195/195 PASS, gồm test mới cho:
+    - chuỗi ngày (ngắt quãng, hôm nay chưa ghi, trùng ngày);
+    - tổng kết tuần;
+    - nước uống và tổng theo ngày trên SQLite thật;
+    - sao lưu rồi khôi phục sang database trống, file hỏng không làm mất dữ
+      liệu, bản sao lưu đời cũ;
+    - bật, tắt, đổi giờ, bị từ chối quyền nhắc nhở;
+    - luồng khôi phục có hỏi xác nhận.
+  - `check_vn_food.py`: OK.
+- Gỡ quyền `READ_PHONE_STATE` khỏi bản release. Quyền này do thư viện GPU
+  của LiteRT kéo vào (vì khai báo targetSdk cũ) chứ app không dùng. Các
+  quyền mới của WorkManager (do `home_widget` dùng) là quyền thường, không
+  phải xin người dùng.
+- Đã build APK arm64 build 110 (20,7 MB, chữ ký release khớp) và cài đè lên
+  điện thoại test. App mở được, nâng cấp database lên v6, log không có lỗi.
+
 ---
 
 ## 3. Việc còn tồn đọng

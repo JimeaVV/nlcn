@@ -979,5 +979,141 @@
       }
     }
   },
-  "adaptiveTdeeInfo": "TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế."
+  "adaptiveTdeeInfo": "TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.",
+  "waterTitle": "Nước uống",
+  "waterProgress": "{drunk} / {target} ml",
+  "@waterProgress": {
+    "placeholders": {
+      "drunk": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "waterGlasses": "{count} ly, mỗi ly {glass} ml",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "glass": {
+        "type": "String"
+      }
+    }
+  },
+  "waterAdd": "Thêm một ly",
+  "waterRemove": "Bớt một ly",
+  "waterNote": "Mục tiêu tham khảo 2 lít mỗi ngày; cần nhiều hơn khi trời nóng hoặc tập nặng.",
+  "streakDays": "{count} ngày liên tục ghi ăn",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "streakKeep": "Ghi bữa hôm nay để giữ chuỗi.",
+  "streakNone": "Ghi một bữa hôm nay để bắt đầu chuỗi ngày.",
+  "weekTitle": "7 ngày qua",
+  "weekLogged": "Ghi ăn {days}/7 ngày",
+  "@weekLogged": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "weekAverage": "Trung bình {calories} kcal • {protein} g protein mỗi ngày ghi",
+  "@weekAverage": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "weekVsTarget": "So với mục tiêu {target} kcal: {diff} kcal/ngày",
+  "@weekVsTarget": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "weekTraining": "Tập {days} ngày",
+  "@weekTraining": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "weekWeight": "Cân nặng {change} kg",
+  "@weekWeight": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "weekEmpty": "Chưa có dữ liệu trong 7 ngày qua.",
+  "remindersTitle": "Nhắc ghi bữa",
+  "remindersBody": "Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.",
+  "remindersSwitch": "Bật nhắc nhở",
+  "remindersDenied": "Chưa được cấp quyền thông báo. Hãy bật trong Cài đặt của Android.",
+  "remindersChangeTime": "Đổi giờ nhắc {meal}",
+  "@remindersChangeTime": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNotificationTitle": "{meal}: bạn đã ghi chưa?",
+  "@reminderNotificationTitle": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNotificationBody": "Mở OptiFit để ghi món, chỉ mất vài giây.",
+  "reminderChannel": "Nhắc ghi bữa",
+  "backupTitle": "Sao lưu dữ liệu",
+  "backupBody": "Lưu toàn bộ hồ sơ, nhật ký ăn, nước uống, cân nặng và lịch sử tập vào một file JSON để cất giữ hoặc chuyển sang máy khác.",
+  "backupExport": "Xuất file sao lưu",
+  "backupImport": "Khôi phục từ file",
+  "backupImportTitle": "Khôi phục dữ liệu?",
+  "backupImportBody": "Toàn bộ dữ liệu hiện có trên máy sẽ được thay bằng dữ liệu trong file. Việc này không hoàn tác được.",
+  "backupRestore": "Khôi phục",
+  "backupRestored": "Đã khôi phục dữ liệu.",
+  "backupInvalid": "File này không phải bản sao lưu OptiFit hợp lệ.",
+  "backupFailed": "Không tạo được file sao lưu. Hãy thử lại.",
+  "widgetTitle": "OptiFit hôm nay",
+  "widgetWater": "Nước {drunk} / {target} L",
+  "@widgetWater": {
+    "placeholders": {
+      "drunk": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "widgetStreak": "Chuỗi {count} ngày",
+  "@widgetStreak": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../core/cyber_theme.dart';
 import '../core/locale_controller.dart';
 import '../l10n/l10n.dart';
+import '../models/food_log_entry.dart';
+import '../services/backup_service.dart';
 import '../services/database_service.dart';
+import '../services/reminder_service.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/scan_button_face.dart';
 
@@ -14,6 +17,9 @@ class SettingsScreen extends StatelessWidget {
     required this.localeController,
     this.database,
     this.onHistoryCleared,
+    this.reminders,
+    this.backup = const BackupService(),
+    this.onDataRestored,
   });
 
   final ThemeController themeController;
@@ -22,6 +28,86 @@ class SettingsScreen extends StatelessWidget {
 
   /// Called after saved meal plans, workouts and logs are deleted.
   final VoidCallback? onHistoryCleared;
+
+  /// Meal reminders; the card is hidden without it.
+  final ReminderController? reminders;
+  final BackupService backup;
+
+  /// Called after a backup replaced all data.
+  final VoidCallback? onDataRestored;
+
+  DatabaseService get _database => database ?? DatabaseService.instance;
+
+  ({String title, String body}) Function(MealSlot) _reminderTexts(
+          AppLocalizations l10n) =>
+      (meal) => (
+            title: l10n.reminderNotificationTitle(l10n.mealSlotLabel(meal)),
+            body: l10n.reminderNotificationBody,
+          );
+
+  Future<void> _toggleReminders(BuildContext context, bool value) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final allowed = await reminders!.setEnabled(value,
+        texts: _reminderTexts(l10n), channelName: l10n.reminderChannel);
+    if (!allowed) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.remindersDenied)));
+    }
+  }
+
+  Future<void> _pickReminderTime(BuildContext context, MealSlot meal) async {
+    final l10n = context.l10n;
+    final controller = reminders!;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: controller.times[meal]!,
+    );
+    if (time == null) return;
+    await controller.setTime(meal, time,
+        texts: _reminderTexts(l10n), channelName: l10n.reminderChannel);
+  }
+
+  Future<void> _export(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await backup.export(_database);
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.backupFailed)));
+    }
+  }
+
+  Future<void> _restore(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.backupImportTitle),
+        content: Text(l10n.backupImportBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.backupRestore),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      final data = await backup.pick();
+      if (data == null) return;
+      await _database.restoreBackup(data);
+      onDataRestored?.call();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.backupRestored)));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.backupInvalid)));
+    }
+  }
 
   Future<void> _clearHistory(BuildContext context) async {
     final l10n = context.l10n;
@@ -45,7 +131,7 @@ class SettingsScreen extends StatelessWidget {
     );
     if (confirmed != true) return;
     try {
-      await (database ?? DatabaseService.instance).clearAllHistory();
+      await _database.clearAllHistory();
       onHistoryCleared?.call();
       messenger.showSnackBar(SnackBar(content: Text(l10n.historyCleared)));
     } catch (_) {
@@ -64,7 +150,11 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([themeController, localeController]),
+      listenable: Listenable.merge([
+        themeController,
+        localeController,
+        if (reminders != null) reminders!,
+      ]),
       builder: (context, _) {
         final l10n = context.l10n;
         return SafeArea(
@@ -128,6 +218,37 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              if (reminders != null) ...[
+                const SizedBox(height: 18),
+                _remindersCard(context, l10n),
+              ],
+              const SizedBox(height: 18),
+              CyberCard(
+                key: const ValueKey('backup-card'),
+                title: l10n.backupTitle,
+                icon: Icons.backup_outlined,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.backupBody,
+                        style: TextStyle(color: CyberColors.muted)),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      key: const ValueKey('backup-export'),
+                      onPressed: () => _export(context),
+                      icon: const Icon(Icons.ios_share_rounded),
+                      label: Text(l10n.backupExport),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      key: const ValueKey('backup-import'),
+                      onPressed: () => _restore(context),
+                      icon: const Icon(Icons.restore_rounded),
+                      label: Text(l10n.backupImport),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.dataTitle,
@@ -151,6 +272,49 @@ class SettingsScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+extension on SettingsScreen {
+  Widget _remindersCard(BuildContext context, AppLocalizations l10n) {
+    final controller = reminders!;
+    return CyberCard(
+      key: const ValueKey('reminders-card'),
+      title: l10n.remindersTitle,
+      icon: Icons.notifications_active_outlined,
+      // The card paints its own background; the tiles need a Material for
+      // their ink.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.remindersBody,
+                style: TextStyle(color: CyberColors.muted)),
+            SwitchListTile(
+              key: const ValueKey('reminders-switch'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.remindersSwitch),
+              value: controller.enabled,
+              onChanged: (value) => _toggleReminders(context, value),
+            ),
+            for (final entry in controller.times.entries)
+              ListTile(
+                key: ValueKey('reminder-${entry.key.name}'),
+                contentPadding: EdgeInsets.zero,
+                enabled: controller.enabled,
+                leading: const Icon(Icons.schedule_rounded),
+                title: Text(l10n.mealSlotLabel(entry.key)),
+                trailing: Text(
+                  entry.value.format(context),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                onTap: () => _pickReminderTime(context, entry.key),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

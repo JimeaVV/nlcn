@@ -1261,4 +1261,145 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get adaptiveTdeeInfo =>
       'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.';
+
+  @override
+  String get waterTitle => 'Nước uống';
+
+  @override
+  String waterProgress(String drunk, String target) {
+    return '$drunk / $target ml';
+  }
+
+  @override
+  String waterGlasses(String count, String glass) {
+    return '$count ly, mỗi ly $glass ml';
+  }
+
+  @override
+  String get waterAdd => 'Thêm một ly';
+
+  @override
+  String get waterRemove => 'Bớt một ly';
+
+  @override
+  String get waterNote =>
+      'Mục tiêu tham khảo 2 lít mỗi ngày; cần nhiều hơn khi trời nóng hoặc tập nặng.';
+
+  @override
+  String streakDays(String count) {
+    return '$count ngày liên tục ghi ăn';
+  }
+
+  @override
+  String get streakKeep => 'Ghi bữa hôm nay để giữ chuỗi.';
+
+  @override
+  String get streakNone => 'Ghi một bữa hôm nay để bắt đầu chuỗi ngày.';
+
+  @override
+  String get weekTitle => '7 ngày qua';
+
+  @override
+  String weekLogged(String days) {
+    return 'Ghi ăn $days/7 ngày';
+  }
+
+  @override
+  String weekAverage(String calories, String protein) {
+    return 'Trung bình $calories kcal • $protein g protein mỗi ngày ghi';
+  }
+
+  @override
+  String weekVsTarget(String target, String diff) {
+    return 'So với mục tiêu $target kcal: $diff kcal/ngày';
+  }
+
+  @override
+  String weekTraining(String days) {
+    return 'Tập $days ngày';
+  }
+
+  @override
+  String weekWeight(String change) {
+    return 'Cân nặng $change kg';
+  }
+
+  @override
+  String get weekEmpty => 'Chưa có dữ liệu trong 7 ngày qua.';
+
+  @override
+  String get remindersTitle => 'Nhắc ghi bữa';
+
+  @override
+  String get remindersBody =>
+      'Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.';
+
+  @override
+  String get remindersSwitch => 'Bật nhắc nhở';
+
+  @override
+  String get remindersDenied =>
+      'Chưa được cấp quyền thông báo. Hãy bật trong Cài đặt của Android.';
+
+  @override
+  String remindersChangeTime(String meal) {
+    return 'Đổi giờ nhắc $meal';
+  }
+
+  @override
+  String reminderNotificationTitle(String meal) {
+    return '$meal: bạn đã ghi chưa?';
+  }
+
+  @override
+  String get reminderNotificationBody =>
+      'Mở OptiFit để ghi món, chỉ mất vài giây.';
+
+  @override
+  String get reminderChannel => 'Nhắc ghi bữa';
+
+  @override
+  String get backupTitle => 'Sao lưu dữ liệu';
+
+  @override
+  String get backupBody =>
+      'Lưu toàn bộ hồ sơ, nhật ký ăn, nước uống, cân nặng và lịch sử tập vào một file JSON để cất giữ hoặc chuyển sang máy khác.';
+
+  @override
+  String get backupExport => 'Xuất file sao lưu';
+
+  @override
+  String get backupImport => 'Khôi phục từ file';
+
+  @override
+  String get backupImportTitle => 'Khôi phục dữ liệu?';
+
+  @override
+  String get backupImportBody =>
+      'Toàn bộ dữ liệu hiện có trên máy sẽ được thay bằng dữ liệu trong file. Việc này không hoàn tác được.';
+
+  @override
+  String get backupRestore => 'Khôi phục';
+
+  @override
+  String get backupRestored => 'Đã khôi phục dữ liệu.';
+
+  @override
+  String get backupInvalid => 'File này không phải bản sao lưu OptiFit hợp lệ.';
+
+  @override
+  String get backupFailed => 'Không tạo được file sao lưu. Hãy thử lại.';
+
+  @override
+  String get widgetTitle => 'OptiFit hôm nay';
+
+  @override
+  String widgetWater(String drunk, String target) {
+    return 'Nước $drunk / $target L';
+  }
+
+  @override
+  String widgetStreak(String count) {
+    return 'Chuỗi $count ngày';
+  }
 }

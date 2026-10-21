@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_widget_name">OptiFit today</string>
+    <string name="today_widget_description">Today\'s calories, water and logging streak</string>
+    <string name="today_widget_open">Open OptiFit to update</string>
+</resources>

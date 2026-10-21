@@ -504,5 +504,141 @@
       }
     }
   },
-  "adaptiveTdeeInfo": "Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice."
+  "adaptiveTdeeInfo": "Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.",
+  "waterTitle": "Water",
+  "waterProgress": "{drunk} / {target} ml",
+  "@waterProgress": {
+    "placeholders": {
+      "drunk": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "waterGlasses": "{count} glasses of {glass} ml",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "glass": {
+        "type": "String"
+      }
+    }
+  },
+  "waterAdd": "Add a glass",
+  "waterRemove": "Remove a glass",
+  "waterNote": "A common reference of 2 litres a day; more in hot weather or hard training.",
+  "streakDays": "{count}-day logging streak",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "streakKeep": "Log a meal today to keep it going.",
+  "streakNone": "Log a meal today to start a streak.",
+  "weekTitle": "Last 7 days",
+  "weekLogged": "Food logged on {days} of 7 days",
+  "@weekLogged": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "weekAverage": "Average {calories} kcal • {protein} g protein per logged day",
+  "@weekAverage": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "weekVsTarget": "Against the {target} kcal target: {diff} kcal/day",
+  "@weekVsTarget": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "weekTraining": "Trained on {days} days",
+  "@weekTraining": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "weekWeight": "Weight {change} kg",
+  "@weekWeight": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "weekEmpty": "Nothing logged in the last 7 days.",
+  "remindersTitle": "Meal reminders",
+  "remindersBody": "Notifications from the phone itself, no internet needed. They may come a few minutes late.",
+  "remindersSwitch": "Turn on reminders",
+  "remindersDenied": "Notifications are not allowed. Turn them on in Android settings.",
+  "remindersChangeTime": "Change the {meal} reminder time",
+  "@remindersChangeTime": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNotificationTitle": "{meal}: logged it yet?",
+  "@reminderNotificationTitle": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNotificationBody": "Open OptiFit to log it, it takes a few seconds.",
+  "reminderChannel": "Meal reminders",
+  "backupTitle": "Backup",
+  "backupBody": "Save the profile, food diary, water, weights and training history to one JSON file to keep or move to another phone.",
+  "backupExport": "Export a backup file",
+  "backupImport": "Restore from a file",
+  "backupImportTitle": "Restore data?",
+  "backupImportBody": "All data on this phone will be replaced by the data in the file. This cannot be undone.",
+  "backupRestore": "Restore",
+  "backupRestored": "Data restored.",
+  "backupInvalid": "This file is not a valid OptiFit backup.",
+  "backupFailed": "Could not create the backup file. Try again.",
+  "widgetTitle": "OptiFit today",
+  "widgetWater": "Water {drunk} / {target} L",
+  "@widgetWater": {
+    "placeholders": {
+      "drunk": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "widgetStreak": "{count}-day streak",
+  "@widgetStreak": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

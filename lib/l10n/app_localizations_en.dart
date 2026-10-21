@@ -1271,4 +1271,145 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adaptiveTdeeInfo =>
       'Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.';
+
+  @override
+  String get waterTitle => 'Water';
+
+  @override
+  String waterProgress(String drunk, String target) {
+    return '$drunk / $target ml';
+  }
+
+  @override
+  String waterGlasses(String count, String glass) {
+    return '$count glasses of $glass ml';
+  }
+
+  @override
+  String get waterAdd => 'Add a glass';
+
+  @override
+  String get waterRemove => 'Remove a glass';
+
+  @override
+  String get waterNote =>
+      'A common reference of 2 litres a day; more in hot weather or hard training.';
+
+  @override
+  String streakDays(String count) {
+    return '$count-day logging streak';
+  }
+
+  @override
+  String get streakKeep => 'Log a meal today to keep it going.';
+
+  @override
+  String get streakNone => 'Log a meal today to start a streak.';
+
+  @override
+  String get weekTitle => 'Last 7 days';
+
+  @override
+  String weekLogged(String days) {
+    return 'Food logged on $days of 7 days';
+  }
+
+  @override
+  String weekAverage(String calories, String protein) {
+    return 'Average $calories kcal • $protein g protein per logged day';
+  }
+
+  @override
+  String weekVsTarget(String target, String diff) {
+    return 'Against the $target kcal target: $diff kcal/day';
+  }
+
+  @override
+  String weekTraining(String days) {
+    return 'Trained on $days days';
+  }
+
+  @override
+  String weekWeight(String change) {
+    return 'Weight $change kg';
+  }
+
+  @override
+  String get weekEmpty => 'Nothing logged in the last 7 days.';
+
+  @override
+  String get remindersTitle => 'Meal reminders';
+
+  @override
+  String get remindersBody =>
+      'Notifications from the phone itself, no internet needed. They may come a few minutes late.';
+
+  @override
+  String get remindersSwitch => 'Turn on reminders';
+
+  @override
+  String get remindersDenied =>
+      'Notifications are not allowed. Turn them on in Android settings.';
+
+  @override
+  String remindersChangeTime(String meal) {
+    return 'Change the $meal reminder time';
+  }
+
+  @override
+  String reminderNotificationTitle(String meal) {
+    return '$meal: logged it yet?';
+  }
+
+  @override
+  String get reminderNotificationBody =>
+      'Open OptiFit to log it, it takes a few seconds.';
+
+  @override
+  String get reminderChannel => 'Meal reminders';
+
+  @override
+  String get backupTitle => 'Backup';
+
+  @override
+  String get backupBody =>
+      'Save the profile, food diary, water, weights and training history to one JSON file to keep or move to another phone.';
+
+  @override
+  String get backupExport => 'Export a backup file';
+
+  @override
+  String get backupImport => 'Restore from a file';
+
+  @override
+  String get backupImportTitle => 'Restore data?';
+
+  @override
+  String get backupImportBody =>
+      'All data on this phone will be replaced by the data in the file. This cannot be undone.';
+
+  @override
+  String get backupRestore => 'Restore';
+
+  @override
+  String get backupRestored => 'Data restored.';
+
+  @override
+  String get backupInvalid => 'This file is not a valid OptiFit backup.';
+
+  @override
+  String get backupFailed => 'Could not create the backup file. Try again.';
+
+  @override
+  String get widgetTitle => 'OptiFit today';
+
+  @override
+  String widgetWater(String drunk, String target) {
+    return 'Water $drunk / $target L';
+  }
+
+  @override
+  String widgetStreak(String count) {
+    return '$count-day streak';
+  }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_widget_name">OptiFit hôm nay</string>
+    <string name="today_widget_description">Calo, nước uống và chuỗi ngày ghi ăn của hôm nay</string>
+    <string name="today_widget_open">Mở OptiFit để cập nhật</string>
+</resources>

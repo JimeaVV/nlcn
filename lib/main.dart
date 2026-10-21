@@ -4,15 +4,19 @@ import 'core/cyber_theme.dart';
 import 'core/locale_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/home_screen.dart';
+import 'services/reminder_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final themeController = ThemeController();
   final localeController = LocaleController();
-  await Future.wait([themeController.load(), localeController.load()]);
+  final reminders = ReminderController();
+  await Future.wait(
+      [themeController.load(), localeController.load(), reminders.load()]);
   runApp(OptiFitApp(
     themeController: themeController,
     localeController: localeController,
+    reminders: reminders,
   ));
 }
 
@@ -21,10 +25,12 @@ class OptiFitApp extends StatelessWidget {
     super.key,
     required this.themeController,
     required this.localeController,
+    this.reminders,
   });
 
   final ThemeController themeController;
   final LocaleController localeController;
+  final ReminderController? reminders;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +47,7 @@ class OptiFitApp extends StatelessWidget {
           home: HomeScreen(
             themeController: themeController,
             localeController: localeController,
+            reminders: reminders,
           ),
         );
       },
