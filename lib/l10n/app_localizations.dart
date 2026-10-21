@@ -2097,6 +2097,176 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Nhận diện trong {total} s (ảnh {photo} s · model {model} s)'**
   String scanTiming(String total, String photo, String model);
+
+  /// No description provided for @diaryFavorites.
+  ///
+  /// In vi, this message translates to:
+  /// **'Yêu thích'**
+  String get diaryFavorites;
+
+  /// No description provided for @diaryRecent.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gần đây'**
+  String get diaryRecent;
+
+  /// No description provided for @diaryQuickHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chạm một món để thêm ngay vào bữa đã chọn.'**
+  String get diaryQuickHint;
+
+  /// No description provided for @diaryQuickChip.
+  ///
+  /// In vi, this message translates to:
+  /// **'{name} · {calories} kcal'**
+  String diaryQuickChip(String name, String calories);
+
+  /// No description provided for @diaryFavoriteAdd.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm vào yêu thích'**
+  String get diaryFavoriteAdd;
+
+  /// No description provided for @diaryFavoriteRemove.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bỏ khỏi yêu thích'**
+  String get diaryFavoriteRemove;
+
+  /// No description provided for @diaryFavoriteAdded.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã thêm {name} vào yêu thích.'**
+  String diaryFavoriteAdded(String name);
+
+  /// No description provided for @diaryFavoriteRemoved.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã bỏ {name} khỏi yêu thích.'**
+  String diaryFavoriteRemoved(String name);
+
+  /// No description provided for @diaryCopyToToday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chép bữa này sang hôm nay'**
+  String get diaryCopyToToday;
+
+  /// No description provided for @diaryRepeatYesterday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ăn giống hôm qua ({count} món · {calories} kcal)'**
+  String diaryRepeatYesterday(String count, String calories);
+
+  /// No description provided for @diaryCopied.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã chép {count} món.'**
+  String diaryCopied(String count);
+
+  /// No description provided for @lastSessionLine.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lần trước ({date}): {weight} kg × {reps}'**
+  String lastSessionLine(String date, String weight, String reps);
+
+  /// No description provided for @lastSessionSuggestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gợi ý hôm nay: {weight} kg × {reps} lần'**
+  String lastSessionSuggestion(String weight, String reps);
+
+  /// No description provided for @restTimerStart.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bấm giờ nghỉ'**
+  String get restTimerStart;
+
+  /// No description provided for @restTimerLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nghỉ {time}'**
+  String restTimerLabel(String time);
+
+  /// No description provided for @restTimerDone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hết giờ nghỉ, vào hiệp tiếp!'**
+  String get restTimerDone;
+
+  /// No description provided for @restTimerMore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm 15 giây'**
+  String get restTimerMore;
+
+  /// No description provided for @restTimerLess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bớt 15 giây'**
+  String get restTimerLess;
+
+  /// No description provided for @restTimerStop.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dừng bấm giờ'**
+  String get restTimerStop;
+
+  /// No description provided for @adaptiveTdeeTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'TDEE theo dữ liệu thật'**
+  String get adaptiveTdeeTitle;
+
+  /// No description provided for @adaptiveTdeeValue.
+  ///
+  /// In vi, this message translates to:
+  /// **'{tdee} kcal/ngày'**
+  String adaptiveTdeeValue(String tdee);
+
+  /// No description provided for @adaptiveTdeeDetails.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.'**
+  String adaptiveTdeeDetails(
+      String days, String intake, String weighIns, String trend);
+
+  /// No description provided for @adaptiveTdeeCompare.
+  ///
+  /// In vi, this message translates to:
+  /// **'Công thức Mifflin-St Jeor ước tính {formula} kcal.'**
+  String adaptiveTdeeCompare(String formula);
+
+  /// No description provided for @adaptiveTdeeUse.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dùng làm mục tiêu ({calories} kcal)'**
+  String adaptiveTdeeUse(String calories);
+
+  /// No description provided for @adaptiveTdeeUsed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.'**
+  String adaptiveTdeeUsed(String calories);
+
+  /// No description provided for @adaptiveTdeeNeedMore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất {days} ngày và cân ít nhất {weighIns} lần, lần đầu và lần cuối cách nhau từ {span} ngày. Hiện có {haveDays} ngày ghi ăn, {haveWeighIns} lần cân.'**
+  String adaptiveTdeeNeedMore(String days, String weighIns, String span,
+      String haveDays, String haveWeighIns);
+
+  /// No description provided for @adaptiveTdeeUnsure.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.'**
+  String adaptiveTdeeUnsure(String tdee, String formula);
+
+  /// No description provided for @adaptiveTdeeInfo.
+  ///
+  /// In vi, this message translates to:
+  /// **'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.'**
+  String get adaptiveTdeeInfo;
 }
 
 class _AppLocalizationsDelegate

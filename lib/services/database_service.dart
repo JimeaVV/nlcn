@@ -47,17 +47,19 @@ class DatabaseService {
     return factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 4,
+        version: 5,
         onCreate: (db, _) async {
           await _createBaseTables(db);
           await _createWorkoutLogTable(db);
           await _createWeightTable(db);
           await _createFoodLogTable(db);
+          await _createFavoriteFoodTable(db);
         },
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) await _createWorkoutLogTable(db);
           if (oldVersion < 3) await _upgradeProfileAndWeights(db);
           if (oldVersion < 4) await _createFoodLogTable(db);
+          if (oldVersion < 5) await _createFavoriteFoodTable(db);
         },
       ),
     );
@@ -162,6 +164,23 @@ class DatabaseService {
     await db.execute(
       'create index if not exists food_log_date on food_log(logged_date)',
     );
+  }
+
+  /// Version 5: foods the user starred, one per name, with the portion and
+  /// nutrition they had when starred.
+  Future<void> _createFavoriteFoodTable(Database db) async {
+    await db.execute('''
+      create table if not exists favorite_food(
+        id integer primary key autoincrement,
+        food_name text unique not null,
+        grams real,
+        calories real not null,
+        protein real not null,
+        carbs real not null,
+        fat real not null,
+        created_at text not null
+      )
+    ''');
   }
 
   Future<void> _createWorkoutLogTable(Database db) async {
@@ -454,6 +473,79 @@ class DatabaseService {
   Future<void> deleteFoodLogEntry(int id) async {
     final db = await database;
     await db.delete('food_log', where: 'id=?', whereArgs: [id]);
+  }
+
+  /// The latest entry of each food the user logged, newest first, so a food
+  /// eaten often can be logged again in one tap.
+  Future<List<FoodLogEntry>> getRecentFoods({int limit = 8}) async {
+    final db = await database;
+    final rows = await db.rawQuery('''
+      select * from food_log
+      where id in (select max(id) from food_log group by food_name)
+      order by id desc
+      limit ?
+    ''', [limit]);
+    return rows.map(FoodLogEntry.fromMap).toList(growable: false);
+  }
+
+  /// Starred foods, as entries dated today; [FoodLogEntry.copyTo] gives them
+  /// the day and meal they are logged into.
+  Future<List<FoodLogEntry>> getFavoriteFoods() async {
+    final db = await database;
+    final rows = await db.query('favorite_food', orderBy: 'food_name');
+    final today = diaryDateKey(DateTime.now());
+    return [
+      for (final row in rows)
+        FoodLogEntry.fromMap({
+          ...Map.of(row)..remove('id'),
+          'logged_date': today,
+          'meal': MealSlot.snack.name,
+          'source': FoodLogSource.manual.name,
+        }),
+    ];
+  }
+
+  /// Stars [entry] by name; starring the same name again keeps the newer
+  /// portion.
+  Future<void> addFavoriteFood(FoodLogEntry entry) async {
+    entry.validate();
+    final db = await database;
+    await db.insert(
+      'favorite_food',
+      {
+        'food_name': entry.name.trim(),
+        'grams': entry.grams,
+        'calories': entry.calories,
+        'protein': entry.protein,
+        'carbs': entry.carbs,
+        'fat': entry.fat,
+        'created_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> removeFavoriteFood(String name) async {
+    final db = await database;
+    await db.delete('favorite_food',
+        where: 'food_name=?', whereArgs: [name.trim()]);
+  }
+
+  /// Calories eaten per day from [from] to [to], both included; days with
+  /// no entries are missing from the map.
+  Future<Map<DateTime, double>> getDailyCalories(
+      DateTime from, DateTime to) async {
+    final db = await database;
+    final rows = await db.rawQuery('''
+      select logged_date, sum(calories) as calories from food_log
+      where logged_date between ? and ?
+      group by logged_date
+    ''', [diaryDateKey(from), diaryDateKey(to)]);
+    return {
+      for (final row in rows)
+        DateTime.parse('${row['logged_date']}'):
+            (row['calories'] as num).toDouble(),
+    };
   }
 
   Future<List<MealHistoryEntry>> getMealHistory() async {

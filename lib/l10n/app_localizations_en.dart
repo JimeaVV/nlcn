@@ -1153,4 +1153,122 @@ class AppLocalizationsEn extends AppLocalizations {
   String scanTiming(String total, String photo, String model) {
     return 'Recognized in $total s (photo $photo s · model $model s)';
   }
+
+  @override
+  String get diaryFavorites => 'Favorites';
+
+  @override
+  String get diaryRecent => 'Recent';
+
+  @override
+  String get diaryQuickHint =>
+      'Tap a food to add it to the chosen meal right away.';
+
+  @override
+  String diaryQuickChip(String name, String calories) {
+    return '$name · $calories kcal';
+  }
+
+  @override
+  String get diaryFavoriteAdd => 'Add to favorites';
+
+  @override
+  String get diaryFavoriteRemove => 'Remove from favorites';
+
+  @override
+  String diaryFavoriteAdded(String name) {
+    return '$name added to favorites.';
+  }
+
+  @override
+  String diaryFavoriteRemoved(String name) {
+    return '$name removed from favorites.';
+  }
+
+  @override
+  String get diaryCopyToToday => 'Copy this meal to today';
+
+  @override
+  String diaryRepeatYesterday(String count, String calories) {
+    return 'Same as yesterday ($count foods · $calories kcal)';
+  }
+
+  @override
+  String diaryCopied(String count) {
+    return 'Copied $count foods.';
+  }
+
+  @override
+  String lastSessionLine(String date, String weight, String reps) {
+    return 'Last time ($date): $weight kg × $reps';
+  }
+
+  @override
+  String lastSessionSuggestion(String weight, String reps) {
+    return 'Today\'s suggestion: $weight kg × $reps reps';
+  }
+
+  @override
+  String get restTimerStart => 'Start rest timer';
+
+  @override
+  String restTimerLabel(String time) {
+    return 'Rest $time';
+  }
+
+  @override
+  String get restTimerDone => 'Rest over, next set!';
+
+  @override
+  String get restTimerMore => 'Add 15 seconds';
+
+  @override
+  String get restTimerLess => 'Take off 15 seconds';
+
+  @override
+  String get restTimerStop => 'Stop the timer';
+
+  @override
+  String get adaptiveTdeeTitle => 'TDEE from your data';
+
+  @override
+  String adaptiveTdeeValue(String tdee) {
+    return '$tdee kcal/day';
+  }
+
+  @override
+  String adaptiveTdeeDetails(
+      String days, String intake, String weighIns, String trend) {
+    return 'From $days logged days (average $intake kcal) and $weighIns weigh-ins over the last 4 weeks: weight $trend kg/week.';
+  }
+
+  @override
+  String adaptiveTdeeCompare(String formula) {
+    return 'The Mifflin-St Jeor formula estimates $formula kcal.';
+  }
+
+  @override
+  String adaptiveTdeeUse(String calories) {
+    return 'Use as target ($calories kcal)';
+  }
+
+  @override
+  String adaptiveTdeeUsed(String calories) {
+    return 'Calorie target set to $calories kcal. Save the profile to apply it.';
+  }
+
+  @override
+  String adaptiveTdeeNeedMore(String days, String weighIns, String span,
+      String haveDays, String haveWeighIns) {
+    return 'More data needed from the last 4 weeks: food logged on at least $days days and at least $weighIns weigh-ins, the first and last $span or more days apart. So far: $haveDays logged days, $haveWeighIns weigh-ins.';
+  }
+
+  @override
+  String adaptiveTdeeUnsure(String tdee, String formula) {
+    return 'This is far from the formula ($tdee vs $formula kcal), maybe because some days were not logged in full. Better not use it as a target yet.';
+  }
+
+  @override
+  String get adaptiveTdeeInfo =>
+      'Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.';
 }

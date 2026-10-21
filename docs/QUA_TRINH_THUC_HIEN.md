@@ -1700,6 +1700,55 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Chạy lại thư mục đó với `BACKBONE = 'efficientnetb0'`: notebook dừng,
     báo khác backbone, và `last.keras` cùng `progress.json` vẫn còn.
 
+### 2026-10-21 · Ghi món nhanh hơn, hiện buổi tập trước, TDEE theo dữ liệu thật
+- Lý do: so với các app cùng loại (MyFitnessPal, MacroFactor, Cal AI, Hevy),
+  app thiếu 3 thứ hay dùng nhất:
+  - ghi lại món đã ăn chỉ bằng một chạm;
+  - thấy kết quả buổi tập trước ngay lúc tập;
+  - TDEE điều chỉnh theo cân nặng thật thay vì chỉ dùng công thức.
+- Nhật ký ăn:
+  - Mỗi món có nút ngôi sao để thêm vào hoặc bỏ khỏi yêu thích. Dữ liệu lưu
+    ở bảng mới `favorite_food`, nên database lên phiên bản 5; bản cũ được
+    nâng cấp mà không mất dữ liệu.
+  - Sheet "Thêm món" có hàng chip **Yêu thích** và **Gần đây** (8 món mới
+    nhất, mỗi tên một lần, kèm đúng khẩu phần đã ăn). Chạm một chip là thêm
+    ngay vào bữa đang chọn.
+  - Bữa trống hôm nay có nút "Ăn giống hôm qua (N món · X kcal)". Khi xem
+    ngày cũ, mỗi bữa có nút "Chép bữa này sang hôm nay".
+- Tập luyện:
+  - Dưới mỗi bài tập hiện "Lần trước (ngày): 60 kg × 10 · 9 · 8".
+  - Hộp thoại ghi kết quả hiện gợi ý hôm nay, và điền sẵn mức tạ cùng số lần
+    theo gợi ý của buổi trước.
+  - Nút bấm giờ nghỉ: đếm ngược 90 giây ở cuối màn hình, có nút ±15 giây,
+    rung khi hết giờ. Chỉ chạy khi app đang mở; chưa có thông báo nền.
+- TDEE thích ứng (`lib/engine/adaptive_tdee.dart`):
+  - Công thức: TDEE ≈ calo ăn trung bình − độ dốc cân nặng (kg/ngày) × 7700
+    kcal/kg, tính trong 4 tuần gần nhất. 7700 kcal/kg là con số xấp xỉ
+    thường dùng; app ghi rõ đây là ước lượng.
+  - Độ dốc lấy bằng bình phương tối thiểu qua các lần cân, nên một lần cân
+    lệch chỉ làm kết quả xê dịch ít.
+  - Điều kiện để có kết quả: ít nhất 10 ngày ghi ăn (bỏ ngày dưới 500 kcal vì
+    coi là ghi thiếu), ít nhất 3 lần cân, lần đầu và lần cuối cách nhau ít
+    nhất 10 ngày.
+  - Nếu kết quả lệch quá 30% dưới hoặc 40% trên so với công thức
+    Mifflin-St Jeor, app cảnh báo là có thể ghi ăn chưa đủ và không cho dùng
+    làm mục tiêu.
+  - Màn Hồ sơ có thẻ "TDEE theo dữ liệu thật". Nút "Dùng làm mục tiêu" điền
+    calo theo mục tiêu (giảm ×0,9, giữ ×1, tăng ×1,1, dùng chung hàm
+    `goalCalorieFactor`) vào ô mục tiêu thủ công; bấm Lưu hồ sơ mới áp dụng.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 178/178 PASS, gồm test mới cho:
+    - cách tính TDEE: cân đứng yên, giảm 0,5 kg/tuần ra +550 kcal, một lần
+      cân lệch, ngày ghi thiếu, dữ liệu ngoài 4 tuần, thiếu dữ liệu, kết quả
+      vô lý;
+    - món gần đây, yêu thích và tổng calo theo ngày trên SQLite thật;
+    - chạm chip yêu thích để thêm món, "ăn giống hôm qua", chép bữa sang hôm
+      nay;
+    - đồng hồ nghỉ và hộp thoại có buổi tập trước;
+    - thẻ TDEE trên màn Hồ sơ.
+  - `check_vn_food.py`: OK.
+  - Chưa chạy thử trên điện thoại thật.
+
 ---
 
 ## 3. Việc còn tồn đọng

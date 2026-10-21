@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 
+import '../core/cyber_theme.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
 import '../core/number_input.dart';
 import '../core/text_search.dart';
 
 /// Picks a dataset food by weight, or takes a custom dish by its nutrition,
-/// and returns the resulting [FoodLogEntry] without saving it.
+/// and returns the resulting [FoodLogEntry] without saving it. Favorite and
+/// recent foods sit on top and are returned in one tap.
 class FoodLogSheet extends StatefulWidget {
-  const FoodLogSheet({super.key, required this.foods, required this.date});
+  const FoodLogSheet({
+    super.key,
+    required this.foods,
+    required this.date,
+    this.favorites = const [],
+    this.recent = const [],
+  });
 
   final List<Map<String, dynamic>> foods;
   final DateTime date;
+  final List<FoodLogEntry> favorites;
+  final List<FoodLogEntry> recent;
 
   @override
   State<FoodLogSheet> createState() => _FoodLogSheetState();
@@ -132,6 +142,7 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
                 onChanged: (value) => setState(() => _meal = value!),
               ),
               const SizedBox(height: 12),
+              ..._quickFoods(l10n),
               if (widget.foods.isNotEmpty) ...[
                 SegmentedButton<bool>(
                   segments: [
@@ -171,6 +182,58 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
         ),
       ),
     );
+  }
+
+  /// Favorites, then recent foods not already among them.
+  List<Widget> _quickFoods(AppLocalizations l10n) {
+    final starred = {for (final food in widget.favorites) food.name};
+    final recent = [
+      for (final food in widget.recent)
+        if (!starred.contains(food.name)) food,
+    ];
+    if (widget.favorites.isEmpty && recent.isEmpty) return const [];
+    Widget row(String title, IconData icon, List<FoodLogEntry> foods,
+            String keyPrefix) =>
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(icon, size: 16, color: CyberColors.muted),
+              const SizedBox(width: 6),
+              Text(title, style: Theme.of(context).textTheme.labelLarge),
+            ]),
+            const SizedBox(height: 6),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final food in foods)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        key: ValueKey('$keyPrefix-${food.name}'),
+                        label: Text(l10n.diaryQuickChip(
+                            food.name, context.formatNumber(food.calories))),
+                        onPressed: () => Navigator.pop(
+                            context, food.copyTo(widget.date, _meal)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        );
+    return [
+      if (widget.favorites.isNotEmpty)
+        row(l10n.diaryFavorites, Icons.star_rounded, widget.favorites,
+            'diary-favorite'),
+      if (recent.isNotEmpty)
+        row(l10n.diaryRecent, Icons.history_rounded, recent, 'diary-recent'),
+      Text(l10n.diaryQuickHint,
+          style: TextStyle(color: CyberColors.muted, fontSize: 12)),
+      const Divider(height: 24),
+    ];
   }
 
   List<Widget> _datasetFields(AppLocalizations l10n) => [

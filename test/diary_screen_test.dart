@@ -56,7 +56,36 @@ class _Database extends Fake implements DatabaseService {
   @override
   Future<void> deleteFoodLogEntry(int id) async =>
       entries.removeWhere((entry) => entry.id == id);
+
+  final favorites = <FoodLogEntry>[];
+
+  @override
+  Future<List<FoodLogEntry>> getFavoriteFoods() async => List.of(favorites);
+
+  @override
+  Future<List<FoodLogEntry>> getRecentFoods({int limit = 8}) async =>
+      entries.reversed.take(limit).toList();
+
+  @override
+  Future<void> addFavoriteFood(FoodLogEntry entry) async => favorites
+    ..removeWhere((food) => food.name == entry.name)
+    ..add(entry);
+
+  @override
+  Future<void> removeFavoriteFood(String name) async =>
+      favorites.removeWhere((food) => food.name == name);
 }
+
+FoodLogEntry _logged(String name, DateTime day, MealSlot meal,
+        {double calories = 300, double? grams}) =>
+    FoodLogEntry(
+      date: day,
+      meal: meal,
+      name: name,
+      grams: grams,
+      calories: calories,
+      protein: 10,
+    );
 
 Future<void> _mount(WidgetTester tester, _Database database) async {
   tester.view.physicalSize = const Size(400, 1800);
@@ -284,5 +313,77 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Bún chả'), findsOneWidget);
     expect(find.text('Hôm nay'), findsNothing);
+  });
+
+  testWidgets('a starred food is logged again in one tap', (tester) async {
+    final today = DateTime.now();
+    final database = _Database();
+    await database.addFoodLogEntries([
+      _logged('Cơm tấm', today, MealSlot.lunch, calories: 600, grams: 350),
+    ]);
+    await _mount(tester, database);
+
+    await tester.tap(find.byTooltip('Thêm vào yêu thích'));
+    await tester.pumpAndSettle();
+    expect(database.favorites.single.name, 'Cơm tấm');
+    expect(find.text('Đã thêm Cơm tấm vào yêu thích.'), findsOneWidget);
+    expect(find.byTooltip('Bỏ khỏi yêu thích'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('diary-add')));
+    await tester.pumpAndSettle();
+    await _chooseMeal(tester, 'Bữa tối');
+    // Starred, so it is not listed a second time among recent foods.
+    expect(find.byKey(const ValueKey('diary-recent-Cơm tấm')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('diary-favorite-Cơm tấm')));
+    await tester.pumpAndSettle();
+
+    final added = database.entries.last;
+    expect(database.entries, hasLength(2));
+    expect(added.meal, MealSlot.dinner);
+    expect(added.grams, 350);
+    expect(added.calories, 600);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('yesterday repeats into today and a past meal copies over',
+      (tester) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+    final database = _Database();
+    await database.addFoodLogEntries([
+      _logged('Phở bò', yesterday, MealSlot.breakfast, calories: 450),
+      _logged('Cà phê sữa', yesterday, MealSlot.breakfast, calories: 120),
+      _logged('Cơm gà', yesterday, MealSlot.lunch, calories: 650),
+    ]);
+    await _mount(tester, database);
+
+    expect(find.text('Ăn giống hôm qua (2 món · 570 kcal)'), findsOneWidget);
+    expect(find.byKey(const ValueKey('diary-copy-lunch')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('diary-copy-breakfast')));
+    await tester.pumpAndSettle();
+    expect(find.text('Đã chép 2 món.'), findsOneWidget);
+    final todays = [
+      for (final entry in database.entries)
+        if (diaryDateKey(entry.date) == diaryDateKey(today)) entry,
+    ];
+    expect([for (final entry in todays) entry.name], ['Phở bò', 'Cà phê sữa']);
+    expect(todays.every((entry) => entry.meal == MealSlot.breakfast), isTrue);
+    // Breakfast is no longer empty today, so its shortcut is gone.
+    expect(find.byKey(const ValueKey('diary-copy-breakfast')), findsNothing);
+
+    await tester.tap(find.byTooltip('Ngày trước'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('diary-copy-lunch')));
+    await tester.pumpAndSettle();
+    expect(
+        database.entries
+            .where((entry) =>
+                diaryDateKey(entry.date) == diaryDateKey(today) &&
+                entry.name == 'Cơm gà')
+            .single
+            .meal,
+        MealSlot.lunch);
+    expect(tester.takeException(), isNull);
   });
 }

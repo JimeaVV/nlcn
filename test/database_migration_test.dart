@@ -177,7 +177,7 @@ void main() {
     final handles = await Future.wait([storage.database, storage.database]);
     expect(identical(handles[0], handles[1]), isTrue);
     final db = handles.first;
-    expect(await db.getVersion(), 4);
+    expect(await db.getVersion(), 5);
     final columns = await db.rawQuery('pragma table_info(user_profile)');
     final goalColumn = columns.singleWhere((row) => row['name'] == 'goal');
     expect(goalColumn['dflt_value'], "'maintain'");
@@ -277,7 +277,7 @@ void main() {
     final before = await _legacyFixture(databasePath);
     final storage = openService();
     final db = await storage.database;
-    expect(await db.getVersion(), 4);
+    expect(await db.getVersion(), 5);
     expect(await storage.getProfile(), {
       ...before['user_profile']!.single,
       'goal': 'lose',
@@ -308,7 +308,7 @@ void main() {
     final before = await _legacyFixture(databasePath, version: 1);
     final storage = openService();
     final db = await storage.database;
-    expect(await db.getVersion(), 4);
+    expect(await db.getVersion(), 5);
     expect(await db.query('meal_plan_history'), before['meal_plan_history']);
     expect(
         await db.query('workout_plan_history'), before['workout_plan_history']);

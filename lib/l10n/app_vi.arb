@@ -807,5 +807,177 @@
         "type": "String"
       }
     }
-  }
+  },
+  "diaryFavorites": "Yêu thích",
+  "diaryRecent": "Gần đây",
+  "diaryQuickHint": "Chạm một món để thêm ngay vào bữa đã chọn.",
+  "diaryQuickChip": "{name} · {calories} kcal",
+  "@diaryQuickChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryFavoriteAdd": "Thêm vào yêu thích",
+  "diaryFavoriteRemove": "Bỏ khỏi yêu thích",
+  "diaryFavoriteAdded": "Đã thêm {name} vào yêu thích.",
+  "@diaryFavoriteAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryFavoriteRemoved": "Đã bỏ {name} khỏi yêu thích.",
+  "@diaryFavoriteRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryCopyToToday": "Chép bữa này sang hôm nay",
+  "diaryRepeatYesterday": "Ăn giống hôm qua ({count} món · {calories} kcal)",
+  "@diaryRepeatYesterday": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryCopied": "Đã chép {count} món.",
+  "@diaryCopied": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSessionLine": "Lần trước ({date}): {weight} kg × {reps}",
+  "@lastSessionLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSessionSuggestion": "Gợi ý hôm nay: {weight} kg × {reps} lần",
+  "@lastSessionSuggestion": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "restTimerStart": "Bấm giờ nghỉ",
+  "restTimerLabel": "Nghỉ {time}",
+  "@restTimerLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "restTimerDone": "Hết giờ nghỉ, vào hiệp tiếp!",
+  "restTimerMore": "Thêm 15 giây",
+  "restTimerLess": "Bớt 15 giây",
+  "restTimerStop": "Dừng bấm giờ",
+  "adaptiveTdeeTitle": "TDEE theo dữ liệu thật",
+  "adaptiveTdeeValue": "{tdee} kcal/ngày",
+  "@adaptiveTdeeValue": {
+    "placeholders": {
+      "tdee": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeDetails": "Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.",
+  "@adaptiveTdeeDetails": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "intake": {
+        "type": "String"
+      },
+      "weighIns": {
+        "type": "String"
+      },
+      "trend": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeCompare": "Công thức Mifflin-St Jeor ước tính {formula} kcal.",
+  "@adaptiveTdeeCompare": {
+    "placeholders": {
+      "formula": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeUse": "Dùng làm mục tiêu ({calories} kcal)",
+  "@adaptiveTdeeUse": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeUsed": "Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.",
+  "@adaptiveTdeeUsed": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeNeedMore": "Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất {days} ngày và cân ít nhất {weighIns} lần, lần đầu và lần cuối cách nhau từ {span} ngày. Hiện có {haveDays} ngày ghi ăn, {haveWeighIns} lần cân.",
+  "@adaptiveTdeeNeedMore": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "weighIns": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      },
+      "haveDays": {
+        "type": "String"
+      },
+      "haveWeighIns": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeUnsure": "Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.",
+  "@adaptiveTdeeUnsure": {
+    "placeholders": {
+      "tdee": {
+        "type": "String"
+      },
+      "formula": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeInfo": "TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế."
 }

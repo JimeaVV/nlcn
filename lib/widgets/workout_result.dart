@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
 import '../l10n/l10n.dart';
+import '../models/history_models.dart';
 import '../models/recommendation_models.dart';
 import 'cyber_card.dart';
+import 'exercise_log_dialog.dart';
 import 'metric_tile.dart';
 
 class WorkoutResult extends StatelessWidget {
@@ -12,11 +14,19 @@ class WorkoutResult extends StatelessWidget {
     required this.recommendation,
     required this.onLogExercise,
     this.logging = false,
+    this.lastSessions = const {},
+    this.onRest,
   });
 
   final WorkoutRecommendation recommendation;
   final Future<void> Function(String exerciseName) onLogExercise;
   final bool logging;
+
+  /// The newest logged session of each exercise, by name.
+  final Map<String, WorkoutLogEntry> lastSessions;
+
+  /// Starts a rest timer after a set of this exercise.
+  final void Function(String exerciseName)? onRest;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +97,7 @@ class WorkoutResult extends StatelessWidget {
                   children: List.generate(exercises.length, (index) {
                     final exercise = exercises[index];
                     final exerciseName = exercise.name;
+                    final last = lastSessions[exerciseName];
                     return Card(
                       color: CyberColors.surfaceAlt,
                       margin: const EdgeInsets.only(bottom: 10),
@@ -95,17 +106,37 @@ class WorkoutResult extends StatelessWidget {
                         child: ListTile(
                           leading: CircleAvatar(child: Text('${index + 1}')),
                           title: Text(exerciseName),
-                          subtitle: Text(exerciseDetails(l10n, exercise)),
-                          trailing: IconButton(
-                            tooltip:
-                                logging ? l10n.savingResult : l10n.logResult,
-                            onPressed: logging
-                                ? null
-                                : () => onLogExercise(exerciseName),
-                            icon: Icon(
-                              Icons.trending_up_rounded,
-                              color: CyberColors.lime,
-                            ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(exerciseDetails(l10n, exercise)),
+                              if (last != null) LastSessionNote(entry: last),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (onRest != null)
+                                IconButton(
+                                  key: ValueKey('rest-$exerciseName'),
+                                  tooltip: l10n.restTimerStart,
+                                  onPressed: () => onRest!(exerciseName),
+                                  icon: Icon(Icons.timer_outlined,
+                                      color: CyberColors.cyan),
+                                ),
+                              IconButton(
+                                tooltip: logging
+                                    ? l10n.savingResult
+                                    : l10n.logResult,
+                                onPressed: logging
+                                    ? null
+                                    : () => onLogExercise(exerciseName),
+                                icon: Icon(
+                                  Icons.trending_up_rounded,
+                                  color: CyberColors.lime,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

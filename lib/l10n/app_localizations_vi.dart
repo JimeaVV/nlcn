@@ -1144,4 +1144,121 @@ class AppLocalizationsVi extends AppLocalizations {
   String scanTiming(String total, String photo, String model) {
     return 'Nhận diện trong $total s (ảnh $photo s · model $model s)';
   }
+
+  @override
+  String get diaryFavorites => 'Yêu thích';
+
+  @override
+  String get diaryRecent => 'Gần đây';
+
+  @override
+  String get diaryQuickHint => 'Chạm một món để thêm ngay vào bữa đã chọn.';
+
+  @override
+  String diaryQuickChip(String name, String calories) {
+    return '$name · $calories kcal';
+  }
+
+  @override
+  String get diaryFavoriteAdd => 'Thêm vào yêu thích';
+
+  @override
+  String get diaryFavoriteRemove => 'Bỏ khỏi yêu thích';
+
+  @override
+  String diaryFavoriteAdded(String name) {
+    return 'Đã thêm $name vào yêu thích.';
+  }
+
+  @override
+  String diaryFavoriteRemoved(String name) {
+    return 'Đã bỏ $name khỏi yêu thích.';
+  }
+
+  @override
+  String get diaryCopyToToday => 'Chép bữa này sang hôm nay';
+
+  @override
+  String diaryRepeatYesterday(String count, String calories) {
+    return 'Ăn giống hôm qua ($count món · $calories kcal)';
+  }
+
+  @override
+  String diaryCopied(String count) {
+    return 'Đã chép $count món.';
+  }
+
+  @override
+  String lastSessionLine(String date, String weight, String reps) {
+    return 'Lần trước ($date): $weight kg × $reps';
+  }
+
+  @override
+  String lastSessionSuggestion(String weight, String reps) {
+    return 'Gợi ý hôm nay: $weight kg × $reps lần';
+  }
+
+  @override
+  String get restTimerStart => 'Bấm giờ nghỉ';
+
+  @override
+  String restTimerLabel(String time) {
+    return 'Nghỉ $time';
+  }
+
+  @override
+  String get restTimerDone => 'Hết giờ nghỉ, vào hiệp tiếp!';
+
+  @override
+  String get restTimerMore => 'Thêm 15 giây';
+
+  @override
+  String get restTimerLess => 'Bớt 15 giây';
+
+  @override
+  String get restTimerStop => 'Dừng bấm giờ';
+
+  @override
+  String get adaptiveTdeeTitle => 'TDEE theo dữ liệu thật';
+
+  @override
+  String adaptiveTdeeValue(String tdee) {
+    return '$tdee kcal/ngày';
+  }
+
+  @override
+  String adaptiveTdeeDetails(
+      String days, String intake, String weighIns, String trend) {
+    return 'Từ $days ngày ghi ăn (trung bình $intake kcal) và $weighIns lần cân trong 4 tuần qua: cân nặng $trend kg/tuần.';
+  }
+
+  @override
+  String adaptiveTdeeCompare(String formula) {
+    return 'Công thức Mifflin-St Jeor ước tính $formula kcal.';
+  }
+
+  @override
+  String adaptiveTdeeUse(String calories) {
+    return 'Dùng làm mục tiêu ($calories kcal)';
+  }
+
+  @override
+  String adaptiveTdeeUsed(String calories) {
+    return 'Đã điền mục tiêu calo $calories kcal. Bấm Lưu hồ sơ để áp dụng.';
+  }
+
+  @override
+  String adaptiveTdeeNeedMore(String days, String weighIns, String span,
+      String haveDays, String haveWeighIns) {
+    return 'Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất $days ngày và cân ít nhất $weighIns lần, lần đầu và lần cuối cách nhau từ $span ngày. Hiện có $haveDays ngày ghi ăn, $haveWeighIns lần cân.';
+  }
+
+  @override
+  String adaptiveTdeeUnsure(String tdee, String formula) {
+    return 'Kết quả lệch xa công thức ($tdee so với $formula kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.';
+  }
+
+  @override
+  String get adaptiveTdeeInfo =>
+      'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.';
 }

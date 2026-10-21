@@ -9,6 +9,14 @@ class NutritionTargetError extends ArgumentError {
   final NutritionTargetIssue issue;
 }
 
+/// How far the calorie target sits from TDEE for each goal. These factors
+/// are product assumptions, also applied to a TDEE measured from the diary.
+double goalCalorieFactor(NutritionGoal goal) => switch (goal) {
+      NutritionGoal.lose => 0.90,
+      NutritionGoal.maintain => 1.0,
+      NutritionGoal.gain => 1.10,
+    };
+
 /// Calculates starting estimates for this app, rather than clinical prescriptions.
 ///
 /// The goal factors (0.90/1.00/1.10) are product assumptions. The 1000 kcal lower
@@ -24,11 +32,7 @@ Map<String, dynamic> calculateNutritionTargets(UserProfile profile) {
   if (!bmr.isFinite || !tdee.isFinite || bmr <= 0 || tdee <= 0) {
     throw ArgumentError('Calculated BMR and TDEE must be greater than 0.');
   }
-  final multiplier = switch (profile.goal) {
-    NutritionGoal.lose => 0.90,
-    NutritionGoal.maintain => 1.0,
-    NutritionGoal.gain => 1.10,
-  };
+  final multiplier = goalCalorieFactor(profile.goal);
   int roundHalfUp(double value) => (value + 0.5).floor();
   final estimatedCalories = roundHalfUp(tdee * multiplier);
   final estimatedProtein = profile.weight * 1.8;
