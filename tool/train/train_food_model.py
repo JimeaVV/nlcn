@@ -920,6 +920,7 @@ def compile_model(learning_rate, weight_decay=0.0):
 
 
 import json
+import math
 
 CHECKPOINT = os.path.join(OUTPUT_DIR, 'checkpoint.keras')   # best so far
 LAST = os.path.join(OUTPUT_DIR, 'last.keras')               # where to resume
@@ -937,6 +938,8 @@ def read_progress():
 def save_progress(phase, epoch, logs):
     best = max(read_progress().get('best', -1.0),
                float(logs.get('val_dish_accuracy', -1.0)))
+    if nan_loss['hit']:
+        return   # this epoch is thrown away
     minutes = earlier_minutes + (time.time() - started) / 60
     with open(PROGRESS + '.tmp', 'w') as f:
         json.dump({'phase': phase, 'epochs_done': epoch + 1, 'best': best,
@@ -947,6 +950,7 @@ def save_progress(phase, epoch, logs):
 
 
 out_of_time = []   # set once training stopped for the time limit
+nan_loss = {'hit': False}   # the loss became NaN in the running epoch
 epoch_started = [time.time()]
 
 
@@ -979,6 +983,8 @@ class SaveModel(keras.callbacks.Callback):
         self.path, self.best_only, self.best = path, best_only, best
 
     def on_epoch_end(self, epoch, logs=None):
+        if nan_loss['hit']:
+            return   # never save weights that turned into NaN
         value = (logs or {}).get('val_dish_accuracy')
         if self.best_only:
             if value is None or (self.best is not None and value <= self.best):
@@ -989,10 +995,34 @@ class SaveModel(keras.callbacks.Callback):
         os.replace(temporary, self.path)
 
 
+class StopOnNaN(keras.callbacks.Callback):
+    """Stops at the first batch whose loss is NaN or infinite. On Kaggle's
+    two T4s the B3 loss once turned into NaN at fine-tuning epoch 6, every
+    weight with it, and the run idled six more epochs until EarlyStopping.
+    Stopping here keeps that epoch from being saved; the training cell then
+    goes back to the last saved epoch and trains on."""
+
+    def __init__(self, phase):
+        super().__init__()
+        self.phase, self.epoch = phase, 0
+
+    def on_epoch_begin(self, epoch, logs=None):
+        self.epoch = epoch
+
+    def on_train_batch_end(self, batch, logs=None):
+        loss = (logs or {}).get('loss')
+        if loss is not None and not math.isfinite(float(loss)):
+            nan_loss['hit'] = True
+            self.model.stop_training = True
+            stage(f'{self.phase} epoch {self.epoch + 1}, batch {batch + 1}: '
+                  'the loss is NaN, stopping this epoch')
+
+
 def callbacks(phase, best=None):
     """[best]: the best validation accuracy before a resume, so the best
     checkpoint is only replaced by a better epoch."""
     return [
+        StopOnNaN(phase),
         SaveModel(CHECKPOINT, best_only=True, best=best),
         # Every epoch, with the optimizer, so a cut-off session continues.
         SaveModel(LAST),
@@ -1106,11 +1136,34 @@ else:
             compile_model(1e-4)
         model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS_FINE,
                   callbacks=callbacks('fine'))
+# A NaN loss: back to the last saved fine-tuning epoch, a few times. The
+# photos come in another order, so the same batch rarely blows up again.
+for attempt in range(3):
+    progress = read_progress()
+    if not nan_loss['hit'] or out_of_time:
+        break
+    if progress.get('phase') != 'fine' or not os.path.exists(LAST):
+        print('The loss became NaN before any fine-tuning epoch was saved; '
+              'the best epoch so far is kept.')
+        break
+    stage(f"going back to the end of fine epoch {progress['epochs_done']} "
+          f'(try {attempt + 1} of 3)')
+    nan_loss['hit'] = False
+    with strategy.scope():
+        model = keras.models.load_model(
+            LAST, custom_objects={'masked_bce': masked_bce})
+    model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS_FINE,
+              initial_epoch=progress['epochs_done'],
+              callbacks=callbacks('fine', best=progress['best']))
+
 train_minutes = earlier_minutes + (time.time() - started) / 60
 print(f'Training took {train_minutes:.1f} min')
 progress = read_progress()
-FINISHED = not out_of_time
-if not FINISHED:
+FINISHED = not out_of_time and not nan_loss['hit']
+if nan_loss['hit']:
+    print('The loss kept turning into NaN; training stopped at fine epoch '
+          f"{progress.get('epochs_done')} and the best epoch is kept.")
+if out_of_time:
     print(f"Stopped for the time limit after fine-tuning epoch "
           f"{progress.get('epochs_done')} of {EPOCHS_FINE}. These files are "
           "usable. To train on, " + (
@@ -1362,7 +1415,7 @@ card = f"""# MODEL_CARD – food_v1
 - Dữ liệu: {len(train)} train / {len(val)} val / {len(test)} test
 - Nguồn ảnh: {', '.join(f'{k}: {v}' for k, v in sources.most_common())}
 - Kích thước: {size_mb:.1f} MB (float16)
-- Thời gian train: {train_minutes:.0f} phút{'' if FINISHED else f" (DỪNG VÌ HẾT GIỜ sau epoch {progress.get('epochs_done')}/{EPOCHS_FINE}, chạy version mới để train tiếp)"}
+- Thời gian train: {train_minutes:.0f} phút{'' if FINISHED else f" (DỪNG VÌ HẾT GIỜ sau epoch {progress.get('epochs_done')}/{EPOCHS_FINE}, chạy lại để train tiếp)" if out_of_time else f" (DỪNG VÌ LOSS BỊ NaN sau epoch {progress.get('epochs_done')}/{EPOCHS_FINE})"}
 
 ## Kết quả trên tập test
 - Món, top-1: {metric('dish_top1')}

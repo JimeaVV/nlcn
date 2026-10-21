@@ -6,6 +6,7 @@ train_food_model.py, before sending the notebook to Kaggle or Colab.
     python tool/train/test/smoke_test.py --two-devices # like Kaggle's T4 x2
     python tool/train/test/smoke_test.py --resume      # cut off, then resume
     python tool/train/test/smoke_test.py --colab       # fake Colab and Drive
+    python tool/train/test/smoke_test.py --nan         # NaN weights in epoch 2
 
 Needs a Python with tensorflow 2.18 and pillow; the first run downloads the
 backbone's ImageNet weights. Runs the quick test with 3 fine-tuning epochs
@@ -31,8 +32,10 @@ EXPORTS = ['food_v1.tflite', 'food_v1_int8.tflite', 'dishes.txt',
 
 
 def patched(source, backbone):
-    """The notebook with 3 fine-tuning epochs in the quick test and a hook
-    that ends the process after a given epoch (CRASH_AFTER=fine1)."""
+    """The notebook with 3 fine-tuning epochs in the quick test, a hook that
+    ends the process after a given epoch (CRASH_AFTER=fine1), and one that
+    turns the last layers' weights into NaN after the first batch of an
+    epoch (NAN_AT=fine2)."""
     with open(source, encoding='utf-8') as f:
         s = f.read()
 
@@ -53,6 +56,15 @@ def patched(source, backbone):
         "    os.replace(PROGRESS + '.tmp', PROGRESS)\n"
         "    if os.environ.get('CRASH_AFTER') == f'{phase}{epoch + 1}':\n"
         "        os._exit(3)   # smoke test: a session cut off here\n")
+    rep("    def on_train_batch_end(self, batch, logs=None):\n"
+        "        loss = (logs or {}).get('loss')\n",
+        "    def on_train_batch_end(self, batch, logs=None):\n"
+        "        if (os.environ.get('NAN_AT') == f'{self.phase}{self.epoch + 1}'\n"
+        "                and batch == 0 and not os.environ.get('_NAN_DONE')):\n"
+        "            os.environ['_NAN_DONE'] = '1'   # smoke test: poison it\n"
+        "            for w in self.model.trainable_weights[-2:]:\n"
+        "                w.assign(tf.fill(w.shape, float('nan')))\n"
+        "        loss = (logs or {}).get('loss')\n")
     return s
 
 
@@ -99,6 +111,8 @@ def main():
     mode.add_argument('--colab', action='store_true')
     parser.add_argument('--resume', action='store_true',
                         help='end the first run after fine epoch 1, resume')
+    parser.add_argument('--nan', action='store_true',
+                        help='NaN weights in fine epoch 2: must roll back')
     parser.add_argument('--backbone', help='e.g. efficientnetb0 (faster)')
     parser.add_argument('--source', default=NOTEBOOK)
     args = parser.parse_args()
@@ -115,13 +129,16 @@ def main():
         code, _ = run(args, work, {'CRASH_AFTER': 'fine1'}, 'run1_cut_off')
         if code != 3:
             problems.append(f'the cut-off run exited {code}, not 3')
-    code, text = run(args, work, {}, 'run2' if args.resume else 'run')
+    code, text = run(args, work, {'NAN_AT': 'fine2'} if args.nan else {},
+                     'run2' if args.resume else 'run')
     if code != 0:
         problems.append(f'the notebook exited {code}; see the log')
     if 'AlreadyExistsError' in text or 'Traceback' in text:
         problems.append('a Python error is in the log')
     if args.resume and 'resuming fine-tuning after epoch 1' not in text:
         problems.append('the second run did not resume after epoch 1')
+    if args.nan and 'going back to the end of fine epoch 1' not in text:
+        problems.append('the NaN in fine epoch 2 did not roll back to epoch 1')
 
     out = output_dir(args, work)
     missing = [f for f in EXPORTS if not os.path.exists(os.path.join(out, f))]
@@ -139,7 +156,8 @@ def main():
     log_path = os.path.join(out, 'training_log_fine.csv')
     if os.path.exists(log_path):
         with open(log_path, encoding='utf-8') as f:
-            rows = list(csv.DictReader(f))
+            # Rows of epochs thrown away for a NaN loss stay in the log.
+            rows = [r for r in csv.DictReader(f) if r['loss'] != 'nan']
         if [r['epoch'] for r in rows] != ['0', '1', '2']:
             problems.append('training_log_fine.csv epochs '
                             f"{[r['epoch'] for r in rows]}, want 0, 1, 2")

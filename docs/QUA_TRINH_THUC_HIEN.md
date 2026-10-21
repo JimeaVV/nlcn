@@ -1619,6 +1619,46 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     `--resume` để cắt sau epoch 1 rồi chạy tiếp.
   - Đã chạy cả 4 chế độ: 1 thiết bị, chạy tiếp, 2 thiết bị, Colab giả.
 
+### 2026-10-21 · B3 FULL trên Kaggle hỏng vì loss thành NaN, thêm cơ chế tự quay lại
+- Kết quả lượt B3 FULL trên Kaggle (2 GPU T4):
+  - Đọc dữ liệu mất khoảng 5 giờ 50 phút, chủ yếu do đọc 171.619 nhãn
+    VietFood67 trên ổ mạng.
+  - Mỗi epoch fine-tune mất khoảng 12,6 phút. Colab 1 T4 mất khoảng 17
+    phút.
+  - 5 epoch fine-tune đầu bình thường: val tăng từ 0,655 lên 0,794, gần như
+    trùng lượt Colab (0,671 lên 0,796). Điều này cho thấy hai nơi train
+    giống nhau.
+  - Ở epoch 6, loss chuyển thành `nan` và độ chính xác rơi xuống 3,2% (luôn
+    đoán một món). Trọng số đã hỏng nên 5 epoch sau đứng yên ở 3,2%, cho tới
+    khi EarlyStopping (patience 6) dừng ở epoch 11. Lúc đó mới khoảng 8 giờ
+    30 phút, chưa tới giới hạn thời gian.
+  - Model xuất ra lấy từ epoch tốt nhất (epoch 5): top-1 0,800, top-3 0,909
+    trên 14.823 ảnh test. Dùng được nhưng kém bản Colab ở epoch 10 (0,829).
+  - `results.json` ghi `finished: true` vì EarlyStopping không bị coi là
+    dừng giữa chừng. Bản sửa dưới đây ghi rõ trường hợp này.
+- Nguyên nhân có thể: mixed precision (float16) cộng với chia batch cho 2 GPU
+  vào lúc learning rate gần đỉnh (khoảng 3e-4). Chưa xác định chắc. Hai đầu
+  ra của model đã ở float32, và hàm loss có kẹp giá trị. Lượt Colab 1 GPU
+  chưa gặp lỗi này sau 10 epoch.
+- Sửa (`StopOnNaN`): không đổi gì khi loss bình thường, nên kết quả vẫn so
+  được với B1, B2 và các lượt trước.
+  - Ngay batch đầu tiên có loss NaN hoặc vô cực, notebook dừng epoch đó.
+  - Không lưu `last.keras`, `checkpoint.keras` hay `progress.json` cho epoch
+    hỏng.
+  - Notebook nạp lại `last.keras` của epoch tốt cuối cùng và train tiếp. Thứ
+    tự ảnh lần này khác nên khó gặp lại đúng batch đó. Thử lại tối đa 3 lần.
+  - Nếu vẫn NaN: dừng, giữ epoch tốt nhất, `finished: false`, và
+    `MODEL_CARD.md` ghi "DỪNG VÌ LOSS BỊ NaN".
+- Thêm chế độ `--nan` cho `smoke_test.py`: cố ý biến trọng số lớp cuối thành
+  NaN sau batch đầu của epoch fine-tune thứ 2. Notebook phải quay lại cuối
+  epoch 1 và chạy đủ 3 epoch.
+- Đã chạy `smoke_test.py` ở 4 chế độ, cả 4 đều PASS:
+  - `--nan` trên 1 thiết bị và trên 2 thiết bị: đều báo "the loss is NaN,
+    stopping this epoch", rồi "going back to the end of fine epoch 1", và
+    chạy đủ 3 epoch.
+  - `--resume` và chạy thường: vẫn như trước, nên bản sửa không làm hỏng
+    tính năng cũ.
+
 ---
 
 ## 3. Việc còn tồn đọng
