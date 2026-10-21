@@ -150,7 +150,9 @@ if ON_COLAB:
                 print('Earlier progress on Drive:', f.read(), '- training '
                       'continues from there after the downloads.', flush=True)
         except OSError:
-            print('No earlier progress on Drive: training starts fresh.')
+            print('No earlier progress on Drive: training starts fresh. If '
+                  'you copied progress to a Drive, stop now: the Drive just '
+                  'allowed belongs to another Google account.', flush=True)
     else:
         OUTPUT_DIR = os.path.join(COLAB_ROOT, 'output')
 
@@ -1106,6 +1108,20 @@ resume = (EXPERIMENT == 'finetune' and progress.get('phase') == 'fine' and
               ('backbone', BACKBONE), ('recipe', RECIPE),
               ('quick_test', QUICK_TEST))) and
           progress.get('epochs_done', 0) < EPOCHS_FINE)
+if not resume and progress.get('phase') == 'fine':
+    # Fine-tuning progress that cannot be continued: never delete it and
+    # start over silently, hours of training may sit in last.keras.
+    differ = [f"{k}: saved {progress.get(k)!r}, now {v!r}" for k, v in (
+        ('backbone', BACKBONE), ('recipe', RECIPE),
+        ('quick_test', QUICK_TEST)) if progress.get(k) != v]
+    if progress.get('epochs_done', 0) >= EPOCHS_FINE:
+        differ.append(f"all {EPOCHS_FINE} fine-tuning epochs are done")
+    if not os.path.exists(LAST):
+        differ.append('last.keras is missing')
+    raise RuntimeError(
+        f'{OUTPUT_DIR} holds fine-tuning progress that this run cannot '
+        f"continue ({'; '.join(differ) or EXPERIMENT}). To start over, "
+        'move or rename that folder first.')
 if resume:
     stage(f"resuming fine-tuning after epoch {progress['epochs_done']} "
           f"(best val {progress['best']:.3f})")

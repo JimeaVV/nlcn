@@ -1678,6 +1678,28 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   tiếp in đúng "Earlier progress on Drive: {... epochs_done: 1 ...}" trước
   khi tải dữ liệu.
 
+### 2026-10-21 · Không bao giờ âm thầm train lại từ đầu khi đã có tiến độ
+- Chuyện xảy ra: tiến độ B3 (epoch 10/30) đã được chép sang Drive của acc
+  mới. Nhưng ở hộp thoại cho phép Drive, phiên Colab chọn nhầm một acc khác
+  không có tiến độ. Notebook không thấy gì nên train lại từ head epoch 1, và
+  hơn 2 giờ GPU chạy lại phần đã có. Bản sao trên acc mới vẫn còn nguyên
+  (đã kiểm tra `progress.json` qua Google Drive).
+- Rủi ro lớn hơn: nếu thư mục có tiến độ nhưng một thiết lập khác đi (ví dụ
+  đổi `BACKBONE`), lần chạy mới sẽ coi là chạy từ đầu và xóa luôn
+  `last.keras` cùng `progress.json`.
+- Sửa:
+  - Nếu thư mục kết quả có tiến độ fine-tune mà không chạy tiếp được, notebook
+    dừng bằng `RuntimeError`, không xóa gì. Các lý do không chạy tiếp được:
+    khác backbone, khác recipe, khác `QUICK_TEST`, đã xong đủ epoch, hoặc
+    thiếu `last.keras`. Thông báo ghi rõ lý do; muốn train lại từ đầu thì đổi
+    tên thư mục cũ trước.
+  - Trên Colab, nếu Drive vừa cho phép không có tiến độ, notebook in cảnh
+    báo: nếu bạn đã chép tiến độ thì dừng ngay, vì đó là Drive của acc khác.
+- Kiểm tra:
+  - `smoke_test.py --resume`: PASS.
+  - Chạy lại thư mục đó với `BACKBONE = 'efficientnetb0'`: notebook dừng,
+    báo khác backbone, và `last.keras` cùng `progress.json` vẫn còn.
+
 ---
 
 ## 3. Việc còn tồn đọng
