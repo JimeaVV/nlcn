@@ -186,6 +186,18 @@ if ON_COLAB:
             print('No earlier progress on Drive: training starts fresh. If '
                   'you copied progress to a Drive, stop now: the Drive just '
                   'allowed belongs to another Google account.', flush=True)
+            # Checked now, not after 40 minutes of downloads.
+            old_model = WARM_START or os.path.join(
+                COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train',
+                f'{BACKBONE}_finetune', 'checkpoint.keras')
+            if CONTINUE and not QUICK_TEST and not os.path.exists(old_model):
+                raise RuntimeError(
+                    f'The 1.4 model is not at {old_model}. Copy '
+                    'checkpoint.keras from the 1.4 run there (the folder '
+                    'macrorunner_train/efficientnetb3_finetune in Drive), '
+                    'or set WARM_START.')
+            if CONTINUE:
+                print('Continuing from', old_model, flush=True)
     else:
         OUTPUT_DIR = os.path.join(COLAB_ROOT, 'output')
 

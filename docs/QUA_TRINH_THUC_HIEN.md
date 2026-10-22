@@ -1999,6 +1999,16 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Build APK 115 (24,5 MB), chữ ký release đúng; chưa cài lên điện thoại
     theo yêu cầu, gửi file cho người dùng tự cài.
 
+### 2026-10-22 · Notebook báo ngay khi Drive thiếu model 1.4
+- Lý do: người dùng train 1.5 bằng một tài khoản Google khác. Trước đây,
+  nếu Drive của tài khoản đó chưa có `checkpoint.keras` của B3, notebook
+  chỉ báo lỗi khi bắt đầu train, tức là sau khoảng 40 phút tải dữ liệu.
+- Đã làm: trên Colab, ngay sau khi kết nối Drive, notebook kiểm tra file
+  `macrorunner_train/efficientnetb3_finetune/checkpoint.keras` (hoặc đường
+  dẫn trong `WARM_START`). Thiếu file thì dừng ngay và chỉ chỗ cần chép file
+  vào; có file thì in đường dẫn sẽ dùng.
+- Kiểm tra: `smoke_test.py --colab` PASS.
+
 ---
 
 ## 3. Việc còn tồn đọng
