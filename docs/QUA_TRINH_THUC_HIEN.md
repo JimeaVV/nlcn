@@ -2071,6 +2071,15 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   phải có trong bảng dinh dưỡng; đầu vào 300×300, đầu ra 92 món và 25 thành
   phần. Build APK 117.
 
+### 2026-10-22 · Sửa chú thích cũ "224×224" trong notebook
+- Lý do: người dùng thấy mục "Input pipeline" ghi ảnh vào 224×224 trong khi
+  đang train B3. Chú thích đó viết từ hồi dùng EfficientNetB0; code thật dùng
+  biến `IMG` (300×300 với B3) nên kết quả train không bị ảnh hưởng.
+- Đã làm: sửa chú thích ở mục "Input pipeline" và phần thu nhỏ ảnh
+  (`SHRUNK_SIDE`) cho đúng kích thước theo từng backbone. Không đổi code.
+- Kiểm tra: sinh lại `train_food_model.ipynb`; `grep 224` chỉ còn ở bảng
+  kích thước và các chú thích đúng.
+
 ---
 
 ## 3. Việc còn tồn đọng

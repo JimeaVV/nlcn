@@ -1000,11 +1000,10 @@ def average_hash(path, box=None):
 
 # Training reads each photo every epoch. Full-size photos made Colab's two
 # CPU cores the bottleneck (about 40 photos/s, 15 minutes an epoch), so every
-# kept photo is decoded once here and saved with its short side SHRUNK_SIDE.
-# 384 keeps even the smallest random crop (60%, 230 px) above the 224×224
-# input, so every crop is still scaled down, never up: no detail is lost.
-# Large enough that the smallest random crop (60% of the short side) still
-# covers the input: 384 for 224-pixel models, 512 for B3's 300.
+# kept photo is decoded once here and saved with its short side SHRUNK_SIDE,
+# large enough that the smallest random crop (60% of the short side) still
+# covers the model input: 384 for 224-pixel models, 512 for B3's 300. Every
+# crop is then scaled down, never up, so no detail the model sees is lost.
 SHRUNK_SIDE = max(384, -(-IMG * 10 // 6 // 32) * 32)
 SHRUNK_DIR = os.environ.get('SHRUNK_DIR', '/tmp/shrunk')
 os.makedirs(SHRUNK_DIR, exist_ok=True)
@@ -1113,7 +1112,8 @@ if MIN_TRAIN_PER_DISH:
 
 # %% [markdown]
 # ## Input pipeline
-# Matches the app: centre square, resized to 224×224, raw RGB 0–255
+# Matches the app: centre square, resized to IMG×IMG (300×300 for B3, 224×224
+# for B0 and MobileNetV3), raw RGB 0–255
 # (the model normalizes inside). Training adds random crops, flips and light
 # colour changes.
 
