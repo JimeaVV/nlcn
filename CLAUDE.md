@@ -27,7 +27,7 @@ thì Android coi là app khác, không cài đè được và mất dữ liệu.
 - `tool/train/`: notebook train model.
   - Code gốc là `train_food_model.py`. File `.ipynb` được sinh từ đó.
   - Thử nhanh nằm trong `tool/train/test/`.
-- `docs/MODEL_CONTRACT.md`: thỏa thuận giữa app và model (đang ở 1.4): danh
+- `docs/MODEL_CONTRACT.md`: thỏa thuận giữa app và model (đang ở 1.5): danh
   sách món, thành phần, định dạng đầu vào và đầu ra, các dòng trong
   `MODEL_CARD.md`.
 - `backend/`: bản Python gốc, chỉ giữ để tham khảo thuật toán. App không cần

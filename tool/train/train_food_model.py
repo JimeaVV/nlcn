@@ -2,14 +2,30 @@
 # # MacroRunner – train the food recognition model
 #
 # Trains the two-output model described in `docs/MODEL_CONTRACT.md`
-# (contract 1.4): a softmax over 65 dishes plus "khac" (food the app does not
+# (contract 1.5): a softmax over 91 dishes plus "khac" (food the app does not
 # know) and an independent probability per component (25). By default it
-# trains EfficientNetB3 at 300×300 with the `full` recipe. The result is the
-# four files the app reads from `assets/models/`, plus an int8 copy.
+# trains EfficientNetB3 at 300×300 with the `full` recipe, continuing from the
+# 1.4 model (`EXPERIMENT = 'continue'`, see below). The result is the four
+# files the app reads from `assets/models/`, plus an int8 copy.
+#
+# **Continuing from the 1.4 model** (`EXPERIMENT = 'continue'`): the 65 old
+# dishes keep their weights and only the 26 new ones start from zero, so 8
+# epochs are enough instead of 30. The notebook looks for the 1.4 model's
+# `checkpoint.keras`:
+# - on Colab in Drive, `macrorunner_train/efficientnetb3_finetune/` (where the
+#   1.4 run saved it; from another Google account, copy that file there);
+# - on Kaggle in the inputs: add the 1.4 notebook's output, or a dataset
+#   holding that file.
+# Set `WARM_START` to its path to choose another file.
+#
+# **The user's own photos** (Settings → "Lưu ảnh để train" in the app, then
+# export): on Kaggle upload the zip as a dataset and add it; on Colab put the
+# zip in Drive, folder `macrorunner_train/my_photos/`.
 #
 # **On Kaggle**
 # 1. *Add data*: VinaFood21, 30VNFoods (vietnamese-foods), 20FoodVN,
-#    VietFood67 (vietfood68), and the team's own photos if any.
+#    VietFood67 (vietfood68), Food-101 (kmader/food41), the 1.4 model and the
+#    user's own photos. MyFood downloads by itself from Zenodo.
 # 2. *Settings*: Accelerator **GPU T4 x2**, Internet **on**.
 # 3. Run once with `QUICK_TEST = True` to check everything. For B3 on Kaggle
 #    this still takes 30–60 minutes: attaching the data, reading VietFood67's
@@ -34,8 +50,8 @@
 #    `kaggle.json` works too: `KAGGLE_USERNAME` and `KAGGLE_KEY`.)
 # 3. *Runtime → Run all*, then allow Google Drive (and the secret) in the
 #    windows that open within the first seconds; only then leave it alone.
-#    The datasets download once per session (VietFood67 is 26 GB). Results
-#    go to Google Drive, folder `macrorunner_train`.
+#    The datasets download once per session (VietFood67 is 26 GB, Food-101
+#    5 GB). Results go to Google Drive, folder `macrorunner_train`.
 # 4. After the quick test, set `QUICK_TEST = False` and run all again in the
 #    same session, so nothing downloads twice. Keep the tab open.
 # 5. Free Colab gives a session about 5 hours, less than B3 needs (7–8 hours
@@ -45,11 +61,13 @@
 #    same settings: each epoch saves `last.keras` to Drive, and fine-tuning
 #    continues after the last finished epoch instead of starting over.
 #
-# The four public datasets are merged into one training set. Class folders are
+# The public datasets are merged into one training set. Class folders are
 # renamed to the app's codes; classes the app does not have become "khac".
 # VietFood67 has bounding boxes, which also give component labels: a plate
 # with boxes for rice, braised pork and vegetables but no dish box is a
-# *cơm phần*.
+# *cơm phần*. Its boxes of rice, tofu, spring rolls and cooked greens are
+# also cut out as photos of those foods eaten on their own, and so are
+# MyFood's masks (rice, chicken breast, eggs, steak on a lunch plate).
 
 # %%
 import os
@@ -65,7 +83,9 @@ def stage(text):
 
 
 QUICK_TEST = True          # True: a few hundred images, 1 epoch per phase.
-EXPERIMENT = 'finetune'    # 'scratch' | 'linear' | 'finetune' (report §3)
+# 'scratch' | 'linear' | 'finetune' (report §3) | 'continue': fine-tune on
+# from the 1.4 model, its 65 dishes kept, the new ones added (see the top).
+EXPERIMENT = 'continue'
 BACKBONE = 'efficientnetb3'  # 'efficientnetb3' (ships); any 'efficientnetb0'
                              # to 'efficientnetb7'; 'efficientnetv2b0';
                              # 'mobilenetv3'
@@ -85,8 +105,13 @@ EFFICIENTNET_SIZES = {0: 224, 1: 240, 2: 260, 3: 300, 4: 380, 5: 456, 6: 528,
 IMG = (EFFICIENTNET_SIZES[int(BACKBONE[-1])]
        if BACKBONE[:-1] == 'efficientnetb' else 224)
 BATCH = 16 if QUICK_TEST else 64       # total, split across the GPUs
-EPOCHS_HEAD = 1 if QUICK_TEST else (3 if FULL else 5)    # backbone frozen
-EPOCHS_FINE = 1 if QUICK_TEST else (30 if FULL else 15)  # backbone learning
+CONTINUE = EXPERIMENT == 'continue'
+# Continuing, one head epoch is enough for the new dishes' columns to catch up.
+EPOCHS_HEAD = 1 if QUICK_TEST or CONTINUE else (3 if FULL else 5)  # frozen
+EPOCHS_FINE = (1 if QUICK_TEST else 8 if CONTINUE else 30 if FULL else 15)
+# The 1.4 model to continue from; empty: looked for (see the top).
+WARM_START = os.environ.get('WARM_START', '')
+PREVIOUS_DISHES = 65   # contract 1.4: DISHES[:65], then "khac"
 # Caps the largest classes. 1,500 held 25 dishes back in v1.3.
 MAX_PER_DISH = 12 if QUICK_TEST else (4000 if FULL else 1500)
 # Dishes with fewer training photos are repeated up to this many, so the
@@ -98,7 +123,8 @@ MIXED_PRECISION = os.environ.get('MIXED_PRECISION', 'gpu')
 # Photos of food the app does not know become the extra class "khac", so the
 # model can say "not in the app" instead of forcing a close match.
 USE_OTHER = True
-MAX_OTHER = 24 if QUICK_TEST else 3000
+# Food-101 alone brings 66 classes the app does not have.
+MAX_OTHER = 24 if QUICK_TEST else 4000
 UNFREEZE_FRACTION = 0.4                 # share of backbone layers fine-tuned
 # 30VNFoods and VietFood67 have one "Phở" class for both beef and chicken.
 # 'skip' leaves those photos out; 'pho_bo' counts them as beef phở.
@@ -128,7 +154,14 @@ KAGGLE_DATASETS = [
     'quandang/vietnamese-foods',
     'sonbui25/vinafood21',
     'thomasnguyen6868/vietfood68',   # 26 GB
+    'kmader/food41',                 # Food-101, 5 GB
 ]
+# Not on Kaggle: downloaded on Kaggle (Internet on) and on Colab alike.
+URL_DATASETS = {
+    # MyFood (Freitas et al. 2020), CC BY 4.0: 9 foods with masks.
+    'myfood': 'https://zenodo.org/records/4041488/files/MyFood%20Dataset.zip?download=1',
+}
+DOWNLOAD_URL_DATASETS = os.environ.get('DOWNLOAD_URL_DATASETS', '1') == '1'
 SAVE_TO_DRIVE = True   # False: results stay in /content/output (lost on exit)
 COLAB_ROOT = os.environ.get('COLAB_ROOT', '/content')
 
@@ -192,8 +225,50 @@ if ON_COLAB:
         print(f'  done in {time.time() - started:.0f} s: {path}', flush=True)
     print(f'Disk free: {shutil.disk_usage(COLAB_ROOT).free / 1e9:.0f} GB')
 
+# Datasets this notebook downloads or unzips itself; Kaggle's input folder
+# is read-only.
+EXTRA_ROOT = os.environ.get('EXTRA_ROOT', INPUT_ROOT if ON_COLAB else
+                            '/tmp/extra_datasets' if ON_KAGGLE else
+                            os.path.join(OUTPUT_DIR, 'extra'))
+os.makedirs(EXTRA_ROOT, exist_ok=True)
+
+
+def unzip(zip_path, folder):
+    import zipfile
+    with zipfile.ZipFile(zip_path) as z:
+        z.extractall(folder + '.part')
+    os.replace(folder + '.part', folder)
+
+
+for name, url in URL_DATASETS.items():
+    folder = os.path.join(EXTRA_ROOT, name)
+    if os.path.isdir(folder) or not DOWNLOAD_URL_DATASETS:
+        continue
+    started = time.time()
+    print(f'Downloading {name} ...', flush=True)
+    try:
+        import urllib.request
+        urllib.request.urlretrieve(url, folder + '.zip')
+        unzip(folder + '.zip', folder)
+        os.remove(folder + '.zip')
+        print(f'  done in {time.time() - started:.0f} s', flush=True)
+    except Exception as error:   # no Internet: train without it
+        print(f'  FAILED ({error}): its dishes get fewer photos. On Kaggle, '
+              'turn Internet on in Settings.', flush=True)
+
+if ON_COLAB and SAVE_TO_DRIVE:
+    # The user's own photos, exported from the app as zip files.
+    for zip_path in sorted(glob.glob(os.path.join(
+            COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train', 'my_photos',
+            '*.zip'))):
+        folder = os.path.join(EXTRA_ROOT, 'my_photos_' + os.path.splitext(
+            os.path.basename(zip_path))[0])
+        if not os.path.isdir(folder):
+            unzip(zip_path, folder)
+            print('Own photos:', zip_path, flush=True)
+
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-print('Photos from', INPUT_ROOT, '| results to', OUTPUT_DIR)
+print('Photos from', INPUT_ROOT, 'and', EXTRA_ROOT, '| results to', OUTPUT_DIR)
 
 # %% [markdown]
 # ## Contract
@@ -201,7 +276,7 @@ print('Photos from', INPUT_ROOT, '| results to', OUTPUT_DIR)
 # which this notebook writes at the end.
 
 # %%
-CONTRACT_VERSION = '1.4'
+CONTRACT_VERSION = '1.5'
 DISHES = [
     'com_tam', 'com_phan', 'com_ga', 'com_chien', 'pho_bo', 'pho_ga',
     'bun_bo_hue', 'bun_cha', 'bun_rieu', 'bun_thit_nuong', 'hu_tieu',
@@ -217,6 +292,12 @@ DISHES = [
     'banh_trang_nuong', 'banh_gio', 'banh_bot_loc', 'banh_duc', 'nem_chua',
     'banh_pia', 'bun_ca', 'khoai_tay_chien', 'salad', 'hamburger',
     'nui_xao_bo', 'sup_cua', 'nom_hoa_chuoi',
+    # 1.5: everyday food, on its own or from abroad.
+    'com_trang', 'uc_ga', 'trung_luoc', 'trung_op', 'trung_chien',
+    'bo_bit_tet', 'mi_y', 'tao', 'dau_hu_chien', 'rau_xao', 'cha_gio',
+    'ga_ran', 'ca_hoi', 'muc_chien', 'sui_cao', 'pizza', 'sushi', 'sashimi',
+    'ramen', 'hot_dog', 'sandwich', 'pancake', 'banh_waffle', 'banh_donut',
+    'banh_kem', 'kem',
 ]
 OTHER = 'khac'   # last dish output; not an app dish (contract §6)
 COMPONENTS = [
@@ -225,7 +306,7 @@ COMPONENTS = [
     'ga', 'ga_chien', 'bo', 'ca', 'tom', 'dau_hu', 'cha_lua', 'rau_song',
     'rau_nau', 'do_chua', 'dua_leo_ca_chua', 'mo_hanh',
 ]
-assert len(DISHES) == 65 and len(COMPONENTS) == 25
+assert len(DISHES) == 91 and len(COMPONENTS) == 25
 OUTPUTS = DISHES + ([OTHER] if USE_OTHER else [])
 # Components each dish's recipe lists (assets/data/vn_food/dishes.csv; checked
 # by tool/check_vn_food.py). A component outside a dish's recipe is taken as
@@ -297,8 +378,38 @@ DISH_PARTS = {
     'nui_xao_bo': ('bo',),
     'sup_cua': (),
     'nom_hoa_chuoi': (),
+    'com_trang': ('com',),
+    'uc_ga': (),
+    'trung_luoc': ('trung_kho',),
+    'trung_op': ('trung_op_la',),
+    'trung_chien': (),
+    'bo_bit_tet': (),
+    'mi_y': (),
+    'tao': (),
+    'dau_hu_chien': ('dau_hu',),
+    'rau_xao': ('rau_nau',),
+    'cha_gio': (),
+    'ga_ran': ('ga_chien',),
+    'ca_hoi': (),
+    'muc_chien': (),
+    'sui_cao': (),
+    'pizza': (),
+    'sushi': (),
+    'sashimi': (),
+    'ramen': (),
+    'hot_dog': (),
+    'sandwich': (),
+    'pancake': (),
+    'banh_waffle': (),
+    'banh_donut': (),
+    'banh_kem': (),
+    'kem': (),
 }
 assert set(DISH_PARTS) == set(DISHES)
+# 1.5 dishes costed by their base row alone (ức gà, sushi…): chicken, rice or
+# fish is on the photo but not in the recipe, so these photos teach the
+# component output nothing rather than "no chicken" (contract §2).
+NO_COMPONENT_LABELS = {d for d in DISHES[PREVIOUS_DISHES:] if not DISH_PARTS[d]}
 DISH_INDEX = {code: i for i, code in enumerate(OUTPUTS)}
 COMP_INDEX = {code: i for i, code in enumerate(COMPONENTS)}
 
@@ -335,6 +446,44 @@ CLASS_ALIASES = {
     'ca_loc_kho': 'ca_kho',
     'che_thai': 'che',
     'che_buoi': 'che',
+    # Food-101 (pizza, sushi, sashimi, ramen, hot_dog and hamburger are
+    # already app codes; its other classes become "khac").
+    'steak': 'bo_bit_tet',
+    'filet_mignon': 'bo_bit_tet',
+    'prime_rib': 'bo_bit_tet',
+    'omelette': 'trung_chien',
+    'spaghetti_bolognese': 'mi_y',
+    'spaghetti_carbonara': 'mi_y',
+    'spring_rolls': 'cha_gio',
+    'chicken_wings': 'ga_ran',
+    'grilled_salmon': 'ca_hoi',
+    'fried_calamari': 'muc_chien',
+    'dumplings': 'sui_cao',
+    'gyoza': 'sui_cao',
+    'club_sandwich': 'sandwich',
+    'grilled_cheese_sandwich': 'sandwich',
+    'pulled_pork_sandwich': 'sandwich',
+    'lobster_roll_sandwich': 'sandwich',
+    'pancakes': 'pancake',
+    'waffles': 'banh_waffle',
+    'donuts': 'banh_donut',
+    'chocolate_cake': 'banh_kem',
+    'cheesecake': 'banh_kem',
+    'red_velvet_cake': 'banh_kem',
+    'strawberry_shortcake': 'banh_kem',
+    'carrot_cake': 'banh_kem',
+    'cup_cakes': 'banh_kem',
+    'ice_cream': 'kem',
+    'fried_rice': 'com_chien',
+    'french_fries': 'khoai_tay_chien',
+    'caesar_salad': 'salad',
+    'greek_salad': 'salad',
+    'beet_salad': 'salad',
+    'caprese_salad': 'salad',
+    # Like an app dish but not one: left out rather than taught as "khac".
+    'frozen_yogurt': None,
+    'seaweed_salad': None,
+    'chicken_curry': 'ca_ri',
 }
 
 
@@ -399,6 +548,13 @@ VF_OBSERVED = set(VF_COMPONENT.values()) | {'banh_mi_o'}
 PROTEIN_BOXES = {'Ca', 'Tom', 'Dau hu', 'Thit kho', 'Thit nuong', 'Thit bo',
                  'Thit ga', 'Trung', 'Thit heo', 'Heo quay', 'Muc', 'Oc',
                  'Cua', 'Long heo', 'Cha'}
+# Boxes also cut out as a photo of that food on its own (1.5). Greens count
+# only on a cơm phần plate: next to phở or bún they are raw herbs.
+VF_CROPS = {'Com': 'com_trang', 'Dau hu': 'dau_hu_chien', 'Cha gio': 'cha_gio',
+            'Rau': 'rau_xao'}
+VF_CROP_ONLY_ON = {'Rau': {'com_phan'}}
+CROP_MIN_SIDE = 0.2   # smaller boxes, as a share of the photo, are too blurry
+CROP_MARGIN = 0.08    # a little of the plate around the box
 
 
 def vf_resolve(dish, names):
@@ -426,6 +582,29 @@ def vf_resolve(dish, names):
         observed.add(code)
     return present, observed
 
+
+# MyFood: mask value → its class (1 is food it left unnamed), and the dish
+# each class is in the app. Brazilian beans are not an app dish.
+MYFOOD_CLASSES = {2: 'apple', 3: 'bean', 4: 'boiled_egg', 5: 'chicken_breast',
+                  6: 'rice', 7: 'salad', 8: 'spaghetti', 9: 'fried_egg',
+                  10: 'steak'}
+MYFOOD_DISH = {'apple': 'tao', 'bean': 'khac', 'boiled_egg': 'trung_luoc',
+               'chicken_breast': 'uc_ga', 'rice': 'com_trang', 'salad': 'salad',
+               'spaghetti': 'mi_y', 'fried_egg': 'trung_op',
+               'steak': 'bo_bit_tet'}
+# The app's photo labels (contract §5): one food eaten on its own is the
+# dish that means the same, if there is one.
+OWN_SINGLE = {'com': 'com_trang', 'trung_kho': 'trung_luoc',
+              'trung_op_la': 'trung_op', 'dau_hu': 'dau_hu_chien',
+              'rau_nau': 'rau_xao', 'ga_chien': 'ga_ran'}
+
+
+def sure_parts(dish):
+    """The components a photo of [dish] surely shows: those of a one-part
+    recipe (plain rice is rice)."""
+    parts = DISH_PARTS.get(dish, ())
+    return set(parts) if len(parts) == 1 else set()
+
 # %% [markdown]
 # ## Collect every photo
 
@@ -434,6 +613,7 @@ import csv
 import hashlib
 import random
 
+import numpy as np
 from PIL import Image
 import time
 from collections import Counter, defaultdict
@@ -446,25 +626,40 @@ GENERIC_FOLDERS = {'images', 'image', 'imgs', 'img', 'photos', 'pictures',
                    'val', 'valid', 'validation'}
 
 
+def top_of(path):
+    """INPUT_ROOT or EXTRA_ROOT, whichever holds [path] most closely."""
+    roots = [r for r in (INPUT_ROOT, EXTRA_ROOT)
+             if path == r or path.startswith(r.rstrip(os.sep) + os.sep)]
+    return max(roots, key=len) if roots else INPUT_ROOT
+
+
 def class_folder(folder):
     """The nearest folder name above the photos that is not generic, e.g.
     'goi_cuon' for 20FoodVN/goi_cuon/images/1.jpg."""
-    for name in reversed(os.path.relpath(folder, INPUT_ROOT).split(os.sep)):
+    for name in reversed(os.path.relpath(folder, top_of(folder)).split(os.sep)):
         if normalize(name) not in GENERIC_FOLDERS:
             return name
     return os.path.basename(folder)
 
 
 random.seed(SEED)
-samples = []   # dicts: path, dish, present (set), observed (set), source
+samples = []   # dicts: path, box, dish, present (set), observed (set), source
 skipped = Counter()
 
 
-def add(path, dish, source, present=(), observed=()):
+def add(path, dish, source, present=(), observed=(), box=None):
+    """[box]: (left, top, right, bottom) as shares of the photo, to train on
+    that part only."""
     # Photos are opened later, only for the ones kept; the small JPEG copies
     # made then also cover WebP, which TensorFlow cannot decode.
-    samples.append({'path': path, 'dish': dish, 'source': source,
+    samples.append({'path': path, 'box': box, 'dish': dish, 'source': source,
                     'present': set(present), 'observed': set(observed)})
+
+
+def padded(left, top, right, bottom):
+    m = CROP_MARGIN
+    return (max(0.0, left - m * (right - left)), max(0.0, top - m * (bottom - top)),
+            min(1.0, right + m * (right - left)), min(1.0, bottom + m * (bottom - top)))
 
 
 def is_detection_root(folder):
@@ -495,21 +690,29 @@ def load_vietfood67(root, source):
                 image_files.setdefault(rel, os.path.join(folder, name))
     stage(f'{source}: {len(image_files)} images listed')
 
-    def box_names(label_path):
-        names = set()
+    def read_boxes(label_path):
+        """[(name, (left, top, right, bottom))] of one YOLO label file."""
+        boxes = []
         with open(label_path) as f:
             for line in f:
                 parts = line.split()
-                if parts and parts[0].isdigit() and int(parts[0]) < len(VF_NAMES):
-                    names.add(VF_NAMES[int(parts[0])])
-        return names
+                if (len(parts) >= 5 and parts[0].isdigit() and
+                        int(parts[0]) < len(VF_NAMES)):
+                    try:
+                        cx, cy, w, h = (float(p) for p in parts[1:5])
+                    except ValueError:
+                        continue
+                    boxes.append((VF_NAMES[int(parts[0])],
+                                  (cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)))
+        return boxes
 
-    all_names = []
+    all_boxes = []
     with ThreadPoolExecutor(32) as pool:
         for start in range(0, len(label_paths), 5000):
-            all_names += pool.map(box_names, label_paths[start:start + 5000])
-            stage(f'{source}: {len(all_names)} of {len(label_paths)} labels read')
-    for label_path, names in zip(label_paths, all_names):
+            all_boxes += pool.map(read_boxes, label_paths[start:start + 5000])
+            stage(f'{source}: {len(all_boxes)} of {len(label_paths)} labels read')
+    for label_path, boxes in zip(label_paths, all_boxes):
+        names = {name for name, _ in boxes}
         rel = os.path.relpath(label_path, os.path.join(root, 'labels'))
         image = image_files.get(os.path.splitext(rel)[0])
         if image is None:
@@ -518,9 +721,9 @@ def load_vietfood67(root, source):
         dishes = {VF_DISH[n] for n in names - VF_SIDES if n in VF_DISH} - {None}
         sides = {VF_DISH[n] for n in names & VF_SIDES}
         if len(dishes) > 1:
+            dish = None
             skipped['vf67: several dishes'] += 1
-            continue
-        if dishes:
+        elif dishes:
             dish = dishes.pop()
         elif 'Com' in names and names & PROTEIN_BOXES:
             dish = 'com_phan'   # rice with mains and no dish box
@@ -529,10 +732,86 @@ def load_vietfood67(root, source):
         elif USE_OTHER and names & VF_OTHER:
             dish = OTHER        # a dish the app does not have
         else:
+            dish = None
             skipped['vf67: no app dish'] += 1
+        # The largest box of each food that can be eaten on its own.
+        largest = {}
+        for name, (left, top, right, bottom) in boxes:
+            if (name in VF_CROPS and dish in VF_CROP_ONLY_ON.get(name, {dish}) and
+                    min(right - left, bottom - top) >= CROP_MIN_SIDE):
+                area = (right - left) * (bottom - top)
+                if area > largest.get(name, (0, None))[0]:
+                    largest[name] = (area, (left, top, right, bottom))
+        for name, (_, box) in largest.items():
+            crop_dish = VF_CROPS[name]
+            parts = sure_parts(crop_dish)
+            add(image, crop_dish, source, parts, parts, box=padded(*box))
+        if dish is None:
             continue
         present, observed = vf_resolve(dish, names)
         add(image, dish, source, present, observed)
+
+
+def is_myfood_root(folder):
+    return all(os.path.isdir(os.path.join(folder, name))
+               for name in ('train', 'train_ann'))
+
+
+def load_myfood(root, source):
+    """MyFood: each photo's mask cut into one photo per food on it."""
+    for split in ('train', 'val', 'test'):
+        folder = os.path.join(root, split)
+        if not os.path.isdir(folder):
+            continue
+        for name in sorted(os.listdir(folder)):
+            stem, ext = os.path.splitext(name)
+            mask_path = os.path.join(root, f'{split}_ann', stem + '.png')
+            if ext.lower() not in IMAGE_EXT or not os.path.exists(mask_path):
+                skipped['myfood: no mask'] += 1
+                continue
+            with Image.open(mask_path) as mask:
+                values = np.asarray(mask)
+            # Palette and grey masks hold the class itself, RGB(A) ones in red.
+            if values.ndim == 3:
+                values = values[..., 0]
+            height, width = values.shape
+            for value, food in MYFOOD_CLASSES.items():
+                ys, xs = np.nonzero(values == value)
+                # Specks of a food the photo is not about.
+                if len(ys) < 0.03 * values.size:
+                    continue
+                dish = MYFOOD_DISH[food]
+                if dish == OTHER and not USE_OTHER:
+                    continue
+                box = (xs.min() / width, ys.min() / height,
+                       (xs.max() + 1) / width, (ys.max() + 1) / height)
+                add(os.path.join(folder, name), dish, source, sure_parts(dish),
+                    sure_parts(dish), box=padded(*box))
+
+
+def is_own_photos(folder, files):
+    """A photo zip exported from the app (contract §5)."""
+    if 'index.csv' not in files:
+        return False
+    with open(os.path.join(folder, 'index.csv'), encoding='utf-8') as f:
+        return 'model_guess' in f.readline()
+
+
+def load_own_photos(folder, source):
+    with open(os.path.join(folder, 'index.csv'), encoding='utf-8') as f:
+        for row in csv.DictReader(f):
+            label = row['label'].strip()
+            if label.startswith('single_'):
+                dish = OWN_SINGLE.get(label[len('single_'):])
+            elif label.startswith('new_'):
+                dish = OTHER if USE_OTHER else None
+            else:
+                dish = label if label in DISH_INDEX else None
+            if dish is None:
+                skipped[f'own photos: {label}'] += 1
+                continue
+            add(os.path.join(folder, row['file']), dish, source,
+                sure_parts(dish), sure_parts(dish))
 
 
 def load_team_labels(path, source):
@@ -557,14 +836,15 @@ def load_team_labels(path, source):
 def source_name(path):
     """The dataset a path belongs to. Kaggle mounts a dataset either at
     /kaggle/input/<name> or at /kaggle/input/datasets/<owner>/<name>."""
-    parts = os.path.relpath(path, INPUT_ROOT).split(os.sep)
+    parts = os.path.relpath(path, top_of(path)).split(os.sep)
     if parts[0] == 'datasets' and len(parts) > 2:
         return parts[2]
     return parts[0]
 
 
 # Each folder is handled by the first rule that matches: the team's
-# labels.csv, a detection dataset (images/ + labels/), or class folders.
+# labels.csv, the app's photo zip (index.csv), a detection dataset (images/
+# + labels/), MyFood (train/ + train_ann/), or class folders.
 handled = []   # roots already loaded, whose subfolders are skipped below
 announced = set()
 collect_started = time.time()
@@ -580,7 +860,9 @@ def announce(source, folder):
 
 # Kaggle may mount datasets as symlinks, which os.walk skips by default.
 visited = set()   # real paths: a symlinked dataset is read once, never in a loop
-for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
+walk = [step for top in dict.fromkeys([INPUT_ROOT, EXTRA_ROOT])
+        for step in [os.walk(top, followlinks=True)]]
+for folder, dirs, files in (entry for step in walk for entry in step):
     dirs.sort()
     real = os.path.realpath(folder)
     if real in visited:
@@ -593,6 +875,16 @@ for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
     if 'labels.csv' in files:
         announce(source_name(folder), folder)
         load_team_labels(os.path.join(folder, 'labels.csv'), source_name(folder))
+        handled.append(folder)
+        dirs[:] = []
+    elif is_own_photos(folder, files):
+        announce(source_name(folder), folder)
+        load_own_photos(folder, source_name(folder))
+        handled.append(folder)
+        dirs[:] = []
+    elif is_myfood_root(folder):
+        announce(source_name(folder), folder)
+        load_myfood(folder, source_name(folder))
         handled.append(folder)
         dirs[:] = []
     elif is_detection_root(folder):
@@ -657,11 +949,22 @@ import numpy as np
 from PIL import Image, ImageOps
 
 
-def average_hash(path):
+def crop(im, box):
+    """[im] cut to [box] (shares of the photo), or [im] when box is None."""
+    if box is None:
+        return im
+    left, top, right, bottom = box
+    return im.crop((round(left * im.width), round(top * im.height),
+                    max(round(left * im.width) + 1, round(right * im.width)),
+                    max(round(top * im.height) + 1, round(bottom * im.height))))
+
+
+def average_hash(path, box=None):
     try:
         with Image.open(path) as im:
-            im.draft('L', (64, 64))   # JPEG: decode at a fraction of the size
-            small = im.convert('L').resize((8, 8), Image.BILINEAR)
+            if box is None:
+                im.draft('L', (64, 64))   # JPEG: decode at a fraction of the size
+            small = crop(im, box).convert('L').resize((8, 8), Image.BILINEAR)
             pixels = np.asarray(small, dtype=np.float32).flatten().tolist()
     except Exception:
         return None
@@ -681,19 +984,22 @@ SHRUNK_DIR = os.environ.get('SHRUNK_DIR', '/tmp/shrunk')
 os.makedirs(SHRUNK_DIR, exist_ok=True)
 
 
-def shrink(path):
-    """A small upright JPEG copy of [path] (reused if already made), or None
-    when the photo cannot be read."""
-    digest = hashlib.md5(path.encode('utf-8')).hexdigest()
+def shrink(path, box=None):
+    """A small upright JPEG copy of [path], or of its [box], reused if already
+    made; None when the photo cannot be read."""
+    key = path if box is None else f'{path}|' + ','.join(f'{v:.4f}' for v in box)
+    digest = hashlib.md5(key.encode('utf-8')).hexdigest()
     target = os.path.join(SHRUNK_DIR, f'{digest}.jpg')
     if os.path.exists(target):
         return target
     try:
         with Image.open(path) as im:
             # JPEG: decode straight at a fraction of the size, much faster.
-            im.draft('RGB', (SHRUNK_SIDE, SHRUNK_SIDE))
+            if box is None:
+                im.draft('RGB', (SHRUNK_SIDE, SHRUNK_SIDE))
             # Upright like the app's photos, which follow EXIF orientation.
-            im = ImageOps.exif_transpose(im).convert('RGB')
+            # Boxes were drawn on the upright photo too.
+            im = crop(ImageOps.exif_transpose(im), box).convert('RGB')
             scale = SHRUNK_SIDE / min(im.size)
             if scale < 1:
                 im = im.resize((max(1, round(im.width * scale)),
@@ -705,10 +1011,10 @@ def shrink(path):
     return target
 
 
-def prepare(path):
+def prepare(s):
     """(small copy, hash) for one photo; (None, None) when it cannot be read."""
-    h = average_hash(path)
-    file = shrink(path) if h is not None else None
+    h = average_hash(s['path'], s['box'])
+    file = shrink(s['path'], s['box']) if h is not None else None
     return (file, h) if file is not None else (None, None)
 
 
@@ -716,7 +1022,7 @@ def prepare(path):
 # gets the same split. Each dish is read in that order only until it is full,
 # so the cap also saves opening photos that would be thrown away. The
 # datasets sit on a network disk, hence the threads.
-samples.sort(key=lambda s: s['path'])
+samples.sort(key=lambda s: (s['path'], s['box'] or ()))
 pending = defaultdict(list)
 for s in samples:
     pending[s['dish']].append(s)
@@ -736,8 +1042,7 @@ with ThreadPoolExecutor(32) as pool:
             chunk = items[start:start + size]
             start += size
             opened += len(chunk)
-            for s, (file, h) in zip(chunk, pool.map(
-                    prepare, [s['path'] for s in chunk])):
+            for s, (file, h) in zip(chunk, pool.map(prepare, chunk)):
                 if len(kept) >= cap:
                     break
                 if file is None:
@@ -763,10 +1068,11 @@ unique_train = list(train)
 with open(os.path.join(OUTPUT_DIR, 'splits.csv'), 'w', newline='',
           encoding='utf-8') as f:
     writer = csv.writer(f)
-    writer.writerow(['file', 'split', 'dish', 'source'])
+    writer.writerow(['file', 'box', 'split', 'dish', 'source'])
     for split, items in (('train', train), ('val', val), ('test', test)):
         for s in items:
-            writer.writerow([s['path'], split, s['dish'], s['source']])
+            box = ' '.join(f'{v:.4f}' for v in s['box']) if s['box'] else ''
+            writer.writerow([s['path'], box, split, s['dish'], s['source']])
 
 if MIN_TRAIN_PER_DISH:
     # After splits.csv, which lists each photo once.
@@ -820,7 +1126,7 @@ def targets(s):
     labels = np.zeros(N_COMP, np.float32)
     mask = np.zeros(N_COMP, np.float32)
     absent = set()
-    if s['dish'] in DISH_PARTS:
+    if s['dish'] in DISH_PARTS and s['dish'] not in NO_COMPONENT_LABELS:
         # Off the dish's recipe: known absent (unless a box shows it).
         absent = set(COMPONENTS) - set(DISH_PARTS[s['dish']]) - set(s['present'])
     for c in s['present']:
@@ -919,6 +1225,68 @@ with strategy.scope():
     model, base = build_model()
 
 
+def find_warm_start():
+    """Paths that may hold the 1.4 model, most likely first."""
+    if WARM_START:
+        return [WARM_START]
+    found = []
+    if ON_COLAB and SAVE_TO_DRIVE:
+        found.append(os.path.join(COLAB_ROOT, 'drive', 'MyDrive',
+                                  'macrorunner_train',
+                                  f'{BACKBONE}_finetune', 'checkpoint.keras'))
+    # Notebook outputs and small datasets sit at most three folders deep.
+    for depth in range(4):
+        found += sorted(glob.glob(os.path.join(
+            INPUT_ROOT, *['*'] * depth, '*.keras')))
+    return [p for p in dict.fromkeys(found) if os.path.exists(p) and
+            os.path.dirname(os.path.abspath(p)) != os.path.abspath(OUTPUT_DIR)
+            and os.path.basename(p) != 'last.keras']
+
+
+def warm_start():
+    """Copies the 1.4 model into [model]: the backbone and the component
+    output as they are, the dish output column by column. The 65 old dishes
+    keep their place and "khac" moves to the end; the new dishes start from
+    fresh weights. Returns the file used, or None."""
+    for path in find_warm_start():
+        try:
+            old = keras.models.load_model(
+                path, custom_objects={'masked_bce': masked_bce}, compile=False)
+        except Exception as error:
+            print('Not a model:', path, error)
+            continue
+        old_dish = old.get_layer('dish')
+        if (old_dish.units != PREVIOUS_DISHES + 1 or
+                old.input_shape[1:3] != (IMG, IMG)):
+            print(f'Skipped {path}: {old_dish.units} dish outputs at '
+                  f'{old.input_shape[1:3]}, not {PREVIOUS_DISHES + 1} at {IMG}')
+            continue
+        old_base = next(l for l in old.layers if isinstance(l, keras.Model))
+        base.set_weights(old_base.get_weights())
+        model.get_layer('components').set_weights(
+            old.get_layer('components').get_weights())
+        kernel, bias = (w.copy() for w in model.get_layer('dish').get_weights())
+        old_kernel, old_bias = old_dish.get_weights()
+        kernel[:, :PREVIOUS_DISHES] = old_kernel[:, :PREVIOUS_DISHES]
+        bias[:PREVIOUS_DISHES] = old_bias[:PREVIOUS_DISHES]
+        if USE_OTHER:
+            kernel[:, -1], bias[-1] = old_kernel[:, -1], old_bias[-1]
+        # New dishes start as likely as an average old one.
+        bias[PREVIOUS_DISHES:len(DISHES)] = old_bias[:PREVIOUS_DISHES].mean()
+        model.get_layer('dish').set_weights([kernel, bias])
+        del old
+        stage(f'continuing from {path}')
+        return path
+    if not QUICK_TEST:
+        raise RuntimeError(
+            'EXPERIMENT is "continue" but no 1.4 model (checkpoint.keras with '
+            f'{PREVIOUS_DISHES + 1} dish outputs) was found. Add it (see the '
+            'top of the notebook), set WARM_START, or set EXPERIMENT to '
+            '"finetune" to train from ImageNet.')
+    print('No 1.4 model found: the quick test starts from ImageNet.')
+    return None
+
+
 def compile_model(learning_rate, weight_decay=0.0):
     with strategy.scope():
         optimizer = (keras.optimizers.AdamW(learning_rate,
@@ -958,6 +1326,8 @@ def save_progress(phase, epoch, logs):
     with open(PROGRESS + '.tmp', 'w') as f:
         json.dump({'phase': phase, 'epochs_done': epoch + 1, 'best': best,
                    'backbone': BACKBONE, 'recipe': RECIPE,
+                   'experiment': EXPERIMENT, 'contract': CONTRACT_VERSION,
+                   'warm_start': warm_started,
                    'quick_test': QUICK_TEST,
                    'train_minutes': round(minutes, 1)}, f)
     os.replace(PROGRESS + '.tmp', PROGRESS)
@@ -1073,6 +1443,7 @@ import time
 
 started = time.time()
 earlier_minutes = 0.0
+warm_started = None   # the 1.4 model this run continues from
 # A session cut off during fine-tuning (Colab's free GPU time, a closed tab)
 # continues from its last epoch when the notebook runs again with the same
 # settings: last.keras holds the model and the optimizer, learning-rate
@@ -1094,7 +1465,13 @@ if not os.path.exists(PROGRESS):
         glob.glob(os.path.join(INPUT_ROOT, '*', '*', '*', 'progress.json')))
     for path in found:
         folder = os.path.dirname(path)
-        if os.path.exists(os.path.join(folder, 'last.keras')):
+        try:
+            with open(path) as f:
+                # Before 1.5 progress had no experiment: those were finetune.
+                same = json.load(f).get('experiment', 'finetune') == EXPERIMENT
+        except (OSError, ValueError):
+            same = False
+        if same and os.path.exists(os.path.join(folder, 'last.keras')):
             print('Previous run found in', folder)
             for target in RESUME_FILES:
                 source = os.path.join(folder, os.path.basename(target))
@@ -1102,18 +1479,20 @@ if not os.path.exists(PROGRESS):
                     shutil.copy(source, target)
             break
 progress = read_progress()
-resume = (EXPERIMENT == 'finetune' and progress.get('phase') == 'fine' and
-          os.path.exists(LAST) and
-          all(progress.get(k) == v for k, v in (
-              ('backbone', BACKBONE), ('recipe', RECIPE),
-              ('quick_test', QUICK_TEST))) and
+progress.setdefault('experiment', 'finetune')   # saved before 1.5
+progress.setdefault('contract', '1.4')
+SAME_RUN = (('backbone', BACKBONE), ('recipe', RECIPE),
+            ('quick_test', QUICK_TEST), ('experiment', EXPERIMENT),
+            ('contract', CONTRACT_VERSION))
+resume = (EXPERIMENT in ('finetune', 'continue') and
+          progress.get('phase') == 'fine' and os.path.exists(LAST) and
+          all(progress.get(k) == v for k, v in SAME_RUN) and
           progress.get('epochs_done', 0) < EPOCHS_FINE)
 if not resume and progress.get('phase') == 'fine':
     # Fine-tuning progress that cannot be continued: never delete it and
     # start over silently, hours of training may sit in last.keras.
-    differ = [f"{k}: saved {progress.get(k)!r}, now {v!r}" for k, v in (
-        ('backbone', BACKBONE), ('recipe', RECIPE),
-        ('quick_test', QUICK_TEST)) if progress.get(k) != v]
+    differ = [f"{k}: saved {progress.get(k)!r}, now {v!r}"
+              for k, v in SAME_RUN if progress.get(k) != v]
     if progress.get('epochs_done', 0) >= EPOCHS_FINE:
         differ.append(f"all {EPOCHS_FINE} fine-tuning epochs are done")
     if not os.path.exists(LAST):
@@ -1126,6 +1505,7 @@ if resume:
     stage(f"resuming fine-tuning after epoch {progress['epochs_done']} "
           f"(best val {progress['best']:.3f})")
     earlier_minutes = progress.get('train_minutes', 0.0)
+    warm_started = progress.get('warm_start')
     with strategy.scope():
         model = keras.models.load_model(
             LAST, custom_objects={'masked_bce': masked_bce})
@@ -1141,11 +1521,13 @@ else:
     for stale in (PROGRESS, LAST):   # a fresh run
         if os.path.exists(stale):
             os.remove(stale)
+    if CONTINUE:
+        warm_started = warm_start()
     base.trainable = False
     compile_model(1e-3)
     model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS_HEAD,
               callbacks=callbacks('head'))
-    if EXPERIMENT == 'finetune':
+    if EXPERIMENT in ('finetune', 'continue'):
         base.trainable = True
         cut = 0 if FULL else int(len(base.layers) * (1 - UNFREEZE_FRACTION))
         for layer in base.layers[:cut]:
@@ -1157,8 +1539,9 @@ else:
             # A short warm-up, then cosine decay to zero over the epochs.
             steps = max(1, -(-len(train) // BATCH)) * EPOCHS_FINE
             warmup = max(1, steps // 20)
+            # Continuing: a third of the rate, not to undo what 1.4 learned.
             compile_model(keras.optimizers.schedules.CosineDecay(
-                0.0, steps - warmup, warmup_target=3e-4,
+                0.0, steps - warmup, warmup_target=1e-4 if CONTINUE else 3e-4,
                 warmup_steps=warmup), weight_decay=1e-5)
         else:
             compile_model(1e-4)
@@ -1264,7 +1647,7 @@ thresholds = {
 }
 
 results = {'experiment': EXPERIMENT, 'backbone': BACKBONE, 'recipe': RECIPE,
-           'img': IMG, 'contract': CONTRACT_VERSION,
+           'img': IMG, 'contract': CONTRACT_VERSION, 'warm_start': warm_started,
            'quick_test': QUICK_TEST, 'train_minutes': round(train_minutes, 1),
            'finished': FINISHED,
            'epochs_fine_done': progress.get('epochs_done'),
@@ -1439,7 +1822,8 @@ card = f"""# MODEL_CARD – food_v1
 
 - Ngày train: {date.today().isoformat()}
 - Contract: {CONTRACT_VERSION} ({len(DISHES)} món{' + lớp khac' if USE_OTHER else ''}, {N_COMP} thành phần)
-- Kiến trúc: {BACKBONE} ({IMG}×{IMG}), thí nghiệm `{EXPERIMENT}`, cách train `{RECIPE}`{' (CHẠY THỬ, KHÔNG DÙNG THẬT)' if QUICK_TEST else ''}
+- Kiến trúc: {BACKBONE} ({IMG}×{IMG}), thí nghiệm `{EXPERIMENT}`, cách train `{RECIPE}`{' (CHẠY THỬ, KHÔNG DÙNG THẬT)' if QUICK_TEST else ''}{f'''
+- Train tiếp từ: model contract 1.4 ({os.path.basename(warm_started)})''' if warm_started else ''}
 - Dữ liệu: {len(train)} train / {len(val)} val / {len(test)} test
 - Nguồn ảnh: {', '.join(f'{k}: {v}' for k, v in sources.most_common())}
 - Kích thước: {size_mb:.1f} MB (float16)
@@ -1459,7 +1843,10 @@ component_dishes: {', '.join(component_dishes)}
 ## Hạn chế
 - Tập test chưa có ảnh tự chụp: contract yêu cầu ít nhất 30%.
 - Nhãn thành phần chỉ có ở ảnh VietFood67 và ảnh tự gán; các ảnh còn lại
-  chỉ dạy phần đoán món.
+  chỉ dạy phần đoán món.{'''
+- Train tiếp từ model 1.4, nhưng ảnh chia lại vì có thêm bộ ảnh: một số ảnh
+  test lần này model 1.4 đã thấy khi train, nên điểm test có thể cao hơn
+  thực tế.''' if warm_started else ''}
 """
 with open(os.path.join(OUTPUT_DIR, 'MODEL_CARD.md'), 'w', encoding='utf-8') as f:
     f.write(card)

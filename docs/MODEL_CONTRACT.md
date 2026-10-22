@@ -5,7 +5,7 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.4**
+- `contract_version`: **1.5**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
@@ -17,7 +17,12 @@ nào thì phải báo người kia, tăng `contract_version` và ghi vào
   - 1.4: thêm 13 món đã có ảnh trong các bộ công khai nhưng trước đó bị gom
     vào `khac` (món 53–65); `khac` còn lẩu và gỏi ngó sen. Kích thước ảnh
     vào do model quyết định, app đọc từ file `.tflite` (mục 6).
-- Cập nhật: 2026-10-20
+  - 1.5: thêm 26 món ăn hằng ngày (món 66–91): món lẻ như cơm trắng, ức gà,
+    trứng, và món quốc tế phổ biến như pizza, sushi, ramen. Ảnh lấy từ
+    Food-101, MyFood và các khung trong VietFood67; ảnh người dùng tự lưu
+    trong app cũng dùng để train (mục 5). Model 1.5 train tiếp từ model
+    1.4: 65 món cũ giữ nguyên thứ tự, món mới nối vào sau.
+- Cập nhật: 2026-10-22
 
 ---
 
@@ -36,12 +41,15 @@ Quy tắc đặt mã: chữ thường, không dấu, nối bằng `_`. Mã dùng
 nhãn trong `labels.csv`, thứ tự trong `dishes.txt` và khoá trong bảng dinh
 dưỡng của app.
 
-Gồm **52 món**:
+Gồm **91 món**:
 - món 1–20 là danh sách ban đầu, phần lớn có trong bộ ảnh 30VNFoods;
 - món 21–40 lấy theo bộ ảnh VinaFood21 (chỉ trùng `bo_kho` với danh sách
   ban đầu);
-- món 41–52 là các món phổ biến có nhiều ảnh trong 30VNFoods, 20FoodVN và
-  VietFood67.
+- món 41–65 là các món phổ biến có nhiều ảnh trong 30VNFoods, 20FoodVN và
+  VietFood67;
+- món 66–91 là món ăn hằng ngày, cả món lẻ (cơm trắng, ức gà, trứng) lẫn
+  món quốc tế. Ảnh lấy từ Food-101, MyFood và các khung trong VietFood67
+  (cắt riêng phần cơm, rau, đậu hũ, chả giò trên dĩa).
 
 Model có thêm một đầu ra cuối cùng `khac` (món không có trong app), không
 nằm trong bảng này; xem mục 6.
@@ -49,12 +57,18 @@ nằm trong bảng này; xem mục 6.
 Món nào chỉ gồm một thứ (bánh tét, bắp nướng…) thì không cần gán nhãn thành
 phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 
+Món 66–91 chỉ có dòng nền (ức gà, pizza…) thì ảnh của chúng **không** dạy
+đầu ra thành phần: ức gà có thịt gà, sushi có cơm và cá, nhưng dinh dưỡng đã
+nằm ở dòng nền nên các thành phần đó không có trong công thức món. Món mới
+có công thức bằng thành phần (cơm trắng là `com`, trứng luộc là
+`trung_kho`…) thì dạy như các món cũ.
+
 | # | Mã | Tên hiển thị (vi) | Ghi chú |
 |---|---|---|---|
 | 1 | `com_tam` | Cơm tấm | |
 | 2 | `com_phan` | Cơm phần (cơm + món mặn tự chọn) | Thành phần thay đổi nhiều, dựa hẳn vào đầu ra `components` |
 | 3 | `com_ga` | Cơm gà | |
-| 4 | `com_chien` | Cơm chiên | |
+| 4 | `com_chien` | Cơm chiên | Từ v1.5 thêm Food-101 (fried rice) |
 | 5 | `pho_bo` | Phở bò | |
 | 6 | `pho_ga` | Phở gà | |
 | 7 | `bun_bo_hue` | Bún bò Huế | |
@@ -77,7 +91,7 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 | 24 | `banh_hoi` | Bánh hỏi | VinaFood21 |
 | 25 | `thit_kho_trung` | Thịt kho trứng | VinaFood21; thành phần `thit_kho`, `trung_kho` |
 | 26 | `banh_can` | Bánh căn | VinaFood21 |
-| 27 | `ca_ri` | Cà ri gà | VinaFood21 |
+| 27 | `ca_ri` | Cà ri gà | VinaFood21; từ v1.5 thêm Food-101 (chicken curry) |
 | 28 | `bap_nuong` | Bắp nướng | VinaFood21 |
 | 29 | `banh_trang_tron` | Bánh tráng trộn | VinaFood21 |
 | 30 | `hoanh_thanh_nuoc` | Hoành thánh nước | VinaFood21 |
@@ -110,12 +124,38 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 | 57 | `nem_chua` | Nem chua | 30VNFoods |
 | 58 | `banh_pia` | Bánh pía | 30VNFoods |
 | 59 | `bun_ca` | Bún cá | 20FoodVN (bún cá), VietFood67 (bún chả cá) |
-| 60 | `khoai_tay_chien` | Khoai tây chiên | VietFood67 |
-| 61 | `salad` | Salad | VietFood67 |
-| 62 | `hamburger` | Hamburger | VietFood67 |
+| 60 | `khoai_tay_chien` | Khoai tây chiên | VietFood67, Food-101 (french fries) |
+| 61 | `salad` | Salad | VietFood67, Food-101 (caesar, greek, beet, caprese salad), MyFood (salad) |
+| 62 | `hamburger` | Hamburger | VietFood67, Food-101 (hamburger) |
 | 63 | `nui_xao_bo` | Nui xào bò | VietFood67 |
 | 64 | `sup_cua` | Súp cua | VietFood67 |
 | 65 | `nom_hoa_chuoi` | Nộm hoa chuối | VietFood67 |
+| 66 | `com_trang` | Cơm trắng | MyFood (rice), VietFood67 (khung `Com`) |
+| 67 | `uc_ga` | Ức gà | MyFood (chicken breast) |
+| 68 | `trung_luoc` | Trứng luộc | MyFood (boiled egg) |
+| 69 | `trung_op` | Trứng ốp la | MyFood (fried egg) |
+| 70 | `trung_chien` | Trứng chiên / ốp lết | Food-101 (omelette) |
+| 71 | `bo_bit_tet` | Bò bít tết | Food-101 (steak, filet mignon, prime rib), MyFood (steak) |
+| 72 | `mi_y` | Mì Ý | Food-101 (spaghetti bolognese, carbonara), MyFood (spaghetti) |
+| 73 | `tao` | Táo | MyFood (apple) |
+| 74 | `dau_hu_chien` | Đậu hũ chiên / sốt cà | VietFood67 (khung `Dau hu`) |
+| 75 | `rau_xao` | Rau luộc / xào | VietFood67 (khung `Rau` trên dĩa cơm phần) |
+| 76 | `cha_gio` | Chả giò | Food-101 (spring rolls), VietFood67 (khung `Cha gio`) |
+| 77 | `ga_ran` | Gà rán / cánh gà chiên | Food-101 (chicken wings) |
+| 78 | `ca_hoi` | Cá hồi áp chảo / nướng | Food-101 (grilled salmon) |
+| 79 | `muc_chien` | Mực chiên | Food-101 (fried calamari) |
+| 80 | `sui_cao` | Sủi cảo / há cảo hấp | Food-101 (dumplings, gyoza) |
+| 81 | `pizza` | Pizza | Food-101 (pizza) |
+| 82 | `sushi` | Sushi | Food-101 (sushi) |
+| 83 | `sashimi` | Sashimi | Food-101 (sashimi) |
+| 84 | `ramen` | Ramen | Food-101 (ramen) |
+| 85 | `hot_dog` | Hot dog | Food-101 (hot dog) |
+| 86 | `sandwich` | Sandwich | Food-101 (club, grilled cheese, pulled pork, lobster roll sandwich) |
+| 87 | `pancake` | Bánh pancake | Food-101 (pancakes) |
+| 88 | `banh_waffle` | Bánh waffle | Food-101 (waffles) |
+| 89 | `banh_donut` | Bánh donut | Food-101 (donuts) |
+| 90 | `banh_kem` | Bánh kem / bánh ngọt | Food-101 (chocolate cake, cheesecake, red velvet cake, strawberry shortcake, carrot cake, cupcakes) |
+| 91 | `kem` | Kem | Food-101 (ice cream) |
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
@@ -233,6 +273,20 @@ img_0002.jpg,pho_bo,banh_pho|bo|rau_song
   30% ảnh tự chụp** và được người kiểm tra lại toàn bộ.
 - Có dùng AI hỗ trợ gán nhãn thì ghi vào `SOURCES.md` và báo cáo.
 
+**Ảnh người dùng tự lưu trong app** (từ v1.5): bật "Lưu ảnh để train" trong
+Cài đặt thì mỗi lần ghi món bằng camera, app giữ một bản ảnh nhỏ (cạnh dài
+640 px) kèm món người dùng đã xác nhận. Nút xuất cho ra một file zip:
+```
+index.csv          file,label,name,model_guess,model_confidence,saved_at
+<nhãn>/<số>.jpg    ảnh, mỗi nhãn một thư mục
+```
+- `label` là mã món, hoặc `single_<mã thành phần>` khi người dùng ghi một
+  thứ ăn riêng, hoặc `new_<tên>` khi món không có trong app.
+- Notebook đổi `single_com` thành `com_trang`, `single_trung_kho` thành
+  `trung_luoc`… (món lẻ có cùng nghĩa); `new_<tên>` vào lớp `khac`.
+- `model_guess` là món model đoán lúc chụp: ảnh model đoán sai là ảnh
+  đáng train nhất.
+
 ## 6. Định dạng model đưa vào app
 Đặt trong `assets/models/`:
 ```
@@ -248,7 +302,7 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 | Tiền xử lý | App: cắt vuông ở giữa ảnh rồi resize về N×N (bilinear). **Việc chuẩn hoá pixel nằm trong model** (lớp `Rescaling`/preprocess), app không tự chuẩn hoá |
 | Đầu ra 1 `dish` | `float32 [1, số_món]`, softmax (tổng bằng 1) |
 | Đầu ra 2 `components` | `float32 [1, số_thành_phần]`, sigmoid (mỗi giá trị 0–1, độc lập) |
-| Lượng tử hoá | float16 |
+| Lượng tử hoá | float16 hoặc int8 (B3 từ v1.4 dùng int8) |
 | Kích thước | Mục tiêu ≤ 15 MB |
 | Tốc độ | Mục tiêu ≤ 300 ms mỗi ảnh trên điện thoại tầm trung |
 
@@ -262,8 +316,9 @@ Món có xác suất cao nhất dưới `0.5` thì app hiện top-3 cho người
 
 **Lớp `khac` (từ v1.3):** dòng cuối của `dishes.txt` là `khac`. Lớp này
 train bằng ảnh của các món không có trong app. Từ v1.4 đó là lẩu (món ăn
-chung nồi, không tính được khẩu phần một người) và gỏi ngó sen; nếu gắn
-thêm bộ ảnh khác, lớp nào không khớp món của app cũng vào `khac`.
+chung nồi, không tính được khẩu phần một người) và gỏi ngó sen; từ v1.5 có
+thêm các lớp Food-101 chưa có trong app (taco, lasagna…). Lớp nào của bộ
+ảnh khác không khớp món của app cũng vào `khac`.
 - `khac` không có dinh dưỡng và không hiện trong danh sách gợi ý.
 - `khac` từ `threshold_confident_dish` trở lên thì app báo "có thể món này
   chưa có trong app" và mở danh sách món cho người dùng chọn, không đoán bừa

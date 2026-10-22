@@ -1,14 +1,16 @@
-"""Builds a tiny fake copy of the four training datasets in Kaggle's
+"""Builds a tiny fake copy of the training datasets in Kaggle's
 /kaggle/input/datasets/<owner>/<slug> layout, enough for the notebook to run
-end to end on a CPU in a few minutes.
+end to end on a CPU in a few minutes: VinaFood21, 30VNFoods, 20FoodVN,
+VietFood67, Food-101, MyFood and a photo zip exported from the app.
 
     python tool/train/test/make_fake_input.py <folder>
 """
+import csv
 import os
 import random
 import sys
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 
 def photo(path, seed):
@@ -36,6 +38,10 @@ def make(root):
         'quandang/vietnamese-foods/Images/Train/Phở': 14,
         # Not an app dish: becomes "khac".
         'quandang/vietnamese-foods/Images/Train/Cao lầu': 14,
+        # Food-101: an app code, an alias, and "khac".
+        'kmader/food41/images/pizza': 14,
+        'kmader/food41/images/steak': 14,
+        'kmader/food41/images/apple_pie': 14,
     }
     for index, (folder, count) in enumerate(folders.items()):
         for i in range(count):
@@ -68,8 +74,40 @@ def make(root):
             os.makedirs(os.path.join(vf, 'labels/train'), exist_ok=True)
             with open(os.path.join(vf, 'labels/train', f'{kind}{i}.txt'),
                       'w') as f:
-                for c in ids:
-                    f.write(f'{c} 0.5 0.5 0.3 0.3\n')
+                # Side by side, so the crops of each box differ.
+                for j, c in enumerate(ids):
+                    f.write(f'{c} {0.2 + 0.2 * j:.2f} 0.5 0.3 0.4\n')
+    # MyFood: masks whose values are the food (6 rice, 5 chicken breast).
+    myfood = os.path.join(data, 'me/myfood/MyFood Dataset')
+    for split in ('train', 'val', 'test'):
+        os.makedirs(os.path.join(myfood, f'{split}_ann'), exist_ok=True)
+        for i in range(5):
+            image = os.path.join(myfood, split, f'lunch_{i}.png')
+            photo(image, 4000 + i)
+            with Image.open(image) as im:
+                size = im.size
+            mask = Image.new('RGBA', size, (0, 0, 0, 255))
+            draw = ImageDraw.Draw(mask)
+            draw.rectangle((0, 0, size[0] // 2, size[1] - 1), fill=(6, 6, 6, 255))
+            draw.rectangle((size[0] // 2 + 1, 0, size[0] - 1, size[1] // 2),
+                           fill=(5, 5, 5, 255))
+            mask.save(os.path.join(myfood, f'{split}_ann', f'lunch_{i}.png'))
+    # The app's photo export (contract §5).
+    own = os.path.join(data, 'me/my-photos')
+    rows = []
+    for k, label in enumerate(['pho_bo', 'single_com', 'new_yen_mach',
+                               'single_bi']):
+        for i in range(4):
+            file = f'{label}/{i}.jpg'
+            photo(os.path.join(own, file), 5000 + k * 100 + i)
+            rows.append([file, label, label, 'com_tam', '0.412',
+                         '2026-10-22T08:00:00'])
+    with open(os.path.join(own, 'index.csv'), 'w', newline='',
+              encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(['file', 'label', 'name', 'model_guess',
+                         'model_confidence', 'saved_at'])
+        writer.writerows(rows)
 
 
 if __name__ == '__main__':

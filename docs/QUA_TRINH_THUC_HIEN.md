@@ -1937,6 +1937,68 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Hai test cũ của màn Cài đặt phải cuộn xa hơn vì có thêm thẻ mới.
   - Build APK 114 (24,5 MB) và cài đè lên điện thoại test.
 
+### 2026-10-22 · Contract 1.5: thêm 26 món ăn hằng ngày, notebook train tiếp từ B3
+- Lý do: người dùng muốn app nhận được cả món lẻ (cơm trắng, ức gà, trứng)
+  và món phổ biến không phải món Việt (pizza, sushi, mì Ý…), để dùng lâu dài.
+  Train lại từ đầu tốn 10 tiếng; train tiếp từ model B3 của contract 1.4 chỉ
+  cần khoảng 8 epoch.
+- Chọn món theo ảnh có sẵn, mỗi món phải có ít nhất một bộ ảnh:
+  - Food-101 (Kaggle `kmader/food41`, 1.000 ảnh mỗi lớp): pizza, sushi,
+    sashimi, ramen, hot dog, bít tết, ốp lết, mì Ý, chả giò, cánh gà, cá hồi,
+    mực chiên, sủi cảo, sandwich, pancake, waffle, donut, bánh kem, kem. Một
+    số lớp gộp vào món cũ: cơm chiên, khoai tây chiên, salad, cà ri gà. Các
+    lớp còn lại vào `khac`.
+  - MyFood (Zenodo, CC BY 4.0, khoảng 1.250 ảnh có mask): cơm, ức gà, trứng
+    luộc, trứng ốp la, bít tết, mì Ý, táo. Notebook cắt theo mask, nên một
+    dĩa cơm trưa cho ra nhiều ảnh, mỗi ảnh một món.
+  - VietFood67: cắt riêng khung cơm, đậu hũ, chả giò, và rau trên dĩa cơm
+    phần (rau cạnh phở, bún là rau sống nên không lấy).
+  - Không dùng ISIA Food-500: bản trên Hugging Face chỉ có 40 ảnh mỗi lớp,
+    và không có yến mạch, sữa chua Hy Lạp, bơ đậu phộng, trà sữa. Các món đó
+    vẫn chờ ảnh người dùng tự lưu.
+- Dữ liệu dinh dưỡng (`assets/data/vn_food`):
+  - 26 món mới trong `dish_names.csv` và `dishes.csv`; 20 dòng nền mới trong
+    `components.csv`, nguồn USDA FoodData Central (SR Legacy hoặc FNDDS) có
+    mã cụ thể. Khối lượng một cái, một miếng ghi rõ là ước lượng của nhóm,
+    trừ quả táo (182 g theo USDA).
+  - Món nào là một thành phần sẵn có thì dùng thành phần đó: cơm trắng là
+    `com`, trứng luộc là `trung_kho`, gà rán là `ga_chien`…
+  - Mã món đậu hũ là `dau_hu_chien` để không trùng mã thành phần `dau_hu`.
+- `docs/MODEL_CONTRACT.md` lên 1.5: bảng món 66–91; ảnh của món chỉ có dòng
+  nền (ức gà, sushi…) không dạy đầu ra thành phần, vì trên ảnh có gà, có cơm
+  nhưng công thức món không ghi; mô tả file zip ảnh tự lưu (mục 5).
+- Notebook (`tool/train/train_food_model.py`):
+  - `EXPERIMENT = 'continue'` (mặc định): tìm `checkpoint.keras` của B3 1.4
+    (trên Drive, trong input của Kaggle, hoặc `WARM_START`). Chép backbone và
+    đầu ra thành phần nguyên vẹn; đầu ra món chép theo từng cột: 65 món cũ giữ
+    chỗ, `khac` chuyển xuống cuối, 26 món mới bắt đầu từ trọng số mới. Train
+    1 epoch đầu ra rồi 8 epoch fine-tune với learning rate 1e-4, bằng một
+    phần ba lần trước, để không làm hỏng những gì 1.4 đã học.
+  - `progress.json` ghi thêm thí nghiệm và phiên bản contract. Nhờ vậy, khi
+    gắn output của lần 1.4 vào Kaggle, notebook không nhầm nó là lần chạy
+    dở của chính mình.
+  - Ảnh có thêm khung cắt (`box`); bản thu nhỏ và mã hash tính trên phần cắt.
+  - Tự tải MyFood; đọc file zip ảnh tự lưu (Kaggle: thêm như dataset; Colab:
+    để trong Drive `macrorunner_train/my_photos/`). Nhãn `single_com` thành
+    `com_trang`, `new_<tên>` vào `khac`.
+- App: chỉ đổi dữ liệu. Bảng chọn món đã có 91 món, nên ghi tay pizza, ức
+  gà… được ngay, trước khi có model mới.
+- Kiểm tra:
+  - `python tool/check_vn_food.py`: OK, 104/104 dòng có dinh dưỡng và nguồn.
+  - `flutter analyze` sạch; `flutter test` PASS (sửa test đếm món 65 → 91).
+  - Smoke test notebook trên dữ liệu giả, có thêm Food-101, MyFood, zip ảnh
+    tự lưu và một model 1.4 giả: PASS cả 3 chế độ (một máy, cắt ngang rồi
+    chạy tiếp, giả lập Colab với model và zip trên Drive). Lần chạy tìm thấy
+    model 1.4, chép trọng số rồi train tiếp; nhãn `single_bi` (không có món
+    lẻ tương ứng) bị bỏ qua đúng như thiết kế.
+  - Agent `model-contract-reviewer`: mã và thứ tự món khớp ở mọi nơi. Đã sửa
+    theo góp ý: lớp Food-101 gần giống món của app (filet mignon, prime rib,
+    salad củ dền, caprese, sandwich thịt kéo, lobster roll) gộp vào món đó
+    thay vì `khac`; frozen yogurt và salad rong biển bỏ qua; `MODEL_CARD`
+    ghi rằng điểm test có thể cao hơn thực tế vì ảnh được chia lại.
+  - Build APK 115 (24,5 MB), chữ ký release đúng; chưa cài lên điện thoại
+    theo yêu cầu, gửi file cho người dùng tự cài.
+
 ---
 
 ## 3. Việc còn tồn đọng

@@ -98,8 +98,9 @@ class ModelLabels {
 }
 
 /// Decodes a photo and turns it into the model input: upright, the centre
-/// square, resized to 224×224 with bilinear sampling, RGB values 0–255 as
-/// float32 in row-major HWC order. Normalisation happens inside the model.
+/// square, resized to the model's N×N with bilinear sampling, RGB values
+/// 0–255 as float32 in row-major HWC order. Normalisation happens inside the
+/// model.
 ///
 /// Pure Dart so it can run in a background isolate.
 Float32List preprocessPhoto(Uint8List encoded, {int size = modelInputSize}) {
