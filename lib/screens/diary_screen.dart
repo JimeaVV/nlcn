@@ -33,6 +33,11 @@ class DiaryScreenState extends State<DiaryScreen> {
 
   DateTime _day = _today();
   List<FoodLogEntry> _entries = const [];
+
+  /// The day before [_day], only loaded on today for "same as yesterday".
+  List<FoodLogEntry> _yesterday = const [];
+  List<FoodLogEntry> _favorites = const [];
+  List<FoodLogEntry> _recent = const [];
   Map<String, dynamic>? _targets;
   bool _loading = true;
   bool _loadFailed = false;
@@ -56,6 +61,17 @@ class DiaryScreenState extends State<DiaryScreen> {
     final version = ++_loadVersion;
     try {
       final entries = await _database.getFoodLog(_day);
+      final yesterday = _isToday
+          ? await _database
+              .getFoodLog(DateTime(_day.year, _day.month, _day.day - 1))
+          : const <FoodLogEntry>[];
+      // Shortcuts only: the diary still works if they fail to load.
+      var favorites = const <FoodLogEntry>[];
+      var recent = const <FoodLogEntry>[];
+      try {
+        favorites = await _database.getFavoriteFoods();
+        recent = await _database.getRecentFoods();
+      } catch (_) {}
       final row = await _database.getProfile();
       Map<String, dynamic>? targets;
       if (row != null) {
@@ -68,6 +84,9 @@ class DiaryScreenState extends State<DiaryScreen> {
       if (!mounted || version != _loadVersion) return;
       setState(() {
         _entries = entries;
+        _yesterday = yesterday;
+        _favorites = favorites;
+        _recent = recent;
         _targets = targets;
         _loading = false;
         _loadFailed = false;
@@ -112,7 +131,12 @@ class DiaryScreenState extends State<DiaryScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: CyberColors.surface,
-      builder: (_) => FoodLogSheet(foods: foods, date: _day),
+      builder: (_) => FoodLogSheet(
+        foods: foods,
+        date: _day,
+        favorites: _favorites,
+        recent: _recent,
+      ),
     );
     if (entry == null || !mounted) return;
     await _save([entry], context.l10n.diaryAdded);
@@ -152,6 +176,54 @@ class DiaryScreenState extends State<DiaryScreen> {
           onPressed: () => _save([entry.withoutId()], l10n.diaryAdded),
         ),
       ));
+  }
+
+  Future<void> _toggleFavorite(FoodLogEntry entry) async {
+    final l10n = context.l10n;
+    final starred = _favorites.any((food) => food.name == entry.name);
+    try {
+      if (starred) {
+        await _database.removeFavoriteFood(entry.name);
+      } else {
+        await _database.addFavoriteFood(entry);
+      }
+      await refresh();
+      if (mounted) {
+        _message(starred
+            ? l10n.diaryFavoriteRemoved(entry.name)
+            : l10n.diaryFavoriteAdded(entry.name));
+      }
+    } catch (_) {
+      if (mounted) _message(l10n.diarySaveFailed);
+    }
+  }
+
+  /// Logs [entries] again on [day], each in its own meal.
+  Future<void> _copy(List<FoodLogEntry> entries, DateTime day) {
+    if (_saving || entries.isEmpty) return Future.value();
+    return _save([for (final entry in entries) entry.copyTo(day, entry.meal)],
+        context.l10n.diaryCopied('${entries.length}'));
+  }
+
+  /// The copy shortcut for [meal]: a past meal goes to today; an empty meal
+  /// today can repeat yesterday's.
+  _CopyAction? _copyAction(MealSlot meal, List<FoodLogEntry> entries) {
+    final l10n = context.l10n;
+    if (!_isToday) {
+      if (entries.isEmpty) return null;
+      return _CopyAction(l10n.diaryCopyToToday, () => _copy(entries, _today()));
+    }
+    if (entries.isNotEmpty) return null;
+    final before = [
+      for (final entry in _yesterday)
+        if (entry.meal == meal) entry,
+    ];
+    if (before.isEmpty) return null;
+    return _CopyAction(
+      l10n.diaryRepeatYesterday('${before.length}',
+          context.formatNumber(FoodLogTotals.of(before).calories)),
+      () => _copy(before, _day),
+    );
   }
 
   void _message(String text) => ScaffoldMessenger.of(context)
@@ -195,14 +267,20 @@ class DiaryScreenState extends State<DiaryScreen> {
               ),
               const SizedBox(height: 14),
               for (final meal in MealSlot.values) ...[
-                _MealSection(
-                  meal: meal,
-                  entries: [
+                Builder(builder: (context) {
+                  final entries = [
                     for (final entry in _entries)
                       if (entry.meal == meal) entry,
-                  ],
-                  onDelete: _saving ? null : _delete,
-                ),
+                  ];
+                  return _MealSection(
+                    meal: meal,
+                    entries: entries,
+                    favoriteNames: {for (final food in _favorites) food.name},
+                    onDelete: _saving ? null : _delete,
+                    onToggleFavorite: _saving ? null : _toggleFavorite,
+                    copy: _saving ? null : _copyAction(meal, entries),
+                  );
+                }),
                 const SizedBox(height: 12),
               ],
             ],
@@ -335,16 +413,30 @@ class _Progress extends StatelessWidget {
   }
 }
 
+/// A button under a meal that logs its foods again on another day.
+class _CopyAction {
+  const _CopyAction(this.label, this.onPressed);
+
+  final String label;
+  final VoidCallback onPressed;
+}
+
 class _MealSection extends StatelessWidget {
   const _MealSection({
     required this.meal,
     required this.entries,
+    required this.favoriteNames,
     required this.onDelete,
+    required this.onToggleFavorite,
+    this.copy,
   });
 
   final MealSlot meal;
   final List<FoodLogEntry> entries;
+  final Set<String> favoriteNames;
   final void Function(FoodLogEntry entry)? onDelete;
+  final void Function(FoodLogEntry entry)? onToggleFavorite;
+  final _CopyAction? copy;
 
   @override
   Widget build(BuildContext context) {
@@ -377,10 +469,22 @@ class _MealSection extends StatelessWidget {
                           number(entry.protein, decimals: 1),
                         ),
                 ),
-                trailing: IconButton(
-                  tooltip: l10n.diaryDeleteEntry,
-                  onPressed: onDelete == null ? null : () => onDelete!(entry),
-                  icon: const Icon(Icons.delete_outline_rounded),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _FavoriteButton(
+                      starred: favoriteNames.contains(entry.name),
+                      onPressed: onToggleFavorite == null
+                          ? null
+                          : () => onToggleFavorite!(entry),
+                    ),
+                    IconButton(
+                      tooltip: l10n.diaryDeleteEntry,
+                      onPressed:
+                          onDelete == null ? null : () => onDelete!(entry),
+                      icon: const Icon(Icons.delete_outline_rounded),
+                    ),
+                  ],
                 ),
               ),
             Text(
@@ -389,7 +493,39 @@ class _MealSection extends StatelessWidget {
               style: TextStyle(color: CyberColors.muted),
             ),
           ],
+          if (copy != null) ...[
+            const SizedBox(height: 6),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: ValueKey('diary-copy-${meal.name}'),
+                onPressed: copy!.onPressed,
+                icon: const Icon(Icons.content_copy_rounded, size: 18),
+                label: Text(copy!.label),
+              ),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _FavoriteButton extends StatelessWidget {
+  const _FavoriteButton({required this.starred, required this.onPressed});
+
+  final bool starred;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return IconButton(
+      tooltip: starred ? l10n.diaryFavoriteRemove : l10n.diaryFavoriteAdd,
+      onPressed: onPressed,
+      icon: Icon(
+        starred ? Icons.star_rounded : Icons.star_outline_rounded,
+        color: starred ? CyberColors.lime : null,
       ),
     );
   }

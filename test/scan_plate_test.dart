@@ -21,7 +21,7 @@ void main() {
       ]);
     });
 
-    test('the packaged tables parse and cover the 40 contract dishes', () {
+    test('the packaged tables parse and cover the 65 contract dishes', () {
       String read(String name) =>
           File('assets/data/vn_food/$name.csv').readAsStringSync();
       final data = parseVnFoodData(
@@ -29,7 +29,7 @@ void main() {
         dishesCsv: read('dishes'),
         dishNamesCsv: read('dish_names'),
       );
-      expect(data.dishes, hasLength(40));
+      expect(data.dishes, hasLength(65));
       expect(data.dish('com_tam')!.nameVi, 'Cơm tấm');
       expect(data.dish('com_tam')!.parts.map((part) => part.component),
           contains('bi'));
@@ -110,12 +110,16 @@ void main() {
       expect(item('trung_op_la').included, isFalse);
       expect(item('trung_op_la').uncertain, isFalse);
       expect(item('_base_com_tam').included, isTrue, reason: 'bases stay');
-      expect(item('dua_leo_ca_chua').included, isTrue);
-      expect(item('tom').uncertain, isTrue);
+      // Outside the recipe: suggested at the ticked threshold, never ticked.
+      expect(item('dua_leo_ca_chua').included, isFalse);
+      expect(item('dua_leo_ca_chua').uncertain, isTrue);
+      expect(plate.items.where((item) => item.component.code == 'tom'), isEmpty,
+          reason: 'below the ticked threshold an extra is left out');
       expect(plate.canLog, isTrue, reason: 'unticked bì needs no data');
 
-      // 200 g rice 260 + one 100 g chop 250 + 100 g salad 16 + 20 g sauce 12.
-      expect(plate.calories, closeTo(538, 1e-9));
+      // 200 g rice 260 + one 100 g chop 250 + 20 g sauce 12.
+      expect(plate.calories, closeTo(522, 1e-9));
+      item('dua_leo_ca_chua').included = true;
       final entries = plate.toEntries(
           date: DateTime(2026, 10, 17),
           meal: MealSlot.lunch,
@@ -133,6 +137,86 @@ void main() {
       for (final entry in entries) {
         entry.validate();
       }
+    });
+
+    test('components of a dish the model did not learn follow the recipe', () {
+      final plate = ScanPlate.forDish(
+        data,
+        comTam,
+        const FoodRecognition(
+          dishes: {'com_tam': 0.9},
+          components: {'suon_nuong': 0.1, 'dua_leo_ca_chua': 0.95},
+          componentDishes: {'pho_bo'},
+        ),
+      );
+      expect(plate.items.map((item) => item.component.code),
+          ['com', 'suon_nuong', 'bi', 'trung_op_la', '_base_com_tam'],
+          reason: 'no suggestions from outputs that mean nothing here');
+      expect(plate.items.every((item) => item.included), isTrue);
+      expect(plate.items.every((item) => item.confidence == null), isTrue);
+    });
+
+    test('an added component starts at its usual portion in other dishes', () {
+      final data = parseVnFoodData(
+        componentsCsv: '$fixtureComponentsCsv'
+            'mo_hanh,Mỡ hành,Scallion oil,583,0.5,2.5,63,,,Test\n',
+        dishesCsv: '${fixtureDishesCsv}com_tam,mo_hanh,10,\n'
+            'pho_bo,suon_nuong,,2\n',
+        dishNamesCsv: fixtureDishNamesCsv,
+      );
+      // Phở does not list scallion oil; cơm tấm has 10 g of it.
+      final pho = ScanPlate.forDish(
+          data,
+          data.dish('pho_bo')!,
+          const FoodRecognition(
+              dishes: {'pho_bo': 1}, components: {'mo_hanh': 0.9}));
+      final oil = pho.items.singleWhere((i) => i.component.code == 'mo_hanh');
+      expect(oil.grams, 10, reason: 'its usual 10 g, not 100 g');
+      expect(oil.included, isFalse);
+      pho.items.remove(oil);
+      pho.add(data.components['mo_hanh']!);
+      expect(pho.items.last.grams, 10, reason: 'added by hand: same portion');
+
+      // A model tuned to tick at 0.3 still suggests extras only from 0.6.
+      final lowTuned = ScanPlate.forDish(
+          data,
+          data.dish('pho_bo')!,
+          const FoodRecognition(
+              dishes: {'pho_bo': 1},
+              components: {'mo_hanh': 0.45, 'tom': 0.7},
+              thresholds: RecognitionThresholds(checked: 0.3, ask: 0.15)));
+      expect(
+          lowTuned.items
+              .where((i) => !data
+                  .dish('pho_bo')!
+                  .parts
+                  .any((p) => p.component == i.component.code))
+              .map((i) => i.component.code),
+          ['tom']);
+      expect(typicalPortion(data, data.components['suon_nuong']!),
+          (inUnits: true, amount: 1.5));
+      expect(typicalPortion(data, data.components['tom']!),
+          (inUnits: true, amount: 1.0),
+          reason: 'no dish lists it: one unit');
+      expect(typicalPortion(data, data.components['dua_leo_ca_chua']!),
+          (inUnits: false, amount: 100.0));
+    });
+
+    test('the whole-dish portion scales every component', () {
+      final plate = ScanPlate.forDish(data, comTam, FoodRecognition.empty);
+      final rice = plate.items.first;
+      rice.amount = 250; // the user's own change keeps its share
+      plate.portion = 1.5;
+      expect(rice.amount, 375);
+      expect(plate.items[1].amount, 1.5, reason: 'one chop becomes 1.5');
+      plate.portion = 0.5;
+      expect(rice.amount, 125);
+      plate.add(data.components['tom']!);
+      expect(plate.items.last.amount, 0.5,
+          reason: 'one shrimp at half a serving');
+      plate.portion = 0;
+      expect(plate.portion, 0.5, reason: 'not a portion');
+      expect(plate.carbs, greaterThan(0));
     });
 
     test('amounts follow units, and unknown unit weights block logging', () {

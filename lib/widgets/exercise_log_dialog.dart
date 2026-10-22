@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/cyber_theme.dart';
 import '../l10n/l10n.dart';
 import '../core/number_input.dart';
+import '../models/history_models.dart';
 
 class ExerciseLogInput {
   const ExerciseLogInput({
@@ -21,9 +22,16 @@ class ExerciseLogInput {
 }
 
 class ExerciseLogDialog extends StatefulWidget {
-  const ExerciseLogDialog({super.key, required this.exerciseName});
+  const ExerciseLogDialog({
+    super.key,
+    required this.exerciseName,
+    this.previous,
+  });
 
   final String exerciseName;
+
+  /// The last logged session of this exercise; its suggestion fills the form.
+  final WorkoutLogEntry? previous;
 
   @override
   State<ExerciseLogDialog> createState() => _ExerciseLogDialogState();
@@ -36,6 +44,24 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
   final set2Controller = TextEditingController(text: '12');
   final set3Controller = TextEditingController(text: '12');
   String difficulty = 'Moderate';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final previous = widget.previous;
+    if (previous != null && weightController.text.isEmpty) {
+      // Start from what the last session suggested for today.
+      weightController.text =
+          context.formatMeasurement(previous.suggestedWeight);
+      for (final controller in [
+        set1Controller,
+        set2Controller,
+        set3Controller
+      ]) {
+        controller.text = '${previous.suggestedReps}';
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -76,6 +102,10 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
                 l10n.progressionModel,
                 style: TextStyle(color: CyberColors.muted),
               ),
+              if (widget.previous != null) ...[
+                const SizedBox(height: 10),
+                LastSessionNote(entry: widget.previous!, withSuggestion: true),
+              ],
               const SizedBox(height: 14),
               TextFormField(
                 controller: weightController,
@@ -149,6 +179,45 @@ class _ExerciseLogDialogState extends State<ExerciseLogDialog> {
           child: Text(l10n.cancel),
         ),
         FilledButton(onPressed: submit, child: Text(l10n.calculate)),
+      ],
+    );
+  }
+}
+
+/// "Last time (date): 60 kg × 10 · 9 · 8", and optionally today's target.
+class LastSessionNote extends StatelessWidget {
+  const LastSessionNote({
+    super.key,
+    required this.entry,
+    this.withSuggestion = false,
+  });
+
+  final WorkoutLogEntry entry;
+  final bool withSuggestion;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.lastSessionLine(
+            formatDate(entry.performedAt.toLocal()),
+            context.formatMeasurement(entry.weight),
+            '${entry.set1Reps} · ${entry.set2Reps} · ${entry.set3Reps}',
+          ),
+          style: TextStyle(color: CyberColors.muted),
+        ),
+        if (withSuggestion)
+          Text(
+            l10n.lastSessionSuggestion(
+              context.formatMeasurement(entry.suggestedWeight),
+              '${entry.suggestedReps}',
+            ),
+            style:
+                TextStyle(color: CyberColors.cyan, fontWeight: FontWeight.w700),
+          ),
       ],
     );
   }

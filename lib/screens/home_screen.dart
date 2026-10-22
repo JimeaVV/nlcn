@@ -6,6 +6,7 @@ import '../l10n/l10n.dart';
 import '../services/dataset_repository.dart';
 import '../services/food_recognizer.dart';
 import '../services/recommendation_service.dart';
+import '../services/reminder_service.dart';
 import '../services/tflite_food_recognizer.dart';
 import '../widgets/optifit_bottom_bar.dart';
 import '../widgets/section_tabs.dart';
@@ -30,10 +31,14 @@ class HomeScreen extends StatefulWidget {
     super.key,
     required this.themeController,
     required this.localeController,
+    this.reminders,
   });
 
   final ThemeController themeController;
   final LocaleController localeController;
+
+  /// Meal reminders; Settings hides them when null (tests).
+  final ReminderController? reminders;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -47,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final mealKey = GlobalKey<MealScreenState>();
   final savedMealsKey = GlobalKey<HistoryScreenState>();
   final workoutHistoryKey = GlobalKey<HistoryScreenState>();
+  final profileKey = GlobalKey<ProfileScreenState>();
   // One cached copy of the packaged dataset serves every screen.
   final datasets = DatasetRepository();
   late final recommendations = RecommendationService(datasets: datasets);
@@ -116,10 +122,19 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SettingsScreen(
           themeController: widget.themeController,
           localeController: widget.localeController,
+          reminders: widget.reminders,
           onHistoryCleared: () {
             savedMealsKey.currentState?.refresh();
             workoutHistoryKey.currentState?.refresh();
             todayKey.currentState?.refresh();
+          },
+          onDataRestored: () {
+            savedMealsKey.currentState?.refresh();
+            workoutHistoryKey.currentState?.refresh();
+            todayKey.currentState?.refresh();
+            diaryKey.currentState?.refresh();
+            profileKey.currentState?.refresh();
+            mealKey.currentState?.refreshProfile();
           },
         ),
       ),
@@ -179,16 +194,20 @@ class _HomeScreenState extends State<HomeScreen> {
               key: workoutHistoryKey, section: HistorySection.workouts),
         ],
       ),
-      ProfileScreen(onProfileChanged: _onProfileChanged),
+      ProfileScreen(key: profileKey, onProfileChanged: _onProfileChanged),
     ];
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.bolt_rounded, color: CyberColors.lime),
-            const SizedBox(width: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(7),
+              child: Image.asset('assets/brand/logo.png',
+                  width: 30, height: 30, filterQuality: FilterQuality.medium),
+            ),
+            const SizedBox(width: 10),
             Text(
-              'OPTIFIT',
+              'MACRORUNNER',
               style: TextStyle(
                 color: CyberColors.text,
                 fontWeight: FontWeight.w900,

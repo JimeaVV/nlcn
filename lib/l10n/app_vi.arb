@@ -694,7 +694,7 @@
   "scanGalleryShort": "Thư viện",
   "scanManualShort": "Ghi tay",
   "scanCaptureFailed": "Không chụp được ảnh. Hãy thử lại.",
-  "scanCameraDenied": "OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.",
+  "scanCameraDenied": "MacroRunner chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.",
   "scanNoCamera": "Không mở được camera. Bạn vẫn có thể chọn ảnh có sẵn hoặc ghi món thủ công.",
   "scanRetryCamera": "Thử mở camera lại",
   "dailyTargetsTitle": "Mục tiêu mỗi ngày",
@@ -757,5 +757,363 @@
   "repsRange": "Nhập từ 0 đến 30",
   "overloadConfirmIncrease": "Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.",
   "overloadBodyweightReps": "Bạn đã hoàn thành 3×12 không cần tạ. Buổi sau thêm 2 lần mỗi hiệp, hoặc chuyển sang biến thể khó hơn.",
-  "overloadBodyweightDecrease": "Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn."
+  "overloadBodyweightDecrease": "Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.",
+  "scanNotInApp": "Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.",
+  "scanRecognizing": "Đang nhận diện món…",
+  "scanPortion": "Khẩu phần cả món",
+  "scanSuggestions": "Có thể có thêm ({count})",
+  "@scanSuggestions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanSuggestionsChosen": "Có thể có thêm ({count}) · đã chọn {chosen}",
+  "@scanSuggestionsChosen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "chosen": {
+        "type": "int"
+      }
+    }
+  },
+  "scanMacroGrams": "Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g",
+  "@scanMacroGrams": {
+    "placeholders": {
+      "protein": {
+        "type": "String"
+      },
+      "carbs": {
+        "type": "String"
+      },
+      "fat": {
+        "type": "String"
+      }
+    }
+  },
+  "scanTiming": "Nhận diện trong {total} s (ảnh {photo} s · model {model} s)",
+  "@scanTiming": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "photo": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryFavorites": "Yêu thích",
+  "diaryRecent": "Gần đây",
+  "diaryQuickHint": "Chạm một món để thêm ngay vào bữa đã chọn.",
+  "diaryQuickChip": "{name} · {calories} kcal",
+  "@diaryQuickChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryFavoriteAdd": "Thêm vào yêu thích",
+  "diaryFavoriteRemove": "Bỏ khỏi yêu thích",
+  "diaryFavoriteAdded": "Đã thêm {name} vào yêu thích.",
+  "@diaryFavoriteAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryFavoriteRemoved": "Đã bỏ {name} khỏi yêu thích.",
+  "@diaryFavoriteRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryCopyToToday": "Chép bữa này sang hôm nay",
+  "diaryRepeatYesterday": "Ăn giống hôm qua ({count} món · {calories} kcal)",
+  "@diaryRepeatYesterday": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryCopied": "Đã chép {count} món.",
+  "@diaryCopied": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSessionLine": "Lần trước ({date}): {weight} kg × {reps}",
+  "@lastSessionLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSessionSuggestion": "Gợi ý hôm nay: {weight} kg × {reps} lần",
+  "@lastSessionSuggestion": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "restTimerStart": "Bấm giờ nghỉ",
+  "restTimerLabel": "Nghỉ {time}",
+  "@restTimerLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "restTimerDone": "Hết giờ nghỉ, vào hiệp tiếp!",
+  "restTimerMore": "Thêm 15 giây",
+  "restTimerLess": "Bớt 15 giây",
+  "restTimerStop": "Dừng bấm giờ",
+  "adaptiveTdeeTitle": "TDEE theo dữ liệu thật",
+  "adaptiveTdeeValue": "{tdee} kcal/ngày",
+  "@adaptiveTdeeValue": {
+    "placeholders": {
+      "tdee": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeDetails": "Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.",
+  "@adaptiveTdeeDetails": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "intake": {
+        "type": "String"
+      },
+      "weighIns": {
+        "type": "String"
+      },
+      "trend": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeCompare": "Công thức Mifflin-St Jeor ước tính {formula} kcal.",
+  "@adaptiveTdeeCompare": {
+    "placeholders": {
+      "formula": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeUse": "Dùng làm mục tiêu ({calories} kcal)",
+  "@adaptiveTdeeUse": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeUsed": "Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.",
+  "@adaptiveTdeeUsed": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeNeedMore": "Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất {days} ngày và cân ít nhất {weighIns} lần, lần đầu và lần cuối cách nhau từ {span} ngày. Hiện có {haveDays} ngày ghi ăn, {haveWeighIns} lần cân.",
+  "@adaptiveTdeeNeedMore": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "weighIns": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      },
+      "haveDays": {
+        "type": "String"
+      },
+      "haveWeighIns": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeUnsure": "Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.",
+  "@adaptiveTdeeUnsure": {
+    "placeholders": {
+      "tdee": {
+        "type": "String"
+      },
+      "formula": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeInfo": "TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.",
+  "waterTitle": "Nước uống",
+  "waterProgress": "{drunk} / {target} ml",
+  "@waterProgress": {
+    "placeholders": {
+      "drunk": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "waterGlasses": "{count} ly, mỗi ly {glass} ml",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "glass": {
+        "type": "String"
+      }
+    }
+  },
+  "waterAdd": "Thêm một ly",
+  "waterRemove": "Bớt một ly",
+  "waterNote": "Mục tiêu tham khảo 2 lít mỗi ngày; cần nhiều hơn khi trời nóng hoặc tập nặng.",
+  "streakDays": "{count} ngày liên tục ghi ăn",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "streakKeep": "Ghi bữa hôm nay để giữ chuỗi.",
+  "streakNone": "Ghi một bữa hôm nay để bắt đầu chuỗi ngày.",
+  "weekTitle": "7 ngày qua",
+  "weekLogged": "Ghi ăn {days}/7 ngày",
+  "@weekLogged": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "weekAverage": "Trung bình {calories} kcal • {protein} g protein mỗi ngày ghi",
+  "@weekAverage": {
+    "placeholders": {
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "weekVsTarget": "So với mục tiêu {target} kcal: {diff} kcal/ngày",
+  "@weekVsTarget": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "weekTraining": "Tập {days} ngày",
+  "@weekTraining": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "weekWeight": "Cân nặng {change} kg",
+  "@weekWeight": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "weekEmpty": "Chưa có dữ liệu trong 7 ngày qua.",
+  "remindersTitle": "Nhắc ghi bữa",
+  "remindersBody": "Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.",
+  "remindersSwitch": "Bật nhắc nhở",
+  "remindersDenied": "Chưa được cấp quyền thông báo. Hãy bật trong Cài đặt của Android.",
+  "remindersChangeTime": "Đổi giờ nhắc {meal}",
+  "@remindersChangeTime": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNotificationTitle": "{meal}: bạn đã ghi chưa?",
+  "@reminderNotificationTitle": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNotificationBody": "Mở MacroRunner để ghi món, chỉ mất vài giây.",
+  "reminderChannel": "Nhắc ghi bữa",
+  "backupTitle": "Sao lưu dữ liệu",
+  "backupBody": "Lưu toàn bộ hồ sơ, nhật ký ăn, nước uống, cân nặng và lịch sử tập vào một file JSON để cất giữ hoặc chuyển sang máy khác.",
+  "backupExport": "Xuất file sao lưu",
+  "backupImport": "Khôi phục từ file",
+  "backupImportTitle": "Khôi phục dữ liệu?",
+  "backupImportBody": "Toàn bộ dữ liệu hiện có trên máy sẽ được thay bằng dữ liệu trong file. Việc này không hoàn tác được.",
+  "backupRestore": "Khôi phục",
+  "backupRestored": "Đã khôi phục dữ liệu.",
+  "backupInvalid": "File này không phải bản sao lưu MacroRunner hợp lệ.",
+  "backupFailed": "Không tạo được file sao lưu. Hãy thử lại.",
+  "widgetTitle": "MacroRunner hôm nay",
+  "widgetWater": "Nước {drunk} / {target} L",
+  "@widgetWater": {
+    "placeholders": {
+      "drunk": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "widgetStreak": "Chuỗi {count} ngày",
+  "@widgetStreak": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

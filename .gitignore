@@ -56,3 +56,7 @@ app.*.map.json
 
 # Food photo dataset (large; see docs/MODEL_CONTRACT.md)
 /dataset/vnfood/
+
+# Claude Code: settings and notes for one machine only
+CLAUDE.local.md
+.claude/settings.local.json

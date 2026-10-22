@@ -37,6 +37,7 @@ FOODS = {
     '4007': ('Cà rốt tươi', 44, 1.5, 9.03, 0.17),
     '4033': ('Đu đủ xanh', 30, 0.8, 6.6, 0),
     '4036': ('Giá đậu xanh', 52, 5.5, 7.17, 0.13),
+    '4026': ('Dọc mùng', 13, 0.4, 2.8, 0),
     '4037': ('Hành củ', 29, 1.3, 5.22, 0.28),
     '4038': ('Hành lá', 26, 1.3, 5.2, 0),
     '4039': ('Hành tây', 45, 1.8, 9.29, 0.11),
@@ -45,12 +46,19 @@ FOODS = {
     '4103': ('Tỏi ta', 126, 6, 24.65, 0.35),
     '4125': ('Mộc nhĩ khô', 332, 10.6, 72, 0.2),
     '5003': ('Chanh', 29, 0.9, 5.96, 0.14),
+    '5014': ('Dứa ta', 32, 0.8, 7.3, 0),
+    '5030': ('Mít mật', 67, 1.5, 15.2, 0),
+    '5035': ('Nhãn', 52, 0.9, 12, 0),
     '5046': ('Quất (tắc)', 42, 0.9, 9.6, 0),
     '6002': ('Dầu thảo mộc', 897, 0, 0, 99.7),
+    '3010': ('Đậu xanh hạt khô', 346, 23.4, 57.8, 2.4),
     '7018': ('Thịt lợn nửa nạc nửa mỡ', 260, 16.5, 0, 21.5),
+    '7018002': ('Thịt lợn nửa nạc nửa mỡ, luộc', 220, 13.98, 0, 18.22),
     '7034002': ('Dạ dày lợn luộc', 106, 18.25, 0, 3.63),
     '7046': ('Lòng lợn (ruột già)', 167, 6.9, 0.8, 15.1),
+    '8022': ('Cá quả (cá lóc)', 97, 18.2, 0, 2.7),
     '8034': ('Cua đồng', 87, 12.3, 2, 3.3),
+    '8051': ('Tôm biển', 82, 17.6, 0.9, 0.9),
     '8053': ('Tôm biển khô', 347, 75.6, 2.5, 3.8),
     '9007': ('Trứng chim cút', 157, 12.78, 2.89, 10.47),
     '9012': ('Trứng gà công nghiệp', 132, 12.79, 1.89, 8.17),
@@ -61,7 +69,9 @@ FOODS = {
     '13006': ('Bột nghệ', 380, 7.83, 64.91, 9.88),
     '13011': ('Mắm tôm đặc', 73, 14.8, 0, 1.5),
     '13017': ('Nước mắm cá', 35, 5.06, 3.64, 0.01),
+    '13013': ('Mắm tép chua', 68, 8.7, 5.5, 1.2),
     '13020': ('Tương nếp', 86, 4.3, 15.7, 0.7),
+    '13022': ('Xì dầu', 55, 6.3, 7.46, 0.04),
     '13034': ('Giấm ăn', 21, 0, 0.93, 0),
     '13039': ('Ớt tươi', 18, 1.4, 2.6, 0.2),
     '13046': ('Bột năng', 343, 0.7, 85.1, 0),
@@ -69,8 +79,19 @@ FOODS = {
     'water': ('Nước lọc', 0, 0, 0, 0),
     'fdc171538': ('Beef broth, canned, ready-to-serve', 7, 1.14, 0.04, 0.22),
     'fdc174536': ('Chicken broth, ready-to-serve', 6, 0.64, 0.44, 0.21),
+    # Contract 1.4 dishes.
+    '1018': ('Bột mì trắng', 347, 11, 73.2, 1.1),
+    '4043': ('Hoa chuối', 28, 1.5, 5.5, 0),
+    '7077': ('Xúc xích', 535, 27.2, 0, 47.4),
+    '8033': ('Cua bể', 103, 17.5, 7, 0.6),
+    '13023': ('Sốt mayonnaise', 701, 0, 0.1, 77.8),
+    'fdc169737': ('Pasta, cooked, enriched, without added salt', 158, 5.8, 30.9, 0.93),
+    'fdc171401': ('Lard', 902, 0, 0, 100),
+    'fdc171606': ('Fish broth', 16, 2.0, 0.4, 0.6),
+    'fdc2706550': ('Fish, cake or patty', 212, 13.63, 10.4, 12.64),
+    'fdc2709822': ('Lettuce, salad with assorted vegetables, no dressing', 24, 1.07, 4.58, 0.2),
 }
-BEEF, CHICKEN = 'fdc171538', 'fdc174536'
+BEEF, CHICKEN, FISH = 'fdc171538', 'fdc174536', 'fdc171606'
 
 
 def broth(base, cooked, seasonings):
@@ -201,11 +222,78 @@ RECIPES = {
         {'13017': 30, '12014': 30, '5003': 30, '4103': 10, '13039': 5,
          '6002': 10},
         115, None, 'nước trộn: nước mắm, đường, chanh, tỏi ớt, dầu hành phi'),
+    # Contract 1.3 dishes, recipes estimated by the team.
+    '_base_banh_khot': (
+        {'1017': 100, '3001': 30, 'water': 150, '8051': 50, '6002': 30,
+         '4038': 5, '13006': 2},
+        320, None, 'bột gạo, cốt dừa, tôm, chiên khuôn; mẻ khoảng 16 cái'),
+    '_base_banh_beo': (
+        {'1017': 100, '13046': 20, 'water': 300, '8053': 15, '13017': 15,
+         '12014': 10},
+        420, None, 'bánh hấp, tôm chấy, nước mắm; mỡ hành tính riêng'),
+    '_base_cao_lau': (
+        {'13022': 15, '6002': 10, '12014': 5, 'water': 30},
+        60, None, 'nước sốt rưới; sợi, thịt, rau tính riêng'),
+    '_base_bun_dau': (
+        {'7018002': 100, '13011': 30, '12014': 10, '5003': 10, '6002': 5},
+        155, None, 'thịt chân giò luộc và chén mắm tôm pha cho 1 phần'),
+    '_base_bun_mam': (
+        broth(BEEF, 3000, {'13013': 150, '7018': 300, '12014': 40,
+                           '4103': 20, '4037': 30, '6002': 30}),
+        3000, None, 'ước tính thấp: nước dùng xương USDA cộng mắm, thịt heo '
+        'quay, gia vị; mắm tép thay cho mắm cá'),
+    '_base_ca_kho': (
+        {'8022': 300, '12014': 20, '13017': 30, '6002': 15, '4037': 15,
+         '13004': 2},
+        280, None, 'cá lóc kho tộ; cơm và rau tính riêng'),
+    '_base_canh_chua': (
+        {'8022': 150, '4005': 100, '5014': 80, '4036': 50, '4026': 60,
+         '12014': 20, '13017': 20, 'water': 800},
+        1100, None, 'canh chua cá lóc với cà chua, thơm, giá, bạc hà'),
+    '_base_che': (
+        {'12014': 60, '3001': 40, '13046': 30, '5035': 50, '5030': 50,
+         '3010': 30, 'water': 250},
+        450, None, 'chè thập cẩm: nước đường, cốt dừa, trân châu, nhãn, mít, '
+        'đậu xanh'),
+    # Contract 1.4 dishes, recipes estimated by the team.
+    '_base_banh_trang_nuong': (
+        {'1010': 20, '9007': 25, '4038': 5, '8053': 3, '7077': 15,
+         '13023': 8, '6002': 2},
+        70, None, 'bánh tráng, 2 trứng cút, hành lá, tôm khô, xúc xích, sốt '
+        'mayonnaise; 1 cái = 70 g'),
+    '_base_banh_pia': (
+        {'1018': 35, 'fdc171401': 12, '3010': 20, '12014': 18, '9012': 5,
+         'water': 20},
+        100, None, 'vỏ bột mì và mỡ heo; nhân đậu xanh, đường, trứng; chưa '
+        'tính sầu riêng; 1 cái = 100 g'),
+    '_base_bun_ca': (
+        broth(FISH, 3000, {'fdc2706550': 400, '4005': 300, '13017': 40,
+                           '12014': 20, '13005': 15, '6002': 20, '4037': 30}),
+        3000, None, 'ước tính thấp: nước dùng cá USDA cộng chả cá, cà chua, '
+        'gia vị; bún, cá và rau tính riêng'),
+    '_base_salad': (
+        {'fdc2709822': 150, '13023': 15},
+        165, None, 'rau trộn có cà chua, cà rốt với 15 g sốt mayonnaise'),
+    '_base_nui_xao_bo': (
+        {'fdc169737': 200, '6002': 10, '4039': 30, '4005': 40, '13022': 10,
+         '12014': 3},
+        280, None, 'nui luộc xào hành tây, cà chua, xì dầu; thịt bò tính riêng'),
+    '_base_sup_cua': (
+        broth(CHICKEN, 1500, {'8033': 150, '9012': 100, '13046': 45,
+                              '4038': 10, '13017': 15, '13005': 6, '13004': 1}),
+        1500, None, 'ước tính thấp: nước gà USDA cộng thịt cua (tính như cua '
+        'bể), trứng, bột năng'),
+    '_base_nom_hoa_chuoi': (
+        {'4043': 200, '4007': 30, '4075': 10, '3017': 20, '13017': 15,
+         '12014': 15, '5003': 15, '4103': 5, '13039': 3},
+        310, None, 'hoa chuối, cà rốt, rau thơm, lạc rang, nước trộn; chưa tính '
+        'thịt gà hay tai heo'),
 }
 # Grams per natural unit: bánh xèo makes about 6 per batch, gỏi cuốn is the
 # 30 g roll above, and the team estimated a slice of chả trứng.
 UNITS = {'_base_banh_xeo': 835 / 6, '_base_goi_cuon': 30, 'cha_trung': 50,
-         '_base_banh_can': 280 / 12}
+         '_base_banh_can': 280 / 12, '_base_banh_khot': 320 / 16,
+         '_base_banh_trang_nuong': 70, '_base_banh_pia': 100}
 
 
 def per_100g(ingredients, cooked):

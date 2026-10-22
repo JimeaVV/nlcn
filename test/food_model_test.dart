@@ -29,9 +29,12 @@ class _FakeBundle extends CachingAssetBundle {
 }
 
 class _FakeRunner implements ModelRunner {
-  _FakeRunner(this.outputs);
+  _FakeRunner(this.outputs, {this.inputSize = modelInputSize});
 
   final List<Float32List> outputs;
+
+  @override
+  final int inputSize;
   Float32List? lastInput;
 
   @override
@@ -45,6 +48,9 @@ class _SlowRunner implements ModelRunner {
   _SlowRunner(this.body);
 
   final Future<List<Float32List>> Function() body;
+
+  @override
+  int get inputSize => modelInputSize;
 
   @override
   Future<List<Float32List>> run(Float32List input) => body();
@@ -82,6 +88,28 @@ void main() {
       expect(parsed.thresholds.checked, 0.55);
       expect(parsed.thresholds.ask, 0.25);
       expect(parsed.thresholds.confidentDish, 0.4);
+    });
+
+    test('reads which dishes the components can be trusted for', () {
+      ModelLabels parse(String card) => ModelLabels.parse(
+          dishesTxt: 'com_tam\npho_bo', componentsTxt: 'c', modelCard: card);
+      expect(
+          parse('## Thành phần\r\ncomponent_dishes: com_tam, com_phan\r\n')
+              .componentDishes,
+          {'com_tam', 'com_phan'});
+      expect(parse('- `component_dishes`: `com_tam`').componentDishes,
+          {'com_tam'});
+      expect(parse('component_dishes:\nthreshold_ask: 0.2').componentDishes,
+          isEmpty);
+      expect(parse('threshold_ask: 0.2').componentDishes, isEmpty,
+          reason: 'an older card trusts no dish');
+      final recognition = interpretOutputs([
+        Float32List.fromList([0.9, 0.1]),
+        Float32List.fromList([0.8]),
+      ], parse('component_dishes: com_tam'));
+      expect(recognition.knowsComponentsOf('com_tam'), isTrue);
+      expect(recognition.knowsComponentsOf('pho_bo'), isFalse);
+      expect(const FoodRecognition().knowsComponentsOf('pho_bo'), isTrue);
     });
 
     test('rejects files the app could not map', () {
@@ -139,9 +167,28 @@ void main() {
       expect(rgbAt(input, 112, 213), near([0, 0, 255]));
     });
 
+    test('resizes to the size the model asks for', () {
+      final photo = img.Image(width: 640, height: 480);
+      expect(preprocessPhoto(img.encodePng(photo), size: 300),
+          hasLength(300 * 300 * 3));
+    });
+
     test('rejects bytes that are not an image', () {
       expect(() => preprocessPhoto(Uint8List.fromList([1, 2, 3])),
           throwsFormatException);
+    });
+  });
+
+  group('the other-dish output', () {
+    test('is never a guess and flags photos of unknown food', () {
+      const unknown = FoodRecognition(
+          dishes: {'com_tam': 0.2, otherDishCode: 0.7, 'pho_bo': 0.1});
+      expect(unknown.topDishes().map((e) => e.key), ['com_tam', 'pho_bo']);
+      expect(unknown.looksUnknown, isTrue);
+      const known =
+          FoodRecognition(dishes: {'com_tam': 0.8, otherDishCode: 0.2});
+      expect(known.looksUnknown, isFalse);
+      expect(known.topDishes(1).single.key, 'com_tam');
     });
   });
 
@@ -170,11 +217,12 @@ void main() {
   group('TfliteFoodRecognizer', () {
     test('prepares the photo, runs the model and keeps its thresholds',
         () async {
+      // A 300x300 model, like EfficientNetB3: the photo is prepared to fit.
       final runner = _FakeRunner([
         Float32List.fromList([0.7, 0.3]),
         Float32List.fromList([0.95, 0.4, 0.1]),
-      ]);
-      final input = Float32List(modelInputSize * modelInputSize * 3);
+      ], inputSize: 300);
+      final input = Float32List(300 * 300 * 3);
       final recognizer = TfliteFoodRecognizer(
         labels: const ModelLabels(
           dishes: ['com_tam', 'pho_bo'],
@@ -182,8 +230,9 @@ void main() {
           thresholds: RecognitionThresholds(checked: 0.9),
         ),
         openRunner: () async => runner,
-        prepare: (path) async {
+        prepare: (path, size) async {
           expect(path, 'plate.jpg');
+          expect(size, 300);
           return input;
         },
       );
@@ -192,6 +241,9 @@ void main() {
       expect(identical(runner.lastInput, input), isTrue);
       expect(result.dishes['com_tam'], closeTo(0.7, 1e-6));
       expect(result.thresholds.checked, 0.9);
+      expect(result.timing, isNotNull, reason: 'shown on the result screen');
+      expect(
+          result.timing!.total, result.timing!.prepare + result.timing!.model);
     });
 
     test('runs photos one after another, never overlapping', () async {
@@ -208,7 +260,7 @@ void main() {
       final recognizer = TfliteFoodRecognizer(
         labels: labels,
         openRunner: () async => runner,
-        prepare: (_) async => Float32List(0),
+        prepare: (_, __) async => Float32List(0),
       );
       final results = await Future.wait(
           [for (var i = 0; i < 3; i++) recognizer.recognize('$i.jpg')]);
@@ -225,7 +277,7 @@ void main() {
           if (++attempts == 1) throw StateError('busy');
           return _FakeRunner([Float32List(2), Float32List(3)]);
         },
-        prepare: (_) async => Float32List(0),
+        prepare: (_, __) async => Float32List(0),
       );
       await expectLater(recognizer.recognize('a.jpg'), throwsStateError);
       await recognizer.recognize('a.jpg');
@@ -281,7 +333,10 @@ void main() {
       dishesTxt: dishesFile.readAsStringSync(),
       componentsTxt: File('$modelFolder/components.txt').readAsStringSync(),
     );
-    expect(labels.dishes.where((code) => data.dish(code) == null), isEmpty);
+    expect(
+        labels.dishes
+            .where((code) => code != otherDishCode && data.dish(code) == null),
+        isEmpty);
     final addable = {for (final c in data.addableComponents) c.code};
     expect(labels.components.where((code) => !addable.contains(code)), isEmpty);
   });

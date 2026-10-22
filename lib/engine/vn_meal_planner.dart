@@ -15,6 +15,11 @@ const defaultNodeBudget = 300000;
 
 const _gramsPerBowlOfRice = 150.0;
 
+/// Whole dishes scoring within this share of the meal's calories of the best
+/// one count as equally good (the score is about one point per kcal of
+/// error), so a 600 kcal breakfast accepts dishes up to [_nearTie]·600 worse.
+const _nearTie = 0.12;
+
 /// A cutting meal up to this size keeps rice to 200 g; above it (people
 /// with a high TDEE) up to 300 g.
 const _cutFullMeal = 600.0;
@@ -133,18 +138,53 @@ Map<String, dynamic> generateVnMealPlan(
           ? const {'Breakfast': 0.25, 'Lunch': 0.375, 'Dinner': 0.375}
           : const {'Breakfast': 0.30, 'Lunch': 0.35, 'Dinner': 0.35};
 
-  final meals = <String, dynamic>{};
+  // Vietnamese breakfasts and snacks carry little protein, so they get a
+  // smaller share of it; lunch and dinner take the rest.
+  final proteinShares = {
+    for (final slot in ratios.keys)
+      slot: switch (slot) {
+        'Breakfast' => 0.20,
+        'Snack' => 0.05,
+        _ => 0.0,
+      },
+  };
+  final mainMeals = ratios.keys.where((s) => s == 'Lunch' || s == 'Dinner');
+  final rest = 1 - proteinShares.values.fold(0.0, (a, b) => a + b);
+  for (final slot in mainMeals) {
+    proteinShares[slot] = rest / mainMeals.length;
+  }
+
+  // Whole-dish meals are planned first; whatever they miss carries over to
+  // lunch and dinner, whose rice combos can absorb it.
+  final order = [
+    for (final slot in ['Breakfast', 'Snack', 'Lunch', 'Dinner'])
+      if (ratios.containsKey(slot)) slot,
+  ];
+  final planned = <String, Map<String, dynamic>>{};
+  var leftCalories = dailyCalories, leftProtein = proteinTarget;
+  var leftCalorieShare = 1.0, leftProteinShare = 1.0;
   var calories = 0.0, protein = 0.0, carbs = 0.0, fat = 0.0;
   final stopwatch = Stopwatch()..start();
-  for (final MapEntry(key: slot, value: share) in ratios.entries) {
-    final meal =
-        planner.planMeal(slot, dailyCalories * share, proteinTarget * share);
-    meals[slot] = meal;
+  for (final slot in order) {
+    final calorieShare = ratios[slot]! / leftCalorieShare;
+    final proteinShare = proteinShares[slot]! / leftProteinShare;
+    final meal = planner.planMeal(
+      slot,
+      math.max(100.0, leftCalories * calorieShare),
+      math.max(1.0, leftProtein * proteinShare),
+    );
+    planned[slot] = meal;
+    leftCalories -= meal['calo'] as double;
+    leftProtein -= meal['protein'] as double;
+    leftCalorieShare -= ratios[slot]!;
+    leftProteinShare -= proteinShares[slot]!;
     calories += meal['calo'] as double;
     protein += meal['protein'] as double;
     carbs += meal['carb'] as double;
     fat += meal['fat'] as double;
   }
+  // Shown in the order of the day.
+  final meals = {for (final slot in ratios.keys) slot: planned[slot]};
   return {
     'planner': 'vn',
     'seed': seed,
@@ -263,28 +303,42 @@ class _Planner {
           targetProtein: targetProtein,
         );
 
-    // Whole dishes: every serving size of a few sampled dishes.
-    final dishes = _sample(
-      [
-        for (final tag in _tagged('dish', slot))
-          if (data.dish(tag.code) != null) data.dish(tag.code)!,
-      ],
-      5,
-      (dish) => _usedDishes.contains(dish.code),
-    );
+    // Whole dishes: every serving size of every tagged dish not eaten yet
+    // today. The seed picks among those nearly as good as the best, so
+    // days vary without settling for a clearly worse dish.
+    final tagged = [
+      for (final tag in _tagged('dish', slot))
+        if (data.dish(tag.code) != null) data.dish(tag.code)!,
+    ];
+    final fresh = [
+      for (final dish in tagged)
+        if (!_usedDishes.contains(dish.code)) dish,
+    ];
     final ceiling = targetCalories * calorieOvershootRatio;
-    for (final dish in dishes) {
+    final bestPerDish = <String, (double, _Choice)>{};
+    for (final dish in fresh.isNotEmpty ? fresh : tagged) {
       for (final servings in _servings()) {
         stats.nodes++;
         final choice = _dishChoice(dish, servings);
         if (choice.calories > ceiling) continue;
         final value =
             score(choice.calories, choice.protein, choice.carbs, choice.fat);
-        if (value < bestScore) {
-          bestScore = value;
-          best = [choice];
+        final previous = bestPerDish[dish.code];
+        if (previous == null || value < previous.$1) {
+          bestPerDish[dish.code] = (value, choice);
         }
       }
+    }
+    if (bestPerDish.isNotEmpty) {
+      final top = bestPerDish.values.map((entry) => entry.$1).reduce(math.min);
+      final near = [
+        for (final code in bestPerDish.keys.toList()..sort())
+          if (bestPerDish[code]!.$1 <= top + _nearTie * targetCalories)
+            bestPerDish[code]!,
+      ];
+      final pick = near[rng.nextInt(near.length)];
+      bestScore = pick.$1;
+      best = [pick.$2];
     }
 
     // Cơm phần: Branch & Bound over rice, mains, vegetables and soup,
@@ -385,7 +439,7 @@ class _Planner {
           if (data.components[tag.code]?.hasNutrition ?? false)
             data.components[tag.code]!,
       ],
-      6,
+      4,
       (main) => _usedMains.contains(main.code),
     );
     final sides = _tagged('side', slot)

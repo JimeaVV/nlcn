@@ -22,6 +22,9 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // flutter_local_notifications schedules with java.time, which older
+        // Android versions get through desugaring.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -52,6 +55,19 @@ android {
             signingConfig = signingConfigs.getByName(if (hasReleaseKey) "release" else "debug")
         }
     }
+
+    packaging {
+        jniLibs {
+            // The model runs on the CPU; tflite_flutter opens LiteRT's GPU
+            // delegate library only when a GpuDelegate is created, which the
+            // app never does. It is 2.5 MB per CPU type.
+            excludes += "**/libtensorflowlite_gpu_jni.so"
+            // Compress native libraries inside the APK: the file people
+            // download and share shrinks by about a third, and Android
+            // unpacks them once at install.
+            useLegacyPackaging = true
+        }
+    }
 }
 
 kotlin {
@@ -62,4 +78,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

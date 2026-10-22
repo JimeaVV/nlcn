@@ -1915,7 +1915,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanCameraDenied.
   ///
   /// In vi, this message translates to:
-  /// **'OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.'**
+  /// **'MacroRunner chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.'**
   String get scanCameraDenied;
 
   /// No description provided for @scanNoCamera.
@@ -2055,6 +2055,440 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.'**
   String get overloadBodyweightDecrease;
+
+  /// No description provided for @scanNotInApp.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.'**
+  String get scanNotInApp;
+
+  /// No description provided for @scanRecognizing.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang nhận diện món…'**
+  String get scanRecognizing;
+
+  /// No description provided for @scanPortion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khẩu phần cả món'**
+  String get scanPortion;
+
+  /// No description provided for @scanSuggestions.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có thể có thêm ({count})'**
+  String scanSuggestions(int count);
+
+  /// No description provided for @scanSuggestionsChosen.
+  ///
+  /// In vi, this message translates to:
+  /// **'Có thể có thêm ({count}) · đã chọn {chosen}'**
+  String scanSuggestionsChosen(int count, int chosen);
+
+  /// No description provided for @scanMacroGrams.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g'**
+  String scanMacroGrams(String protein, String carbs, String fat);
+
+  /// No description provided for @scanTiming.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhận diện trong {total} s (ảnh {photo} s · model {model} s)'**
+  String scanTiming(String total, String photo, String model);
+
+  /// No description provided for @diaryFavorites.
+  ///
+  /// In vi, this message translates to:
+  /// **'Yêu thích'**
+  String get diaryFavorites;
+
+  /// No description provided for @diaryRecent.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gần đây'**
+  String get diaryRecent;
+
+  /// No description provided for @diaryQuickHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chạm một món để thêm ngay vào bữa đã chọn.'**
+  String get diaryQuickHint;
+
+  /// No description provided for @diaryQuickChip.
+  ///
+  /// In vi, this message translates to:
+  /// **'{name} · {calories} kcal'**
+  String diaryQuickChip(String name, String calories);
+
+  /// No description provided for @diaryFavoriteAdd.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm vào yêu thích'**
+  String get diaryFavoriteAdd;
+
+  /// No description provided for @diaryFavoriteRemove.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bỏ khỏi yêu thích'**
+  String get diaryFavoriteRemove;
+
+  /// No description provided for @diaryFavoriteAdded.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã thêm {name} vào yêu thích.'**
+  String diaryFavoriteAdded(String name);
+
+  /// No description provided for @diaryFavoriteRemoved.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã bỏ {name} khỏi yêu thích.'**
+  String diaryFavoriteRemoved(String name);
+
+  /// No description provided for @diaryCopyToToday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chép bữa này sang hôm nay'**
+  String get diaryCopyToToday;
+
+  /// No description provided for @diaryRepeatYesterday.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ăn giống hôm qua ({count} món · {calories} kcal)'**
+  String diaryRepeatYesterday(String count, String calories);
+
+  /// No description provided for @diaryCopied.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã chép {count} món.'**
+  String diaryCopied(String count);
+
+  /// No description provided for @lastSessionLine.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lần trước ({date}): {weight} kg × {reps}'**
+  String lastSessionLine(String date, String weight, String reps);
+
+  /// No description provided for @lastSessionSuggestion.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gợi ý hôm nay: {weight} kg × {reps} lần'**
+  String lastSessionSuggestion(String weight, String reps);
+
+  /// No description provided for @restTimerStart.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bấm giờ nghỉ'**
+  String get restTimerStart;
+
+  /// No description provided for @restTimerLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nghỉ {time}'**
+  String restTimerLabel(String time);
+
+  /// No description provided for @restTimerDone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hết giờ nghỉ, vào hiệp tiếp!'**
+  String get restTimerDone;
+
+  /// No description provided for @restTimerMore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm 15 giây'**
+  String get restTimerMore;
+
+  /// No description provided for @restTimerLess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bớt 15 giây'**
+  String get restTimerLess;
+
+  /// No description provided for @restTimerStop.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dừng bấm giờ'**
+  String get restTimerStop;
+
+  /// No description provided for @adaptiveTdeeTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'TDEE theo dữ liệu thật'**
+  String get adaptiveTdeeTitle;
+
+  /// No description provided for @adaptiveTdeeValue.
+  ///
+  /// In vi, this message translates to:
+  /// **'{tdee} kcal/ngày'**
+  String adaptiveTdeeValue(String tdee);
+
+  /// No description provided for @adaptiveTdeeDetails.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.'**
+  String adaptiveTdeeDetails(
+      String days, String intake, String weighIns, String trend);
+
+  /// No description provided for @adaptiveTdeeCompare.
+  ///
+  /// In vi, this message translates to:
+  /// **'Công thức Mifflin-St Jeor ước tính {formula} kcal.'**
+  String adaptiveTdeeCompare(String formula);
+
+  /// No description provided for @adaptiveTdeeUse.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dùng làm mục tiêu ({calories} kcal)'**
+  String adaptiveTdeeUse(String calories);
+
+  /// No description provided for @adaptiveTdeeUsed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.'**
+  String adaptiveTdeeUsed(String calories);
+
+  /// No description provided for @adaptiveTdeeNeedMore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất {days} ngày và cân ít nhất {weighIns} lần, lần đầu và lần cuối cách nhau từ {span} ngày. Hiện có {haveDays} ngày ghi ăn, {haveWeighIns} lần cân.'**
+  String adaptiveTdeeNeedMore(String days, String weighIns, String span,
+      String haveDays, String haveWeighIns);
+
+  /// No description provided for @adaptiveTdeeUnsure.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.'**
+  String adaptiveTdeeUnsure(String tdee, String formula);
+
+  /// No description provided for @adaptiveTdeeInfo.
+  ///
+  /// In vi, this message translates to:
+  /// **'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.'**
+  String get adaptiveTdeeInfo;
+
+  /// No description provided for @waterTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nước uống'**
+  String get waterTitle;
+
+  /// No description provided for @waterProgress.
+  ///
+  /// In vi, this message translates to:
+  /// **'{drunk} / {target} ml'**
+  String waterProgress(String drunk, String target);
+
+  /// No description provided for @waterGlasses.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} ly, mỗi ly {glass} ml'**
+  String waterGlasses(String count, String glass);
+
+  /// No description provided for @waterAdd.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm một ly'**
+  String get waterAdd;
+
+  /// No description provided for @waterRemove.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bớt một ly'**
+  String get waterRemove;
+
+  /// No description provided for @waterNote.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu tham khảo 2 lít mỗi ngày; cần nhiều hơn khi trời nóng hoặc tập nặng.'**
+  String get waterNote;
+
+  /// No description provided for @streakDays.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} ngày liên tục ghi ăn'**
+  String streakDays(String count);
+
+  /// No description provided for @streakKeep.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi bữa hôm nay để giữ chuỗi.'**
+  String get streakKeep;
+
+  /// No description provided for @streakNone.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi một bữa hôm nay để bắt đầu chuỗi ngày.'**
+  String get streakNone;
+
+  /// No description provided for @weekTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'7 ngày qua'**
+  String get weekTitle;
+
+  /// No description provided for @weekLogged.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi ăn {days}/7 ngày'**
+  String weekLogged(String days);
+
+  /// No description provided for @weekAverage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trung bình {calories} kcal • {protein} g protein mỗi ngày ghi'**
+  String weekAverage(String calories, String protein);
+
+  /// No description provided for @weekVsTarget.
+  ///
+  /// In vi, this message translates to:
+  /// **'So với mục tiêu {target} kcal: {diff} kcal/ngày'**
+  String weekVsTarget(String target, String diff);
+
+  /// No description provided for @weekTraining.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tập {days} ngày'**
+  String weekTraining(String days);
+
+  /// No description provided for @weekWeight.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cân nặng {change} kg'**
+  String weekWeight(String change);
+
+  /// No description provided for @weekEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có dữ liệu trong 7 ngày qua.'**
+  String get weekEmpty;
+
+  /// No description provided for @remindersTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhắc ghi bữa'**
+  String get remindersTitle;
+
+  /// No description provided for @remindersBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.'**
+  String get remindersBody;
+
+  /// No description provided for @remindersSwitch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bật nhắc nhở'**
+  String get remindersSwitch;
+
+  /// No description provided for @remindersDenied.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa được cấp quyền thông báo. Hãy bật trong Cài đặt của Android.'**
+  String get remindersDenied;
+
+  /// No description provided for @remindersChangeTime.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đổi giờ nhắc {meal}'**
+  String remindersChangeTime(String meal);
+
+  /// No description provided for @reminderNotificationTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'{meal}: bạn đã ghi chưa?'**
+  String reminderNotificationTitle(String meal);
+
+  /// No description provided for @reminderNotificationBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở MacroRunner để ghi món, chỉ mất vài giây.'**
+  String get reminderNotificationBody;
+
+  /// No description provided for @reminderChannel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhắc ghi bữa'**
+  String get reminderChannel;
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sao lưu dữ liệu'**
+  String get backupTitle;
+
+  /// No description provided for @backupBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu toàn bộ hồ sơ, nhật ký ăn, nước uống, cân nặng và lịch sử tập vào một file JSON để cất giữ hoặc chuyển sang máy khác.'**
+  String get backupBody;
+
+  /// No description provided for @backupExport.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xuất file sao lưu'**
+  String get backupExport;
+
+  /// No description provided for @backupImport.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khôi phục từ file'**
+  String get backupImport;
+
+  /// No description provided for @backupImportTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khôi phục dữ liệu?'**
+  String get backupImportTitle;
+
+  /// No description provided for @backupImportBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Toàn bộ dữ liệu hiện có trên máy sẽ được thay bằng dữ liệu trong file. Việc này không hoàn tác được.'**
+  String get backupImportBody;
+
+  /// No description provided for @backupRestore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khôi phục'**
+  String get backupRestore;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã khôi phục dữ liệu.'**
+  String get backupRestored;
+
+  /// No description provided for @backupInvalid.
+  ///
+  /// In vi, this message translates to:
+  /// **'File này không phải bản sao lưu MacroRunner hợp lệ.'**
+  String get backupInvalid;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tạo được file sao lưu. Hãy thử lại.'**
+  String get backupFailed;
+
+  /// No description provided for @widgetTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'MacroRunner hôm nay'**
+  String get widgetTitle;
+
+  /// No description provided for @widgetWater.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nước {drunk} / {target} L'**
+  String widgetWater(String drunk, String target);
+
+  /// No description provided for @widgetStreak.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuỗi {count} ngày'**
+  String widgetStreak(String count);
 }
 
 class _AppLocalizationsDelegate

@@ -5,7 +5,9 @@ import 'package:image/image.dart' as img;
 
 import 'food_recognizer.dart';
 
-/// Side of the square image the model takes (docs/MODEL_CONTRACT.md §6).
+/// Side of the square image most models take. Each model sets its own
+/// (EfficientNetB3 reads 300); the app reads it from the .tflite file
+/// (docs/MODEL_CONTRACT.md §6).
 const modelInputSize = 224;
 
 /// The label files that ship next to the model, parsed.
@@ -14,11 +16,14 @@ class ModelLabels {
     required this.dishes,
     required this.components,
     this.thresholds = RecognitionThresholds.contract,
+    this.componentDishes,
   });
 
   /// `dishes.txt` and `components.txt` hold one code per line in output
   /// order; `MODEL_CARD.md` may override the thresholds with lines such as
-  /// `threshold_checked: 0.55`.
+  /// `threshold_checked: 0.55`, and lists the dishes whose components the
+  /// model learned in `component_dishes: com_tam, com_phan`. A card without
+  /// that line trusts the components of no dish.
   factory ModelLabels.parse({
     required String dishesTxt,
     required String componentsTxt,
@@ -35,12 +40,27 @@ class ModelLabels {
       dishes: dishes,
       components: components,
       thresholds: _thresholds(modelCard),
+      componentDishes: _componentDishes(modelCard),
     );
   }
 
   final List<String> dishes;
   final List<String> components;
   final RecognitionThresholds thresholds;
+
+  /// See [FoodRecognition.componentDishes].
+  final Set<String>? componentDishes;
+
+  static Set<String> _componentDishes(String modelCard) {
+    final match = RegExp(r'^\s*(?:[-*]\s*)?`?component_dishes`?\s*:(.*)$',
+            multiLine: true)
+        .firstMatch(modelCard);
+    if (match == null) return const {};
+    return {
+      for (final code in match.group(1)!.split(RegExp(r'[,\s`]+')))
+        if (code.isNotEmpty) code,
+    };
+  }
 
   static List<String> _codes(String text, String file) {
     final codes = [
@@ -82,7 +102,7 @@ class ModelLabels {
 /// float32 in row-major HWC order. Normalisation happens inside the model.
 ///
 /// Pure Dart so it can run in a background isolate.
-Float32List preprocessPhoto(Uint8List encoded) {
+Float32List preprocessPhoto(Uint8List encoded, {int size = modelInputSize}) {
   final decoded = img.decodeImage(encoded);
   if (decoded == null) throw const FormatException('Not a readable image');
   // Phone cameras store rotation in EXIF instead of turning the pixels.
@@ -97,14 +117,14 @@ Float32List preprocessPhoto(Uint8List encoded) {
   );
   final resized = img.copyResize(
     square,
-    width: modelInputSize,
-    height: modelInputSize,
+    width: size,
+    height: size,
     interpolation: img.Interpolation.linear,
   );
-  final input = Float32List(modelInputSize * modelInputSize * 3);
+  final input = Float32List(size * size * 3);
   var i = 0;
-  for (var y = 0; y < modelInputSize; y++) {
-    for (var x = 0; x < modelInputSize; x++) {
+  for (var y = 0; y < size; y++) {
+    for (var x = 0; x < size; x++) {
       final pixel = resized.getPixel(x, y);
       input[i++] = pixel.r.toDouble();
       input[i++] = pixel.g.toDouble();
@@ -142,5 +162,6 @@ FoodRecognition interpretOutputs(
         labels.components[i]: probability(componentOut[i]),
     },
     thresholds: labels.thresholds,
+    componentDishes: labels.componentDishes,
   );
 }

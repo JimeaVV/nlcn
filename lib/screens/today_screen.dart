@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../core/haptics.dart';
+import '../engine/daily_habits.dart';
 import '../engine/nutrition_targets.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
@@ -8,6 +10,7 @@ import '../models/history_models.dart';
 import '../models/user_profile.dart';
 import '../models/weight_entry.dart';
 import '../services/database_service.dart';
+import '../services/home_widget_sync.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/error_box.dart';
 
@@ -44,6 +47,10 @@ class TodayScreenState extends State<TodayScreen> {
   List<WeightEntry> _weights = const [];
   List<WorkoutLogEntry> _todayLogs = const [];
   WorkoutHistoryEntry? _lastWorkout;
+  int _water = 0;
+  int _streak = 0;
+  bool _loggedToday = false;
+  WeekSummary? _week;
   int _loadVersion = 0;
 
   @override
@@ -61,6 +68,15 @@ class TodayScreenState extends State<TodayScreen> {
       final weights = await _database.getWeightHistory(limit: 30);
       final logs = await _database.getWorkoutLogs();
       final workouts = await _database.getWorkoutHistory();
+      // A year of daily totals covers the streak and the week. Both are
+      // extras: the day's overview still shows if they fail.
+      var days = const <DateTime, FoodLogTotals>{};
+      var water = 0;
+      try {
+        days = await _database.getDailyTotals(
+            DateTime(now.year, now.month, now.day - 365), now);
+        water = await _database.getWater(now);
+      } catch (_) {}
       Map<String, dynamic>? targets;
       if (row != null) {
         try {
@@ -81,9 +97,19 @@ class TodayScreenState extends State<TodayScreen> {
             if (diaryDateKey(log.performedAt) == today) log,
         ];
         _lastWorkout = workouts.isEmpty ? null : workouts.first;
+        _water = water;
+        _streak = loggingStreak(days.keys, now);
+        _loggedToday = food.isNotEmpty;
+        _week = summarizeWeek(
+          dailyTotals: days,
+          workoutLogs: logs,
+          weights: weights,
+          today: now,
+        );
         _loading = false;
         _loadFailed = false;
       });
+      _syncHomeWidget();
     } catch (_) {
       if (!mounted || version != _loadVersion) return;
       setState(() {
@@ -91,6 +117,40 @@ class TodayScreenState extends State<TodayScreen> {
         _loadFailed = true;
       });
     }
+  }
+
+  /// Adds [delta] ml (negative to remove) to what is already counted, so
+  /// two quick taps count twice.
+  Future<void> _addWater(int delta) async {
+    final value = (_water + delta).clamp(0, 10000);
+    Haptics.tap();
+    setState(() => _water = value);
+    try {
+      await _database.setWater(DateTime.now(), value);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.diarySaveFailed)));
+      }
+    }
+    _syncHomeWidget();
+  }
+
+  /// The home-screen widget shows the same numbers as this screen.
+  void _syncHomeWidget() {
+    if (!mounted) return;
+    final l10n = context.l10n;
+    final number = context.formatNumber;
+    final target = (_targets?['target_calories'] as num?)?.toDouble();
+    HomeWidgetSync.update(
+      title: l10n.widgetTitle,
+      calories: target == null
+          ? '${number(_eaten.calories)} kcal'
+          : l10n.diaryCaloriesProgress(number(_eaten.calories), number(target)),
+      water: l10n.widgetWater(number(_water / 1000, decimals: 1),
+          number(waterTargetMl / 1000, decimals: 1)),
+      streak: l10n.widgetStreak('$_streak'),
+    );
   }
 
   @override
@@ -120,10 +180,18 @@ class TodayScreenState extends State<TodayScreen> {
               _NutritionCard(
                 eaten: _eaten,
                 targets: _targets,
+                streak: _streak,
+                loggedToday: _loggedToday,
                 onOpenDiary: widget.onOpenDiary,
                 onScan: widget.onScan,
               ),
               const SizedBox(height: 14),
+              _WaterCard(ml: _water, onAdd: _addWater),
+              const SizedBox(height: 14),
+              if (_week != null) ...[
+                _WeekCard(week: _week!, targets: _targets),
+                const SizedBox(height: 14),
+              ],
               _WeightCard(weights: _weights, onOpen: widget.onOpenProfile),
               const SizedBox(height: 14),
               _TrainingCard(
@@ -170,12 +238,16 @@ class _NutritionCard extends StatelessWidget {
   const _NutritionCard({
     required this.eaten,
     required this.targets,
+    required this.streak,
+    required this.loggedToday,
     required this.onOpenDiary,
     required this.onScan,
   });
 
   final FoodLogTotals eaten;
   final Map<String, dynamic>? targets;
+  final int streak;
+  final bool loggedToday;
   final VoidCallback? onOpenDiary;
   final VoidCallback? onScan;
 
@@ -191,6 +263,28 @@ class _NutritionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            key: const ValueKey('today-streak'),
+            children: [
+              Icon(Icons.whatshot_rounded,
+                  size: 18,
+                  color: streak > 0 ? Colors.orange : CyberColors.muted),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  streak == 0
+                      ? l10n.streakNone
+                      : loggedToday
+                          ? l10n.streakDays('$streak')
+                          : '${l10n.streakDays('$streak')} • ${l10n.streakKeep}',
+                  style: TextStyle(
+                      color: streak > 0 ? Colors.orange : CyberColors.muted,
+                      fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
           Text(
             calorieTarget == null
                 ? '${number(eaten.calories)} kcal'
@@ -240,6 +334,126 @@ class _NutritionCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _WaterCard extends StatelessWidget {
+  const _WaterCard({required this.ml, required this.onAdd});
+
+  final int ml;
+  final ValueChanged<int> onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final number = context.formatNumber;
+    return CyberCard(
+      key: const ValueKey('today-water'),
+      title: l10n.waterTitle,
+      icon: Icons.water_drop_outlined,
+      accent: CyberColors.cyan,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconButton.outlined(
+                key: const ValueKey('water-remove'),
+                tooltip: l10n.waterRemove,
+                onPressed: ml == 0 ? null : () => onAdd(-waterGlassMl),
+                icon: const Icon(Icons.remove_rounded),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      l10n.waterProgress(number(ml), number(waterTargetMl)),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text(
+                      l10n.waterGlasses(
+                          '${ml ~/ waterGlassMl}', '$waterGlassMl'),
+                      style: TextStyle(color: CyberColors.muted),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton.filled(
+                key: const ValueKey('water-add'),
+                tooltip: l10n.waterAdd,
+                onPressed: () => onAdd(waterGlassMl),
+                icon: const Icon(Icons.add_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              minHeight: 8,
+              value: (ml / waterTargetMl).clamp(0.0, 1.0),
+              color: CyberColors.cyan,
+              backgroundColor: CyberColors.surfaceAlt,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(l10n.waterNote,
+              style: TextStyle(color: CyberColors.muted, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekCard extends StatelessWidget {
+  const _WeekCard({required this.week, required this.targets});
+
+  final WeekSummary week;
+  final Map<String, dynamic>? targets;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final number = context.formatNumber;
+    final target = (targets?['target_calories'] as num?)?.toDouble();
+    final change = week.weightChange;
+    final muted = TextStyle(color: CyberColors.muted);
+    return CyberCard(
+      key: const ValueKey('today-week'),
+      title: l10n.weekTitle,
+      icon: Icons.calendar_view_week_rounded,
+      accent: CyberColors.magenta,
+      child: week.loggedDays == 0 && week.trainingDays == 0 && change == null
+          ? Text(l10n.weekEmpty, style: muted)
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.weekLogged('${week.loggedDays}'),
+                    style: Theme.of(context).textTheme.titleMedium),
+                if (week.loggedDays > 0) ...[
+                  const SizedBox(height: 4),
+                  Text(l10n.weekAverage(number(week.averageCalories),
+                      number(week.averageProtein, decimals: 1))),
+                  if (target != null)
+                    Text(
+                      l10n.weekVsTarget(number(target),
+                          context.formatSigned(week.averageCalories - target)),
+                      style: muted,
+                    ),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  [
+                    l10n.weekTraining('${week.trainingDays}'),
+                    if (change != null)
+                      l10n.weekWeight(
+                          context.formatSigned(change, decimals: 1)),
+                  ].join(' • '),
+                  style: muted,
+                ),
+              ],
+            ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../services/food_recognizer.dart';
 import 'food_log_entry.dart';
 import 'vn_food.dart';
@@ -11,6 +13,7 @@ class PlateItem {
     required this.amount,
     this.confidence,
     this.uncertain = false,
+    this.suggested = false,
   });
 
   final VnComponent component;
@@ -25,6 +28,10 @@ class PlateItem {
 
   /// Shown as "maybe" because the model was not sure.
   bool uncertain;
+
+  /// Outside the dish's recipe, offered because the model saw it; the screen
+  /// lists these apart from the dish.
+  final bool suggested;
 
   double get step => inUnits ? 0.5 : 10;
 
@@ -45,23 +52,30 @@ class PlateItem {
 
 /// The dish chosen for a photo and the components the user keeps.
 class ScanPlate {
-  ScanPlate._(this.dish, this.items);
+  ScanPlate._(this._data, this.dish, this.items);
 
   /// Default parts of [dish], adjusted by what [recognition] saw: confident
-  /// components are ticked, unsure ones are asked about, and confident
-  /// components outside the usual recipe are added.
+  /// components are ticked and unsure ones are asked about. Confident
+  /// components outside the usual recipe are suggested but never ticked:
+  /// the model learned components from only some photo sets, so it is least
+  /// reliable there, and food that is not on the plate would inflate the
+  /// total.
   factory ScanPlate.forDish(
     VnFoodData data,
     VnDish dish,
     FoodRecognition recognition,
   ) {
-    final seen = recognition.components;
+    // Without trusted component outputs the plate follows the recipe, as it
+    // does when no model is bundled.
+    final seen = recognition.knowsComponentsOf(dish.code)
+        ? recognition.components
+        : const <String, double>{};
     final items = <PlateItem>[];
     for (final part in dish.parts) {
       final component = data.components[part.component]!;
       final score = seen[component.code];
       final included = component.isBase ||
-          recognition.isEmpty ||
+          seen.isEmpty ||
           (score ?? 0) >= recognition.thresholds.checked;
       final inUnits = part.defaultUnits != null ||
           (part.defaultGrams == null && component.unitNameVi != null);
@@ -76,29 +90,49 @@ class ScanPlate {
       ));
     }
     final listed = {for (final part in dish.parts) part.component};
+    // A model may tune its ticked threshold low for the usual parts; an
+    // extra still needs at least the contract's default to be suggested.
+    final suggestAt = math.max(
+        recognition.thresholds.checked, RecognitionThresholds.contract.checked);
     for (final entry in seen.entries) {
       final component = data.components[entry.key];
       if (component == null ||
           component.isBase ||
           listed.contains(entry.key) ||
-          entry.value < recognition.thresholds.ask) {
+          entry.value < suggestAt) {
         continue;
       }
-      final confident = entry.value >= recognition.thresholds.checked;
+      final portion = typicalPortion(data, component);
       items.add(PlateItem(
         component: component,
-        included: confident,
-        inUnits: component.unitNameVi != null,
-        amount: component.unitNameVi != null ? 1 : 100,
+        included: false,
+        inUnits: portion.inUnits,
+        amount: portion.amount,
         confidence: entry.value,
-        uncertain: !confident,
+        uncertain: true,
+        suggested: true,
       ));
     }
-    return ScanPlate._(dish, items);
+    return ScanPlate._(data, dish, items);
   }
 
+  final VnFoodData _data;
   final VnDish dish;
   final List<PlateItem> items;
+
+  /// Servings of the whole dish, 1 for the usual portion.
+  double get portion => _portion;
+  double _portion = 1;
+
+  /// Scales every component at once, e.g. 1.5 for a large bowl; amounts the
+  /// user changed keep their share.
+  set portion(double value) {
+    if (value <= 0 || value == _portion) return;
+    for (final item in items) {
+      item.amount = item.amount * value / _portion;
+    }
+    _portion = value;
+  }
 
   Iterable<PlateItem> get selected => items.where((item) => item.included);
 
@@ -118,14 +152,24 @@ class ScanPlate {
       .where((item) => item.hasNutrition)
       .fold(0, (sum, item) => sum + item.protein);
 
+  double get carbs => selected
+      .where((item) => item.hasNutrition)
+      .fold(0, (sum, item) => sum + item.carbs);
+
+  double get fat => selected
+      .where((item) => item.hasNutrition)
+      .fold(0, (sum, item) => sum + item.fat);
+
   /// Adds a component the user found on the plate; the model did not see it.
+  /// It starts at its usual portion, scaled like the rest of the dish.
   void add(VnComponent component) {
     if (items.any((item) => item.component.code == component.code)) return;
+    final typical = typicalPortion(_data, component);
     items.add(PlateItem(
       component: component,
       included: true,
-      inUnits: component.unitNameVi != null,
-      amount: component.unitNameVi != null ? 1 : 100,
+      inUnits: typical.inUnits,
+      amount: typical.amount * _portion,
     ));
   }
 
@@ -155,4 +199,39 @@ class ScanPlate {
         ),
     ];
   }
+}
+
+/// How much of [component] a plate usually holds when it is added outside the
+/// dish's recipe: the median amount among the dishes that list it, in units
+/// when most of them count it in units (10 g of scallion oil, not 100 g).
+/// A component no dish lists starts at one unit, or 100 g without a unit.
+({bool inUnits, double amount}) typicalPortion(
+    VnFoodData data, VnComponent component) {
+  final units = <double>[];
+  final grams = <double>[];
+  for (final dish in data.dishes) {
+    for (final part in dish.parts) {
+      if (part.component != component.code) continue;
+      if (part.defaultUnits != null) {
+        units.add(part.defaultUnits!);
+      } else if (part.defaultGrams != null) {
+        grams.add(part.defaultGrams!);
+      }
+    }
+  }
+  if (units.isNotEmpty && units.length >= grams.length) {
+    return (inUnits: true, amount: _median(units));
+  }
+  if (grams.isNotEmpty) return (inUnits: false, amount: _median(grams));
+  return component.unitNameVi != null
+      ? (inUnits: true, amount: 1)
+      : (inUnits: false, amount: 100);
+}
+
+double _median(List<double> values) {
+  final sorted = [...values]..sort();
+  final middle = sorted.length ~/ 2;
+  return sorted.length.isOdd
+      ? sorted[middle]
+      : (sorted[middle - 1] + sorted[middle]) / 2;
 }

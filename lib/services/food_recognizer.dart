@@ -1,3 +1,7 @@
+/// The model's extra dish output for food the app does not know (contract
+/// 1.3): it has no nutrition and is never offered as a guess.
+const otherDishCode = 'khac';
+
 /// What a recognizer saw in one photo, following docs/MODEL_CONTRACT.md:
 /// a softmax over dishes and an independent probability per component.
 class FoodRecognition {
@@ -5,6 +9,8 @@ class FoodRecognition {
     this.dishes = const {},
     this.components = const {},
     this.thresholds = RecognitionThresholds.contract,
+    this.componentDishes,
+    this.timing,
   });
 
   static const empty = FoodRecognition();
@@ -18,13 +24,51 @@ class FoodRecognition {
   /// How the screen treats these probabilities; tuned per model.
   final RecognitionThresholds thresholds;
 
+  /// Dishes whose components the model learned well (MODEL_CARD.md
+  /// `component_dishes`). For any other dish the component outputs carry no
+  /// meaning, so they are ignored. Null trusts them for every dish.
+  final Set<String>? componentDishes;
+
+  /// How long this photo took, when a model ran.
+  final RecognitionTiming? timing;
+
+  FoodRecognition withTiming(RecognitionTiming timing) => FoodRecognition(
+        dishes: dishes,
+        components: components,
+        thresholds: thresholds,
+        componentDishes: componentDishes,
+        timing: timing,
+      );
+
+  /// Whether [components] can be used for a photo of [dish].
+  bool knowsComponentsOf(String dish) =>
+      componentDishes?.contains(dish) ?? true;
+
   bool get isEmpty => dishes.isEmpty && components.isEmpty;
 
-  /// The most likely dishes first, at most [count] of them.
+  /// The most likely dishes first, at most [count] of them; the "other"
+  /// output is left out.
   List<MapEntry<String, double>> topDishes([int count = 3]) =>
-      (dishes.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
+      (dishes.entries.where((entry) => entry.key != otherDishCode).toList()
+            ..sort((a, b) => b.value.compareTo(a.value)))
           .take(count)
           .toList(growable: false);
+
+  /// How sure the model is that the dish is not one the app knows.
+  double get otherProbability => dishes[otherDishCode] ?? 0;
+
+  /// True when the model thinks the photo shows a dish outside the app.
+  bool get looksUnknown => otherProbability >= thresholds.confidentDish;
+}
+
+/// Time spent on one photo: decoding and resizing it, then the model.
+class RecognitionTiming {
+  const RecognitionTiming({required this.prepare, required this.model});
+
+  final Duration prepare;
+  final Duration model;
+
+  Duration get total => prepare + model;
 }
 
 /// Thresholds for showing components. The contract sets the defaults; a

@@ -22,6 +22,13 @@ class _Database extends Fake implements DatabaseService {
   @override
   Future<Map<String, dynamic>?> getProfile() async => profile;
 
+  Map<DateTime, double> dailyCalories = const {};
+
+  @override
+  Future<Map<DateTime, double>> getDailyCalories(
+          DateTime from, DateTime to) async =>
+      dailyCalories;
+
   @override
   Future<List<WeightEntry>> getWeightHistory({int limit = 90}) async =>
       (List<WeightEntry>.of(weights)
@@ -415,6 +422,8 @@ void main() {
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
 
+    // The adaptive TDEE card sits above the weigh-ins.
+    await reveal(tester, find.byKey(const ValueKey('edit-weight-5')));
     expect(find.byKey(const ValueKey('edit-weight-5')), findsOneWidget);
     expect(find.byKey(const ValueKey('edit-weight-6')), findsNothing);
     final showAll = find.byKey(const ValueKey('weights-show-all'));
@@ -425,5 +434,41 @@ void main() {
     expect(find.byKey(const ValueKey('edit-weight-7')), findsOneWidget);
     expect(find.text('Thu gọn'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('TDEE measured from the diary can become the calorie target',
+      (tester) async {
+    final now = DateTime.now();
+    DateTime daysAgo(int days) => DateTime(now.year, now.month, now.day - days);
+    final database = _Database(profile: _profile(), weights: [
+      for (var ago = 21; ago >= 0; ago -= 3)
+        WeightEntry(id: ago + 1, weight: 70, recordedAt: daysAgo(ago)),
+    ])
+      ..dailyCalories = {for (var i = 0; i < 20; i++) daysAgo(i): 2500.0};
+    await open(tester, database);
+
+    final card = find.byKey(const ValueKey('profile-adaptive-tdee'));
+    await reveal(tester, card);
+    expect(find.text('2.500 kcal/ngày'), findsOneWidget);
+    expect(find.textContaining('Mifflin-St Jeor ước tính 2.625 kcal'),
+        findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('adaptive-tdee-use')));
+    await tester.pumpAndSettle();
+    expect(fieldText(tester, 'profile-calories'), '2500');
+    expect(database.savedProfiles, isEmpty,
+        reason: 'the target only applies once the profile is saved');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('without enough data the TDEE card says what is missing',
+      (tester) async {
+    final database = _Database(profile: _profile(), weights: [
+      WeightEntry(id: 1, weight: 70, recordedAt: DateTime.now()),
+    ]);
+    await open(tester, database);
+    await reveal(tester, find.byKey(const ValueKey('profile-adaptive-tdee')));
+    expect(find.textContaining('Hiện có 0 ngày ghi ăn, 1 lần cân.'),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('adaptive-tdee-use')), findsNothing);
   });
 }

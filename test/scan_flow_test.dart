@@ -9,6 +9,7 @@ import 'package:optifit/services/food_recognizer.dart';
 import 'package:optifit/services/scan_camera.dart';
 import 'package:optifit/services/vn_food_repository.dart';
 import 'package:optifit/widgets/scan_button_face.dart';
+import 'package:optifit/widgets/scan_sweep.dart';
 
 import 'helpers/localized_app.dart';
 import 'helpers/vn_food_fixture.dart';
@@ -147,6 +148,76 @@ void main() {
     expect(popped, isTrue);
   });
 
+  testWidgets('the scan sweep plays a full pass even for an instant answer',
+      (tester) async {
+    _tall(tester);
+    await tester.pumpWidget(localizedApp(
+      home: ScanResultScreen(
+        imagePath: 'plate.jpg',
+        data: fixtureVnFood(),
+        recognizer: _Recognizer(const FoodRecognition(
+            dishes: {'com_tam': 0.9}, components: {'com': 0.9})),
+        database: _Database(),
+      ),
+    ));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Cơm tấm · 90%'), findsOneWidget, reason: 'not blocked');
+    expect(find.byType(ScanSweep), findsOneWidget);
+    await tester.pump(ScanSweep.onePass);
+    await tester.pump();
+    expect(find.byType(ScanSweep), findsNothing);
+    expect(find.byKey(const ValueKey('scan-timing')), findsNothing,
+        reason: 'no timing without a model run');
+  });
+
+  testWidgets('the result shows how long recognition took', (tester) async {
+    _tall(tester);
+    await _openResult(
+      tester,
+      recognizer: _Recognizer(const FoodRecognition(
+              dishes: {'com_tam': 0.9}, components: {'com': 0.9})
+          .withTiming(const RecognitionTiming(
+              prepare: Duration(milliseconds: 640),
+              model: Duration(milliseconds: 180)))),
+      database: _Database(),
+    );
+    expect(find.text('Nhận diện trong 0,82 s (ảnh 0,64 s · model 0,18 s)'),
+        findsOneWidget);
+  });
+
+  testWidgets('suggestions stay folded and the portion scales the dish',
+      (tester) async {
+    _tall(tester);
+    await _openResult(
+      tester,
+      recognizer: _Recognizer(const FoodRecognition(
+        dishes: {'com_tam': 0.9},
+        components: {'com': 0.97, 'suon_nuong': 0.91, 'dua_leo_ca_chua': 0.9},
+      )),
+      database: _Database(),
+    );
+    // Rice 260 + chop 250 + sauce 12; bì and egg were not seen.
+    expect(find.text('Tổng: 522 kcal • 25,6 g protein'), findsOneWidget);
+    expect(find.text('Có thể có thêm (1)'), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('component-dua_leo_ca_chua')), findsNothing,
+        reason: 'outside the recipe: folded until asked for');
+
+    await tester.tap(find.byKey(const ValueKey('portion-2.0')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tổng: 1.044 kcal • 51,2 g protein'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('scan-suggestions')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(
+        of: find.byKey(const ValueKey('component-dua_leo_ca_chua')),
+        matching: find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+    expect(find.text('Có thể có thêm (1) · đã chọn 1'), findsOneWidget);
+    // The salad doubled with the dish: 200 g, 32 kcal.
+    expect(find.text('Tổng: 1.076 kcal • 52,6 g protein'), findsOneWidget);
+  });
+
   testWidgets(
       'without a model the user picks the dish and missing data '
       'blocks logging until unticked', (tester) async {
@@ -221,6 +292,12 @@ void main() {
     expect(find.byKey(const ValueKey('camera-preview')), findsOneWidget);
     expect(find.text('Đặt dĩa hoặc tô vào giữa khung'), findsOneWidget);
     expect(find.byType(ViewfinderFrame), findsOneWidget);
+    // The frame sits on the photo's centre, which the model reads.
+    final frame = tester.getCenter(find.byType(ViewfinderFrame));
+    final preview =
+        tester.getCenter(find.byKey(const ValueKey('camera-preview')));
+    expect(frame.dx, closeTo(preview.dx, 1));
+    expect(frame.dy, closeTo(preview.dy, 1));
 
     await tester.tap(find.byKey(const ValueKey('scan-shutter')));
     await tester.pumpAndSettle();
@@ -257,6 +334,13 @@ void main() {
     final manual = tester.getCenter(find.byKey(const ValueKey('scan-manual')));
     expect(gallery.dx, lessThan(shutter.dx));
     expect(manual.dx, greaterThan(shutter.dx));
+
+    // Tapping the picture focuses there, mapped onto the uncropped preview.
+    await tester.tapAt(preview(tester));
+    await tester.pump();
+    expect(camera.focused.single.dx, closeTo(0.5, 0.01));
+    expect(camera.focused.single.dy, closeTo(0.5, 0.01));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const ValueKey('scan-torch')));
     await tester.pumpAndSettle();
@@ -321,6 +405,7 @@ class _FakeCamera implements ScanCamera {
   var torch = false;
   var paused = false;
   var disposed = false;
+  final focused = <Offset>[];
 
   @override
   Future<void> initialize() async {
@@ -341,6 +426,9 @@ class _FakeCamera implements ScanCamera {
   Future<void> setTorch(bool on) async => torch = on;
 
   @override
+  Future<void> focusAt(Offset point) async => focused.add(point);
+
+  @override
   Future<String> takePicture() async => 'shot-${++shots}.jpg';
 
   @override
@@ -352,6 +440,9 @@ class _FakeCamera implements ScanCamera {
   @override
   Future<void> dispose() async => disposed = true;
 }
+
+Offset preview(WidgetTester tester) =>
+    tester.getCenter(find.byKey(const ValueKey('camera-preview')));
 
 /// Pushes Scan over a home page; returns a getter for the popped value.
 Future<bool? Function()> _openScan(

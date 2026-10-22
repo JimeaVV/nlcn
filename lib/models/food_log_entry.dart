@@ -121,6 +121,19 @@ class FoodLogEntry {
         'created_at': (createdAt ?? DateTime.now()).toIso8601String(),
       };
 
+  /// The same food and portion logged again on [day] in [meal], e.g. a
+  /// recent or favorite food, or a meal copied from another day.
+  FoodLogEntry copyTo(DateTime day, MealSlot meal) => FoodLogEntry(
+        date: DateTime(day.year, day.month, day.day),
+        meal: meal,
+        name: name,
+        grams: grams,
+        calories: calories,
+        protein: protein,
+        carbs: carbs,
+        fat: fat,
+      );
+
   /// The same food without its database id, used to undo a deletion.
   FoodLogEntry withoutId() => FoodLogEntry(
         date: date,

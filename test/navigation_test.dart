@@ -37,6 +37,30 @@ class _Database extends Fake implements DatabaseService {
   Future<List<FoodLogEntry>> getFoodLog(DateTime day) async => food;
 
   @override
+  Future<Map<DateTime, FoodLogTotals>> getDailyTotals(
+      DateTime from, DateTime to) async {
+    final days = <DateTime, List<FoodLogEntry>>{};
+    for (final entry in food) {
+      days
+          .putIfAbsent(
+              DateTime(entry.date.year, entry.date.month, entry.date.day),
+              () => [])
+          .add(entry);
+    }
+    return {
+      for (final day in days.entries) day.key: FoodLogTotals.of(day.value)
+    };
+  }
+
+  int water = 0;
+
+  @override
+  Future<int> getWater(DateTime day) async => water;
+
+  @override
+  Future<void> setWater(DateTime day, int ml) async => water = ml;
+
+  @override
   Future<List<WeightEntry>> getWeightHistory({int limit = 90}) async => weights;
 
   @override
@@ -161,7 +185,8 @@ void main() {
 
   testWidgets('Today sums the diary, weight trend and training of the day',
       (tester) async {
-    _size(tester, 400, 1600);
+    // Tall enough for every card, water and the week included.
+    _size(tester, 400, 2600);
     final now = DateTime.now();
     final database = _Database()
       ..profile = const UserProfile(
@@ -225,6 +250,25 @@ void main() {
     expect(find.text('Còn 750 kcal so với mục tiêu'), findsOneWidget);
     expect(find.text('Thay đổi 7 ngày: -0,4 kg'), findsOneWidget);
     expect(find.text('Đã ghi 1 bài tập hôm nay'), findsOneWidget);
+    expect(find.text('1 ngày liên tục ghi ăn'), findsOneWidget);
+    expect(find.text('Ghi ăn 1/7 ngày'), findsOneWidget);
+    expect(find.text('Trung bình 1.250 kcal • 58,0 g protein mỗi ngày ghi'),
+        findsOneWidget);
+    expect(find.text('So với mục tiêu 2.000 kcal: -750 kcal/ngày'),
+        findsOneWidget);
+    expect(find.text('Tập 1 ngày'), findsOneWidget);
+
+    expect(find.text('0 / 2.000 ml'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('water-add')));
+    await tester.tap(find.byKey(const ValueKey('water-add')));
+    await tester.pumpAndSettle();
+    expect(find.text('500 / 2.000 ml'), findsOneWidget);
+    expect(find.text('2 ly, mỗi ly 250 ml'), findsOneWidget);
+    expect(database.water, 500);
+    await tester.tap(find.byKey(const ValueKey('water-remove')));
+    await tester.pumpAndSettle();
+    expect(database.water, 250);
+
     await tester.tap(find.byKey(const ValueKey('today-open-diary')));
     await tester.tap(find.byKey(const ValueKey('today-scan')));
     expect([diary, scan], [1, 1]);
@@ -354,6 +398,9 @@ class _NoCamera implements ScanCamera {
 
   @override
   Future<void> setTorch(bool on) async {}
+
+  @override
+  Future<void> focusAt(Offset point) async {}
 
   @override
   Future<String> takePicture() async => throw UnimplementedError();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
+import '../engine/adaptive_tdee.dart';
 import '../engine/nutrition_targets.dart';
 import '../l10n/l10n.dart';
 import '../models/user_profile.dart';
@@ -31,6 +32,9 @@ class ProfileScreenState extends State<ProfileScreen> {
   double _activity = 1.55;
   NutritionGoal _goal = NutritionGoal.maintain;
   List<WeightEntry> _weights = const [];
+
+  /// Calories logged per day over the adaptive TDEE window.
+  Map<DateTime, double> _dailyCalories = const {};
   bool _loading = true;
   bool _saving = false;
   bool _hasProfile = false;
@@ -67,6 +71,17 @@ class ProfileScreenState extends State<ProfileScreen> {
     try {
       final map = await _database.getProfile();
       final weights = await _database.getWeightHistory();
+      var dailyCalories = const <DateTime, double>{};
+      try {
+        final now = DateTime.now();
+        dailyCalories = await _database.getDailyCalories(
+          DateTime(now.year, now.month,
+              now.day - const AdaptiveTdeeRules().windowDays + 1),
+          now,
+        );
+      } catch (_) {
+        // Only the adaptive estimate needs the diary.
+      }
       if (!mounted || refreshId != _refreshId) return;
       setState(() {
         if (map != null) {
@@ -90,6 +105,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         }
         _hasProfile = map != null;
         _weights = weights;
+        _dailyCalories = dailyCalories;
         _loading = false;
         if (!preserveDraft) _error = null;
       });
@@ -390,6 +406,83 @@ class ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  /// TDEE measured from the diary and weigh-ins, next to the formula, with a
+  /// button that turns it into the manual calorie target (saved on Save).
+  Widget _adaptiveTdeeCard(Map<String, dynamic> targets) {
+    final l10n = context.l10n;
+    final number = context.formatNumber;
+    final formula = (targets['tdee'] as num).toDouble();
+    const rules = AdaptiveTdeeRules();
+    final estimate = estimateAdaptiveTdee(
+      dailyCalories: _dailyCalories,
+      weights: _weights,
+      formulaTdee: formula,
+      today: DateTime.now(),
+      rules: rules,
+    );
+    final tdee = estimate.tdee;
+    final suggested = tdee == null
+        ? null
+        : (tdee * goalCalorieFactor(_goal)).roundToDouble().clamp(1000, 10000);
+    return CyberCard(
+      key: const ValueKey('profile-adaptive-tdee'),
+      title: l10n.adaptiveTdeeTitle,
+      icon: Icons.insights_rounded,
+      accent: CyberColors.lime,
+      trailing: _infoButton(
+        'adaptive-tdee-info',
+        () => _showInfo(l10n.adaptiveTdeeTitle, [l10n.adaptiveTdeeInfo]),
+      ),
+      child: tdee == null
+          ? Text(
+              l10n.adaptiveTdeeNeedMore(
+                '${rules.minLoggedDays}',
+                '${rules.minWeighIns}',
+                '${rules.minWeighInSpanDays}',
+                '${estimate.loggedDays}',
+                '${estimate.weighIns}',
+              ),
+              style: TextStyle(color: CyberColors.muted),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.adaptiveTdeeValue(number(tdee)),
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 6),
+                Text(l10n.adaptiveTdeeDetails(
+                  '${estimate.loggedDays}',
+                  number(estimate.averageIntake),
+                  '${estimate.weighIns}',
+                  context.formatSigned(estimate.weeklyChangeKg, decimals: 2),
+                )),
+                const SizedBox(height: 4),
+                Text(l10n.adaptiveTdeeCompare(number(formula)),
+                    style: TextStyle(color: CyberColors.muted)),
+                const SizedBox(height: 10),
+                if (!estimate.plausible)
+                  Text(
+                    l10n.adaptiveTdeeUnsure(number(tdee), number(formula)),
+                    style: const TextStyle(color: Colors.orange),
+                  )
+                else
+                  OutlinedButton.icon(
+                    key: const ValueKey('adaptive-tdee-use'),
+                    onPressed: () {
+                      setState(() {
+                        _customCalories = true;
+                        _calories.text = _inputNumber(suggested.toDouble());
+                      });
+                      _message(l10n.adaptiveTdeeUsed(number(suggested)));
+                    },
+                    icon: const Icon(Icons.flag_outlined),
+                    label: Text(l10n.adaptiveTdeeUse(number(suggested!))),
+                  ),
+              ],
+            ),
+    );
+  }
+
   Widget _weightHistory() {
     final chronological = List<WeightEntry>.of(_weights)
       ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
@@ -560,6 +653,10 @@ class ProfileScreenState extends State<ProfileScreen> {
         children: [
           _targetsCard(targets),
           const SizedBox(height: 14),
+          if (_hasProfile && targets != null) ...[
+            _adaptiveTdeeCard(targets),
+            const SizedBox(height: 14),
+          ],
           CyberCard(
             title: l10n.personalInfo,
             icon: Icons.person_outline_rounded,

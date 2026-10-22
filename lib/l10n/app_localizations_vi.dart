@@ -1032,7 +1032,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get scanCameraDenied =>
-      'OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.';
+      'MacroRunner chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.';
 
   @override
   String get scanNoCamera =>
@@ -1114,4 +1114,293 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get overloadBodyweightDecrease =>
       'Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.';
+
+  @override
+  String get scanNotInApp =>
+      'Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.';
+
+  @override
+  String get scanRecognizing => 'Đang nhận diện món…';
+
+  @override
+  String get scanPortion => 'Khẩu phần cả món';
+
+  @override
+  String scanSuggestions(int count) {
+    return 'Có thể có thêm ($count)';
+  }
+
+  @override
+  String scanSuggestionsChosen(int count, int chosen) {
+    return 'Có thể có thêm ($count) · đã chọn $chosen';
+  }
+
+  @override
+  String scanMacroGrams(String protein, String carbs, String fat) {
+    return 'Đạm $protein g · Tinh bột $carbs g · Béo $fat g';
+  }
+
+  @override
+  String scanTiming(String total, String photo, String model) {
+    return 'Nhận diện trong $total s (ảnh $photo s · model $model s)';
+  }
+
+  @override
+  String get diaryFavorites => 'Yêu thích';
+
+  @override
+  String get diaryRecent => 'Gần đây';
+
+  @override
+  String get diaryQuickHint => 'Chạm một món để thêm ngay vào bữa đã chọn.';
+
+  @override
+  String diaryQuickChip(String name, String calories) {
+    return '$name · $calories kcal';
+  }
+
+  @override
+  String get diaryFavoriteAdd => 'Thêm vào yêu thích';
+
+  @override
+  String get diaryFavoriteRemove => 'Bỏ khỏi yêu thích';
+
+  @override
+  String diaryFavoriteAdded(String name) {
+    return 'Đã thêm $name vào yêu thích.';
+  }
+
+  @override
+  String diaryFavoriteRemoved(String name) {
+    return 'Đã bỏ $name khỏi yêu thích.';
+  }
+
+  @override
+  String get diaryCopyToToday => 'Chép bữa này sang hôm nay';
+
+  @override
+  String diaryRepeatYesterday(String count, String calories) {
+    return 'Ăn giống hôm qua ($count món · $calories kcal)';
+  }
+
+  @override
+  String diaryCopied(String count) {
+    return 'Đã chép $count món.';
+  }
+
+  @override
+  String lastSessionLine(String date, String weight, String reps) {
+    return 'Lần trước ($date): $weight kg × $reps';
+  }
+
+  @override
+  String lastSessionSuggestion(String weight, String reps) {
+    return 'Gợi ý hôm nay: $weight kg × $reps lần';
+  }
+
+  @override
+  String get restTimerStart => 'Bấm giờ nghỉ';
+
+  @override
+  String restTimerLabel(String time) {
+    return 'Nghỉ $time';
+  }
+
+  @override
+  String get restTimerDone => 'Hết giờ nghỉ, vào hiệp tiếp!';
+
+  @override
+  String get restTimerMore => 'Thêm 15 giây';
+
+  @override
+  String get restTimerLess => 'Bớt 15 giây';
+
+  @override
+  String get restTimerStop => 'Dừng bấm giờ';
+
+  @override
+  String get adaptiveTdeeTitle => 'TDEE theo dữ liệu thật';
+
+  @override
+  String adaptiveTdeeValue(String tdee) {
+    return '$tdee kcal/ngày';
+  }
+
+  @override
+  String adaptiveTdeeDetails(
+      String days, String intake, String weighIns, String trend) {
+    return 'Từ $days ngày ghi ăn (trung bình $intake kcal) và $weighIns lần cân trong 4 tuần qua: cân nặng $trend kg/tuần.';
+  }
+
+  @override
+  String adaptiveTdeeCompare(String formula) {
+    return 'Công thức Mifflin-St Jeor ước tính $formula kcal.';
+  }
+
+  @override
+  String adaptiveTdeeUse(String calories) {
+    return 'Dùng làm mục tiêu ($calories kcal)';
+  }
+
+  @override
+  String adaptiveTdeeUsed(String calories) {
+    return 'Đã điền mục tiêu calo $calories kcal. Bấm Lưu hồ sơ để áp dụng.';
+  }
+
+  @override
+  String adaptiveTdeeNeedMore(String days, String weighIns, String span,
+      String haveDays, String haveWeighIns) {
+    return 'Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất $days ngày và cân ít nhất $weighIns lần, lần đầu và lần cuối cách nhau từ $span ngày. Hiện có $haveDays ngày ghi ăn, $haveWeighIns lần cân.';
+  }
+
+  @override
+  String adaptiveTdeeUnsure(String tdee, String formula) {
+    return 'Kết quả lệch xa công thức ($tdee so với $formula kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.';
+  }
+
+  @override
+  String get adaptiveTdeeInfo =>
+      'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.';
+
+  @override
+  String get waterTitle => 'Nước uống';
+
+  @override
+  String waterProgress(String drunk, String target) {
+    return '$drunk / $target ml';
+  }
+
+  @override
+  String waterGlasses(String count, String glass) {
+    return '$count ly, mỗi ly $glass ml';
+  }
+
+  @override
+  String get waterAdd => 'Thêm một ly';
+
+  @override
+  String get waterRemove => 'Bớt một ly';
+
+  @override
+  String get waterNote =>
+      'Mục tiêu tham khảo 2 lít mỗi ngày; cần nhiều hơn khi trời nóng hoặc tập nặng.';
+
+  @override
+  String streakDays(String count) {
+    return '$count ngày liên tục ghi ăn';
+  }
+
+  @override
+  String get streakKeep => 'Ghi bữa hôm nay để giữ chuỗi.';
+
+  @override
+  String get streakNone => 'Ghi một bữa hôm nay để bắt đầu chuỗi ngày.';
+
+  @override
+  String get weekTitle => '7 ngày qua';
+
+  @override
+  String weekLogged(String days) {
+    return 'Ghi ăn $days/7 ngày';
+  }
+
+  @override
+  String weekAverage(String calories, String protein) {
+    return 'Trung bình $calories kcal • $protein g protein mỗi ngày ghi';
+  }
+
+  @override
+  String weekVsTarget(String target, String diff) {
+    return 'So với mục tiêu $target kcal: $diff kcal/ngày';
+  }
+
+  @override
+  String weekTraining(String days) {
+    return 'Tập $days ngày';
+  }
+
+  @override
+  String weekWeight(String change) {
+    return 'Cân nặng $change kg';
+  }
+
+  @override
+  String get weekEmpty => 'Chưa có dữ liệu trong 7 ngày qua.';
+
+  @override
+  String get remindersTitle => 'Nhắc ghi bữa';
+
+  @override
+  String get remindersBody =>
+      'Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.';
+
+  @override
+  String get remindersSwitch => 'Bật nhắc nhở';
+
+  @override
+  String get remindersDenied =>
+      'Chưa được cấp quyền thông báo. Hãy bật trong Cài đặt của Android.';
+
+  @override
+  String remindersChangeTime(String meal) {
+    return 'Đổi giờ nhắc $meal';
+  }
+
+  @override
+  String reminderNotificationTitle(String meal) {
+    return '$meal: bạn đã ghi chưa?';
+  }
+
+  @override
+  String get reminderNotificationBody =>
+      'Mở MacroRunner để ghi món, chỉ mất vài giây.';
+
+  @override
+  String get reminderChannel => 'Nhắc ghi bữa';
+
+  @override
+  String get backupTitle => 'Sao lưu dữ liệu';
+
+  @override
+  String get backupBody =>
+      'Lưu toàn bộ hồ sơ, nhật ký ăn, nước uống, cân nặng và lịch sử tập vào một file JSON để cất giữ hoặc chuyển sang máy khác.';
+
+  @override
+  String get backupExport => 'Xuất file sao lưu';
+
+  @override
+  String get backupImport => 'Khôi phục từ file';
+
+  @override
+  String get backupImportTitle => 'Khôi phục dữ liệu?';
+
+  @override
+  String get backupImportBody =>
+      'Toàn bộ dữ liệu hiện có trên máy sẽ được thay bằng dữ liệu trong file. Việc này không hoàn tác được.';
+
+  @override
+  String get backupRestore => 'Khôi phục';
+
+  @override
+  String get backupRestored => 'Đã khôi phục dữ liệu.';
+
+  @override
+  String get backupInvalid =>
+      'File này không phải bản sao lưu MacroRunner hợp lệ.';
+
+  @override
+  String get backupFailed => 'Không tạo được file sao lưu. Hãy thử lại.';
+
+  @override
+  String get widgetTitle => 'MacroRunner hôm nay';
+
+  @override
+  String widgetWater(String drunk, String target) {
+    return 'Nước $drunk / $target L';
+  }
+
+  @override
+  String widgetStreak(String count) {
+    return 'Chuỗi $count ngày';
+  }
 }

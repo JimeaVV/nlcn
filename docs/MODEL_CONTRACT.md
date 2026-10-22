@@ -5,14 +5,19 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.2**
+- `contract_version`: **1.4**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
   - 1.2: thêm thành phần `ga_chien` (gà chiên / xối mỡ), lên 25 thành phần,
     vì cơm gà ở quán thường là gà chiên; thêm bảng `meal_plan.csv` cho phần
-    gợi ý thực đơn (mục 4).
-- Cập nhật: 2026-10-17
+    gợi ý thực đơn (mục 4);
+  - 1.3: thêm 12 món có nhiều ảnh trong các bộ công khai (món 41–52), và
+    lớp `khac` ở cuối đầu ra `dish` cho món không có trong app (mục 6).
+  - 1.4: thêm 13 món đã có ảnh trong các bộ công khai nhưng trước đó bị gom
+    vào `khac` (món 53–65); `khac` còn lẩu và gỏi ngó sen. Kích thước ảnh
+    vào do model quyết định, app đọc từ file `.tflite` (mục 6).
+- Cập nhật: 2026-10-20
 
 ---
 
@@ -31,10 +36,15 @@ Quy tắc đặt mã: chữ thường, không dấu, nối bằng `_`. Mã dùng
 nhãn trong `labels.csv`, thứ tự trong `dishes.txt` và khoá trong bảng dinh
 dưỡng của app.
 
-Gồm **40 món**:
+Gồm **52 món**:
 - món 1–20 là danh sách ban đầu, phần lớn có trong bộ ảnh 30VNFoods;
 - món 21–40 lấy theo bộ ảnh VinaFood21 (chỉ trùng `bo_kho` với danh sách
-  ban đầu).
+  ban đầu);
+- món 41–52 là các món phổ biến có nhiều ảnh trong 30VNFoods, 20FoodVN và
+  VietFood67.
+
+Model có thêm một đầu ra cuối cùng `khac` (món không có trong app), không
+nằm trong bảng này; xem mục 6.
 
 Món nào chỉ gồm một thứ (bánh tét, bắp nướng…) thì không cần gán nhãn thành
 phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
@@ -81,6 +91,31 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 | 38 | `canh_khoai_mo` | Canh khoai mỡ | VinaFood21 |
 | 39 | `canh_kho_qua` | Canh khổ qua | VinaFood21 |
 | 40 | `banh_mi_chao` | Bánh mì chảo | VinaFood21 |
+| 41 | `banh_chung` | Bánh chưng | 30VNFoods, VietFood67 |
+| 42 | `banh_khot` | Bánh khọt | 30VNFoods, VietFood67 |
+| 43 | `banh_beo` | Bánh bèo | 30VNFoods, VietFood67 |
+| 44 | `cao_lau` | Cao lầu | 30VNFoods, VietFood67 |
+| 45 | `bun_dau` | Bún đậu mắm tôm | 30VNFoods, VietFood67 |
+| 46 | `bun_mam` | Bún mắm | 30VNFoods, VietFood67 |
+| 47 | `chao_long` | Cháo lòng | 30VNFoods, 20FoodVN, VietFood67 |
+| 48 | `ca_kho` | Cá kho | 30VNFoods (cá kho tộ), 20FoodVN (cá lóc kho) |
+| 49 | `canh_chua` | Canh chua | 30VNFoods |
+| 50 | `trung_vit_lon` | Trứng vịt lộn | 20FoodVN |
+| 51 | `che` | Chè | 20FoodVN (chè Thái, chè bưởi) |
+| 52 | `nuoc_mia` | Nước mía | 20FoodVN |
+| 53 | `banh_trang_nuong` | Bánh tráng nướng | 30VNFoods |
+| 54 | `banh_gio` | Bánh giò | 30VNFoods |
+| 55 | `banh_bot_loc` | Bánh bột lọc | 30VNFoods |
+| 56 | `banh_duc` | Bánh đúc | 30VNFoods |
+| 57 | `nem_chua` | Nem chua | 30VNFoods |
+| 58 | `banh_pia` | Bánh pía | 30VNFoods |
+| 59 | `bun_ca` | Bún cá | 20FoodVN (bún cá), VietFood67 (bún chả cá) |
+| 60 | `khoai_tay_chien` | Khoai tây chiên | VietFood67 |
+| 61 | `salad` | Salad | VietFood67 |
+| 62 | `hamburger` | Hamburger | VietFood67 |
+| 63 | `nui_xao_bo` | Nui xào bò | VietFood67 |
+| 64 | `sup_cua` | Súp cua | VietFood67 |
+| 65 | `nom_hoa_chuoi` | Nộm hoa chuối | VietFood67 |
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
@@ -209,8 +244,8 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 
 | Mục | Quy định |
 |---|---|
-| Đầu vào | `float32 [1, 224, 224, 3]`, ảnh **RGB, giá trị 0–255** |
-| Tiền xử lý | App: cắt vuông ở giữa ảnh rồi resize về 224×224 (bilinear). **Việc chuẩn hoá pixel nằm trong model** (lớp `Rescaling`/preprocess), app không tự chuẩn hoá |
+| Đầu vào | `float32 [1, N, N, 3]`, ảnh **RGB, giá trị 0–255**. N do model quyết định (từ v1.4): 224 cho MobileNetV3/EfficientNetB0, 300 cho EfficientNetB3; app đọc N từ file `.tflite` |
+| Tiền xử lý | App: cắt vuông ở giữa ảnh rồi resize về N×N (bilinear). **Việc chuẩn hoá pixel nằm trong model** (lớp `Rescaling`/preprocess), app không tự chuẩn hoá |
 | Đầu ra 1 `dish` | `float32 [1, số_món]`, softmax (tổng bằng 1) |
 | Đầu ra 2 `components` | `float32 [1, số_thành_phần]`, sigmoid (mỗi giá trị 0–1, độc lập) |
 | Lượng tử hoá | float16 |
@@ -225,6 +260,31 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 
 Món có xác suất cao nhất dưới `0.5` thì app hiện top-3 cho người dùng chọn.
 
+**Lớp `khac` (từ v1.3):** dòng cuối của `dishes.txt` là `khac`. Lớp này
+train bằng ảnh của các món không có trong app. Từ v1.4 đó là lẩu (món ăn
+chung nồi, không tính được khẩu phần một người) và gỏi ngó sen; nếu gắn
+thêm bộ ảnh khác, lớp nào không khớp món của app cũng vào `khac`.
+- `khac` không có dinh dưỡng và không hiện trong danh sách gợi ý.
+- `khac` từ `threshold_confident_dish` trở lên thì app báo "có thể món này
+  chưa có trong app" và mở danh sách món cho người dùng chọn, không đoán bừa
+  một món gần giống.
+
+**Món được tin phần thành phần** (từ v1.3, thêm sau khi thử thật): thẻ
+model có dòng `component_dishes: com_tam, com_phan, …`. Đó là các món mà
+phần thành phần đạt F1 từ 0,7 trở lên, đo trên ít nhất 20 ảnh val có nhãn
+thành phần.
+- Với món nằm trong danh sách: app dùng các ngưỡng ở trên.
+- Với món khác, hoặc thẻ model không có dòng này: app bỏ qua đầu ra thành
+  phần, tick các thành phần theo công thức món như khi chưa có model, và
+  không gợi ý thêm thành phần nào.
+- Thành phần nằm ngoài công thức món không bao giờ được tick sẵn. Nó chỉ
+  hiện ở dạng "Có thể" khi xác suất từ 0,6 trở lên.
+
+Vì sao cần: khi thử thật với một tô phở bò, model chắc trên 60% là có
+trứng, bì, chả trứng, nhưng lại bỏ tick thịt bò. Lý do là không ảnh phở
+nào có nhãn thành phần, nên với phở, đầu ra thành phần không mang ý nghĩa
+gì.
+
 **Cách ghi ngưỡng trong `MODEL_CARD.md`** (từ v1.1): mỗi ngưỡng một dòng
 dạng `khoá: giá trị`, giá trị trong khoảng 0–1. Thiếu dòng nào thì app dùng
 số mặc định ở trên.
@@ -232,10 +292,11 @@ số mặc định ở trên.
 threshold_checked: 0.6
 threshold_ask: 0.3
 threshold_confident_dish: 0.5
+component_dishes: com_tam, com_phan
 ```
 
 **App kiểm tra khi nạp model:**
-- đầu vào phải là `float32 [1, 224, 224, 3]`, mọi đầu ra là float32;
+- đầu vào phải là `float32 [1, N, N, 3]` (ảnh vuông, N ≥ 32), mọi đầu ra là float32;
 - hai đầu ra được nhận ra theo **độ dài**, khớp với số dòng của
   `dishes.txt` và `components.txt`, nên thứ tự đầu ra trong file `.tflite`
   không quan trọng; vì vậy hai file này phải có số dòng khác nhau;
