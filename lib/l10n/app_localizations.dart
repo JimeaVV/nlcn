@@ -1915,7 +1915,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanCameraDenied.
   ///
   /// In vi, this message translates to:
-  /// **'OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.'**
+  /// **'MacroRunner chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.'**
   String get scanCameraDenied;
 
   /// No description provided for @scanNoCamera.
@@ -2403,7 +2403,7 @@ abstract class AppLocalizations {
   /// No description provided for @reminderNotificationBody.
   ///
   /// In vi, this message translates to:
-  /// **'Mở OptiFit để ghi món, chỉ mất vài giây.'**
+  /// **'Mở MacroRunner để ghi món, chỉ mất vài giây.'**
   String get reminderNotificationBody;
 
   /// No description provided for @reminderChannel.
@@ -2463,7 +2463,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupInvalid.
   ///
   /// In vi, this message translates to:
-  /// **'File này không phải bản sao lưu OptiFit hợp lệ.'**
+  /// **'File này không phải bản sao lưu MacroRunner hợp lệ.'**
   String get backupInvalid;
 
   /// No description provided for @backupFailed.
@@ -2475,7 +2475,7 @@ abstract class AppLocalizations {
   /// No description provided for @widgetTitle.
   ///
   /// In vi, this message translates to:
-  /// **'OptiFit hôm nay'**
+  /// **'MacroRunner hôm nay'**
   String get widgetTitle;
 
   /// No description provided for @widgetWater.

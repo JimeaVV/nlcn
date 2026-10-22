@@ -165,7 +165,7 @@ void main() {
     await tester.tap(find.text('Khôi phục'));
     await tester.pumpAndSettle();
     expect(database.restored, isNull);
-    expect(find.text('File này không phải bản sao lưu OptiFit hợp lệ.'),
+    expect(find.text('File này không phải bản sao lưu MacroRunner hợp lệ.'),
         findsOneWidget);
   });
 }

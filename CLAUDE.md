@@ -7,8 +7,11 @@ người (phân công ở `docs/PHAN_CONG.md`):
 - **Người A** (JimeaVV): app Flutter và dữ liệu dinh dưỡng.
 - **Người B**: train model nhận diện món ăn.
 
-Tên trong code vẫn là OptiFit: package `optifit`, applicationId
-`io.github.jimeavv.optifit`. File APK đặt tên `MacroRunner-...apk`.
+Tên hiển thị là MacroRunner (tên dưới icon, thanh đầu app, thông báo,
+widget). Trong code vẫn giữ tên cũ OptiFit: package `optifit`, applicationId
+`io.github.jimeavv.optifit`, class `OptiFitApp`. Không đổi applicationId: đổi
+thì Android coi là app khác, không cài đè được và mất dữ liệu. Logo vẽ bằng
+`tool/brand/make_logo.py`; file APK đặt tên `MacroRunner-...apk`.
 
 ## Cấu trúc
 - `lib/`: app Flutter.

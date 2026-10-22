@@ -42,5 +42,6 @@ flutter:
     - assets/data/recommendations.json
     - assets/data/vn_food/
     - assets/models/
+    - assets/brand/
   shaders:
     - shaders/scan_sweep.frag

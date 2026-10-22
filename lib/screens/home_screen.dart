@@ -200,10 +200,14 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.bolt_rounded, color: CyberColors.lime),
-            const SizedBox(width: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(7),
+              child: Image.asset('assets/brand/logo.png',
+                  width: 30, height: 30, filterQuality: FilterQuality.medium),
+            ),
+            const SizedBox(width: 10),
             Text(
-              'OPTIFIT',
+              'MACRORUNNER',
               style: TextStyle(
                 color: CyberColors.text,
                 fontWeight: FontWeight.w900,

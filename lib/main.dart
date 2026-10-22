@@ -39,7 +39,7 @@ class OptiFitApp extends StatelessWidget {
       builder: (context, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'OptiFit',
+          title: 'MacroRunner',
           theme: themeController.theme,
           locale: localeController.locale,
           supportedLocales: AppLocalizations.supportedLocales,

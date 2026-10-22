@@ -1845,6 +1845,42 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Build APK arm64 build 111: 24,1 MB (bản B0 là 20,7 MB), chữ ký release
   khớp, không có quyền INTERNET. Chưa đo tốc độ quét trên điện thoại thật.
 
+### 2026-10-22 · Đổi tên hiển thị thành MacroRunner và thêm logo
+- Vấn đề: app trên điện thoại vẫn hiện tên cũ "OptiFit" và icon mặc định của
+  Flutter.
+- Tên: mọi chỗ người dùng nhìn thấy đều đổi thành **MacroRunner**:
+  - tên dưới icon (`android:label`) và tiêu đề app;
+  - chữ trên thanh đầu app;
+  - tên và chữ của widget;
+  - thông báo nhắc ghi bữa;
+  - các câu báo lỗi camera và bản sao lưu.
+- Giữ nguyên applicationId `io.github.jimeavv.optifit` cùng tên package và
+  class trong code, vì đổi applicationId thì Android coi là app khác, không
+  cài đè được và người dùng mất dữ liệu. Khóa `app: optifit` trong file sao
+  lưu cũng giữ nguyên để file cũ vẫn khôi phục được.
+- Logo (tự vẽ bằng code, `tool/brand/make_logo.py`, không dùng hình hay
+  thương hiệu của ai):
+  - Chữ **M vẽ bằng đường nhịp tim**, chỉ sức khỏe và luyện tập, chuyển màu
+    từ cyan sang hồng. Cuối đường có một chấm lime, chỉ tiến bộ.
+  - Nền xanh navy, sáng nhẹ ở giữa.
+  - Màu lấy đúng bảng màu Cyberpunk của app: `#00F5FF`, `#FF2BD6`,
+    `#B7FF00`.
+- Icon Android:
+  - Icon thích ứng (adaptive): lớp nền, lớp hình, và lớp đơn sắc cho icon
+    theo chủ đề trên Android 13 trở lên.
+  - Icon PNG bo góc cho Android cũ, đủ 5 mật độ màn hình.
+  - Icon thông báo màu trắng trên nền trong suốt (`ic_stat_notify`). Android
+    tô xám icon thông báo có màu, nên icon cũ hiện thành ô vuông xám.
+    `res/raw/keep.xml` giữ icon này khỏi bị bước thu gọn tài nguyên xóa, vì
+    nó chỉ được gọi bằng tên trong code Dart.
+- Logo cũng thay icon tia sét trên thanh đầu app (`assets/brand/logo.png`).
+  Bản 1024 px ở `docs/logo_macrorunner.png` để dùng cho báo cáo.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 195/195 PASS.
+  - APK build 112 (24,4 MB): `aapt` báo tên "MacroRunner", có
+    `drawable/ic_stat_notify`, chữ ký release khớp.
+  - Đã cài đè lên điện thoại test; app mở được, log không có lỗi.
+
 ---
 
 ## 3. Việc còn tồn đọng

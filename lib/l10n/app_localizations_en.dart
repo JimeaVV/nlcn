@@ -1041,7 +1041,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanCameraDenied =>
-      'OptiFit is not allowed to use the camera. Grant access in the phone settings, or choose an existing photo.';
+      'MacroRunner is not allowed to use the camera. Grant access in the phone settings, or choose an existing photo.';
 
   @override
   String get scanNoCamera =>
@@ -1363,7 +1363,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reminderNotificationBody =>
-      'Open OptiFit to log it, it takes a few seconds.';
+      'Open MacroRunner to log it, it takes a few seconds.';
 
   @override
   String get reminderChannel => 'Meal reminders';
@@ -1395,13 +1395,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupRestored => 'Data restored.';
 
   @override
-  String get backupInvalid => 'This file is not a valid OptiFit backup.';
+  String get backupInvalid => 'This file is not a valid MacroRunner backup.';
 
   @override
   String get backupFailed => 'Could not create the backup file. Try again.';
 
   @override
-  String get widgetTitle => 'OptiFit today';
+  String get widgetTitle => 'MacroRunner today';
 
   @override
   String widgetWater(String drunk, String target) {

@@ -694,7 +694,7 @@
   "scanGalleryShort": "Thư viện",
   "scanManualShort": "Ghi tay",
   "scanCaptureFailed": "Không chụp được ảnh. Hãy thử lại.",
-  "scanCameraDenied": "OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.",
+  "scanCameraDenied": "MacroRunner chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.",
   "scanNoCamera": "Không mở được camera. Bạn vẫn có thể chọn ảnh có sẵn hoặc ghi món thủ công.",
   "scanRetryCamera": "Thử mở camera lại",
   "dailyTargetsTitle": "Mục tiêu mỗi ngày",
@@ -1084,7 +1084,7 @@
       }
     }
   },
-  "reminderNotificationBody": "Mở OptiFit để ghi món, chỉ mất vài giây.",
+  "reminderNotificationBody": "Mở MacroRunner để ghi món, chỉ mất vài giây.",
   "reminderChannel": "Nhắc ghi bữa",
   "backupTitle": "Sao lưu dữ liệu",
   "backupBody": "Lưu toàn bộ hồ sơ, nhật ký ăn, nước uống, cân nặng và lịch sử tập vào một file JSON để cất giữ hoặc chuyển sang máy khác.",
@@ -1094,9 +1094,9 @@
   "backupImportBody": "Toàn bộ dữ liệu hiện có trên máy sẽ được thay bằng dữ liệu trong file. Việc này không hoàn tác được.",
   "backupRestore": "Khôi phục",
   "backupRestored": "Đã khôi phục dữ liệu.",
-  "backupInvalid": "File này không phải bản sao lưu OptiFit hợp lệ.",
+  "backupInvalid": "File này không phải bản sao lưu MacroRunner hợp lệ.",
   "backupFailed": "Không tạo được file sao lưu. Hãy thử lại.",
-  "widgetTitle": "OptiFit hôm nay",
+  "widgetTitle": "MacroRunner hôm nay",
   "widgetWater": "Nước {drunk} / {target} L",
   "@widgetWater": {
     "placeholders": {

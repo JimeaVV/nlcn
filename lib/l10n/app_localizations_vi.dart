@@ -1032,7 +1032,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get scanCameraDenied =>
-      'OptiFit chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.';
+      'MacroRunner chưa được phép dùng camera. Bạn có thể cấp quyền trong Cài đặt của điện thoại, hoặc chọn ảnh có sẵn.';
 
   @override
   String get scanNoCamera =>
@@ -1353,7 +1353,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get reminderNotificationBody =>
-      'Mở OptiFit để ghi món, chỉ mất vài giây.';
+      'Mở MacroRunner để ghi món, chỉ mất vài giây.';
 
   @override
   String get reminderChannel => 'Nhắc ghi bữa';
@@ -1385,13 +1385,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get backupRestored => 'Đã khôi phục dữ liệu.';
 
   @override
-  String get backupInvalid => 'File này không phải bản sao lưu OptiFit hợp lệ.';
+  String get backupInvalid =>
+      'File này không phải bản sao lưu MacroRunner hợp lệ.';
 
   @override
   String get backupFailed => 'Không tạo được file sao lưu. Hãy thử lại.';
 
   @override
-  String get widgetTitle => 'OptiFit hôm nay';
+  String get widgetTitle => 'MacroRunner hôm nay';
 
   @override
   String widgetWater(String drunk, String target) {

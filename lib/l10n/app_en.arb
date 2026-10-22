@@ -302,7 +302,7 @@
   "scanGalleryShort": "Gallery",
   "scanManualShort": "Log food",
   "scanCaptureFailed": "Could not take the photo. Please try again.",
-  "scanCameraDenied": "OptiFit is not allowed to use the camera. Grant access in the phone settings, or choose an existing photo.",
+  "scanCameraDenied": "MacroRunner is not allowed to use the camera. Grant access in the phone settings, or choose an existing photo.",
   "scanNoCamera": "The camera could not be opened. You can still choose a photo or log food manually.",
   "scanRetryCamera": "Try the camera again",
   "dailyTargetsTitle": "Daily targets",
@@ -609,7 +609,7 @@
       }
     }
   },
-  "reminderNotificationBody": "Open OptiFit to log it, it takes a few seconds.",
+  "reminderNotificationBody": "Open MacroRunner to log it, it takes a few seconds.",
   "reminderChannel": "Meal reminders",
   "backupTitle": "Backup",
   "backupBody": "Save the profile, food diary, water, weights and training history to one JSON file to keep or move to another phone.",
@@ -619,9 +619,9 @@
   "backupImportBody": "All data on this phone will be replaced by the data in the file. This cannot be undone.",
   "backupRestore": "Restore",
   "backupRestored": "Data restored.",
-  "backupInvalid": "This file is not a valid OptiFit backup.",
+  "backupInvalid": "This file is not a valid MacroRunner backup.",
   "backupFailed": "Could not create the backup file. Try again.",
-  "widgetTitle": "OptiFit today",
+  "widgetTitle": "MacroRunner today",
   "widgetWater": "Water {drunk} / {target} L",
   "@widgetWater": {
     "placeholders": {
