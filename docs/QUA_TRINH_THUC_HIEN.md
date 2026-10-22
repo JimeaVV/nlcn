@@ -2048,6 +2048,29 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     khoảng cách từ thẻ Cài đặt.
   - Build APK 116.
 
+### 2026-10-22 · Đưa model 1.5 (B3 train tiếp, 91 món) vào app
+- Lý do: lần train tiếp từ B3 1.4 trên Colab (tài khoản khác, tự tải model
+  1.4 qua link) đã xong. Colab hết giờ sau epoch 6/8; notebook dừng gọn và
+  xuất epoch tốt nhất (val 0,873, vẫn đang tăng chậm).
+- Kết quả trên tập test (22.229 ảnh), so với B3 1.4:
+  - Món top-1: 0,870 (1.4: 0,860); top-3: 0,949 (0,941).
+  - Thành phần F1: 0,577 (0,468). Lần đầu có món được tin phần thành phần
+    (`component_dishes`): mì Quảng, xôi, cơm trắng, đậu hũ.
+  - 26 món mới: phần lớn 0,79–0,97, như pizza 0,907, bò bít tết 0,930, chả
+    giò 0,933, cơm trắng 0,950. Yếu nhất là ức gà 0,650 và cá hồi 0,727.
+    Táo và trứng luộc đạt 1,0 nhưng chỉ có khoảng 15 ảnh test, chưa nói lên
+    gì.
+  - Món cũ tăng nhờ ảnh Food-101: salad 0,479 lên 0,907, khoai tây chiên
+    0,698 lên 0,897, cà ri 0,667 lên 0,838. Món cũ giảm nhiều nhất: há cảo
+    0,932 xuống 0,844 (dễ nhầm với sủi cảo mới), gà nướng 0,899 xuống 0,840.
+  - Lưu ý: ảnh được chia lại vì có thêm bộ ảnh, nên một phần ảnh test model
+    1.4 đã thấy khi train; điểm có thể cao hơn thực tế (ghi trong MODEL_CARD).
+- App dùng bản int8 (12,0 MB; trên mẫu ảnh test int8 0,838, float16 0,839).
+  Ngưỡng mới: tick sẵn 0,55, hỏi lại 0,25.
+- Kiểm tra: `flutter test` 207/207 PASS, trong đó có test mã món của model
+  phải có trong bảng dinh dưỡng; đầu vào 300×300, đầu ra 92 món và 25 thành
+  phần. Build APK 117.
+
 ---
 
 ## 3. Việc còn tồn đọng
