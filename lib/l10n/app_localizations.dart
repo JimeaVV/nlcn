@@ -2489,6 +2489,48 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Chuỗi {count} ngày'**
   String widgetStreak(String count);
+
+  /// No description provided for @pickerSearch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm món hoặc thứ ăn riêng (gõ không dấu cũng được)'**
+  String get pickerSearch;
+
+  /// No description provided for @pickerSearchComponents.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tìm thành phần'**
+  String get pickerSearchComponents;
+
+  /// No description provided for @pickerClear.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa ô tìm'**
+  String get pickerClear;
+
+  /// No description provided for @pickerNoMatch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không tìm thấy. Thử từ khác, ví dụ \"ga\" hoặc \"com\".'**
+  String get pickerNoMatch;
+
+  /// No description provided for @pickerDishes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Món'**
+  String get pickerDishes;
+
+  /// No description provided for @pickerSingle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ăn riêng một thứ'**
+  String get pickerSingle;
+
+  /// No description provided for @pickerPer100g.
+  ///
+  /// In vi, this message translates to:
+  /// **'{kcal} kcal / 100 g'**
+  String pickerPer100g(String kcal);
 }
 
 class _AppLocalizationsDelegate

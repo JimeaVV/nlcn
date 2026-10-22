@@ -1881,6 +1881,33 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     `drawable/ic_stat_notify`, chữ ký release khớp.
   - Đã cài đè lên điện thoại test; app mở được, log không có lỗi.
 
+### 2026-10-22 · Ô tìm kiếm khi chọn món, và ghi "ăn riêng một thứ"
+- Thử thật trên điện thoại với model B3:
+  - Quét rất nhanh: 0,19–0,22 giây mỗi lần, trong đó model chạy 0,07–0,10
+    giây.
+  - Cơm trắng trong nồi và ức gà luộc bị đoán thành xôi, bánh đúc, há cảo,
+    vì đó không phải "món" trong 65 món model được học.
+  - Chạy lại model trên ảnh cắt từ màn hình: đầu ra thành phần nhận ra cơm
+    chắc 100%, nhưng gà luộc thì 0%.
+- Vấn đề khi ghi tay: danh sách "Món khác" chỉ có 65 món, cuộn dài, không tìm
+  được, và không chọn được một thứ ăn riêng (cơm, gà, trứng…).
+- Sửa:
+  - Bảng chọn mới (`FoodPickerSheet`) có ô tìm kiếm, gõ không dấu cũng được.
+    Bảng có hai nhóm: **Món** và **Ăn riêng một thứ** (các thành phần, kèm
+    kcal/100 g).
+  - Kết quả khớp đủ mọi từ hiện trước. Sau đó hiện các mục có một từ bắt đầu
+    bằng từ đã gõ, nên gõ "ức gà" vẫn ra "Thịt gà" dù không món nào tên như
+    vậy. Chỉ so phần đầu từ, vì so cả chuỗi con thì "uc" khớp nhầm "bánh
+    đúc".
+  - Chọn một thứ ăn riêng tạo đĩa chỉ gồm thứ đó, với khẩu phần thường gặp
+    (`ScanPlate.single`). Nhật ký ghi đúng tên thứ đó, không kèm tên món.
+  - Bảng "Thêm thành phần" cũng có ô tìm kiếm.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 196/196 PASS. Có thêm test: tìm
+    "pho" ra Phở bò, tìm "tom luoc" ra Tôm, chọn Tôm rồi ghi được một dòng
+    tên "Tôm".
+  - Build APK 113 (24,4 MB). Chưa cài lên điện thoại vì máy mất kết nối adb.
+
 ---
 
 ## 3. Việc còn tồn đọng

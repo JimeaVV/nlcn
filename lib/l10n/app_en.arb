@@ -640,5 +640,19 @@
         "type": "String"
       }
     }
+  },
+  "pickerSearch": "Search dishes or single foods",
+  "pickerSearchComponents": "Search components",
+  "pickerClear": "Clear search",
+  "pickerNoMatch": "Nothing found. Try another word, such as \"chicken\" or \"rice\".",
+  "pickerDishes": "Dishes",
+  "pickerSingle": "A single food",
+  "pickerPer100g": "{kcal} kcal / 100 g",
+  "@pickerPer100g": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
   }
 }

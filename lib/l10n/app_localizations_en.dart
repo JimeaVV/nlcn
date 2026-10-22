@@ -1412,4 +1412,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String widgetStreak(String count) {
     return '$count-day streak';
   }
+
+  @override
+  String get pickerSearch => 'Search dishes or single foods';
+
+  @override
+  String get pickerSearchComponents => 'Search components';
+
+  @override
+  String get pickerClear => 'Clear search';
+
+  @override
+  String get pickerNoMatch =>
+      'Nothing found. Try another word, such as \"chicken\" or \"rice\".';
+
+  @override
+  String get pickerDishes => 'Dishes';
+
+  @override
+  String get pickerSingle => 'A single food';
+
+  @override
+  String pickerPer100g(String kcal) {
+    return '$kcal kcal / 100 g';
+  }
 }

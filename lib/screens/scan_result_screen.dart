@@ -13,6 +13,7 @@ import '../services/database_service.dart';
 import '../services/food_recognizer.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/error_box.dart';
+import '../widgets/food_picker_sheet.dart';
 import '../widgets/food_log_sheet.dart';
 import '../widgets/scan_sweep.dart';
 
@@ -91,71 +92,54 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     _plate = ScanPlate.forDish(widget.data, dish, _recognition);
   }
 
-  Future<void> _pickDish() async {
-    final language = Localizations.localeOf(context).languageCode;
-    final code = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: CyberColors.surface,
-      builder: (context) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: .7,
-        builder: (context, controller) => ListView(
-          controller: controller,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(context.l10n.scanChooseDish,
-                  style: Theme.of(context).textTheme.titleLarge),
+  Future<FoodPick?> _showPicker(
+          String title, List<VnDish> dishes, List<VnComponent> components) =>
+      showModalBottomSheet<FoodPick>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: CyberColors.surface,
+        builder: (context) => Padding(
+          // The keyboard must not cover the search results.
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+          child: DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: .75,
+            maxChildSize: .95,
+            builder: (context, controller) => FoodPickerSheet(
+              title: title,
+              dishes: dishes,
+              components: components,
+              scrollController: controller,
             ),
-            for (final dish in widget.data.dishes)
-              ListTile(
-                key: ValueKey('dish-${dish.code}'),
-                title: Text(dish.name(language)),
-                onTap: () => Navigator.pop(context, dish.code),
-              ),
-          ],
+          ),
         ),
-      ),
-    );
-    if (code != null && mounted) setState(() => _choose(code));
+      );
+
+  Future<void> _pickDish() async {
+    final pick = await _showPicker(context.l10n.scanChooseDish,
+        widget.data.dishes, widget.data.addableComponents);
+    if (pick == null || !mounted) return;
+    setState(() => switch (pick) {
+          DishPick(:final code) => _choose(code),
+          ComponentPick(:final component) => _plate =
+              ScanPlate.single(widget.data, component),
+        });
   }
 
   Future<void> _addComponent() async {
     final plate = _plate;
     if (plate == null) return;
-    final language = Localizations.localeOf(context).languageCode;
     final present = {for (final item in plate.items) item.component.code};
     final options = [
       for (final component in widget.data.addableComponents)
         if (!present.contains(component.code)) component,
     ];
-    final picked = await showModalBottomSheet<VnComponent>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: CyberColors.surface,
-      builder: (context) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: .7,
-        builder: (context, controller) => ListView(
-          controller: controller,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(context.l10n.scanAddComponent,
-                  style: Theme.of(context).textTheme.titleLarge),
-            ),
-            for (final component in options)
-              ListTile(
-                key: ValueKey('add-${component.code}'),
-                title: Text(component.name(language)),
-                onTap: () => Navigator.pop(context, component),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (picked != null && mounted) setState(() => plate.add(picked));
+    final pick =
+        await _showPicker(context.l10n.scanAddComponent, const [], options);
+    if (pick is ComponentPick && mounted) {
+      setState(() => plate.add(pick.component));
+    }
   }
 
   Future<void> _save() async {
@@ -237,6 +221,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   modelAvailable: widget.recognizer.isAvailable,
                   data: widget.data,
                   selected: plate?.dish.code,
+                  chosenName: plate?.dish.name(language),
                   onChoose: (code) {
                     Haptics.tap();
                     setState(() => _choose(code));
@@ -319,6 +304,7 @@ class _DishCard extends StatelessWidget {
     required this.modelAvailable,
     required this.data,
     required this.selected,
+    required this.chosenName,
     required this.onChoose,
     required this.onPickOther,
   });
@@ -327,6 +313,9 @@ class _DishCard extends StatelessWidget {
   final bool modelAvailable;
   final VnFoodData data;
   final String? selected;
+
+  /// The chosen dish or single component, shown when it is not a guess.
+  final String? chosenName;
   final ValueChanged<String> onChoose;
   final VoidCallback onPickOther;
 
@@ -335,7 +324,7 @@ class _DishCard extends StatelessWidget {
     final l10n = context.l10n;
     final language = Localizations.localeOf(context).languageCode;
     final top = recognition.topDishes();
-    final chosen = selected == null ? null : data.dish(selected!);
+
     return CyberCard(
       title: l10n.scanDishTitle,
       icon: Icons.restaurant_rounded,
@@ -372,11 +361,10 @@ class _DishCard extends StatelessWidget {
               ],
             ),
           ],
-          if (chosen != null &&
-              !top.any((guess) => guess.key == chosen.code)) ...[
+          if (chosenName != null &&
+              !top.any((guess) => guess.key == selected)) ...[
             const SizedBox(height: 10),
-            Text(chosen.name(language),
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(chosenName!, style: Theme.of(context).textTheme.titleLarge),
           ],
           if (recognition.timing case final timing?) ...[
             const SizedBox(height: 8),
@@ -394,7 +382,7 @@ class _DishCard extends StatelessWidget {
             key: const ValueKey('scan-pick-dish'),
             onPressed: onPickOther,
             icon: const Icon(Icons.list_rounded),
-            label: Text(chosen == null && top.isEmpty
+            label: Text(selected == null && top.isEmpty
                 ? l10n.scanChooseDish
                 : l10n.scanOtherDish),
           ),

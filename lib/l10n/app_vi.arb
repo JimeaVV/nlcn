@@ -1115,5 +1115,19 @@
         "type": "String"
       }
     }
+  },
+  "pickerSearch": "Tìm món hoặc thứ ăn riêng (gõ không dấu cũng được)",
+  "pickerSearchComponents": "Tìm thành phần",
+  "pickerClear": "Xóa ô tìm",
+  "pickerNoMatch": "Không tìm thấy. Thử từ khác, ví dụ \"ga\" hoặc \"com\".",
+  "pickerDishes": "Món",
+  "pickerSingle": "Ăn riêng một thứ",
+  "pickerPer100g": "{kcal} kcal / 100 g",
+  "@pickerPer100g": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
   }
 }

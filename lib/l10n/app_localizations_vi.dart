@@ -1403,4 +1403,29 @@ class AppLocalizationsVi extends AppLocalizations {
   String widgetStreak(String count) {
     return 'Chuỗi $count ngày';
   }
+
+  @override
+  String get pickerSearch =>
+      'Tìm món hoặc thứ ăn riêng (gõ không dấu cũng được)';
+
+  @override
+  String get pickerSearchComponents => 'Tìm thành phần';
+
+  @override
+  String get pickerClear => 'Xóa ô tìm';
+
+  @override
+  String get pickerNoMatch =>
+      'Không tìm thấy. Thử từ khác, ví dụ \"ga\" hoặc \"com\".';
+
+  @override
+  String get pickerDishes => 'Món';
+
+  @override
+  String get pickerSingle => 'Ăn riêng một thứ';
+
+  @override
+  String pickerPer100g(String kcal) {
+    return '$kcal kcal / 100 g';
+  }
 }

@@ -261,7 +261,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('scan-add-component')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('add-tom')));
+    await tester.tap(find.byKey(const ValueKey('single-tom')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('component-tom')), findsOneWidget);
 
@@ -273,6 +273,41 @@ void main() {
     expect(egg.grams, 100);
     expect(egg.confidence, isNull);
     expect(database.added.any((entry) => entry.name.startsWith('Bì')), isFalse);
+  });
+
+  testWidgets('the picker searches without diacritics and logs one food alone',
+      (tester) async {
+    _tall(tester);
+    final database = _Database();
+    await _openResult(tester,
+        recognizer: const NoModelRecognizer(), database: database);
+    await tester.tap(find.byKey(const ValueKey('scan-pick-dish')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('dish-com_tam')), findsOneWidget);
+
+    await tester.enterText(
+        find.byKey(const ValueKey('food-picker-search')), 'pho');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('dish-pho_bo')), findsOneWidget);
+    expect(find.byKey(const ValueKey('dish-com_tam')), findsNothing);
+
+    // No food is called "tôm luộc"; a word that starts a name still finds it.
+    await tester.enterText(
+        find.byKey(const ValueKey('food-picker-search')), 'tom luoc');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('single-tom')), findsOneWidget);
+    expect(find.byKey(const ValueKey('single-com')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('single-tom')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('component-tom')), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const ValueKey('scan-save')));
+    await tester.tap(find.byKey(const ValueKey('scan-save')));
+    await tester.pumpAndSettle();
+    final shrimp = database.added.single;
+    expect(shrimp.name, 'Tôm');
+    expect(shrimp.calories, greaterThan(0));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('the shutter takes a photo, reviews it and closes Scan',

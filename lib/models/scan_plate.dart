@@ -116,9 +116,41 @@ class ScanPlate {
     return ScanPlate._(data, dish, items);
   }
 
+  /// One component eaten on its own, such as plain rice or a boiled
+  /// chicken breast, at its usual portion. Its [dish] is a stand-in named
+  /// after the component, whose code starts with [singleCodePrefix].
+  factory ScanPlate.single(VnFoodData data, VnComponent component) {
+    final typical = typicalPortion(data, component);
+    final dish = VnDish(
+      code: '$singleCodePrefix${component.code}',
+      nameVi: component.nameVi,
+      nameEn: component.nameEn,
+      parts: [
+        VnDishPart(
+          component: component.code,
+          defaultUnits: typical.inUnits ? typical.amount : null,
+          defaultGrams: typical.inUnits ? null : typical.amount,
+        ),
+      ],
+    );
+    return ScanPlate._(data, dish, [
+      PlateItem(
+        component: component,
+        included: true,
+        inUnits: typical.inUnits,
+        amount: typical.amount,
+      ),
+    ]);
+  }
+
+  static const singleCodePrefix = '_single_';
+
   final VnFoodData _data;
   final VnDish dish;
   final List<PlateItem> items;
+
+  /// True for a plate from [ScanPlate.single].
+  bool get isSingle => dish.code.startsWith(singleCodePrefix);
 
   /// Servings of the whole dish, 1 for the usual portion.
   double get portion => _portion;
@@ -187,8 +219,10 @@ class ScanPlate {
         FoodLogEntry(
           date: date,
           meal: meal,
-          name: '${item.component.name(languageCode)} '
-              '(${dish.name(languageCode)})',
+          name: isSingle
+              ? item.component.name(languageCode)
+              : '${item.component.name(languageCode)} '
+                  '(${dish.name(languageCode)})',
           grams: item.grams,
           calories: item.calories,
           protein: item.protein,
