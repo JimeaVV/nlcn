@@ -2531,6 +2531,84 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{kcal} kcal / 100 g'**
   String pickerPer100g(String kcal);
+
+  /// No description provided for @pickerNewFood.
+  ///
+  /// In vi, this message translates to:
+  /// **'Món chưa có trong danh sách…'**
+  String get pickerNewFood;
+
+  /// No description provided for @pickerNewFoodHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tự nhập tên và dinh dưỡng. Nếu đang gom ảnh, ảnh được giữ để sau này dạy model món này.'**
+  String get pickerNewFoodHint;
+
+  /// No description provided for @collectTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gom ảnh để dạy model'**
+  String get collectTitle;
+
+  /// No description provided for @collectBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khi bật, mỗi lần bạn ghi một món đã quét, app giữ lại ảnh (thu nhỏ) kèm tên món bạn xác nhận. Ảnh chỉ nằm trong máy; muốn dùng để train thì bấm Xuất rồi đưa file zip lên Drive.'**
+  String get collectBody;
+
+  /// No description provided for @collectSwitch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giữ ảnh khi ghi món đã quét'**
+  String get collectSwitch;
+
+  /// No description provided for @collectStats.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã gom {photos} ảnh · {size} MB'**
+  String collectStats(String photos, String size);
+
+  /// No description provided for @collectEmpty.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chưa có ảnh nào.'**
+  String get collectEmpty;
+
+  /// No description provided for @collectExport.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xuất ảnh đã gom (zip)'**
+  String get collectExport;
+
+  /// No description provided for @collectExportFailed.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không xuất được ảnh. Hãy thử lại.'**
+  String get collectExportFailed;
+
+  /// No description provided for @collectDelete.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa ảnh đã gom'**
+  String get collectDelete;
+
+  /// No description provided for @collectDeleteTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa toàn bộ ảnh đã gom?'**
+  String get collectDeleteTitle;
+
+  /// No description provided for @collectDeleteBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ảnh đã xóa không lấy lại được. Nhật ký ăn không bị ảnh hưởng.'**
+  String get collectDeleteBody;
+
+  /// No description provided for @collectDeleted.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã xóa ảnh đã gom.'**
+  String get collectDeleted;
 }
 
 class _AppLocalizationsDelegate

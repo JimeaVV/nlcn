@@ -1428,4 +1428,48 @@ class AppLocalizationsVi extends AppLocalizations {
   String pickerPer100g(String kcal) {
     return '$kcal kcal / 100 g';
   }
+
+  @override
+  String get pickerNewFood => 'Món chưa có trong danh sách…';
+
+  @override
+  String get pickerNewFoodHint =>
+      'Tự nhập tên và dinh dưỡng. Nếu đang gom ảnh, ảnh được giữ để sau này dạy model món này.';
+
+  @override
+  String get collectTitle => 'Gom ảnh để dạy model';
+
+  @override
+  String get collectBody =>
+      'Khi bật, mỗi lần bạn ghi một món đã quét, app giữ lại ảnh (thu nhỏ) kèm tên món bạn xác nhận. Ảnh chỉ nằm trong máy; muốn dùng để train thì bấm Xuất rồi đưa file zip lên Drive.';
+
+  @override
+  String get collectSwitch => 'Giữ ảnh khi ghi món đã quét';
+
+  @override
+  String collectStats(String photos, String size) {
+    return 'Đã gom $photos ảnh · $size MB';
+  }
+
+  @override
+  String get collectEmpty => 'Chưa có ảnh nào.';
+
+  @override
+  String get collectExport => 'Xuất ảnh đã gom (zip)';
+
+  @override
+  String get collectExportFailed => 'Không xuất được ảnh. Hãy thử lại.';
+
+  @override
+  String get collectDelete => 'Xóa ảnh đã gom';
+
+  @override
+  String get collectDeleteTitle => 'Xóa toàn bộ ảnh đã gom?';
+
+  @override
+  String get collectDeleteBody =>
+      'Ảnh đã xóa không lấy lại được. Nhật ký ăn không bị ảnh hưởng.';
+
+  @override
+  String get collectDeleted => 'Đã xóa ảnh đã gom.';
 }

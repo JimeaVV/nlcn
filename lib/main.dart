@@ -4,6 +4,7 @@ import 'core/cyber_theme.dart';
 import 'core/locale_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/home_screen.dart';
+import 'services/photo_collector.dart';
 import 'services/reminder_service.dart';
 
 Future<void> main() async {
@@ -11,8 +12,12 @@ Future<void> main() async {
   final themeController = ThemeController();
   final localeController = LocaleController();
   final reminders = ReminderController();
-  await Future.wait(
-      [themeController.load(), localeController.load(), reminders.load()]);
+  await Future.wait([
+    themeController.load(),
+    localeController.load(),
+    reminders.load(),
+    PhotoCollector.instance.load(),
+  ]);
   runApp(OptiFitApp(
     themeController: themeController,
     localeController: localeController,

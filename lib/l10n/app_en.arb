@@ -654,5 +654,28 @@
         "type": "String"
       }
     }
-  }
+  },
+  "pickerNewFood": "Food not in the list…",
+  "pickerNewFoodHint": "Type its name and nutrition. When photos are being kept, this one helps teach the model the new food later.",
+  "collectTitle": "Keep photos to teach the model",
+  "collectBody": "When on, every scanned meal you log keeps its photo (shrunk) with the dish you confirmed. Photos stay on this phone; to train with them, export the zip and put it on Drive.",
+  "collectSwitch": "Keep photos of logged scans",
+  "collectStats": "{photos} photos kept · {size} MB",
+  "@collectStats": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "collectEmpty": "No photos yet.",
+  "collectExport": "Export photos (zip)",
+  "collectExportFailed": "Could not export the photos. Try again.",
+  "collectDelete": "Delete kept photos",
+  "collectDeleteTitle": "Delete all kept photos?",
+  "collectDeleteBody": "Deleted photos cannot be recovered. The food diary is not affected.",
+  "collectDeleted": "Kept photos deleted."
 }

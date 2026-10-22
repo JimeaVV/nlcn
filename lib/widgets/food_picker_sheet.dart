@@ -23,6 +23,11 @@ class ComponentPick extends FoodPick {
   final VnComponent component;
 }
 
+/// Food the app does not know: the user types its name and nutrition.
+class NewFoodPick extends FoodPick {
+  const NewFoodPick();
+}
+
 /// A searchable list of dishes and components. Typing filters both lists,
 /// with or without Vietnamese diacritics ("uc ga" finds "Ức gà").
 class FoodPickerSheet extends StatefulWidget {
@@ -156,6 +161,14 @@ class _FoodPickerSheetState extends State<FoodPickerSheet> {
               onTap: () => Navigator.pop(context, ComponentPick(component)),
             ),
         ],
+        if (widget.dishes.isNotEmpty)
+          ListTile(
+            key: const ValueKey('pick-new-food'),
+            leading: Icon(Icons.add_circle_outline, color: CyberColors.lime),
+            title: Text(l10n.pickerNewFood),
+            subtitle: Text(l10n.pickerNewFoodHint),
+            onTap: () => Navigator.pop(context, const NewFoodPick()),
+          ),
         const SizedBox(height: 24),
       ],
     );

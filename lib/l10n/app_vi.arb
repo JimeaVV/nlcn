@@ -1129,5 +1129,28 @@
         "type": "String"
       }
     }
-  }
+  },
+  "pickerNewFood": "Món chưa có trong danh sách…",
+  "pickerNewFoodHint": "Tự nhập tên và dinh dưỡng. Nếu đang gom ảnh, ảnh được giữ để sau này dạy model món này.",
+  "collectTitle": "Gom ảnh để dạy model",
+  "collectBody": "Khi bật, mỗi lần bạn ghi một món đã quét, app giữ lại ảnh (thu nhỏ) kèm tên món bạn xác nhận. Ảnh chỉ nằm trong máy; muốn dùng để train thì bấm Xuất rồi đưa file zip lên Drive.",
+  "collectSwitch": "Giữ ảnh khi ghi món đã quét",
+  "collectStats": "Đã gom {photos} ảnh · {size} MB",
+  "@collectStats": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "collectEmpty": "Chưa có ảnh nào.",
+  "collectExport": "Xuất ảnh đã gom (zip)",
+  "collectExportFailed": "Không xuất được ảnh. Hãy thử lại.",
+  "collectDelete": "Xóa ảnh đã gom",
+  "collectDeleteTitle": "Xóa toàn bộ ảnh đã gom?",
+  "collectDeleteBody": "Ảnh đã xóa không lấy lại được. Nhật ký ăn không bị ảnh hưởng.",
+  "collectDeleted": "Đã xóa ảnh đã gom."
 }

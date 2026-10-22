@@ -350,7 +350,8 @@ void main() {
   testWidgets('Settings clears saved history only after confirmation',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
-    _size(tester, 400, 1800);
+    // Tall enough for every Settings card down to the data card.
+    _size(tester, 400, 3200);
     final database = _Database();
     var notified = 0;
     await tester.pumpWidget(localizedApp(
@@ -364,7 +365,9 @@ void main() {
       ),
     ));
     final clear = find.byKey(const ValueKey('clear-history'));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(clear);
+    await tester.pumpAndSettle();
     await tester.tap(clear);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Hủy'));

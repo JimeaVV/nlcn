@@ -11,6 +11,7 @@ import '../models/scan_plate.dart';
 import '../models/vn_food.dart';
 import '../services/database_service.dart';
 import '../services/food_recognizer.dart';
+import '../services/photo_collector.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/error_box.dart';
 import '../widgets/food_picker_sheet.dart';
@@ -26,12 +27,16 @@ class ScanResultScreen extends StatefulWidget {
     required this.data,
     required this.recognizer,
     this.database,
+    this.collector,
   });
 
   final String imagePath;
   final VnFoodData data;
   final FoodRecognizer recognizer;
   final DatabaseService? database;
+
+  /// Where confirmed photos are kept; [PhotoCollector.instance] by default.
+  final PhotoCollector? collector;
 
   @override
   State<ScanResultScreen> createState() => _ScanResultScreenState();
@@ -120,10 +125,12 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     final pick = await _showPicker(context.l10n.scanChooseDish,
         widget.data.dishes, widget.data.addableComponents);
     if (pick == null || !mounted) return;
+    if (pick is NewFoodPick) return _logNewFood();
     setState(() => switch (pick) {
           DishPick(:final code) => _choose(code),
           ComponentPick(:final component) => _plate =
               ScanPlate.single(widget.data, component),
+          NewFoodPick() => null,
         });
   }
 
@@ -142,6 +149,50 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     }
   }
 
+  PhotoCollector get _collector => widget.collector ?? PhotoCollector.instance;
+
+  /// Keeps the photo with what the user confirmed, when collecting is on.
+  /// It never stops the meal from being logged.
+  Future<void> _keepPhoto(String label, String name) async {
+    final top = _recognition.topDishes();
+    try {
+      await _collector.save(
+        widget.imagePath,
+        label: label,
+        name: name,
+        guess: top.isEmpty ? null : top.first.key,
+        confidence: top.isEmpty ? null : top.first.value,
+      );
+    } catch (error) {
+      debugPrint('Photo not kept: $error');
+    }
+  }
+
+  /// A food that is in no list: typed in by hand, and its photo kept under
+  /// its own name for a later model.
+  Future<void> _logNewFood() async {
+    final entry = await showModalBottomSheet<FoodLogEntry>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: CyberColors.surface,
+      builder: (_) => FoodLogSheet(foods: const [], date: DateTime.now()),
+    );
+    if (entry == null || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await (widget.database ?? DatabaseService.instance)
+          .addFoodLogEntries([entry.copyTo(entry.date, _meal)]);
+      await _keepPhoto(PhotoCollector.labelForNewFood(entry.name), entry.name);
+      Haptics.strong();
+      if (mounted) Navigator.pop(context, true);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.diarySaveFailed)));
+    }
+  }
+
   Future<void> _save() async {
     final plate = _plate;
     if (plate == null || !plate.canLog || _saving) return;
@@ -154,6 +205,11 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
           languageCode: Localizations.localeOf(context).languageCode,
         ),
       );
+      await _keepPhoto(
+          plate.isSingle
+              ? 'single_${plate.items.first.component.code}'
+              : plate.dish.code,
+          plate.dish.nameVi);
       Haptics.strong();
       if (mounted) Navigator.pop(context, true);
     } catch (_) {

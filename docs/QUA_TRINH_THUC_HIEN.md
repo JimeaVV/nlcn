@@ -1908,6 +1908,35 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     tên "Tôm".
   - Build APK 113 (24,4 MB). Chưa cài lên điện thoại vì máy mất kết nối adb.
 
+### 2026-10-22 · Gom ảnh của chính người dùng để dạy model, và ghi món chưa có
+- Lý do: nhiều món hay ăn (yến mạch, khoai lang, gạo lứt, sữa chua Hy Lạp,
+  bánh mì đen, bơ đậu phộng, shake protein, mì gói, trà sữa) không có bộ ảnh
+  công khai nào dùng được. Đã tìm trên Hugging Face, Kaggle, Roboflow và danh
+  sách lớp của ISIA Food-500. Ảnh người dùng tự chụp lại khớp đúng chén bát,
+  ánh sáng và góc chụp thật, nên dạy model tốt hơn ảnh trên mạng.
+- `PhotoCollector` (`lib/services/photo_collector.dart`):
+  - Mặc định tắt; bật trong Cài đặt, thẻ "Gom ảnh để dạy model".
+  - Khi bật, mỗi lần ghi một món đã quét, app giữ lại ảnh (cạnh dài nhất 640
+    px, JPEG 85, khoảng 60 KB) trong thư mục `training_photos/<nhãn>/`.
+  - Nhãn là mã món, `single_<thành phần>` cho thứ ăn riêng, hoặc
+    `new_<tên>` cho món chưa có (ví dụ "Yến mạch" thành `new_yen_mach`).
+  - `index.csv` ghi tên món người dùng xác nhận, kèm món model đoán và độ tin
+    cậy. Ảnh model đoán sai là ảnh đáng train nhất.
+  - Ảnh chỉ nằm trong máy. "Xuất ảnh đã gom (zip)" mở bảng chia sẻ của
+    Android; "Xóa ảnh đã gom" có hỏi xác nhận và không đụng tới nhật ký ăn.
+  - Lưu ảnh trước khi rời màn kết quả, vì ảnh quét bị xóa ngay sau đó. Lỗi
+    khi lưu ảnh không chặn việc ghi món.
+- Bảng chọn món có thêm mục "Món chưa có trong danh sách…": nhập tên và dinh
+  dưỡng như món tự nhập trong nhật ký, ghi vào bữa đang chọn, và giữ ảnh dưới
+  nhãn `new_<tên>`.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 200/200 PASS.
+  - Test mới: không lưu gì khi đang tắt; ảnh 1600×1200 được thu còn 640×480;
+    `index.csv` đúng cột; nhãn `new_` sinh từ tên tiếng Việt; nhãn có `../`
+    bị chặn; file zip có ảnh và chỉ mục; xóa sạch được.
+  - Hai test cũ của màn Cài đặt phải cuộn xa hơn vì có thêm thẻ mới.
+  - Build APK 114 (24,5 MB) và cài đè lên điện thoại test.
+
 ---
 
 ## 3. Việc còn tồn đọng

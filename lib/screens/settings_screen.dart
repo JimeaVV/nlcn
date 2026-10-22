@@ -6,8 +6,11 @@ import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
 import '../services/backup_service.dart';
 import '../services/database_service.dart';
+import '../services/photo_collector.dart';
 import '../services/reminder_service.dart';
 import '../widgets/cyber_card.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../widgets/scan_button_face.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -20,7 +23,12 @@ class SettingsScreen extends StatelessWidget {
     this.reminders,
     this.backup = const BackupService(),
     this.onDataRestored,
+    this.collector,
   });
+
+  /// Kept scan photos; [PhotoCollector.instance] by default.
+  final PhotoCollector? collector;
+  PhotoCollector get _photos => collector ?? PhotoCollector.instance;
 
   final ThemeController themeController;
   final LocaleController localeController;
@@ -65,6 +73,52 @@ class SettingsScreen extends StatelessWidget {
     if (time == null) return;
     await controller.setTime(meal, time,
         texts: _reminderTexts(l10n), channelName: l10n.reminderChannel);
+  }
+
+  Future<void> _exportPhotos(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final dir = await getTemporaryDirectory();
+      final zip = await _photos.exportZip(
+          '${dir.path}/macrorunner_photos_${diaryDateKey(DateTime.now())}.zip');
+      if (zip == null) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.collectEmpty)));
+        return;
+      }
+      await SharePlus.instance.share(ShareParams(files: [XFile(zip.path)]));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.collectExportFailed)));
+    }
+  }
+
+  Future<void> _deletePhotos(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.collectDeleteTitle),
+        content: Text(l10n.collectDeleteBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _photos.clear();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.collectDeleted)));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.clearAllFailed)));
+    }
   }
 
   Future<void> _export(BuildContext context) async {
@@ -154,6 +208,7 @@ class SettingsScreen extends StatelessWidget {
         themeController,
         localeController,
         if (reminders != null) reminders!,
+        _photos,
       ]),
       builder: (context, _) {
         final l10n = context.l10n;
@@ -223,6 +278,8 @@ class SettingsScreen extends StatelessWidget {
                 _remindersCard(context, l10n),
               ],
               const SizedBox(height: 18),
+              _collectCard(context, l10n),
+              const SizedBox(height: 18),
               CyberCard(
                 key: const ValueKey('backup-card'),
                 title: l10n.backupTitle,
@@ -277,6 +334,64 @@ class SettingsScreen extends StatelessWidget {
 }
 
 extension on SettingsScreen {
+  Widget _collectCard(BuildContext context, AppLocalizations l10n) {
+    final photos = _photos;
+    return CyberCard(
+      key: const ValueKey('collect-card'),
+      title: l10n.collectTitle,
+      icon: Icons.photo_library_outlined,
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.collectBody, style: TextStyle(color: CyberColors.muted)),
+            SwitchListTile(
+              key: const ValueKey('collect-switch'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.collectSwitch),
+              value: photos.enabled,
+              onChanged: photos.setEnabled,
+            ),
+            FutureBuilder(
+              future: photos.stats(),
+              builder: (context, snapshot) {
+                final stats = snapshot.data;
+                return Text(
+                  key: const ValueKey('collect-stats'),
+                  stats == null || stats.photos == 0
+                      ? l10n.collectEmpty
+                      : l10n.collectStats('${stats.photos}',
+                          context.formatNumber(stats.bytes / 1e6, decimals: 1)),
+                  style: Theme.of(context).textTheme.titleMedium,
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  key: const ValueKey('collect-export'),
+                  onPressed: () => _exportPhotos(context),
+                  icon: const Icon(Icons.ios_share_rounded),
+                  label: Text(l10n.collectExport),
+                ),
+                TextButton.icon(
+                  key: const ValueKey('collect-delete'),
+                  onPressed: () => _deletePhotos(context),
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  label: Text(l10n.collectDelete),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _remindersCard(BuildContext context, AppLocalizations l10n) {
     final controller = reminders!;
     return CyberCard(

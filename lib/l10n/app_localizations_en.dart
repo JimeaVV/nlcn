@@ -1436,4 +1436,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String pickerPer100g(String kcal) {
     return '$kcal kcal / 100 g';
   }
+
+  @override
+  String get pickerNewFood => 'Food not in the list…';
+
+  @override
+  String get pickerNewFoodHint =>
+      'Type its name and nutrition. When photos are being kept, this one helps teach the model the new food later.';
+
+  @override
+  String get collectTitle => 'Keep photos to teach the model';
+
+  @override
+  String get collectBody =>
+      'When on, every scanned meal you log keeps its photo (shrunk) with the dish you confirmed. Photos stay on this phone; to train with them, export the zip and put it on Drive.';
+
+  @override
+  String get collectSwitch => 'Keep photos of logged scans';
+
+  @override
+  String collectStats(String photos, String size) {
+    return '$photos photos kept · $size MB';
+  }
+
+  @override
+  String get collectEmpty => 'No photos yet.';
+
+  @override
+  String get collectExport => 'Export photos (zip)';
+
+  @override
+  String get collectExportFailed => 'Could not export the photos. Try again.';
+
+  @override
+  String get collectDelete => 'Delete kept photos';
+
+  @override
+  String get collectDeleteTitle => 'Delete all kept photos?';
+
+  @override
+  String get collectDeleteBody =>
+      'Deleted photos cannot be recovered. The food diary is not affected.';
+
+  @override
+  String get collectDeleted => 'Kept photos deleted.';
 }
