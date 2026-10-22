@@ -1817,6 +1817,34 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Đã build APK arm64 build 110 (20,7 MB, chữ ký release khớp) và cài đè lên
   điện thoại test. App mở được, nâng cấp database lên v6, log không có lỗi.
 
+### 2026-10-22 · Đưa EfficientNetB3 (bản int8) vào app thay EfficientNetB0
+- B3 train xong đủ 30 epoch fine-tune qua nhiều phiên Colab và nhiều acc
+  Google (`finished: true`), tổng 630 phút train, không lần nào bị lỗi NaN.
+  - Val top-1 0,867; test top-1 **0,860**, top-3 **0,941** trên 14.823 ảnh
+    test; F1 thành phần 0,468.
+  - 26/63 món có ảnh đạt từ 90% trở lên. Yếu nhất: salad 0,48, cơm phần
+    0,57, "món lạ" (khac) 0,63, cà ri 0,67, khoai tây chiên 0,70.
+  - Ngưỡng chọn theo độ chính xác ≥ 0,85: `threshold_checked` 0,7,
+    `threshold_ask` 0,4.
+- So với B0 đang dùng (contract 1.3, 52 món): test top-1 0,688, top-3
+  0,839. B3 cao hơn khoảng 17 điểm dù phải nhận 65 món. Hai model thi trên hai
+  tập test khác nhau, nên đây không phải phép so trên cùng một đề. Phép so
+  công bằng là với B1/B2, cùng cách train và cùng tập test.
+- Chọn bản **int8** (lượng tử hóa trọng số theo dynamic range): 11,9 MB so
+  với 21,8 MB của bản float16. Trên cùng mẫu ảnh test, int8 đạt 0,830 và
+  float16 đạt 0,832. Trên CPU điện thoại, bản int8 thường nhanh hơn và tốn ít
+  RAM hơn.
+- Kiểm tra trước khi đưa vào app:
+  - `dishes.txt` (66 dòng) và `components.txt` (25 dòng) đúng thứ tự `DISHES`
+    + `khac` và `COMPONENTS` của notebook.
+  - Model nhận `[1,300,300,3]` float32 và trả hai đầu ra 66 và 25; đầu ra món
+    cộng lại bằng 1.
+  - `flutter test` 195/195 PASS.
+- `MODEL_CARD.md` ghi rõ app dùng bản int8. Sửa chú thích trong
+  `scan_camera.dart`: model đọc ảnh tối đa 300×300, không còn 224×224.
+- Build APK arm64 build 111: 24,1 MB (bản B0 là 20,7 MB), chữ ký release
+  khớp, không có quyền INTERNET. Chưa đo tốc độ quét trên điện thoại thật.
+
 ---
 
 ## 3. Việc còn tồn đọng

@@ -74,7 +74,8 @@ class DeviceScanCamera implements ScanCamera {
       final controller = CameraController(
         back,
         // 1080p. "high" is only 720p, which looked soft on the preview and
-        // in the photo; the model reads 224x224, so larger buys nothing.
+        // in the photo; the model reads 300x300 at most, so larger buys
+        // nothing.
         ResolutionPreset.veryHigh,
         // Photos only: the app never asks for the microphone.
         enableAudio: false,

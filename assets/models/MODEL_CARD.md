@@ -1,22 +1,24 @@
 # MODEL_CARD – food_v1
 
-- Ngày train: 2026-10-19
-- Contract: 1.3 (52 món + lớp khac, 25 thành phần)
-- Kiến trúc: efficientnetb0, thí nghiệm `finetune`
-- Dữ liệu: 38677 train / 8287 val / 8287 test
-- Nguồn ảnh: vietfood68: 29595, vinafood21: 12713, vietnamese-foods: 10801, 20foodvn: 2142
-- Kích thước: 8.3 MB (float16)
-- Thời gian train: 55 phút
+- Ngày train: 2026-10-21
+- Contract: 1.4 (65 món + lớp khac, 25 thành phần)
+- Kiến trúc: efficientnetb3 (300×300), thí nghiệm `finetune`, cách train `full`
+- Dữ liệu: 70065 train / 14823 val / 14823 test
+- Nguồn ảnh: vietfood68: 58999, vietnamese-foods: 23022, vinafood21: 13855, 20foodvn: 3835
+- Kích thước: 11.9 MB, bản int8 (lượng tử hóa trọng số) mà app dùng; bản
+  float16 21.8 MB. Trên cùng mẫu ảnh test: int8 0.830, float16 0.832.
+- Thời gian train: 630 phút
 
 ## Kết quả trên tập test
-- Món, top-1: 0.688
-- Món, top-3: 0.839
-- Thành phần, F1: 0.497
+- Món, top-1: 0.860
+- Món, top-3: 0.941
+- Thành phần, F1: 0.468
 
 ## Ngưỡng (app đọc các dòng này)
-threshold_checked: 0.3
-threshold_ask: 0.15
+threshold_checked: 0.7
+threshold_ask: 0.4
 threshold_confident_dish: 0.5
+component_dishes: 
 
 ## Hạn chế
 - Tập test chưa có ảnh tự chụp: contract yêu cầu ít nhất 30%.

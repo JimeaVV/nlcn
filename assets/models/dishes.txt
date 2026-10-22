@@ -50,4 +50,17 @@ canh_chua
 trung_vit_lon
 che
 nuoc_mia
+banh_trang_nuong
+banh_gio
+banh_bot_loc
+banh_duc
+nem_chua
+banh_pia
+bun_ca
+khoai_tay_chien
+salad
+hamburger
+nui_xao_bo
+sup_cua
+nom_hoa_chuoi
 khac
