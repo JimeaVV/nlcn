@@ -1480,4 +1480,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectDeleted => 'Kept photos deleted.';
+
+  @override
+  String get waterRemindersTitle => 'Water reminders';
+
+  @override
+  String waterRemindersBody(String goal) {
+    return 'Each reminder is one of five messages at random. Once you have drunk $goal in a day, the rest of that day stays quiet. Open the app at least once a week so the reminders keep coming.';
+  }
+
+  @override
+  String get waterRemindersSwitch => 'Remind me to drink water';
+
+  @override
+  String get waterRemindersEvery => 'Remind every';
+
+  @override
+  String waterRemindersHours(String hours) {
+    return '$hours h';
+  }
+
+  @override
+  String get waterRemindersFrom => 'From';
+
+  @override
+  String get waterRemindersTo => 'Until';
+
+  @override
+  String get waterRemindersBadWindow =>
+      'The end time must be after the start time.';
+
+  @override
+  String get waterReminderChannel => 'Water reminders';
+
+  @override
+  String get waterReminder1Title => 'Time for some water 💧';
+
+  @override
+  String get waterReminder1Body => 'A glass now helps you stay sharp.';
+
+  @override
+  String get waterReminder2Title => 'Had enough water today?';
+
+  @override
+  String get waterReminder2Body =>
+      'Open MacroRunner to log the glass you just drank.';
+
+  @override
+  String get waterReminder3Title => 'Top up';
+
+  @override
+  String get waterReminder3Body =>
+      'Training goes better when you are hydrated.';
+
+  @override
+  String get waterReminder4Title => 'Don\'t wait until you\'re thirsty';
+
+  @override
+  String get waterReminder4Body =>
+      'Thirst means your body is already a little short.';
+
+  @override
+  String get waterReminder5Title => 'One glass of water';
+
+  @override
+  String get waterReminder5Body =>
+      'Stand up, pour a glass, then get back to it.';
 }

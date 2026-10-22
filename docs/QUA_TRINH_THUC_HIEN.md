@@ -2015,6 +2015,39 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   mở được, ảnh vào 300×300, 66 đầu ra món, 25 thành phần. Smoke test dùng
   chính file này làm điểm xuất phát: PASS.
 
+### 2026-10-22 · Nhắc uống nước
+- Lý do: người dùng muốn được nhắc uống nước đều trong ngày, mỗi lần một
+  câu khác nhau, tự bật tắt và chọn khoảng cách giữa hai lần nhắc.
+- `WaterReminderController` (`lib/services/water_reminder_service.dart`):
+  - Mặc định tắt. Tuỳ chọn nhắc mỗi 1; 1,5; 2; 3 hoặc 4 tiếng (mặc định 2),
+    trong khung giờ đổi được (mặc định 8:00–22:00) để không nhắc lúc ngủ.
+  - 5 câu nhắc (tiếng Việt và tiếng Anh). Mỗi thông báo chọn ngẫu nhiên một
+    câu, không lặp lại câu ngay trước đó.
+  - Android không có kiểu thông báo lặp lại mà mỗi lần đổi chữ, nên app hẹn
+    sẵn từng thông báo cho 7 ngày tới (tối đa 7 × 24 cái, dưới giới hạn 500
+    của Android). Mỗi lần mở màn Hôm nay hoặc ghi nước thì hẹn lại; quá 7
+    ngày không mở app thì hết nhắc (ghi trong thẻ Cài đặt).
+  - Hôm nào đã uống đủ mục tiêu (2.000 ml) thì bỏ các lần nhắc còn lại trong
+    ngày.
+  - Các lần hẹn lại chạy lần lượt, để hai lần chồng nhau không để lại thông
+    báo trùng.
+- Kênh thông báo riêng "Nhắc uống nước", nên có thể tắt tiếng riêng trong
+  Android. Mã thông báo 1000–1999, tách khỏi nhắc bữa (100–199).
+- Sửa lỗi cũ: tắt nhắc bữa trước đây xoá mọi thông báo đã hẹn (`cancelAll`).
+  Giờ mỗi loại chỉ xoá mã của mình. Phần khởi tạo thông báo dùng chung nằm
+  ở `lib/services/local_notifications.dart`.
+- Cài đặt có thẻ "Nhắc uống nước": công tắc, các nút chọn số tiếng, giờ bắt
+  đầu và kết thúc. Giờ kết thúc không sau giờ bắt đầu thì báo lỗi và không
+  đổi gì.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 207/207 PASS.
+  - 7 test mới: giờ nhắc đúng theo khoảng cách, khung giờ và giờ hiện tại;
+    nhắc mỗi 1,5 tiếng; câu nhắc luôn là một trong 5 câu và không lặp liền;
+    đủ nước thì hôm nay thôi nhắc; quyền bị từ chối; khung giờ sai; cài đặt
+    còn sau khi mở lại app; tắt nhắc nước không đụng tới nhắc bữa; bật và đổi
+    khoảng cách từ thẻ Cài đặt.
+  - Build APK 116.
+
 ---
 
 ## 3. Việc còn tồn đọng

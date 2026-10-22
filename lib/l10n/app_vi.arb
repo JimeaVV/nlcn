@@ -1152,5 +1152,38 @@
   "collectDelete": "Xóa ảnh đã gom",
   "collectDeleteTitle": "Xóa toàn bộ ảnh đã gom?",
   "collectDeleteBody": "Ảnh đã xóa không lấy lại được. Nhật ký ăn không bị ảnh hưởng.",
-  "collectDeleted": "Đã xóa ảnh đã gom."
+  "collectDeleted": "Đã xóa ảnh đã gom.",
+  "waterRemindersTitle": "Nhắc uống nước",
+  "waterRemindersBody": "Mỗi lần nhắc là một câu ngẫu nhiên. Hôm nào đã uống đủ {goal} thì app thôi nhắc. Mở app ít nhất 7 ngày một lần để nhắc không bị ngắt.",
+  "@waterRemindersBody": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemindersSwitch": "Bật nhắc uống nước",
+  "waterRemindersEvery": "Nhắc mỗi",
+  "waterRemindersHours": "{hours} tiếng",
+  "@waterRemindersHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemindersFrom": "Từ",
+  "waterRemindersTo": "Đến",
+  "waterRemindersBadWindow": "Giờ kết thúc phải sau giờ bắt đầu.",
+  "waterReminderChannel": "Nhắc uống nước",
+  "waterReminder1Title": "Tới giờ uống nước 💧",
+  "waterReminder1Body": "Một ly nước bây giờ giúp bạn tỉnh táo hơn.",
+  "waterReminder2Title": "Hôm nay uống đủ nước chưa?",
+  "waterReminder2Body": "Mở MacroRunner để ghi lại ly vừa uống.",
+  "waterReminder3Title": "Nạp nước thôi",
+  "waterReminder3Body": "Tập luyện hiệu quả hơn khi cơ thể đủ nước.",
+  "waterReminder4Title": "Đừng đợi khát mới uống",
+  "waterReminder4Body": "Khát nghĩa là cơ thể đã hơi thiếu nước rồi.",
+  "waterReminder5Title": "Một ly nước nhé",
+  "waterReminder5Body": "Đứng dậy rót một ly, rồi quay lại việc đang làm."
 }

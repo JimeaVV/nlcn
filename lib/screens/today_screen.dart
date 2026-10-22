@@ -11,6 +11,7 @@ import '../models/user_profile.dart';
 import '../models/weight_entry.dart';
 import '../services/database_service.dart';
 import '../services/home_widget_sync.dart';
+import '../services/water_reminder_service.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/error_box.dart';
 
@@ -24,7 +25,11 @@ class TodayScreen extends StatefulWidget {
     this.onOpenWorkout,
     this.onOpenProfile,
     this.onScan,
+    this.waterReminders,
   });
+
+  /// Scheduled again whenever the day's water is known or changes.
+  final WaterReminderController? waterReminders;
 
   final DatabaseService? database;
   final VoidCallback? onOpenDiary;
@@ -110,6 +115,7 @@ class TodayScreenState extends State<TodayScreen> {
         _loadFailed = false;
       });
       _syncHomeWidget();
+      _refreshWaterReminders();
     } catch (_) {
       if (!mounted || version != _loadVersion) return;
       setState(() {
@@ -134,6 +140,16 @@ class TodayScreenState extends State<TodayScreen> {
       }
     }
     _syncHomeWidget();
+    _refreshWaterReminders();
+  }
+
+  /// Reaching the goal ends today's water reminders; opening the app also
+  /// schedules the days ahead again.
+  void _refreshWaterReminders() {
+    widget.waterReminders?.refresh(
+      texts: WaterReminderTexts.of(context.l10n),
+      goalReachedToday: _water >= waterTargetMl,
+    );
   }
 
   /// The home-screen widget shows the same numbers as this screen.

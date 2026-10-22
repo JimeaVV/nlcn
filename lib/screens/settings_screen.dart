@@ -7,7 +7,9 @@ import '../models/food_log_entry.dart';
 import '../services/backup_service.dart';
 import '../services/database_service.dart';
 import '../services/photo_collector.dart';
+import '../engine/daily_habits.dart';
 import '../services/reminder_service.dart';
+import '../services/water_reminder_service.dart';
 import '../widgets/cyber_card.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -21,6 +23,7 @@ class SettingsScreen extends StatelessWidget {
     this.database,
     this.onHistoryCleared,
     this.reminders,
+    this.waterReminders,
     this.backup = const BackupService(),
     this.onDataRestored,
     this.collector,
@@ -39,6 +42,9 @@ class SettingsScreen extends StatelessWidget {
 
   /// Meal reminders; the card is hidden without it.
   final ReminderController? reminders;
+
+  /// Water reminders; the card is hidden without it.
+  final WaterReminderController? waterReminders;
   final BackupService backup;
 
   /// Called after a backup replaced all data.
@@ -73,6 +79,53 @@ class SettingsScreen extends StatelessWidget {
     if (time == null) return;
     await controller.setTime(meal, time,
         texts: _reminderTexts(l10n), channelName: l10n.reminderChannel);
+  }
+
+  /// Whether today's water already reaches the goal; reminders then skip
+  /// the rest of today.
+  Future<bool> _waterGoalReached() async {
+    try {
+      return await _database.getWater(DateTime.now()) >= waterTargetMl;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _toggleWaterReminders(BuildContext context, bool value) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final allowed = await waterReminders!.setEnabled(value,
+        texts: WaterReminderTexts.of(l10n),
+        goalReachedToday: await _waterGoalReached());
+    if (!allowed) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.remindersDenied)));
+    }
+  }
+
+  Future<void> _setWaterInterval(BuildContext context, double hours) async {
+    final texts = WaterReminderTexts.of(context.l10n);
+    await waterReminders!.setInterval(hours,
+        texts: texts, goalReachedToday: await _waterGoalReached());
+  }
+
+  Future<void> _pickWaterTime(BuildContext context,
+      {required bool start}) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final controller = waterReminders!;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: start ? controller.from : controller.to,
+    );
+    if (time == null) return;
+    final saved = await controller.setWindow(
+        start ? time : controller.from, start ? controller.to : time,
+        texts: WaterReminderTexts.of(l10n),
+        goalReachedToday: await _waterGoalReached());
+    if (!saved) {
+      messenger
+          .showSnackBar(SnackBar(content: Text(l10n.waterRemindersBadWindow)));
+    }
   }
 
   Future<void> _exportPhotos(BuildContext context) async {
@@ -208,6 +261,7 @@ class SettingsScreen extends StatelessWidget {
         themeController,
         localeController,
         if (reminders != null) reminders!,
+        if (waterReminders != null) waterReminders!,
         _photos,
       ]),
       builder: (context, _) {
@@ -276,6 +330,10 @@ class SettingsScreen extends StatelessWidget {
               if (reminders != null) ...[
                 const SizedBox(height: 18),
                 _remindersCard(context, l10n),
+              ],
+              if (waterReminders != null) ...[
+                const SizedBox(height: 18),
+                _waterRemindersCard(context, l10n),
               ],
               const SizedBox(height: 18),
               _collectCard(context, l10n),
@@ -386,6 +444,69 @@ extension on SettingsScreen {
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _waterRemindersCard(BuildContext context, AppLocalizations l10n) {
+    final controller = waterReminders!;
+    String hours(double value) => l10n.waterRemindersHours(context
+        .formatNumber(value, decimals: value == value.roundToDouble() ? 0 : 1));
+    return CyberCard(
+      key: const ValueKey('water-reminders-card'),
+      title: l10n.waterRemindersTitle,
+      icon: Icons.water_drop_outlined,
+      accent: CyberColors.cyan,
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                l10n.waterRemindersBody(
+                    '${context.formatNumber(waterTargetMl)} ml'),
+                style: TextStyle(color: CyberColors.muted)),
+            SwitchListTile(
+              key: const ValueKey('water-reminders-switch'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.waterRemindersSwitch),
+              value: controller.enabled,
+              onChanged: (value) => _toggleWaterReminders(context, value),
+            ),
+            Text(l10n.waterRemindersEvery,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final option in waterReminderIntervals)
+                  ChoiceChip(
+                    key: ValueKey('water-every-$option'),
+                    label: Text(hours(option)),
+                    selected: controller.everyHours == option,
+                    onSelected: controller.enabled
+                        ? (_) => _setWaterInterval(context, option)
+                        : null,
+                  ),
+              ],
+            ),
+            for (final start in [true, false])
+              ListTile(
+                key: ValueKey(start ? 'water-from' : 'water-to'),
+                contentPadding: EdgeInsets.zero,
+                enabled: controller.enabled,
+                leading: const Icon(Icons.schedule_rounded),
+                title: Text(
+                    start ? l10n.waterRemindersFrom : l10n.waterRemindersTo),
+                trailing: Text(
+                  (start ? controller.from : controller.to).format(context),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                onTap: () => _pickWaterTime(context, start: start),
+              ),
           ],
         ),
       ),

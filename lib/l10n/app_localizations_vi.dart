@@ -1472,4 +1472,67 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get collectDeleted => 'Đã xóa ảnh đã gom.';
+
+  @override
+  String get waterRemindersTitle => 'Nhắc uống nước';
+
+  @override
+  String waterRemindersBody(String goal) {
+    return 'Mỗi lần nhắc là một câu ngẫu nhiên. Hôm nào đã uống đủ $goal thì app thôi nhắc. Mở app ít nhất 7 ngày một lần để nhắc không bị ngắt.';
+  }
+
+  @override
+  String get waterRemindersSwitch => 'Bật nhắc uống nước';
+
+  @override
+  String get waterRemindersEvery => 'Nhắc mỗi';
+
+  @override
+  String waterRemindersHours(String hours) {
+    return '$hours tiếng';
+  }
+
+  @override
+  String get waterRemindersFrom => 'Từ';
+
+  @override
+  String get waterRemindersTo => 'Đến';
+
+  @override
+  String get waterRemindersBadWindow => 'Giờ kết thúc phải sau giờ bắt đầu.';
+
+  @override
+  String get waterReminderChannel => 'Nhắc uống nước';
+
+  @override
+  String get waterReminder1Title => 'Tới giờ uống nước 💧';
+
+  @override
+  String get waterReminder1Body => 'Một ly nước bây giờ giúp bạn tỉnh táo hơn.';
+
+  @override
+  String get waterReminder2Title => 'Hôm nay uống đủ nước chưa?';
+
+  @override
+  String get waterReminder2Body => 'Mở MacroRunner để ghi lại ly vừa uống.';
+
+  @override
+  String get waterReminder3Title => 'Nạp nước thôi';
+
+  @override
+  String get waterReminder3Body => 'Tập luyện hiệu quả hơn khi cơ thể đủ nước.';
+
+  @override
+  String get waterReminder4Title => 'Đừng đợi khát mới uống';
+
+  @override
+  String get waterReminder4Body =>
+      'Khát nghĩa là cơ thể đã hơi thiếu nước rồi.';
+
+  @override
+  String get waterReminder5Title => 'Một ly nước nhé';
+
+  @override
+  String get waterReminder5Body =>
+      'Đứng dậy rót một ly, rồi quay lại việc đang làm.';
 }

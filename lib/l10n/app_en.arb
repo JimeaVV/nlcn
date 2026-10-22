@@ -677,5 +677,38 @@
   "collectDelete": "Delete kept photos",
   "collectDeleteTitle": "Delete all kept photos?",
   "collectDeleteBody": "Deleted photos cannot be recovered. The food diary is not affected.",
-  "collectDeleted": "Kept photos deleted."
+  "collectDeleted": "Kept photos deleted.",
+  "waterRemindersTitle": "Water reminders",
+  "waterRemindersBody": "Each reminder is one of five messages at random. Once you have drunk {goal} in a day, the rest of that day stays quiet. Open the app at least once a week so the reminders keep coming.",
+  "@waterRemindersBody": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemindersSwitch": "Remind me to drink water",
+  "waterRemindersEvery": "Remind every",
+  "waterRemindersHours": "{hours} h",
+  "@waterRemindersHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemindersFrom": "From",
+  "waterRemindersTo": "Until",
+  "waterRemindersBadWindow": "The end time must be after the start time.",
+  "waterReminderChannel": "Water reminders",
+  "waterReminder1Title": "Time for some water 💧",
+  "waterReminder1Body": "A glass now helps you stay sharp.",
+  "waterReminder2Title": "Had enough water today?",
+  "waterReminder2Body": "Open MacroRunner to log the glass you just drank.",
+  "waterReminder3Title": "Top up",
+  "waterReminder3Body": "Training goes better when you are hydrated.",
+  "waterReminder4Title": "Don't wait until you're thirsty",
+  "waterReminder4Body": "Thirst means your body is already a little short.",
+  "waterReminder5Title": "One glass of water",
+  "waterReminder5Body": "Stand up, pour a glass, then get back to it."
 }

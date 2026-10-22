@@ -8,6 +8,7 @@ import '../services/food_recognizer.dart';
 import '../services/recommendation_service.dart';
 import '../services/reminder_service.dart';
 import '../services/tflite_food_recognizer.dart';
+import '../services/water_reminder_service.dart';
 import '../widgets/optifit_bottom_bar.dart';
 import '../widgets/section_tabs.dart';
 import 'diary_screen.dart';
@@ -32,6 +33,7 @@ class HomeScreen extends StatefulWidget {
     required this.themeController,
     required this.localeController,
     this.reminders,
+    this.waterReminders,
   });
 
   final ThemeController themeController;
@@ -39,6 +41,9 @@ class HomeScreen extends StatefulWidget {
 
   /// Meal reminders; Settings hides them when null (tests).
   final ReminderController? reminders;
+
+  /// Water reminders; like [reminders], hidden when null.
+  final WaterReminderController? waterReminders;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -123,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
           themeController: widget.themeController,
           localeController: widget.localeController,
           reminders: widget.reminders,
+          waterReminders: widget.waterReminders,
           onHistoryCleared: () {
             savedMealsKey.currentState?.refresh();
             workoutHistoryKey.currentState?.refresh();
@@ -153,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final pages = [
       TodayScreen(
         key: todayKey,
+        waterReminders: widget.waterReminders,
         onOpenDiary: () => _openFoodTab(_FoodTab.diary),
         onOpenWorkout: () => _select(_Section.workout),
         onOpenProfile: () => _select(_Section.profile),

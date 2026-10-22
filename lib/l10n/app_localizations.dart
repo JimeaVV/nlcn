@@ -2609,6 +2609,120 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đã xóa ảnh đã gom.'**
   String get collectDeleted;
+
+  /// No description provided for @waterRemindersTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhắc uống nước'**
+  String get waterRemindersTitle;
+
+  /// No description provided for @waterRemindersBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mỗi lần nhắc là một câu ngẫu nhiên. Hôm nào đã uống đủ {goal} thì app thôi nhắc. Mở app ít nhất 7 ngày một lần để nhắc không bị ngắt.'**
+  String waterRemindersBody(String goal);
+
+  /// No description provided for @waterRemindersSwitch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bật nhắc uống nước'**
+  String get waterRemindersSwitch;
+
+  /// No description provided for @waterRemindersEvery.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhắc mỗi'**
+  String get waterRemindersEvery;
+
+  /// No description provided for @waterRemindersHours.
+  ///
+  /// In vi, this message translates to:
+  /// **'{hours} tiếng'**
+  String waterRemindersHours(String hours);
+
+  /// No description provided for @waterRemindersFrom.
+  ///
+  /// In vi, this message translates to:
+  /// **'Từ'**
+  String get waterRemindersFrom;
+
+  /// No description provided for @waterRemindersTo.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đến'**
+  String get waterRemindersTo;
+
+  /// No description provided for @waterRemindersBadWindow.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giờ kết thúc phải sau giờ bắt đầu.'**
+  String get waterRemindersBadWindow;
+
+  /// No description provided for @waterReminderChannel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhắc uống nước'**
+  String get waterReminderChannel;
+
+  /// No description provided for @waterReminder1Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tới giờ uống nước 💧'**
+  String get waterReminder1Title;
+
+  /// No description provided for @waterReminder1Body.
+  ///
+  /// In vi, this message translates to:
+  /// **'Một ly nước bây giờ giúp bạn tỉnh táo hơn.'**
+  String get waterReminder1Body;
+
+  /// No description provided for @waterReminder2Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hôm nay uống đủ nước chưa?'**
+  String get waterReminder2Title;
+
+  /// No description provided for @waterReminder2Body.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mở MacroRunner để ghi lại ly vừa uống.'**
+  String get waterReminder2Body;
+
+  /// No description provided for @waterReminder3Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nạp nước thôi'**
+  String get waterReminder3Title;
+
+  /// No description provided for @waterReminder3Body.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tập luyện hiệu quả hơn khi cơ thể đủ nước.'**
+  String get waterReminder3Body;
+
+  /// No description provided for @waterReminder4Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đừng đợi khát mới uống'**
+  String get waterReminder4Title;
+
+  /// No description provided for @waterReminder4Body.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khát nghĩa là cơ thể đã hơi thiếu nước rồi.'**
+  String get waterReminder4Body;
+
+  /// No description provided for @waterReminder5Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Một ly nước nhé'**
+  String get waterReminder5Title;
+
+  /// No description provided for @waterReminder5Body.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đứng dậy rót một ly, rồi quay lại việc đang làm.'**
+  String get waterReminder5Body;
 }
 
 class _AppLocalizationsDelegate
