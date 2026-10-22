@@ -16,7 +16,9 @@
 #   1.4 run saved it; from another Google account, copy that file there);
 # - on Kaggle in the inputs: add the 1.4 notebook's output, or a dataset
 #   holding that file.
-# Set `WARM_START` to its path to choose another file.
+# Training on another Google account: set `WARM_START_URL` to a share link
+# of that file and it is copied into this account's Drive first. Set
+# `WARM_START` to a path to choose another file.
 #
 # **The user's own photos** (Settings → "Lưu ảnh để train" in the app, then
 # export): on Kaggle upload the zip as a dataset and add it; on Colab put the
@@ -111,6 +113,9 @@ EPOCHS_HEAD = 1 if QUICK_TEST or CONTINUE else (3 if FULL else 5)  # frozen
 EPOCHS_FINE = (1 if QUICK_TEST else 8 if CONTINUE else 30 if FULL else 15)
 # The 1.4 model to continue from; empty: looked for (see the top).
 WARM_START = os.environ.get('WARM_START', '')
+# On Colab, a Drive share link to that checkpoint.keras: copied into this
+# account's Drive first when it is not there yet (training on another account).
+WARM_START_URL = os.environ.get('WARM_START_URL', '')
 PREVIOUS_DISHES = 65   # contract 1.4: DISHES[:65], then "khac"
 # Caps the largest classes. 1,500 held 25 dishes back in v1.3.
 MAX_PER_DISH = 12 if QUICK_TEST else (4000 if FULL else 1500)
@@ -190,12 +195,21 @@ if ON_COLAB:
             old_model = WARM_START or os.path.join(
                 COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train',
                 f'{BACKBONE}_finetune', 'checkpoint.keras')
+            if CONTINUE and WARM_START_URL and not os.path.exists(old_model):
+                import re
+                import gdown   # preinstalled on Colab
+                print('Copying the 1.4 model from', WARM_START_URL, flush=True)
+                os.makedirs(os.path.dirname(old_model), exist_ok=True)
+                file_id = re.search(r'(?:/d/|id=)([-\w]{20,})', WARM_START_URL)
+                gdown.download(id=file_id.group(1) if file_id else WARM_START_URL,
+                               output=old_model + '.part')
+                os.replace(old_model + '.part', old_model)
             if CONTINUE and not QUICK_TEST and not os.path.exists(old_model):
                 raise RuntimeError(
                     f'The 1.4 model is not at {old_model}. Copy '
                     'checkpoint.keras from the 1.4 run there (the folder '
                     'macrorunner_train/efficientnetb3_finetune in Drive), '
-                    'or set WARM_START.')
+                    'set WARM_START_URL to its share link, or set WARM_START.')
             if CONTINUE:
                 print('Continuing from', old_model, flush=True)
     else:

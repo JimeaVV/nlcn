@@ -1999,7 +1999,7 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Build APK 115 (24,5 MB), chữ ký release đúng; chưa cài lên điện thoại
     theo yêu cầu, gửi file cho người dùng tự cài.
 
-### 2026-10-22 · Notebook báo ngay khi Drive thiếu model 1.4
+### 2026-10-22 · Notebook báo ngay khi Drive thiếu model 1.4, hoặc tự tải từ link
 - Lý do: người dùng train 1.5 bằng một tài khoản Google khác. Trước đây,
   nếu Drive của tài khoản đó chưa có `checkpoint.keras` của B3, notebook
   chỉ báo lỗi khi bắt đầu train, tức là sau khoảng 40 phút tải dữ liệu.
@@ -2007,7 +2007,13 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   `macrorunner_train/efficientnetb3_finetune/checkpoint.keras` (hoặc đường
   dẫn trong `WARM_START`). Thiếu file thì dừng ngay và chỉ chỗ cần chép file
   vào; có file thì in đường dẫn sẽ dùng.
-- Kiểm tra: `smoke_test.py --colab` PASS.
+- Thêm `WARM_START_URL`: link chia sẻ của `checkpoint.keras`. Drive chưa có
+  file thì notebook tự tải về bằng `gdown` (lấy mã file trong link, vì bản
+  `gdown` mới bỏ tham số `fuzzy`), khỏi chép tay. Bản gửi người dùng điền sẵn
+  link bản B3 30 epoch (val 0,867). Repo để trống, không lộ link Drive.
+- Kiểm tra: `smoke_test.py --colab` PASS. Tải thật file qua link: 217 MB,
+  mở được, ảnh vào 300×300, 66 đầu ra món, 25 thành phần. Smoke test dùng
+  chính file này làm điểm xuất phát: PASS.
 
 ---
 
