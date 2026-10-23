@@ -204,6 +204,31 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('an emptied weight or height field does not break the screen',
+      (tester) async {
+    // Clearing the weight used to throw while building the preview, which a
+    // release build shows as a grey screen.
+    final database = _Database(profile: _profile());
+    await open(tester, database);
+    await toggle(tester, 'profile-custom-calories');
+    for (final key in ['profile-weight', 'profile-height']) {
+      await fill(tester, key, '');
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: '$key emptied');
+      expect(find.byKey(const ValueKey('save-profile')), findsOneWidget);
+      await fill(tester, key, key == 'profile-weight' ? '72' : '175');
+    }
+    await fill(tester, 'profile-weight', '');
+    await saveProfile(tester);
+    expect(tester.takeException(), isNull);
+    expect(database.savedProfiles, isEmpty,
+        reason: 'the form says what is missing');
+
+    await fill(tester, 'profile-weight', '72');
+    await saveProfile(tester);
+    expect(database.savedProfiles.single.weight, 72);
+  });
+
   testWidgets(
       'backdated weight validates dates and supports edit and confirmed delete',
       (tester) async {

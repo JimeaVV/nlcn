@@ -119,20 +119,26 @@ class ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// The profile as typed so far. Throws a FormatException while a field is
+  /// empty or not a number, so the preview shows nothing instead of the
+  /// screen failing to build.
   UserProfile _draft() => UserProfile(
         age: int.parse(_age.text.trim()),
         gender: _gender,
-        height: parseDecimal(_height.text)!,
-        weight: parseDecimal(_weight.text)!,
+        height: _decimal(_height.text),
+        weight: _decimal(_weight.text),
         activityLevel: _activity,
         goal: _goal,
         calorieOverride: !_customCalories || _calories.text.trim().isEmpty
             ? null
-            : parseDecimal(_calories.text)!,
+            : _decimal(_calories.text),
         proteinOverride: !_customProtein || _protein.text.trim().isEmpty
             ? null
-            : parseDecimal(_protein.text)!,
+            : _decimal(_protein.text),
       );
+
+  static double _decimal(String text) =>
+      parseDecimal(text) ?? (throw FormatException('Not a number', text));
 
   Map<String, dynamic>? get _preview {
     try {

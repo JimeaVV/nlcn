@@ -2120,6 +2120,24 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   đúng lựa chọn EfficientNetB0 như ngày 20/10; số trong README lấy thẳng từ
   các `results.json`.
 
+### 2026-10-23 · Sửa lỗi màn xám khi xóa hết số cân nặng trong Hồ sơ
+- Lý do: người dùng xóa trắng ô cân nặng trong Hồ sơ thì cả màn hình thành
+  màu xám (bản release hiện màn xám khi một widget không vẽ được).
+- Nguyên nhân: phần xem trước mục tiêu dinh dưỡng dựng hồ sơ nháp bằng
+  `parseDecimal(...)!`. Ô trống thì `parseDecimal` trả về `null`, dấu `!`
+  ném lỗi null-check. Phần xem trước chỉ bắt `ArgumentError` và
+  `FormatException`, nên lỗi lọt ra ngoài lúc vẽ. Ô chiều cao và hai ô mục
+  tiêu tự đặt cũng dính lỗi y vậy.
+- Đã làm: `_draft()` dùng `_decimal()`. Số không đọc được thì ném
+  `FormatException`, phần xem trước chỉ để trống, và form vẫn báo ô nào
+  thiếu khi bấm lưu. Hai chỗ `!` còn lại (hộp thoại cân nặng, ghi bài tập)
+  chạy sau khi form đã kiểm tra hợp lệ nên giữ nguyên.
+- Kiểm tra: test mới xóa trắng ô cân nặng rồi ô chiều cao, xem màn hình vẫn
+  còn và bấm lưu thì không lưu gì; nhập lại 72 kg thì lưu được. Chạy test với
+  code cũ thì báo đúng lỗi `Null check operator used on a null value`; với
+  code mới thì PASS. `flutter analyze` sạch; `flutter test` 208/208 PASS.
+  Build APK 119.
+
 ---
 
 ## 3. Việc còn tồn đọng
