@@ -6,7 +6,7 @@ import '../core/cyber_theme.dart';
 /// interface style. It uses the palette of [style] itself, so Settings can
 /// preview every style at once.
 ///
-/// - Cyberpunk: neon gradient with a two-colour glow.
+/// - Neon: neon gradient with a two-colour glow.
 /// - Minimal Light: one flat colour and a soft drop shadow.
 /// - Forest: a leaf-like rounded square with a green gradient.
 /// - Sunset: warm gradient inside a sun halo.

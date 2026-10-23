@@ -162,7 +162,7 @@ void main() {
     final database = _Database();
     await _mount(tester, database);
     expect(find.text('Hôm nay'), findsOneWidget);
-    expect(find.text('0 kcal'), findsOneWidget);
+    expect(find.text('0 kcal'), findsOneWidget);
     expect(find.text('Lưu hồ sơ để so với mục tiêu calo và protein.'),
         findsOneWidget);
     expect(find.text('Chưa ghi món nào.'), findsNWidgets(4));
@@ -181,7 +181,7 @@ void main() {
         proteinOverride: 120,
       ).toMap();
     await _mount(tester, database);
-    expect(find.text('0 / 2.000 kcal'), findsOneWidget);
+    expect(find.text('0 / 2.000 kcal'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('diary-add')));
     await tester.pumpAndSettle();
@@ -196,16 +196,16 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('diary-grams')), '40');
     await tester.pumpAndSettle();
-    expect(find.text('Ước tính: 156 kcal • 6,8 g protein'), findsOneWidget);
+    expect(find.text('Ước tính: 156 kcal • 6,8 g protein'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('diary-save')));
     await tester.pumpAndSettle();
 
     final saved = database.entries.single;
     expect(saved.meal, MealSlot.breakfast);
     expect(saved.source, FoodLogSource.manual);
-    expect(find.text('156 / 2.000 kcal'), findsOneWidget);
-    expect(find.text('Còn 1.844 kcal so với mục tiêu'), findsOneWidget);
-    expect(find.text('40 g • 156 kcal • 6,8 g protein'), findsOneWidget);
+    expect(find.text('156 / 2.000 kcal'), findsOneWidget);
+    expect(find.text('Còn 1.844 kcal so với mục tiêu'), findsOneWidget);
+    expect(find.text('40 g • 156 kcal • 6,8 g protein'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -279,7 +279,7 @@ void main() {
 
     expect(database.entries.single.name, 'Phở bò');
     expect(database.entries.single.grams, isNull);
-    expect(find.text('450 kcal • 25,0 g protein'), findsOneWidget);
+    expect(find.text('450 kcal • 25,0 g protein'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Xóa món'));
     await tester.pumpAndSettle();
@@ -366,7 +366,7 @@ void main() {
     ]);
     await _mount(tester, database);
 
-    expect(find.text('Ăn giống hôm qua (2 món · 570 kcal)'), findsOneWidget);
+    expect(find.text('Ăn giống hôm qua (2 món · 570 kcal)'), findsOneWidget);
     expect(find.byKey(const ValueKey('diary-copy-lunch')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('diary-copy-breakfast')));
     await tester.pumpAndSettle();

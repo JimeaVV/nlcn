@@ -246,24 +246,24 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('1.250 / 2.000 kcal'), findsOneWidget);
-    expect(find.text('Còn 750 kcal so với mục tiêu'), findsOneWidget);
-    expect(find.text('Thay đổi 7 ngày: -0,4 kg'), findsOneWidget);
+    expect(find.text('1.250 / 2.000 kcal'), findsOneWidget);
+    expect(find.text('Còn 750 kcal so với mục tiêu'), findsOneWidget);
+    expect(find.text('Thay đổi 7 ngày: -0,4 kg'), findsOneWidget);
     expect(find.text('Đã ghi 1 bài tập hôm nay'), findsOneWidget);
     expect(find.text('1 ngày liên tục ghi ăn'), findsOneWidget);
     expect(find.text('Ghi ăn 1/7 ngày'), findsOneWidget);
-    expect(find.text('Trung bình 1.250 kcal • 58,0 g protein mỗi ngày ghi'),
+    expect(find.text('Mỗi ngày có ghi: trung bình 1.250 kcal • 58,0 g protein'),
         findsOneWidget);
-    expect(find.text('So với mục tiêu 2.000 kcal: -750 kcal/ngày'),
+    expect(find.text('So với mục tiêu 2.000 kcal: -750 kcal/ngày'),
         findsOneWidget);
     expect(find.text('Tập 1 ngày'), findsOneWidget);
 
-    expect(find.text('0 / 2.000 ml'), findsOneWidget);
+    expect(find.text('0 / 2.000 ml'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('water-add')));
     await tester.tap(find.byKey(const ValueKey('water-add')));
     await tester.pumpAndSettle();
-    expect(find.text('500 / 2.000 ml'), findsOneWidget);
-    expect(find.text('2 ly, mỗi ly 250 ml'), findsOneWidget);
+    expect(find.text('500 / 2.000 ml'), findsOneWidget);
+    expect(find.text('2 ly, mỗi ly 250 ml'), findsOneWidget);
     expect(database.water, 500);
     await tester.tap(find.byKey(const ValueKey('water-remove')));
     await tester.pumpAndSettle();

@@ -242,6 +242,7 @@ class MealScreenState extends State<MealScreen> {
             )
           else
             CyberCard(
+              highlight: true,
               title: l10n.goalLabel(profile.goal),
               icon: Icons.flag_outlined,
               child: Column(

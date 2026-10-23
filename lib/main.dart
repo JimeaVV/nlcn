@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'core/cyber_theme.dart';
 import 'core/locale_controller.dart';
@@ -10,6 +12,11 @@ import 'services/water_reminder_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The bundled font's licence, listed on the licences page.
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(['Be Vietnam Pro'],
+        await rootBundle.loadString('assets/fonts/BeVietnamPro/OFL.txt'));
+  });
   final themeController = ThemeController();
   final localeController = LocaleController();
   final reminders = ReminderController();

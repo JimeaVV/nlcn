@@ -11,6 +11,7 @@ import '../engine/daily_habits.dart';
 import '../services/reminder_service.dart';
 import '../services/water_reminder_service.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/info_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../widgets/scan_button_face.dart';
@@ -272,27 +273,26 @@ class SettingsScreen extends StatelessWidget {
             children: [
               Text(l10n.settingsTitle,
                   style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 6),
-              Text(
-                l10n.settingsSubtitle,
-                style: TextStyle(color: CyberColors.muted),
-              ),
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.languageTitle,
                 icon: Icons.translate_rounded,
-                child: Column(
-                  children: [
-                    for (final language in AppLanguage.values)
-                      _OptionTile(
-                        key: ValueKey('language-${language.name}'),
-                        icon: Icons.language_rounded,
-                        title: language.nativeName,
-                        subtitle: language.name.toUpperCase(),
-                        selected: localeController.language == language,
-                        onTap: () => localeController.setLanguage(language),
-                      ),
-                  ],
+                child: SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<AppLanguage>(
+                    showSelectedIcon: false,
+                    segments: [
+                      for (final language in AppLanguage.values)
+                        ButtonSegment(
+                          value: language,
+                          label: Text(language.nativeName,
+                              key: ValueKey('language-${language.name}')),
+                        ),
+                    ],
+                    selected: {localeController.language},
+                    onSelectionChanged: (value) =>
+                        localeController.setLanguage(value.single),
+                  ),
                 ),
               ),
               const SizedBox(height: 18),
@@ -333,12 +333,13 @@ class SettingsScreen extends StatelessWidget {
                 key: const ValueKey('backup-card'),
                 title: l10n.backupTitle,
                 icon: Icons.backup_outlined,
+                trailing: InfoButton(
+                    key: const ValueKey('backup-info'),
+                    title: l10n.backupTitle,
+                    paragraphs: [l10n.backupBody]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.backupBody,
-                        style: TextStyle(color: CyberColors.muted)),
-                    const SizedBox(height: 12),
                     FilledButton.icon(
                       key: const ValueKey('backup-export'),
                       onPressed: () => _export(context),
@@ -359,12 +360,15 @@ class SettingsScreen extends StatelessWidget {
               CyberCard(
                 title: l10n.dataTitle,
                 icon: Icons.storage_rounded,
+                // The confirmation dialog says the same before anything is
+                // deleted.
+                trailing: InfoButton(
+                    key: const ValueKey('data-info'),
+                    title: l10n.dataTitle,
+                    paragraphs: [l10n.clearAllBody]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.clearAllBody,
-                        style: TextStyle(color: CyberColors.muted)),
-                    const SizedBox(height: 12),
                     OutlinedButton.icon(
                       key: const ValueKey('clear-history'),
                       onPressed: () => _clearHistory(context),
@@ -389,12 +393,15 @@ extension on SettingsScreen {
       key: const ValueKey('collect-card'),
       title: l10n.collectTitle,
       icon: Icons.photo_library_outlined,
+      trailing: InfoButton(
+          key: const ValueKey('collect-info'),
+          title: l10n.collectTitle,
+          paragraphs: [l10n.collectBody]),
       child: Material(
         type: MaterialType.transparency,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.collectBody, style: TextStyle(color: CyberColors.muted)),
             SwitchListTile(
               key: const ValueKey('collect-switch'),
               contentPadding: EdgeInsets.zero,
@@ -450,15 +457,18 @@ extension on SettingsScreen {
       title: l10n.waterRemindersTitle,
       icon: Icons.water_drop_outlined,
       accent: CyberColors.cyan,
+      trailing: InfoButton(
+          key: const ValueKey('water-reminders-info'),
+          title: l10n.waterRemindersTitle,
+          paragraphs: [
+            l10n.waterRemindersBody(
+                '${context.formatNumber(waterTargetMl)}\u00A0ml'),
+          ]),
       child: Material(
         type: MaterialType.transparency,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-                l10n.waterRemindersBody(
-                    '${context.formatNumber(waterTargetMl)} ml'),
-                style: TextStyle(color: CyberColors.muted)),
             SwitchListTile(
               key: const ValueKey('water-reminders-switch'),
               contentPadding: EdgeInsets.zero,
@@ -510,6 +520,10 @@ extension on SettingsScreen {
       key: const ValueKey('reminders-card'),
       title: l10n.remindersTitle,
       icon: Icons.notifications_active_outlined,
+      trailing: InfoButton(
+          key: const ValueKey('reminders-info'),
+          title: l10n.remindersTitle,
+          paragraphs: [l10n.remindersBody]),
       // The card paints its own background; the tiles need a Material for
       // their ink.
       child: Material(
@@ -517,8 +531,6 @@ extension on SettingsScreen {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.remindersBody,
-                style: TextStyle(color: CyberColors.muted)),
             SwitchListTile(
               key: const ValueKey('reminders-switch'),
               contentPadding: EdgeInsets.zero,

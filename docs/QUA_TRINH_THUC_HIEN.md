@@ -2164,6 +2164,42 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   màn hình rộng 360 px, không bị tràn chữ. `flutter analyze` sạch; `flutter
   test` 208/208 PASS. Build APK 121.
 
+### 2026-10-23 · Chỉnh giao diện: thẻ bớt chói, số không tách đơn vị, font tiếng Việt
+- Lý do: người dùng nhờ đánh giá giao diện. Các điểm cần sửa: thẻ nào cũng
+  viền sáng và phát sáng như nhau nên không có điểm nhấn; số bị tách khỏi
+  đơn vị khi xuống dòng ("6,0" một dòng, "g protein" dòng dưới); snack bar
+  màu xám sáng lạc giữa giao diện tối; màn Cài đặt dài và nhiều chữ; app
+  dùng font mặc định của Android.
+- Đã làm:
+  - `CyberCard` có thêm `highlight`. Chỉ thẻ chính của mỗi màn có viền màu
+    nhấn và phát sáng (Đã ăn ở Hôm nay và Nhật ký, Món ở kết quả quét, Thiết
+    lập buổi tập, Mục tiêu ở Thực đơn); các thẻ khác viền mờ, không phát sáng.
+  - Dấu cách không ngắt (U+00A0) giữa số và đơn vị (g, kg, kcal, ml, cm) trong
+    mọi chuỗi bản dịch và các chuỗi ghép trong code, kể cả "g protein".
+  - `snackBarTheme`: nền `surfaceAlt`, chữ và nút theo màu của giao diện,
+    dạng nổi bo góc.
+  - Cài đặt: bỏ câu phụ dưới tiêu đề; chọn ngôn ngữ bằng một hàng hai nút;
+    đoạn giải thích của 5 thẻ (nhắc bữa, nhắc nước, gom ảnh, sao lưu, dữ
+    liệu) chuyển vào nút ⓘ. Widget `InfoButton` dùng chung với màn Hồ sơ.
+  - Giao diện "Cyberpunk" đổi tên hiển thị thành "Neon", theo quy tắc không
+    dùng tên liên quan tới Cyberpunk: Edgerunners. Mã `AppStyle.cyberpunk`
+    giữ nguyên nên lựa chọn đã lưu không mất.
+  - Font Be Vietnam Pro (giấy phép SIL OFL 1.1, 6 độ đậm, 836 KB) đóng sẵn
+    trong app vì app chạy offline; giấy phép hiện ở trang giấy phép.
+  - Nút `NeonButton` (như "THÊM MÓN") trước đây tự đặt kiểu chữ riêng nên
+    mất font của theme; giờ lấy từ theme.
+  - Dòng trung bình 7 ngày viết lại để chữ "ghi" không rớt xuống dòng một
+    mình.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 208/208 PASS (các chuỗi trong
+    test đổi theo dấu cách không ngắt).
+  - Test của Flutter vẽ chữ bằng font giả nên không thấy lỗi font. Vì vậy
+    có thêm một lần chụp thử, không commit: nạp Be Vietnam Pro thật, vẽ Hôm
+    nay, Nhật ký, Hồ sơ, Cài đặt ở giao diện Neon và Minimal Light ra PNG rồi
+    xem từng ảnh. Lần chụp này tìm ra lỗi font của nút "THÊM MÓN"; không có
+    lỗi tràn chữ nào.
+  - Build APK 122.
+
 ---
 
 ## 3. Việc còn tồn đọng

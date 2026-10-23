@@ -203,7 +203,7 @@ abstract class AppLocalizations {
   /// No description provided for @mealProfileSummary.
   ///
   /// In vi, this message translates to:
-  /// **'{weight} kg • {height} cm • {age} tuổi'**
+  /// **'{weight} kg • {height} cm • {age} tuổi'**
   String mealProfileSummary(String weight, String height, String age);
 
   /// No description provided for @caloriesPerDay.
@@ -305,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @comparisonDifference.
   ///
   /// In vi, this message translates to:
-  /// **'Lệch {difference} {unit} ({percent}%)'**
+  /// **'Lệch {difference} {unit} ({percent}%)'**
   String comparisonDifference(String difference, String unit, String percent);
 
   /// No description provided for @mealToleranceNote.
@@ -461,13 +461,13 @@ abstract class AppLocalizations {
   /// No description provided for @nextSessionSummary.
   ///
   /// In vi, this message translates to:
-  /// **'{weight} kg • 3 hiệp • mục tiêu {reps} lần'**
+  /// **'{weight} kg • 3 hiệp • mục tiêu {reps} lần'**
   String nextSessionSummary(String weight, String reps);
 
   /// No description provided for @overloadIncreaseWeight.
   ///
   /// In vi, this message translates to:
-  /// **'Bạn đã hoàn thành 3×12 với mức gắng sức vừa phải. Buổi sau tăng thêm 2,5 kg và bắt đầu lại trong khoảng 8–12 lần.'**
+  /// **'Bạn đã hoàn thành 3×12 với mức gắng sức vừa phải. Buổi sau tăng thêm 2,5 kg và bắt đầu lại trong khoảng 8–12 lần.'**
   String get overloadIncreaseWeight;
 
   /// No description provided for @overloadMaintainWeight.
@@ -479,7 +479,7 @@ abstract class AppLocalizations {
   /// No description provided for @overloadDecreaseWeight.
   ///
   /// In vi, this message translates to:
-  /// **'Số lần chưa đạt khoảng mục tiêu. Giảm 2,5 kg và ưu tiên kỹ thuật có kiểm soát.'**
+  /// **'Số lần chưa đạt khoảng mục tiêu. Giảm 2,5 kg và ưu tiên kỹ thuật có kiểm soát.'**
   String get overloadDecreaseWeight;
 
   /// No description provided for @overloadIncreaseReps.
@@ -569,7 +569,7 @@ abstract class AppLocalizations {
   /// No description provided for @currentLoadError.
   ///
   /// In vi, this message translates to:
-  /// **'Nhập mức tạ từ 0 đến 1000 kg.'**
+  /// **'Nhập mức tạ từ 0 đến 1000 kg.'**
   String get currentLoadError;
 
   /// No description provided for @setLabel.
@@ -761,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @mealHistoryTitle.
   ///
   /// In vi, this message translates to:
-  /// **'{calories} kcal • {protein} g protein'**
+  /// **'{calories} kcal • {protein} g protein'**
   String mealHistoryTitle(String calories, String protein);
 
   /// No description provided for @workoutHistorySubtitle.
@@ -773,7 +773,7 @@ abstract class AppLocalizations {
   /// No description provided for @exerciseLogSubtitle.
   ///
   /// In vi, this message translates to:
-  /// **'{weight} kg • {reps} lần\nBuổi sau: {nextWeight} kg • mục tiêu {nextReps} lần\n{date}'**
+  /// **'{weight} kg • {reps} lần\nBuổi sau: {nextWeight} kg • mục tiêu {nextReps} lần\n{date}'**
   String exerciseLogSubtitle(String weight, String reps, String nextWeight,
       String nextReps, String date);
 
@@ -888,7 +888,7 @@ abstract class AppLocalizations {
   /// No description provided for @estimateFormula.
   ///
   /// In vi, this message translates to:
-  /// **'Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).'**
+  /// **'Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).'**
   String get estimateFormula;
 
   /// No description provided for @manualCalories.
@@ -924,7 +924,7 @@ abstract class AppLocalizations {
   /// No description provided for @targetsInvalidHint.
   ///
   /// In vi, this message translates to:
-  /// **'Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.'**
+  /// **'Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.'**
   String get targetsInvalidHint;
 
   /// No description provided for @estimatedCalories.
@@ -966,19 +966,19 @@ abstract class AppLocalizations {
   /// No description provided for @targetErrorProteinEnergy.
   ///
   /// In vi, this message translates to:
-  /// **'Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. Hãy điều chỉnh mục tiêu calo hoặc protein.'**
+  /// **'Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. Hãy điều chỉnh mục tiêu calo hoặc protein.'**
   String get targetErrorProteinEnergy;
 
   /// No description provided for @targetErrorCalorieRange.
   ///
   /// In vi, this message translates to:
-  /// **'Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.'**
+  /// **'Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.'**
   String get targetErrorCalorieRange;
 
   /// No description provided for @targetErrorProteinRange.
   ///
   /// In vi, this message translates to:
-  /// **'Mục tiêu protein phải lớn hơn 0 và không quá 500 g. Kiểm tra hồ sơ hoặc tự nhập mục tiêu.'**
+  /// **'Mục tiêu protein phải lớn hơn 0 và không quá 500 g. Kiểm tra hồ sơ hoặc tự nhập mục tiêu.'**
   String get targetErrorProteinRange;
 
   /// No description provided for @targetErrorGeneric.
@@ -1002,13 +1002,13 @@ abstract class AppLocalizations {
   /// No description provided for @latestWeight.
   ///
   /// In vi, this message translates to:
-  /// **'Gần nhất: {weight} kg · {date}'**
+  /// **'Gần nhất: {weight} kg · {date}'**
   String latestWeight(String weight, String date);
 
   /// No description provided for @weightChange.
   ///
   /// In vi, this message translates to:
-  /// **'Thay đổi: {change} kg từ {from} đến {to}'**
+  /// **'Thay đổi: {change} kg từ {from} đến {to}'**
   String weightChange(String change, String from, String to);
 
   /// No description provided for @logWeight.
@@ -1080,7 +1080,7 @@ abstract class AppLocalizations {
   /// No description provided for @weightValueError.
   ///
   /// In vi, this message translates to:
-  /// **'Nhập cân nặng lớn hơn 0 và không quá 500 kg.'**
+  /// **'Nhập cân nặng lớn hơn 0 và không quá 500 kg.'**
   String get weightValueError;
 
   /// No description provided for @weighInDateField.
@@ -1134,7 +1134,7 @@ abstract class AppLocalizations {
   /// No description provided for @weightChartSemantics.
   ///
   /// In vi, this message translates to:
-  /// **'Biểu đồ {count} lần ghi cân nặng. Từ {firstDate}: {firstWeight} kg đến {lastDate}: {lastWeight} kg. Các giá trị được liệt kê bên dưới.'**
+  /// **'Biểu đồ {count} lần ghi cân nặng. Từ {firstDate}: {firstWeight} kg đến {lastDate}: {lastWeight} kg. Các giá trị được liệt kê bên dưới.'**
   String weightChartSemantics(String count, String firstDate,
       String firstWeight, String lastDate, String lastWeight);
 
@@ -1143,12 +1143,6 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'CÀI ĐẶT'**
   String get settingsTitle;
-
-  /// No description provided for @settingsSubtitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'Chọn ngôn ngữ và giao diện. Lựa chọn được lưu trên máy.'**
-  String get settingsSubtitle;
 
   /// No description provided for @languageTitle.
   ///
@@ -1405,25 +1399,25 @@ abstract class AppLocalizations {
   /// No description provided for @diaryCaloriesProgress.
   ///
   /// In vi, this message translates to:
-  /// **'{eaten} / {target} kcal'**
+  /// **'{eaten} / {target} kcal'**
   String diaryCaloriesProgress(String eaten, String target);
 
   /// No description provided for @diaryProteinProgress.
   ///
   /// In vi, this message translates to:
-  /// **'{eaten} / {target} g protein'**
+  /// **'{eaten} / {target} g protein'**
   String diaryProteinProgress(String eaten, String target);
 
   /// No description provided for @diaryRemaining.
   ///
   /// In vi, this message translates to:
-  /// **'Còn {value} kcal so với mục tiêu'**
+  /// **'Còn {value} kcal so với mục tiêu'**
   String diaryRemaining(String value);
 
   /// No description provided for @diaryOver.
   ///
   /// In vi, this message translates to:
-  /// **'Vượt mục tiêu {value} kcal'**
+  /// **'Vượt mục tiêu {value} kcal'**
   String diaryOver(String value);
 
   /// No description provided for @diaryNoTarget.
@@ -1435,7 +1429,7 @@ abstract class AppLocalizations {
   /// No description provided for @diaryMacros.
   ///
   /// In vi, this message translates to:
-  /// **'Carb {carbs} g • Chất béo {fat} g'**
+  /// **'Carb {carbs} g • Chất béo {fat} g'**
   String diaryMacros(String carbs, String fat);
 
   /// No description provided for @diaryEmptyMeal.
@@ -1495,7 +1489,7 @@ abstract class AppLocalizations {
   /// No description provided for @diaryGramsError.
   ///
   /// In vi, this message translates to:
-  /// **'Nhập khối lượng lớn hơn 0 và không quá 5000 g.'**
+  /// **'Nhập khối lượng lớn hơn 0 và không quá 5000 g.'**
   String get diaryGramsError;
 
   /// No description provided for @diaryOptionalGrams.
@@ -1543,13 +1537,13 @@ abstract class AppLocalizations {
   /// No description provided for @diaryMacroError.
   ///
   /// In vi, this message translates to:
-  /// **'Từ 0 đến 1000 g.'**
+  /// **'Từ 0 đến 1000 g.'**
   String get diaryMacroError;
 
   /// No description provided for @diaryPreview.
   ///
   /// In vi, this message translates to:
-  /// **'Ước tính: {calories} kcal • {protein} g protein'**
+  /// **'Ước tính: {calories} kcal • {protein} g protein'**
   String diaryPreview(String calories, String protein);
 
   /// No description provided for @diarySave.
@@ -1561,13 +1555,13 @@ abstract class AppLocalizations {
   /// No description provided for @diaryEntryDetails.
   ///
   /// In vi, this message translates to:
-  /// **'{grams} g • {calories} kcal • {protein} g protein'**
+  /// **'{grams} g • {calories} kcal • {protein} g protein'**
   String diaryEntryDetails(String grams, String calories, String protein);
 
   /// No description provided for @diaryEntryDetailsNoGrams.
   ///
   /// In vi, this message translates to:
-  /// **'{calories} kcal • {protein} g protein'**
+  /// **'{calories} kcal • {protein} g protein'**
   String diaryEntryDetailsNoGrams(String calories, String protein);
 
   /// No description provided for @diaryAdded.
@@ -1681,7 +1675,7 @@ abstract class AppLocalizations {
   /// No description provided for @todayWeightWeek.
   ///
   /// In vi, this message translates to:
-  /// **'Thay đổi 7 ngày: {change} kg'**
+  /// **'Thay đổi 7 ngày: {change} kg'**
   String todayWeightWeek(String change);
 
   /// No description provided for @todayNoExercise.
@@ -1843,7 +1837,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanTotal.
   ///
   /// In vi, this message translates to:
-  /// **'Tổng: {calories} kcal • {protein} g protein'**
+  /// **'Tổng: {calories} kcal • {protein} g protein'**
   String scanTotal(String calories, String protein);
 
   /// No description provided for @scanNothingSelected.
@@ -2005,19 +1999,19 @@ abstract class AppLocalizations {
   /// No description provided for @proteinGrams.
   ///
   /// In vi, this message translates to:
-  /// **'{value} g protein'**
+  /// **'{value} g protein'**
   String proteinGrams(String value);
 
   /// No description provided for @kcalProteinLine.
   ///
   /// In vi, this message translates to:
-  /// **'{kcal} kcal • protein {protein} g'**
+  /// **'{kcal} kcal • protein {protein} g'**
   String kcalProteinLine(String kcal, String protein);
 
   /// No description provided for @mealMacroLine.
   ///
   /// In vi, this message translates to:
-  /// **'{kcal} kcal • protein {protein} g • tinh bột {carbs} g • béo {fat} g'**
+  /// **'{kcal} kcal • protein {protein} g • tinh bột {carbs} g • béo {fat} g'**
   String mealMacroLine(String kcal, String protein, String carbs, String fat);
 
   /// No description provided for @repsRange.
@@ -2029,7 +2023,7 @@ abstract class AppLocalizations {
   /// No description provided for @overloadConfirmIncrease.
   ///
   /// In vi, this message translates to:
-  /// **'Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.'**
+  /// **'Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.'**
   String get overloadConfirmIncrease;
 
   /// No description provided for @overloadBodyweightReps.
@@ -2077,7 +2071,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanMacroGrams.
   ///
   /// In vi, this message translates to:
-  /// **'Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g'**
+  /// **'Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g'**
   String scanMacroGrams(String protein, String carbs, String fat);
 
   /// No description provided for @scanTiming.
@@ -2107,7 +2101,7 @@ abstract class AppLocalizations {
   /// No description provided for @diaryQuickChip.
   ///
   /// In vi, this message translates to:
-  /// **'{name} · {calories} kcal'**
+  /// **'{name} · {calories} kcal'**
   String diaryQuickChip(String name, String calories);
 
   /// No description provided for @diaryFavoriteAdd.
@@ -2143,7 +2137,7 @@ abstract class AppLocalizations {
   /// No description provided for @diaryRepeatYesterday.
   ///
   /// In vi, this message translates to:
-  /// **'Ăn giống hôm qua ({count} món · {calories} kcal)'**
+  /// **'Ăn giống hôm qua ({count} món · {calories} kcal)'**
   String diaryRepeatYesterday(String count, String calories);
 
   /// No description provided for @diaryCopied.
@@ -2155,13 +2149,13 @@ abstract class AppLocalizations {
   /// No description provided for @lastSessionLine.
   ///
   /// In vi, this message translates to:
-  /// **'Lần trước ({date}): {weight} kg × {reps}'**
+  /// **'Lần trước ({date}): {weight} kg × {reps}'**
   String lastSessionLine(String date, String weight, String reps);
 
   /// No description provided for @lastSessionSuggestion.
   ///
   /// In vi, this message translates to:
-  /// **'Gợi ý hôm nay: {weight} kg × {reps} lần'**
+  /// **'Gợi ý hôm nay: {weight} kg × {reps} lần'**
   String lastSessionSuggestion(String weight, String reps);
 
   /// No description provided for @restTimerStart.
@@ -2209,32 +2203,32 @@ abstract class AppLocalizations {
   /// No description provided for @adaptiveTdeeValue.
   ///
   /// In vi, this message translates to:
-  /// **'{tdee} kcal/ngày'**
+  /// **'{tdee} kcal/ngày'**
   String adaptiveTdeeValue(String tdee);
 
   /// No description provided for @adaptiveTdeeDetails.
   ///
   /// In vi, this message translates to:
-  /// **'Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.'**
+  /// **'Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.'**
   String adaptiveTdeeDetails(
       String days, String intake, String weighIns, String trend);
 
   /// No description provided for @adaptiveTdeeCompare.
   ///
   /// In vi, this message translates to:
-  /// **'Công thức Mifflin-St Jeor ước tính {formula} kcal.'**
+  /// **'Công thức Mifflin-St Jeor ước tính {formula} kcal.'**
   String adaptiveTdeeCompare(String formula);
 
   /// No description provided for @adaptiveTdeeUse.
   ///
   /// In vi, this message translates to:
-  /// **'Dùng làm mục tiêu ({calories} kcal)'**
+  /// **'Dùng làm mục tiêu ({calories} kcal)'**
   String adaptiveTdeeUse(String calories);
 
   /// No description provided for @adaptiveTdeeUsed.
   ///
   /// In vi, this message translates to:
-  /// **'Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.'**
+  /// **'Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.'**
   String adaptiveTdeeUsed(String calories);
 
   /// No description provided for @adaptiveTdeeNeedMore.
@@ -2247,13 +2241,13 @@ abstract class AppLocalizations {
   /// No description provided for @adaptiveTdeeUnsure.
   ///
   /// In vi, this message translates to:
-  /// **'Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.'**
+  /// **'Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.'**
   String adaptiveTdeeUnsure(String tdee, String formula);
 
   /// No description provided for @adaptiveTdeeInfo.
   ///
   /// In vi, this message translates to:
-  /// **'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.'**
+  /// **'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.'**
   String get adaptiveTdeeInfo;
 
   /// No description provided for @waterTitle.
@@ -2265,13 +2259,13 @@ abstract class AppLocalizations {
   /// No description provided for @waterProgress.
   ///
   /// In vi, this message translates to:
-  /// **'{drunk} / {target} ml'**
+  /// **'{drunk} / {target} ml'**
   String waterProgress(String drunk, String target);
 
   /// No description provided for @waterGlasses.
   ///
   /// In vi, this message translates to:
-  /// **'{count} ly, mỗi ly {glass} ml'**
+  /// **'{count} ly, mỗi ly {glass} ml'**
   String waterGlasses(String count, String glass);
 
   /// No description provided for @waterAdd.
@@ -2325,13 +2319,13 @@ abstract class AppLocalizations {
   /// No description provided for @weekAverage.
   ///
   /// In vi, this message translates to:
-  /// **'Trung bình {calories} kcal • {protein} g protein mỗi ngày ghi'**
+  /// **'Mỗi ngày có ghi: trung bình {calories} kcal • {protein} g protein'**
   String weekAverage(String calories, String protein);
 
   /// No description provided for @weekVsTarget.
   ///
   /// In vi, this message translates to:
-  /// **'So với mục tiêu {target} kcal: {diff} kcal/ngày'**
+  /// **'So với mục tiêu {target} kcal: {diff} kcal/ngày'**
   String weekVsTarget(String target, String diff);
 
   /// No description provided for @weekTraining.
@@ -2343,7 +2337,7 @@ abstract class AppLocalizations {
   /// No description provided for @weekWeight.
   ///
   /// In vi, this message translates to:
-  /// **'Cân nặng {change} kg'**
+  /// **'Cân nặng {change} kg'**
   String weekWeight(String change);
 
   /// No description provided for @weekEmpty.
@@ -2469,7 +2463,7 @@ abstract class AppLocalizations {
   /// No description provided for @widgetWater.
   ///
   /// In vi, this message translates to:
-  /// **'Nước {drunk} / {target} L'**
+  /// **'Nước {drunk} / {target} L'**
   String widgetWater(String drunk, String target);
 
   /// No description provided for @widgetStreak.
@@ -2517,7 +2511,7 @@ abstract class AppLocalizations {
   /// No description provided for @pickerPer100g.
   ///
   /// In vi, this message translates to:
-  /// **'{kcal} kcal / 100 g'**
+  /// **'{kcal} kcal / 100 g'**
   String pickerPer100g(String kcal);
 
   /// No description provided for @pickerNewFood.
@@ -2711,6 +2705,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đứng dậy rót một ly, rồi quay lại việc đang làm.'**
   String get waterReminder5Body;
+
+  /// No description provided for @infoTooltip.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giải thích'**
+  String get infoTooltip;
 }
 
 class _AppLocalizationsDelegate

@@ -17,7 +17,7 @@
   "mealProfileRequiredTitle": "Set up your profile first",
   "mealProfileRequiredBody": "Choose a goal and save your body details in the Profile tab.",
   "mealOpenProfile": "OPEN PROFILE",
-  "mealProfileSummary": "{weight} kg • {height} cm • {age} years old",
+  "mealProfileSummary": "{weight} kg • {height} cm • {age} years old",
   "caloriesPerDay": "Calories/day",
   "proteinPerDay": "Protein/day",
   "targetSources": "Calories: {calories} • Protein: {protein}",
@@ -34,7 +34,7 @@
   "mealOutsideTarget": "Outside the target range",
   "caloriesLabel": "Calories",
   "proteinLabel": "Protein",
-  "comparisonDifference": "Difference {difference} {unit} ({percent}%)",
+  "comparisonDifference": "Difference {difference} {unit} ({percent}%)",
   "mealToleranceNote": "Tolerance: calories ±5%, protein −10% to +20%. A suggested plan is not a record of what you ate.",
   "mealsTitle": "Meals",
   "breakfast": "Breakfast",
@@ -60,10 +60,10 @@
   "workoutSaveFailed": "Could not save the workout plan.",
   "exerciseLogSaveFailed": "Could not save the exercise result.",
   "nextSessionTitle": "Next-session recommendation",
-  "nextSessionSummary": "{weight} kg • 3 sets • target {reps} reps",
-  "overloadIncreaseWeight": "Completed 3x12 with manageable difficulty. Increase the load by 2.5 kg next session and restart within the 8–12 rep range.",
+  "nextSessionSummary": "{weight} kg • 3 sets • target {reps} reps",
+  "overloadIncreaseWeight": "Completed 3x12 with manageable difficulty. Increase the load by 2.5 kg next session and restart within the 8–12 rep range.",
   "overloadMaintainWeight": "Completed 3x12, but effort was high. Keep the same load for one more session before increasing it.",
-  "overloadDecreaseWeight": "Performance fell below the target rep range. Reduce the load by 2.5 kg and prioritize controlled technique.",
+  "overloadDecreaseWeight": "Performance fell below the target rep range. Reduce the load by 2.5 kg and prioritize controlled technique.",
   "overloadIncreaseReps": "Keep the same load and try to add reps until all three sets reach 12 reps.",
   "sessionSummary": "Session summary",
   "estimatedLabel": "Estimated",
@@ -78,7 +78,7 @@
   "logExerciseTitle": "Log {name}",
   "progressionModel": "Progression model: 3 sets in the 8–12 rep range.",
   "currentLoadKg": "Current weight (kg)",
-  "currentLoadError": "Use a weight from 0 to 1000 kg.",
+  "currentLoadError": "Use a weight from 0 to 1000 kg.",
   "setLabel": "Set {number}",
   "difficulty": "Difficulty",
   "difficultyEasy": "Easy",
@@ -110,9 +110,9 @@
   "deleteMealPlan": "Delete meal plan",
   "deleteWorkoutPlan": "Delete workout plan",
   "deleteExerciseLog": "Delete exercise log",
-  "mealHistoryTitle": "{calories} kcal • {protein} g protein",
+  "mealHistoryTitle": "{calories} kcal • {protein} g protein",
   "workoutHistorySubtitle": "{minutes} min • {date}",
-  "exerciseLogSubtitle": "{weight} kg • {reps} reps\nNext: {nextWeight} kg • target {nextReps} reps\n{date}",
+  "exerciseLogSubtitle": "{weight} kg • {reps} reps\nNext: {nextWeight} kg • target {nextReps} reps\n{date}",
   "profileDisclaimer": "Estimates are for adults aged 18 and over. Actual needs may differ; this is not medical advice.",
   "personalInfo": "Personal details",
   "age": "Age",
@@ -131,27 +131,27 @@
   "goalLose": "Lose fat",
   "goalMaintain": "Maintain weight",
   "goalGain": "Gain weight",
-  "estimateFormula": "Estimate: BMR by Mifflin–St Jeor; TDEE = BMR × activity factor. Calories to lose/maintain/gain = 90%/100%/110% of TDEE. Protein = 1.8 g × body weight (kg).",
+  "estimateFormula": "Estimate: BMR by Mifflin–St Jeor; TDEE = BMR × activity factor. Calories to lose/maintain/gain = 90%/100%/110% of TDEE. Protein = 1.8 g × body weight (kg).",
   "manualCalories": "Manual calories (kcal/day)",
   "manualProtein": "Manual protein (g/day)",
   "numberInvalid": "Enter a valid value for {name}.",
   "numberPositiveMax": "{name} must be greater than 0 and at most {max}.",
   "numberRange": "{name} must be between {min} and {max}.",
-  "targetsInvalidHint": "Enter valid details and goals to see the estimate. Protein energy (4 kcal/g) cannot exceed total calories.",
+  "targetsInvalidHint": "Enter valid details and goals to see the estimate. Protein energy (4 kcal/g) cannot exceed total calories.",
   "estimatedCalories": "Estimated calories",
   "estimatedProtein": "Estimated protein",
   "saveProfile": "Save profile",
   "savingProfile": "Saving...",
   "profileSaved": "Profile and goals saved.",
   "profileSaveFailed": "Could not save the profile. Please try again.",
-  "targetErrorProteinEnergy": "Protein energy (4 kcal/g) cannot exceed total calories. Adjust the calorie or protein target.",
-  "targetErrorCalorieRange": "The calorie target is outside the supported range (1,000–10,000 kcal). Review your profile or enter a suitable manual target.",
-  "targetErrorProteinRange": "The protein target must be greater than 0 and at most 500 g. Review your profile or enter a manual target.",
+  "targetErrorProteinEnergy": "Protein energy (4 kcal/g) cannot exceed total calories. Adjust the calorie or protein target.",
+  "targetErrorCalorieRange": "The calorie target is outside the supported range (1,000–10,000 kcal). Review your profile or enter a suitable manual target.",
+  "targetErrorProteinRange": "The protein target must be greater than 0 and at most 500 g. Review your profile or enter a manual target.",
   "targetErrorGeneric": "These details do not give a valid estimate. Check age, height, weight and goal.",
   "weightTracking": "Weight tracking",
   "noWeights": "No weigh-ins yet. Save your profile to start.",
-  "latestWeight": "Latest: {weight} kg · {date}",
-  "weightChange": "Change: {change} kg from {from} to {to}",
+  "latestWeight": "Latest: {weight} kg · {date}",
+  "weightChange": "Change: {change} kg from {from} to {to}",
   "logWeight": "Log weight",
   "weightHistoryNote": "One value is kept per day; logging again on the same day updates it. The chart shows up to the 90 most recent weigh-ins.",
   "editWeightTooltip": "Edit weight for {date}",
@@ -163,7 +163,7 @@
   "weightDeleteFailed": "Could not delete the weight. Please try again.",
   "editWeight": "Edit weight",
   "weightKg": "Weight (kg)",
-  "weightValueError": "Enter a weight greater than 0 and at most 500 kg.",
+  "weightValueError": "Enter a weight greater than 0 and at most 500 kg.",
   "weighInDateField": "Weigh-in date (dd/mm/yyyy)",
   "weighInDate": "Weigh-in date",
   "chooseWeighInDate": "Choose the weigh-in date",
@@ -172,9 +172,8 @@
   "dateFormatError": "Enter the date as dd/mm/yyyy.",
   "dateAfterToday": "The weigh-in date cannot be after today.",
   "saveWeight": "Save weight",
-  "weightChartSemantics": "Chart of {count} weigh-ins. From {firstDate}: {firstWeight} kg to {lastDate}: {lastWeight} kg. The values are listed below.",
+  "weightChartSemantics": "Chart of {count} weigh-ins. From {firstDate}: {firstWeight} kg to {lastDate}: {lastWeight} kg. The values are listed below.",
   "settingsTitle": "SETTINGS",
-  "settingsSubtitle": "Choose a language and visual style. Your selection is saved on this device.",
   "languageTitle": "Language",
   "interfaceStyle": "Interface style",
   "styleCyberpunkDescription": "Neon cyan, magenta and deep navy.",
@@ -217,12 +216,12 @@
   "diaryPreviousDay": "Previous day",
   "diaryNextDay": "Next day",
   "diaryEaten": "Eaten",
-  "diaryCaloriesProgress": "{eaten} / {target} kcal",
-  "diaryProteinProgress": "{eaten} / {target} g protein",
-  "diaryRemaining": "{value} kcal left for your target",
-  "diaryOver": "{value} kcal over your target",
+  "diaryCaloriesProgress": "{eaten} / {target} kcal",
+  "diaryProteinProgress": "{eaten} / {target} g protein",
+  "diaryRemaining": "{value} kcal left for your target",
+  "diaryOver": "{value} kcal over your target",
   "diaryNoTarget": "Save your profile to compare with calorie and protein targets.",
-  "diaryMacros": "Carbs {carbs} g • Fat {fat} g",
+  "diaryMacros": "Carbs {carbs} g • Fat {fat} g",
   "diaryEmptyMeal": "Nothing logged yet.",
   "diaryAddFood": "ADD FOOD",
   "diaryAddTitle": "Add food to the diary",
@@ -232,7 +231,7 @@
   "diaryFoodSearch": "Search foods",
   "diaryFoodRequired": "Choose a food from the list.",
   "diaryGrams": "Amount (g)",
-  "diaryGramsError": "Enter an amount greater than 0 and at most 5000 g.",
+  "diaryGramsError": "Enter an amount greater than 0 and at most 5000 g.",
   "diaryOptionalGrams": "Amount (g, optional)",
   "diaryCustomName": "Food name",
   "diaryCustomNameError": "Enter a food name.",
@@ -240,11 +239,11 @@
   "diaryCustomCaloriesError": "Enter calories from 0 to 10000.",
   "diaryCarbsLabel": "Carbs (g)",
   "diaryFatLabel": "Fat (g)",
-  "diaryMacroError": "0 to 1000 g.",
-  "diaryPreview": "Estimate: {calories} kcal • {protein} g protein",
+  "diaryMacroError": "0 to 1000 g.",
+  "diaryPreview": "Estimate: {calories} kcal • {protein} g protein",
   "diarySave": "Add to diary",
-  "diaryEntryDetails": "{grams} g • {calories} kcal • {protein} g protein",
-  "diaryEntryDetailsNoGrams": "{calories} kcal • {protein} g protein",
+  "diaryEntryDetails": "{grams} g • {calories} kcal • {protein} g protein",
+  "diaryEntryDetailsNoGrams": "{calories} kcal • {protein} g protein",
   "diaryAdded": "Added to the diary.",
   "diaryDeleted": "Food removed from the diary.",
   "diaryUndo": "Undo",
@@ -263,7 +262,7 @@
   "todayTitle": "TODAY",
   "todayLoadFailed": "Could not load today's data. Pull down to try again.",
   "todayOpenDiary": "Open diary",
-  "todayWeightWeek": "7-day change: {change} kg",
+  "todayWeightWeek": "7-day change: {change} kg",
   "todayNoExercise": "No exercises logged today.",
   "todayExercisesLogged": "{count} exercises logged today",
   "todayLastWorkout": "Last workout: {plan} · {date}",
@@ -290,7 +289,7 @@
   "scanDecrease": "Decrease",
   "scanIncrease": "Increase",
   "scanMissingNutrition": "No nutrition data yet for: {names}. Untick them or add the data to log this plate.",
-  "scanTotal": "Total: {calories} kcal • {protein} g protein",
+  "scanTotal": "Total: {calories} kcal • {protein} g protein",
   "scanNothingSelected": "Select at least one component.",
   "scanSave": "Log to diary",
   "scanFrameHint": "Fit the plate or bowl inside the frame",
@@ -317,11 +316,11 @@
   "goalGainShort": "Gain",
   "processingButton": "PROCESSING...",
   "planAlreadySaved": "SAVED",
-  "proteinGrams": "{value} g protein",
-  "kcalProteinLine": "{kcal} kcal • P {protein} g",
-  "mealMacroLine": "{kcal} kcal • P {protein} g • C {carbs} g • F {fat} g",
+  "proteinGrams": "{value} g protein",
+  "kcalProteinLine": "{kcal} kcal • P {protein} g",
+  "mealMacroLine": "{kcal} kcal • P {protein} g • C {carbs} g • F {fat} g",
   "repsRange": "Enter 0 to 30",
-  "overloadConfirmIncrease": "First comfortable 3×12 at this load. Repeat it once more; if it is comfortable again, add 2.5 kg.",
+  "overloadConfirmIncrease": "First comfortable 3×12 at this load. Repeat it once more; if it is comfortable again, add 2.5 kg.",
   "overloadBodyweightReps": "You completed 3×12 without added load. Next session add 2 reps per set, or move to a harder variation.",
   "overloadBodyweightDecrease": "Reps fell below the target range. Aim for 8 clean reps per set, or use an easier variation.",
   "scanNotInApp": "This dish may not be in the app yet. Pick the closest dish, or log it by hand in the diary.",
@@ -329,12 +328,12 @@
   "scanPortion": "Whole-dish portion",
   "scanSuggestions": "Might also be there ({count})",
   "scanSuggestionsChosen": "Might also be there ({count}) · {chosen} chosen",
-  "scanMacroGrams": "Protein {protein} g · Carbs {carbs} g · Fat {fat} g",
+  "scanMacroGrams": "Protein {protein} g · Carbs {carbs} g · Fat {fat} g",
   "scanTiming": "Recognized in {total} s (photo {photo} s · model {model} s)",
   "diaryFavorites": "Favorites",
   "diaryRecent": "Recent",
   "diaryQuickHint": "Tap a food to add it to the chosen meal right away.",
-  "diaryQuickChip": "{name} · {calories} kcal",
+  "diaryQuickChip": "{name} · {calories} kcal",
   "@diaryQuickChip": {
     "placeholders": {
       "name": {
@@ -364,7 +363,7 @@
     }
   },
   "diaryCopyToToday": "Copy this meal to today",
-  "diaryRepeatYesterday": "Same as yesterday ({count} foods · {calories} kcal)",
+  "diaryRepeatYesterday": "Same as yesterday ({count} foods · {calories} kcal)",
   "@diaryRepeatYesterday": {
     "placeholders": {
       "count": {
@@ -383,7 +382,7 @@
       }
     }
   },
-  "lastSessionLine": "Last time ({date}): {weight} kg × {reps}",
+  "lastSessionLine": "Last time ({date}): {weight} kg × {reps}",
   "@lastSessionLine": {
     "placeholders": {
       "date": {
@@ -397,7 +396,7 @@
       }
     }
   },
-  "lastSessionSuggestion": "Today's suggestion: {weight} kg × {reps} reps",
+  "lastSessionSuggestion": "Today's suggestion: {weight} kg × {reps} reps",
   "@lastSessionSuggestion": {
     "placeholders": {
       "weight": {
@@ -422,7 +421,7 @@
   "restTimerLess": "Take off 15 seconds",
   "restTimerStop": "Stop the timer",
   "adaptiveTdeeTitle": "TDEE from your data",
-  "adaptiveTdeeValue": "{tdee} kcal/day",
+  "adaptiveTdeeValue": "{tdee} kcal/day",
   "@adaptiveTdeeValue": {
     "placeholders": {
       "tdee": {
@@ -430,7 +429,7 @@
       }
     }
   },
-  "adaptiveTdeeDetails": "From {days} logged days (average {intake} kcal) and {weighIns} weigh-ins over the last 4 weeks: weight {trend} kg/week.",
+  "adaptiveTdeeDetails": "From {days} logged days (average {intake} kcal) and {weighIns} weigh-ins over the last 4 weeks: weight {trend} kg/week.",
   "@adaptiveTdeeDetails": {
     "placeholders": {
       "days": {
@@ -447,7 +446,7 @@
       }
     }
   },
-  "adaptiveTdeeCompare": "The Mifflin-St Jeor formula estimates {formula} kcal.",
+  "adaptiveTdeeCompare": "The Mifflin-St Jeor formula estimates {formula} kcal.",
   "@adaptiveTdeeCompare": {
     "placeholders": {
       "formula": {
@@ -455,7 +454,7 @@
       }
     }
   },
-  "adaptiveTdeeUse": "Use as target ({calories} kcal)",
+  "adaptiveTdeeUse": "Use as target ({calories} kcal)",
   "@adaptiveTdeeUse": {
     "placeholders": {
       "calories": {
@@ -463,7 +462,7 @@
       }
     }
   },
-  "adaptiveTdeeUsed": "Calorie target set to {calories} kcal. Save the profile to apply it.",
+  "adaptiveTdeeUsed": "Calorie target set to {calories} kcal. Save the profile to apply it.",
   "@adaptiveTdeeUsed": {
     "placeholders": {
       "calories": {
@@ -491,7 +490,7 @@
       }
     }
   },
-  "adaptiveTdeeUnsure": "This is far from the formula ({tdee} vs {formula} kcal), maybe because some days were not logged in full. Better not use it as a target yet.",
+  "adaptiveTdeeUnsure": "This is far from the formula ({tdee} vs {formula} kcal), maybe because some days were not logged in full. Better not use it as a target yet.",
   "@adaptiveTdeeUnsure": {
     "placeholders": {
       "tdee": {
@@ -502,9 +501,9 @@
       }
     }
   },
-  "adaptiveTdeeInfo": "Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.",
+  "adaptiveTdeeInfo": "Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.",
   "waterTitle": "Water",
-  "waterProgress": "{drunk} / {target} ml",
+  "waterProgress": "{drunk} / {target} ml",
   "@waterProgress": {
     "placeholders": {
       "drunk": {
@@ -515,7 +514,7 @@
       }
     }
   },
-  "waterGlasses": "{count} glasses of {glass} ml",
+  "waterGlasses": "{count} glasses of {glass} ml",
   "@waterGlasses": {
     "placeholders": {
       "count": {
@@ -548,7 +547,7 @@
       }
     }
   },
-  "weekAverage": "Average {calories} kcal • {protein} g protein per logged day",
+  "weekAverage": "Per logged day: {calories} kcal • {protein} g protein on average",
   "@weekAverage": {
     "placeholders": {
       "calories": {
@@ -559,7 +558,7 @@
       }
     }
   },
-  "weekVsTarget": "Against the {target} kcal target: {diff} kcal/day",
+  "weekVsTarget": "Against the {target} kcal target: {diff} kcal/day",
   "@weekVsTarget": {
     "placeholders": {
       "target": {
@@ -578,7 +577,7 @@
       }
     }
   },
-  "weekWeight": "Weight {change} kg",
+  "weekWeight": "Weight {change} kg",
   "@weekWeight": {
     "placeholders": {
       "change": {
@@ -620,7 +619,7 @@
   "backupInvalid": "This file is not a valid MacroRunner backup.",
   "backupFailed": "Could not create the backup file. Try again.",
   "widgetTitle": "MacroRunner today",
-  "widgetWater": "Water {drunk} / {target} L",
+  "widgetWater": "Water {drunk} / {target} L",
   "@widgetWater": {
     "placeholders": {
       "drunk": {
@@ -645,7 +644,7 @@
   "pickerNoMatch": "Nothing found. Try another word, such as \"chicken\" or \"rice\".",
   "pickerDishes": "Dishes",
   "pickerSingle": "A single food",
-  "pickerPer100g": "{kcal} kcal / 100 g",
+  "pickerPer100g": "{kcal} kcal / 100 g",
   "@pickerPer100g": {
     "placeholders": {
       "kcal": {
@@ -687,7 +686,7 @@
   },
   "waterRemindersSwitch": "Remind me to drink water",
   "waterRemindersEvery": "Remind every",
-  "waterRemindersHours": "{hours} h",
+  "waterRemindersHours": "{hours} h",
   "@waterRemindersHours": {
     "placeholders": {
       "hours": {
@@ -708,5 +707,6 @@
   "waterReminder4Title": "Don't wait until you're thirsty",
   "waterReminder4Body": "Thirst means your body is already a little short.",
   "waterReminder5Title": "One glass of water",
-  "waterReminder5Body": "Stand up, pour a glass, then get back to it."
+  "waterReminder5Body": "Stand up, pour a glass, then get back to it.",
+  "infoTooltip": "More info"
 }

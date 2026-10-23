@@ -59,9 +59,9 @@ void main() {
             ExerciseLogDialog(exerciseName: 'Bench Press', previous: previous),
       ),
     ));
-    expect(find.text('Lần trước (18/10/2026): 60 kg × 10 · 9 · 8'),
+    expect(find.text('Lần trước (18/10/2026): 60 kg × 10 · 9 · 8'),
         findsOneWidget);
-    expect(find.text('Gợi ý hôm nay: 62,5 kg × 10 lần'), findsOneWidget);
+    expect(find.text('Gợi ý hôm nay: 62,5 kg × 10 lần'), findsOneWidget);
     final fields = tester.widgetList<TextFormField>(find.byType(TextFormField));
     expect([for (final field in fields) field.controller!.text],
         ['62,5', '10', '10', '10']);

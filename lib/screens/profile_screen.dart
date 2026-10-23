@@ -8,6 +8,7 @@ import '../models/user_profile.dart';
 import '../models/weight_entry.dart';
 import '../services/database_service.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/info_button.dart';
 import '../widgets/weight_trend_chart.dart';
 import '../core/number_input.dart';
 
@@ -263,7 +264,7 @@ class ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => AlertDialog(
         title: Text(context.l10n.deleteWeightTitle),
         content: Text(
-          '${context.formatMeasurement(entry.weight)} kg · '
+          '${context.formatMeasurement(entry.weight)}\u00A0kg · '
           '${_date(entry.recordedAt)}',
         ),
         actions: [
@@ -337,29 +338,8 @@ class ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  void _showInfo(String title, List<String> paragraphs) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: CyberColors.surface,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              for (final paragraph in paragraphs) ...[
-                const SizedBox(height: 12),
-                Text(paragraph),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  void _showInfo(String title, List<String> paragraphs) =>
+      InfoButton.show(context, title, paragraphs);
 
   Widget _infoButton(String key, VoidCallback onPressed) => IconButton(
         key: ValueKey(key),
@@ -381,8 +361,8 @@ class ProfileScreenState extends State<ProfileScreen> {
         () => _showInfo(l10n.howCalculated, [
           l10n.estimateFormula,
           if (targets != null)
-            'BMR: ${number(targets['bmr'] as num)} kcal · '
-                'TDEE: ${number(targets['tdee'] as num)} kcal',
+            'BMR: ${number(targets['bmr'] as num)}\u00A0kcal · '
+                'TDEE: ${number(targets['tdee'] as num)}\u00A0kcal',
           l10n.profileDisclaimer,
         ]),
       ),
@@ -547,7 +527,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                 Expanded(
                   child: Text.rich(TextSpan(children: [
                     TextSpan(
-                      text: '${weight(entry.weight)} kg',
+                      text: '${weight(entry.weight)}\u00A0kg',
                       style: TextStyle(
                           color: CyberColors.text, fontWeight: FontWeight.w700),
                     ),
@@ -844,7 +824,7 @@ class _TargetTile extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: ' $unit',
+                text: '\u00A0$unit',
                 style: TextStyle(
                   color: CyberColors.cyan,
                   fontSize: 14,

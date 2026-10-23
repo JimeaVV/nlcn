@@ -178,7 +178,7 @@ void main() {
     await fill(tester, 'profile-calories', '1000');
     await fill(tester, 'profile-protein', '300');
     await saveProfile(tester);
-    expect(find.textContaining('Năng lượng từ protein (4 kcal/g) không được'),
+    expect(find.textContaining('Năng lượng từ protein (4 kcal/g) không được'),
         findsOneWidget);
     expect(database.savedProfiles, isEmpty);
 
@@ -260,7 +260,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(database.savedWeights.single.date, yesterday);
     expect(database.savedWeights.single.weight, 71.25);
-    expect(find.textContaining('Gần nhất: 70 kg'), findsOneWidget);
+    expect(find.textContaining('Gần nhất: 70 kg'), findsOneWidget);
 
     final edit = find.byKey(const ValueKey('edit-weight-2'));
     await reveal(tester, edit);
@@ -443,7 +443,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('profile-how')));
     await tester.pumpAndSettle();
     expect(find.textContaining('Mifflin'), findsOneWidget);
-    expect(find.textContaining('TDEE: 2.625 kcal'), findsOneWidget);
+    expect(find.textContaining('TDEE: 2.625 kcal'), findsOneWidget);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
 
@@ -474,8 +474,8 @@ void main() {
 
     final card = find.byKey(const ValueKey('profile-adaptive-tdee'));
     await reveal(tester, card);
-    expect(find.text('2.500 kcal/ngày'), findsOneWidget);
-    expect(find.textContaining('Mifflin-St Jeor ước tính 2.625 kcal'),
+    expect(find.text('2.500 kcal/ngày'), findsOneWidget);
+    expect(find.textContaining('Mifflin-St Jeor ước tính 2.625 kcal'),
         findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('adaptive-tdee-use')));
     await tester.pumpAndSettle();

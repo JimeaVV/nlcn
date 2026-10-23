@@ -150,7 +150,7 @@ class _Comparison extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('$label: ${format(actual)} / ${format(target)} $unit',
+        Text('$label: ${format(actual)} / ${format(target)}\u00A0$unit',
             style: TextStyle(
                 color: CyberColors.text, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),

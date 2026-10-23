@@ -63,7 +63,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String mealProfileSummary(String weight, String height, String age) {
-    return '$weight kg • $height cm • $age tuổi';
+    return '$weight kg • $height cm • $age tuổi';
   }
 
   @override
@@ -118,7 +118,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String comparisonDifference(String difference, String unit, String percent) {
-    return 'Lệch $difference $unit ($percent%)';
+    return 'Lệch $difference $unit ($percent%)';
   }
 
   @override
@@ -202,12 +202,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String nextSessionSummary(String weight, String reps) {
-    return '$weight kg • 3 hiệp • mục tiêu $reps lần';
+    return '$weight kg • 3 hiệp • mục tiêu $reps lần';
   }
 
   @override
   String get overloadIncreaseWeight =>
-      'Bạn đã hoàn thành 3×12 với mức gắng sức vừa phải. Buổi sau tăng thêm 2,5 kg và bắt đầu lại trong khoảng 8–12 lần.';
+      'Bạn đã hoàn thành 3×12 với mức gắng sức vừa phải. Buổi sau tăng thêm 2,5 kg và bắt đầu lại trong khoảng 8–12 lần.';
 
   @override
   String get overloadMaintainWeight =>
@@ -215,7 +215,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get overloadDecreaseWeight =>
-      'Số lần chưa đạt khoảng mục tiêu. Giảm 2,5 kg và ưu tiên kỹ thuật có kiểm soát.';
+      'Số lần chưa đạt khoảng mục tiêu. Giảm 2,5 kg và ưu tiên kỹ thuật có kiểm soát.';
 
   @override
   String get overloadIncreaseReps =>
@@ -270,7 +270,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get currentLoadKg => 'Mức tạ hiện tại (kg)';
 
   @override
-  String get currentLoadError => 'Nhập mức tạ từ 0 đến 1000 kg.';
+  String get currentLoadError => 'Nhập mức tạ từ 0 đến 1000 kg.';
 
   @override
   String setLabel(String number) {
@@ -374,7 +374,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String mealHistoryTitle(String calories, String protein) {
-    return '$calories kcal • $protein g protein';
+    return '$calories kcal • $protein g protein';
   }
 
   @override
@@ -385,7 +385,7 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String exerciseLogSubtitle(String weight, String reps, String nextWeight,
       String nextReps, String date) {
-    return '$weight kg • $reps lần\nBuổi sau: $nextWeight kg • mục tiêu $nextReps lần\n$date';
+    return '$weight kg • $reps lần\nBuổi sau: $nextWeight kg • mục tiêu $nextReps lần\n$date';
   }
 
   @override
@@ -455,7 +455,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get estimateFormula =>
-      'Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).';
+      'Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).';
 
   @override
   String get manualCalories => 'Calo tự đặt (kcal/ngày)';
@@ -480,7 +480,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get targetsInvalidHint =>
-      'Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.';
+      'Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.';
 
   @override
   String get estimatedCalories => 'Calo ước tính';
@@ -502,15 +502,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get targetErrorProteinEnergy =>
-      'Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. Hãy điều chỉnh mục tiêu calo hoặc protein.';
+      'Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. Hãy điều chỉnh mục tiêu calo hoặc protein.';
 
   @override
   String get targetErrorCalorieRange =>
-      'Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.';
+      'Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.';
 
   @override
   String get targetErrorProteinRange =>
-      'Mục tiêu protein phải lớn hơn 0 và không quá 500 g. Kiểm tra hồ sơ hoặc tự nhập mục tiêu.';
+      'Mục tiêu protein phải lớn hơn 0 và không quá 500 g. Kiểm tra hồ sơ hoặc tự nhập mục tiêu.';
 
   @override
   String get targetErrorGeneric =>
@@ -524,12 +524,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String latestWeight(String weight, String date) {
-    return 'Gần nhất: $weight kg · $date';
+    return 'Gần nhất: $weight kg · $date';
   }
 
   @override
   String weightChange(String change, String from, String to) {
-    return 'Thay đổi: $change kg từ $from đến $to';
+    return 'Thay đổi: $change kg từ $from đến $to';
   }
 
   @override
@@ -573,7 +573,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get weightKg => 'Cân nặng (kg)';
 
   @override
-  String get weightValueError => 'Nhập cân nặng lớn hơn 0 và không quá 500 kg.';
+  String get weightValueError => 'Nhập cân nặng lớn hơn 0 và không quá 500 kg.';
 
   @override
   String get weighInDateField => 'Ngày cân (ngày/tháng/năm)';
@@ -602,15 +602,11 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String weightChartSemantics(String count, String firstDate,
       String firstWeight, String lastDate, String lastWeight) {
-    return 'Biểu đồ $count lần ghi cân nặng. Từ $firstDate: $firstWeight kg đến $lastDate: $lastWeight kg. Các giá trị được liệt kê bên dưới.';
+    return 'Biểu đồ $count lần ghi cân nặng. Từ $firstDate: $firstWeight kg đến $lastDate: $lastWeight kg. Các giá trị được liệt kê bên dưới.';
   }
 
   @override
   String get settingsTitle => 'CÀI ĐẶT';
-
-  @override
-  String get settingsSubtitle =>
-      'Chọn ngôn ngữ và giao diện. Lựa chọn được lưu trên máy.';
 
   @override
   String get languageTitle => 'Ngôn ngữ';
@@ -746,22 +742,22 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String diaryCaloriesProgress(String eaten, String target) {
-    return '$eaten / $target kcal';
+    return '$eaten / $target kcal';
   }
 
   @override
   String diaryProteinProgress(String eaten, String target) {
-    return '$eaten / $target g protein';
+    return '$eaten / $target g protein';
   }
 
   @override
   String diaryRemaining(String value) {
-    return 'Còn $value kcal so với mục tiêu';
+    return 'Còn $value kcal so với mục tiêu';
   }
 
   @override
   String diaryOver(String value) {
-    return 'Vượt mục tiêu $value kcal';
+    return 'Vượt mục tiêu $value kcal';
   }
 
   @override
@@ -769,7 +765,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String diaryMacros(String carbs, String fat) {
-    return 'Carb $carbs g • Chất béo $fat g';
+    return 'Carb $carbs g • Chất béo $fat g';
   }
 
   @override
@@ -801,7 +797,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get diaryGramsError =>
-      'Nhập khối lượng lớn hơn 0 và không quá 5000 g.';
+      'Nhập khối lượng lớn hơn 0 và không quá 5000 g.';
 
   @override
   String get diaryOptionalGrams => 'Khối lượng (g, không bắt buộc)';
@@ -825,11 +821,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get diaryFatLabel => 'Chất béo (g)';
 
   @override
-  String get diaryMacroError => 'Từ 0 đến 1000 g.';
+  String get diaryMacroError => 'Từ 0 đến 1000 g.';
 
   @override
   String diaryPreview(String calories, String protein) {
-    return 'Ước tính: $calories kcal • $protein g protein';
+    return 'Ước tính: $calories kcal • $protein g protein';
   }
 
   @override
@@ -837,12 +833,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String diaryEntryDetails(String grams, String calories, String protein) {
-    return '$grams g • $calories kcal • $protein g protein';
+    return '$grams g • $calories kcal • $protein g protein';
   }
 
   @override
   String diaryEntryDetailsNoGrams(String calories, String protein) {
-    return '$calories kcal • $protein g protein';
+    return '$calories kcal • $protein g protein';
   }
 
   @override
@@ -902,7 +898,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String todayWeightWeek(String change) {
-    return 'Thay đổi 7 ngày: $change kg';
+    return 'Thay đổi 7 ngày: $change kg';
   }
 
   @override
@@ -993,7 +989,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String scanTotal(String calories, String protein) {
-    return 'Tổng: $calories kcal • $protein g protein';
+    return 'Tổng: $calories kcal • $protein g protein';
   }
 
   @override
@@ -1080,17 +1076,17 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String proteinGrams(String value) {
-    return '$value g protein';
+    return '$value g protein';
   }
 
   @override
   String kcalProteinLine(String kcal, String protein) {
-    return '$kcal kcal • protein $protein g';
+    return '$kcal kcal • protein $protein g';
   }
 
   @override
   String mealMacroLine(String kcal, String protein, String carbs, String fat) {
-    return '$kcal kcal • protein $protein g • tinh bột $carbs g • béo $fat g';
+    return '$kcal kcal • protein $protein g • tinh bột $carbs g • béo $fat g';
   }
 
   @override
@@ -1098,7 +1094,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get overloadConfirmIncrease =>
-      'Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.';
+      'Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.';
 
   @override
   String get overloadBodyweightReps =>
@@ -1130,7 +1126,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String scanMacroGrams(String protein, String carbs, String fat) {
-    return 'Đạm $protein g · Tinh bột $carbs g · Béo $fat g';
+    return 'Đạm $protein g · Tinh bột $carbs g · Béo $fat g';
   }
 
   @override
@@ -1149,7 +1145,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String diaryQuickChip(String name, String calories) {
-    return '$name · $calories kcal';
+    return '$name · $calories kcal';
   }
 
   @override
@@ -1173,7 +1169,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String diaryRepeatYesterday(String count, String calories) {
-    return 'Ăn giống hôm qua ($count món · $calories kcal)';
+    return 'Ăn giống hôm qua ($count món · $calories kcal)';
   }
 
   @override
@@ -1183,12 +1179,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String lastSessionLine(String date, String weight, String reps) {
-    return 'Lần trước ($date): $weight kg × $reps';
+    return 'Lần trước ($date): $weight kg × $reps';
   }
 
   @override
   String lastSessionSuggestion(String weight, String reps) {
-    return 'Gợi ý hôm nay: $weight kg × $reps lần';
+    return 'Gợi ý hôm nay: $weight kg × $reps lần';
   }
 
   @override
@@ -1216,28 +1212,28 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String adaptiveTdeeValue(String tdee) {
-    return '$tdee kcal/ngày';
+    return '$tdee kcal/ngày';
   }
 
   @override
   String adaptiveTdeeDetails(
       String days, String intake, String weighIns, String trend) {
-    return 'Từ $days ngày ghi ăn (trung bình $intake kcal) và $weighIns lần cân trong 4 tuần qua: cân nặng $trend kg/tuần.';
+    return 'Từ $days ngày ghi ăn (trung bình $intake kcal) và $weighIns lần cân trong 4 tuần qua: cân nặng $trend kg/tuần.';
   }
 
   @override
   String adaptiveTdeeCompare(String formula) {
-    return 'Công thức Mifflin-St Jeor ước tính $formula kcal.';
+    return 'Công thức Mifflin-St Jeor ước tính $formula kcal.';
   }
 
   @override
   String adaptiveTdeeUse(String calories) {
-    return 'Dùng làm mục tiêu ($calories kcal)';
+    return 'Dùng làm mục tiêu ($calories kcal)';
   }
 
   @override
   String adaptiveTdeeUsed(String calories) {
-    return 'Đã điền mục tiêu calo $calories kcal. Bấm Lưu hồ sơ để áp dụng.';
+    return 'Đã điền mục tiêu calo $calories kcal. Bấm Lưu hồ sơ để áp dụng.';
   }
 
   @override
@@ -1248,24 +1244,24 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String adaptiveTdeeUnsure(String tdee, String formula) {
-    return 'Kết quả lệch xa công thức ($tdee so với $formula kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.';
+    return 'Kết quả lệch xa công thức ($tdee so với $formula kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.';
   }
 
   @override
   String get adaptiveTdeeInfo =>
-      'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.';
+      'TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.';
 
   @override
   String get waterTitle => 'Nước uống';
 
   @override
   String waterProgress(String drunk, String target) {
-    return '$drunk / $target ml';
+    return '$drunk / $target ml';
   }
 
   @override
   String waterGlasses(String count, String glass) {
-    return '$count ly, mỗi ly $glass ml';
+    return '$count ly, mỗi ly $glass ml';
   }
 
   @override
@@ -1299,12 +1295,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String weekAverage(String calories, String protein) {
-    return 'Trung bình $calories kcal • $protein g protein mỗi ngày ghi';
+    return 'Mỗi ngày có ghi: trung bình $calories kcal • $protein g protein';
   }
 
   @override
   String weekVsTarget(String target, String diff) {
-    return 'So với mục tiêu $target kcal: $diff kcal/ngày';
+    return 'So với mục tiêu $target kcal: $diff kcal/ngày';
   }
 
   @override
@@ -1314,7 +1310,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String weekWeight(String change) {
-    return 'Cân nặng $change kg';
+    return 'Cân nặng $change kg';
   }
 
   @override
@@ -1389,7 +1385,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String widgetWater(String drunk, String target) {
-    return 'Nước $drunk / $target L';
+    return 'Nước $drunk / $target L';
   }
 
   @override
@@ -1419,7 +1415,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String pickerPer100g(String kcal) {
-    return '$kcal kcal / 100 g';
+    return '$kcal kcal / 100 g';
   }
 
   @override
@@ -1528,4 +1524,7 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get waterReminder5Body =>
       'Đứng dậy rót một ly, rồi quay lại việc đang làm.';
+
+  @override
+  String get infoTooltip => 'Giải thích';
 }

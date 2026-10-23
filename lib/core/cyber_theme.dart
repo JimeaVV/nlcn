@@ -19,7 +19,9 @@ class AppStyleInfo {
 const appStyleOptions = <AppStyleInfo>[
   AppStyleInfo(
     style: AppStyle.cyberpunk,
-    name: 'Cyberpunk',
+    // Shown to the user; the enum keeps its old name, which saved settings
+    // still use.
+    name: 'Neon',
     icon: Icons.bolt_rounded,
   ),
   AppStyleInfo(
@@ -167,6 +169,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'BeVietnamPro',
       brightness: p.brightness,
       scaffoldBackgroundColor: p.background,
       colorScheme: scheme,
@@ -220,6 +223,18 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(color: p.surface),
       dividerColor: p.border,
+      // Material's default snack bar is a light grey slab on the dark styles.
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: p.surfaceAlt,
+        contentTextStyle: TextStyle(color: p.text, fontSize: 15),
+        actionTextColor: p.primary,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: p.border),
+        ),
+      ),
     );
   }
 }

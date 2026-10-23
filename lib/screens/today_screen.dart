@@ -161,7 +161,7 @@ class TodayScreenState extends State<TodayScreen> {
     HomeWidgetSync.update(
       title: l10n.widgetTitle,
       calories: target == null
-          ? '${number(_eaten.calories)} kcal'
+          ? '${number(_eaten.calories)}\u00A0kcal'
           : l10n.diaryCaloriesProgress(number(_eaten.calories), number(target)),
       water: l10n.widgetWater(number(_water / 1000, decimals: 1),
           number(waterTargetMl / 1000, decimals: 1)),
@@ -274,6 +274,7 @@ class _NutritionCard extends StatelessWidget {
     final calorieTarget = (targets?['target_calories'] as num?)?.toDouble();
     final proteinTarget = (targets?['protein_target'] as num?)?.toDouble();
     return CyberCard(
+      highlight: true,
       title: l10n.diaryEaten,
       icon: Icons.local_fire_department_outlined,
       child: Column(
@@ -303,7 +304,7 @@ class _NutritionCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             calorieTarget == null
-                ? '${number(eaten.calories)} kcal'
+                ? '${number(eaten.calories)}\u00A0kcal'
                 : l10n.diaryCaloriesProgress(
                     number(eaten.calories), number(calorieTarget)),
             style: Theme.of(context).textTheme.titleLarge,

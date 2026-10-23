@@ -346,13 +346,14 @@ class _Summary extends StatelessWidget {
     final proteinTarget = (targets?['protein_target'] as num?)?.toDouble();
     final number = context.formatNumber;
     return CyberCard(
+      highlight: true,
       title: l10n.diaryEaten,
       icon: Icons.local_fire_department_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (calorieTarget == null || proteinTarget == null) ...[
-            Text('${number(totals.calories)} kcal',
+            Text('${number(totals.calories)}\u00A0kcal',
                 style: Theme.of(context).textTheme.titleLarge),
             Text(l10n.proteinGrams(number(totals.protein, decimals: 1))),
             const SizedBox(height: 8),

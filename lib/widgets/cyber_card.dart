@@ -11,6 +11,7 @@ class CyberCard extends StatelessWidget {
     this.accent,
     this.padding = const EdgeInsets.all(18),
     this.trailing,
+    this.highlight = false,
   });
 
   final Widget child;
@@ -22,6 +23,10 @@ class CyberCard extends StatelessWidget {
   /// Shown at the end of the title row, e.g. an info button.
   final Widget? trailing;
 
+  /// The one card a screen leads with gets the accent border and glow; the
+  /// rest keep a quiet border, so the eye knows where to start.
+  final bool highlight;
+
   @override
   Widget build(BuildContext context) {
     final resolvedAccent = accent ?? CyberColors.cyan;
@@ -31,13 +36,17 @@ class CyberCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: CyberColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: resolvedAccent.withValues(alpha: 0.55)),
+        border: Border.all(
+            color: highlight
+                ? resolvedAccent.withValues(alpha: 0.55)
+                : CyberColors.border),
         boxShadow: [
-          BoxShadow(
-            color: resolvedAccent.withValues(alpha: 0.09),
-            blurRadius: 20,
-            spreadRadius: 1,
-          ),
+          if (highlight)
+            BoxShadow(
+              color: resolvedAccent.withValues(alpha: 0.09),
+              blurRadius: 20,
+              spreadRadius: 1,
+            ),
         ],
       ),
       child: Column(

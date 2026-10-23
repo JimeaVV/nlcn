@@ -43,10 +43,11 @@ class NeonButton extends StatelessWidget {
           foregroundColor: CyberColors.background,
           disabledBackgroundColor: CyberColors.surfaceAlt,
           disabledForegroundColor: resolvedColor,
-          textStyle: const TextStyle(
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.7,
-          ),
+          // From the theme, so the button keeps the app's font.
+          textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),

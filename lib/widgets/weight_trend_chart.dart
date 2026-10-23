@@ -96,7 +96,7 @@ class _WeightPainter extends CustomPainter {
       canvas.drawLine(Offset(left, y), Offset(right, y), grid);
       _label(
         canvas,
-        '${formatWeight(upper - (upper - lower) * fraction)} kg',
+        '${formatWeight(upper - (upper - lower) * fraction)}\u00A0kg',
         Offset(0, y - 6),
       );
     }

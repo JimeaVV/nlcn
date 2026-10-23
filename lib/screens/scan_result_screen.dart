@@ -382,6 +382,7 @@ class _DishCard extends StatelessWidget {
     final top = recognition.topDishes();
 
     return CyberCard(
+      highlight: true,
       title: l10n.scanDishTitle,
       icon: Icons.restaurant_rounded,
       child: Column(
@@ -606,9 +607,9 @@ class _ComponentRow extends StatelessWidget {
         ? (language == 'vi' ? item.component.unitNameVi : null) ??
             l10n.scanUnitFallback
         : 'g';
-    final amount = '${context.formatMeasurement(item.amount)} $unit';
+    final amount = '${context.formatMeasurement(item.amount)}\u00A0$unit';
     final detail = item.hasNutrition
-        ? '$amount · ${context.formatNumber(item.calories)} kcal'
+        ? '$amount · ${context.formatNumber(item.calories)}\u00A0kcal'
         : '$amount · ${l10n.scanNoNutrition}';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
