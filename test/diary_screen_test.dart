@@ -162,7 +162,8 @@ void main() {
     final database = _Database();
     await _mount(tester, database);
     expect(find.text('Hôm nay'), findsOneWidget);
-    expect(find.text('0 kcal'), findsOneWidget);
+    // Without targets the gauge shows what was eaten.
+    expect(find.text('kcal đã ăn'), findsOneWidget);
     expect(find.text('Lưu hồ sơ để so với mục tiêu calo và protein.'),
         findsOneWidget);
     expect(find.text('Chưa ghi món nào.'), findsNWidgets(4));
@@ -204,7 +205,11 @@ void main() {
     expect(saved.meal, MealSlot.breakfast);
     expect(saved.source, FoodLogSource.manual);
     expect(find.text('156 / 2.000 kcal'), findsOneWidget);
-    expect(find.text('Còn 1.844 kcal so với mục tiêu'), findsOneWidget);
+    // The gauge: calories left in the middle, the full line for readers.
+    expect(find.text('1.844'), findsOneWidget);
+    expect(find.text('kcal còn lại'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Còn 1.844.kcal so với mục tiêu')),
+        findsOneWidget);
     expect(find.text('40 g • 156 kcal • 6,8 g protein'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

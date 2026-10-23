@@ -1203,5 +1203,32 @@
         "type": "String"
       }
     }
+  },
+  "gaugeLeftLabel": "kcal còn lại",
+  "gaugeOverLabel": "kcal vượt mục tiêu",
+  "gaugeEatenLabel": "kcal đã ăn",
+  "macroCarbs": "Carb",
+  "macroProtein": "Protein",
+  "macroFat": "Béo",
+  "streakBadge": "{days} ngày",
+  "@streakBadge": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "macroInfoTitle": "Mục tiêu carb và chất béo",
+  "macroInfo": "Mục tiêu calo và protein lấy từ Hồ sơ. Mục tiêu carb và chất béo là ước lượng: chất béo chiếm 30% calo (9 kcal mỗi gam), carb là phần calo còn lại sau protein và chất béo (4 kcal mỗi gam). 30% nằm giữa khoảng khuyến nghị cho người lớn: chất béo 20–35%, carb 45–65% năng lượng (Institute of Medicine, Dietary Reference Intakes, 2005). Chip C/P/B cho biết phần năng lượng đã ăn đến từ mỗi loại.",
+  "waterGlassSemantics": "Ly {n} trên {total}",
+  "@waterGlassSemantics": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
   }
 }

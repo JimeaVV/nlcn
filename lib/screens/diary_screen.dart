@@ -8,6 +8,8 @@ import '../models/user_profile.dart';
 import '../services/database_service.dart';
 import '../services/dataset_repository.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/info_button.dart';
+import '../widgets/intake_summary.dart';
 import '../widgets/error_box.dart';
 import '../widgets/food_log_sheet.dart';
 import '../widgets/neon_button.dart';
@@ -342,77 +344,25 @@ class _Summary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final calorieTarget = (targets?['target_calories'] as num?)?.toDouble();
-    final proteinTarget = (targets?['protein_target'] as num?)?.toDouble();
-    final number = context.formatNumber;
+    final hasTargets = targets?['target_calories'] != null &&
+        targets?['protein_target'] != null;
     return CyberCard(
       highlight: true,
       title: l10n.diaryEaten,
       icon: Icons.local_fire_department_outlined,
+      trailing:
+          InfoButton(title: l10n.macroInfoTitle, paragraphs: [l10n.macroInfo]),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (calorieTarget == null || proteinTarget == null) ...[
-            Text('${number(totals.calories)}\u00A0kcal',
-                style: Theme.of(context).textTheme.titleLarge),
-            Text(l10n.proteinGrams(number(totals.protein, decimals: 1))),
-            const SizedBox(height: 8),
+          IntakeSummary(totals: totals, targets: hasTargets ? targets : null),
+          if (!hasTargets) ...[
+            const SizedBox(height: 10),
             Text(l10n.diaryNoTarget,
+                textAlign: TextAlign.center,
                 style: TextStyle(color: CyberColors.muted)),
-          ] else ...[
-            Text(
-              l10n.diaryCaloriesProgress(
-                  number(totals.calories), number(calorieTarget)),
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 6),
-            _Progress(value: totals.calories, target: calorieTarget),
-            const SizedBox(height: 6),
-            Text(
-              totals.calories <= calorieTarget
-                  ? l10n.diaryRemaining(number(calorieTarget - totals.calories))
-                  : l10n.diaryOver(number(totals.calories - calorieTarget)),
-              style: TextStyle(color: CyberColors.muted),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.diaryProteinProgress(
-                number(totals.protein, decimals: 1),
-                number(proteinTarget, decimals: 1),
-              ),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 6),
-            _Progress(value: totals.protein, target: proteinTarget),
           ],
-          const SizedBox(height: 10),
-          Text(
-            l10n.diaryMacros(number(totals.carbs, decimals: 1),
-                number(totals.fat, decimals: 1)),
-            style: TextStyle(color: CyberColors.muted),
-          ),
         ],
-      ),
-    );
-  }
-}
-
-class _Progress extends StatelessWidget {
-  const _Progress({required this.value, required this.target});
-
-  final double value;
-  final double target;
-
-  @override
-  Widget build(BuildContext context) {
-    final over = value > target;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: LinearProgressIndicator(
-        minHeight: 8,
-        value: target > 0 ? (value / target).clamp(0.0, 1.0) : 0,
-        color: over ? CyberColors.warning : CyberColors.lime,
-        backgroundColor: CyberColors.surfaceAlt,
       ),
     );
   }

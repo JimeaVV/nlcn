@@ -14,6 +14,9 @@ import '../services/home_widget_sync.dart';
 import '../services/water_reminder_service.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/error_box.dart';
+import '../widgets/info_button.dart';
+import '../widgets/intake_summary.dart';
+import '../widgets/water_glasses.dart';
 
 /// Overview of the current day: intake against targets, weight trend and
 /// training, with shortcuts into the other tabs.
@@ -270,94 +273,48 @@ class _NutritionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final number = context.formatNumber;
-    final calorieTarget = (targets?['target_calories'] as num?)?.toDouble();
-    final proteinTarget = (targets?['protein_target'] as num?)?.toDouble();
     return CyberCard(
       highlight: true,
       title: l10n.diaryEaten,
       icon: Icons.local_fire_department_outlined,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        StreakBadge(
             key: const ValueKey('today-streak'),
-            children: [
-              Icon(Icons.whatshot_rounded,
-                  size: 18,
-                  color: streak > 0 ? CyberColors.warning : CyberColors.muted),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  streak == 0
-                      ? l10n.streakNone
-                      : loggedToday
-                          ? l10n.streakDays('$streak')
-                          : '${l10n.streakDays('$streak')} • ${l10n.streakKeep}',
-                  style: TextStyle(
-                      color:
-                          streak > 0 ? CyberColors.warning : CyberColors.muted,
-                      fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            calorieTarget == null
-                ? '${number(eaten.calories)}\u00A0kcal'
-                : l10n.diaryCaloriesProgress(
-                    number(eaten.calories), number(calorieTarget)),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          if (calorieTarget != null) ...[
-            const SizedBox(height: 6),
-            _Bar(value: eaten.calories, target: calorieTarget),
-            const SizedBox(height: 6),
-            Text(
-              eaten.calories <= calorieTarget
-                  ? l10n.diaryRemaining(number(calorieTarget - eaten.calories))
-                  : l10n.diaryOver(number(eaten.calories - calorieTarget)),
-              style: TextStyle(color: CyberColors.muted),
+            days: streak,
+            loggedToday: loggedToday),
+        InfoButton(title: l10n.macroInfoTitle, paragraphs: [l10n.macroInfo]),
+      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (streak == 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(l10n.streakNone,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: CyberColors.muted)),
             ),
-          ],
-          const SizedBox(height: 10),
-          Text(
-            proteinTarget == null
-                ? l10n.proteinGrams(number(eaten.protein, decimals: 1))
-                : l10n.diaryProteinProgress(number(eaten.protein, decimals: 1),
-                    number(proteinTarget, decimals: 1)),
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(builder: (context, constraints) {
-            final buttons = [
-              OutlinedButton.icon(
+          IntakeSummary(totals: eaten, targets: targets),
+          const SizedBox(height: 8),
+          // Small links: the bar's scan button is the one that stands out.
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            children: [
+              TextButton.icon(
                 key: const ValueKey('today-open-diary'),
                 onPressed: onOpenDiary,
                 icon: const Icon(Icons.menu_book_rounded),
                 label: Text(l10n.todayOpenDiary),
               ),
-              // Outlined: the bar's scan button is the one that stands out.
-              OutlinedButton.icon(
+              TextButton.icon(
                 key: const ValueKey('today-scan'),
                 onPressed: onScan,
                 icon: const Icon(Icons.photo_camera_rounded),
                 label: Text(l10n.navScan),
               ),
-            ];
-            final textScale = MediaQuery.textScalerOf(context).scale(1);
-            if (constraints.maxWidth / textScale < 300) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [buttons[0], const SizedBox(height: 8), buttons[1]],
-              );
-            }
-            return Row(children: [
-              Expanded(child: buttons[0]),
-              const SizedBox(width: 8),
-              Expanded(child: buttons[1]),
-            ]);
-          }),
+            ],
+          ),
         ],
       ),
     );
@@ -416,16 +373,8 @@ class _WaterCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              minHeight: 8,
-              value: (ml / waterTargetMl).clamp(0.0, 1.0),
-              color: CyberColors.cyan,
-              backgroundColor: CyberColors.surfaceAlt,
-            ),
-          ),
+          const SizedBox(height: 4),
+          WaterGlasses(ml: ml, onSet: (value) => onAdd(value - ml)),
           const SizedBox(height: 6),
           Text(l10n.waterNote,
               style: TextStyle(color: CyberColors.muted, fontSize: 12)),
@@ -584,22 +533,4 @@ class _TrainingCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Bar extends StatelessWidget {
-  const _Bar({required this.value, required this.target});
-
-  final double value;
-  final double target;
-
-  @override
-  Widget build(BuildContext context) => ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: LinearProgressIndicator(
-          minHeight: 8,
-          value: target > 0 ? (value / target).clamp(0.0, 1.0) : 0,
-          color: value > target ? CyberColors.warning : CyberColors.lime,
-          backgroundColor: CyberColors.surfaceAlt,
-        ),
-      );
 }

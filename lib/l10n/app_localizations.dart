@@ -2717,6 +2717,66 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{count} thành phần • {calories} kcal • {protein} g protein'**
   String diaryDishSummary(String count, String calories, String protein);
+
+  /// No description provided for @gaugeLeftLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'kcal còn lại'**
+  String get gaugeLeftLabel;
+
+  /// No description provided for @gaugeOverLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'kcal vượt mục tiêu'**
+  String get gaugeOverLabel;
+
+  /// No description provided for @gaugeEatenLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'kcal đã ăn'**
+  String get gaugeEatenLabel;
+
+  /// No description provided for @macroCarbs.
+  ///
+  /// In vi, this message translates to:
+  /// **'Carb'**
+  String get macroCarbs;
+
+  /// No description provided for @macroProtein.
+  ///
+  /// In vi, this message translates to:
+  /// **'Protein'**
+  String get macroProtein;
+
+  /// No description provided for @macroFat.
+  ///
+  /// In vi, this message translates to:
+  /// **'Béo'**
+  String get macroFat;
+
+  /// No description provided for @streakBadge.
+  ///
+  /// In vi, this message translates to:
+  /// **'{days} ngày'**
+  String streakBadge(String days);
+
+  /// No description provided for @macroInfoTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu carb và chất béo'**
+  String get macroInfoTitle;
+
+  /// No description provided for @macroInfo.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu calo và protein lấy từ Hồ sơ. Mục tiêu carb và chất béo là ước lượng: chất béo chiếm 30% calo (9 kcal mỗi gam), carb là phần calo còn lại sau protein và chất béo (4 kcal mỗi gam). 30% nằm giữa khoảng khuyến nghị cho người lớn: chất béo 20–35%, carb 45–65% năng lượng (Institute of Medicine, Dietary Reference Intakes, 2005). Chip C/P/B cho biết phần năng lượng đã ăn đến từ mỗi loại.'**
+  String get macroInfo;
+
+  /// No description provided for @waterGlassSemantics.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ly {n} trên {total}'**
+  String waterGlassSemantics(String n, String total);
 }
 
 class _AppLocalizationsDelegate

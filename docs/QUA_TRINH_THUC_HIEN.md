@@ -2291,6 +2291,49 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   ngày. `flutter analyze` sạch; `flutter test` 212/212 PASS; ảnh màn Hôm nay
   hiện −0,8 kg so với 14/10 ở cả hai thẻ. Build APK 124.
 
+### 2026-10-23 · Thẻ "Đã ăn" mới: vòng cung calo, chip C/P/B, vạch macro, ly nước
+- Lý do: người dùng thấy các bộ đếm còn đơn giản (một thanh ngang và vài
+  dòng chữ). Họ gửi ảnh một app theo dõi ăn uống khác để tham khảo cách bố
+  trí: vòng cung lớn, phần trăm C/P/F, vạch riêng cho từng macro. Giữ màu
+  neon của MacroRunner, không chép màu hay nhân vật của app đó.
+- Đã làm (giai đoạn 1 và 2 của kế hoạch):
+  - `lib/widgets/intake_summary.dart`, dùng chung cho Hôm nay và Nhật ký:
+    - `CalorieGauge`: vòng cung 240° vẽ bằng `CustomPainter`, màu chuyển từ
+      màu chính sang màu phụ của giao diện. Giữa vòng là số kcal còn lại, vượt
+      mục tiêu thì là số kcal vượt, đổi sang màu `warning`; chưa có hồ sơ thì
+      là số kcal đã ăn. Vòng và số chạy lên trong 0,7 giây. Trình đọc màn hình
+      nghe cả câu "Đã ăn … trên … kcal. Còn …".
+    - `MacroChips`: phần trăm năng lượng đến từ carb, protein, chất béo
+      (4/4/9 kcal mỗi gam), tổng 100%.
+    - `MacroBars`: ba vạch "đã ăn / mục tiêu g".
+    - `StreakBadge`: chuỗi ngày ghi ăn thành viên "🔥 N ngày" trên tiêu đề
+      thẻ, mờ khi hôm nay chưa ghi.
+  - `lib/engine/macro_split.dart`: mục tiêu carb và chất béo **ước lượng**
+    từ mục tiêu calo và protein sẵn có. Chất béo = 30% calo ÷ 9; carb = phần
+    calo còn lại ÷ 4, không âm. 30% là giữa khoảng 20–35% năng lượng cho người
+    lớn (AMDR, Institute of Medicine, Dietary Reference Intakes, 2005). Nút ⓘ
+    của thẻ giải thích điều này và ghi nguồn.
+  - Nước uống: 8 ly (2.000 ml ÷ 250 ml). Bấm ly thứ n là đã uống n ly; bấm lại
+    ly đầy cuối cùng thì bớt một ly. Vượt mục tiêu thì hiện "+N". Mỗi ly rộng
+    ít nhất 48 dp: không đủ chỗ thì chia 2 hàng 4 ly (lỗi agent `ui-reviewer`
+    chỉ ra: 8 ly một hàng ở máy 360 px chỉ còn khoảng 36 dp mỗi ly). Vẫn giữ
+    nút −/+.
+  - Hai nút "Mở nhật ký" và "Quét" trong thẻ thành nút chữ nhỏ.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 216/216 PASS. Test mới gồm:
+    - cách tính mục tiêu carb, chất béo và phần trăm C/P/B, kể cả khi protein
+      quá cao và trước khi ăn gì;
+    - vòng cung ở trạng thái còn, vượt và không có mục tiêu;
+    - nhãn cho trình đọc màn hình;
+    - bấm ly nước để đặt và bớt.
+    Các test cũ tìm câu "Còn … kcal so với mục tiêu" chuyển sang kiểm tra số
+    giữa vòng và nhãn đọc màn hình.
+  - Skill `ui-screenshots`: 20/20 màn vẽ được, không tràn bố cục. Đã xem
+    Hôm nay ở Neon và ở máy nhỏ chữ ×1,3, Nhật ký ở Minimal Light.
+  - Agent `ui-reviewer`: 2 lỗi (ly nước quá hẹp; "9 kcal" trong đoạn giải
+    thích chưa dùng dấu cách không ngắt), đã sửa cả hai.
+  - Build APK 125.
+
 ---
 
 ## 3. Việc còn tồn đọng

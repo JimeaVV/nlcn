@@ -247,7 +247,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1.250 / 2.000 kcal'), findsOneWidget);
-    expect(find.text('Còn 750 kcal so với mục tiêu'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Còn 750.kcal so với mục tiêu')),
+        findsOneWidget);
     // Both cards compare with the same earlier weigh-in, 8 days back.
     final since = now.subtract(const Duration(days: 8));
     final date = '${since.day.toString().padLeft(2, '0')}/'
@@ -256,7 +257,10 @@ void main() {
     expect(
         find.textContaining('Cân nặng -0,4 kg so với $date'), findsOneWidget);
     expect(find.text('Đã ghi 1 bài tập hôm nay'), findsOneWidget);
-    expect(find.text('1 ngày liên tục ghi ăn'), findsOneWidget);
+    // The streak is a badge in the card's title row.
+    expect(find.text('1 ngày'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('1 ngày liên tục ghi ăn')),
+        findsOneWidget);
     expect(find.text('Ghi ăn 1/7 ngày'), findsOneWidget);
     expect(find.text('Mỗi ngày có ghi: trung bình 1.250 kcal • 58,0 g protein'),
         findsOneWidget);
@@ -275,6 +279,13 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('water-remove')));
     await tester.pumpAndSettle();
     expect(database.water, 250);
+    // A glass sets the count; the last full glass tapped again comes off.
+    await tester.tap(find.byKey(const ValueKey('water-glass-3')));
+    await tester.pumpAndSettle();
+    expect(database.water, 1000);
+    await tester.tap(find.byKey(const ValueKey('water-glass-3')));
+    await tester.pumpAndSettle();
+    expect(database.water, 750);
 
     await tester.tap(find.byKey(const ValueKey('today-open-diary')));
     await tester.tap(find.byKey(const ValueKey('today-scan')));

@@ -1543,4 +1543,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String diaryDishSummary(String count, String calories, String protein) {
     return '$count items • $calories kcal • $protein g protein';
   }
+
+  @override
+  String get gaugeLeftLabel => 'kcal left';
+
+  @override
+  String get gaugeOverLabel => 'kcal over target';
+
+  @override
+  String get gaugeEatenLabel => 'kcal eaten';
+
+  @override
+  String get macroCarbs => 'Carbs';
+
+  @override
+  String get macroProtein => 'Protein';
+
+  @override
+  String get macroFat => 'Fat';
+
+  @override
+  String streakBadge(String days) {
+    return '$days days';
+  }
+
+  @override
+  String get macroInfoTitle => 'Carb and fat targets';
+
+  @override
+  String get macroInfo =>
+      'Calorie and protein targets come from your profile. Carb and fat targets are estimates: fat gets 30% of the calories (9 kcal per gram), carbs what is left after protein and fat (4 kcal per gram). 30% sits in the middle of the adult range of 20–35% fat and 45–65% carbs (Institute of Medicine, Dietary Reference Intakes, 2005). The C/P/F chips show where the eaten energy came from.';
+
+  @override
+  String waterGlassSemantics(String n, String total) {
+    return 'Glass $n of $total';
+  }
 }

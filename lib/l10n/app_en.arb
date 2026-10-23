@@ -735,5 +735,32 @@
         "type": "String"
       }
     }
+  },
+  "gaugeLeftLabel": "kcal left",
+  "gaugeOverLabel": "kcal over target",
+  "gaugeEatenLabel": "kcal eaten",
+  "macroCarbs": "Carbs",
+  "macroProtein": "Protein",
+  "macroFat": "Fat",
+  "streakBadge": "{days} days",
+  "@streakBadge": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "macroInfoTitle": "Carb and fat targets",
+  "macroInfo": "Calorie and protein targets come from your profile. Carb and fat targets are estimates: fat gets 30% of the calories (9 kcal per gram), carbs what is left after protein and fat (4 kcal per gram). 30% sits in the middle of the adult range of 20–35% fat and 45–65% carbs (Institute of Medicine, Dietary Reference Intakes, 2005). The C/P/F chips show where the eaten energy came from.",
+  "waterGlassSemantics": "Glass {n} of {total}",
+  "@waterGlassSemantics": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
   }
 }

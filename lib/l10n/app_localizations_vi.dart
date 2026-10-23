@@ -1532,4 +1532,39 @@ class AppLocalizationsVi extends AppLocalizations {
   String diaryDishSummary(String count, String calories, String protein) {
     return '$count thành phần • $calories kcal • $protein g protein';
   }
+
+  @override
+  String get gaugeLeftLabel => 'kcal còn lại';
+
+  @override
+  String get gaugeOverLabel => 'kcal vượt mục tiêu';
+
+  @override
+  String get gaugeEatenLabel => 'kcal đã ăn';
+
+  @override
+  String get macroCarbs => 'Carb';
+
+  @override
+  String get macroProtein => 'Protein';
+
+  @override
+  String get macroFat => 'Béo';
+
+  @override
+  String streakBadge(String days) {
+    return '$days ngày';
+  }
+
+  @override
+  String get macroInfoTitle => 'Mục tiêu carb và chất béo';
+
+  @override
+  String get macroInfo =>
+      'Mục tiêu calo và protein lấy từ Hồ sơ. Mục tiêu carb và chất béo là ước lượng: chất béo chiếm 30% calo (9 kcal mỗi gam), carb là phần calo còn lại sau protein và chất béo (4 kcal mỗi gam). 30% nằm giữa khoảng khuyến nghị cho người lớn: chất béo 20–35%, carb 45–65% năng lượng (Institute of Medicine, Dietary Reference Intakes, 2005). Chip C/P/B cho biết phần năng lượng đã ăn đến từ mỗi loại.';
+
+  @override
+  String waterGlassSemantics(String n, String total) {
+    return 'Ly $n trên $total';
+  }
 }
