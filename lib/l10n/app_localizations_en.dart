@@ -1538,4 +1538,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get infoTooltip => 'More info';
+
+  @override
+  String diaryDishSummary(String count, String calories, String protein) {
+    return '$count items • $calories kcal • $protein g protein';
+  }
 }

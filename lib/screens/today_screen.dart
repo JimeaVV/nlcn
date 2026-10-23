@@ -285,7 +285,7 @@ class _NutritionCard extends StatelessWidget {
             children: [
               Icon(Icons.whatshot_rounded,
                   size: 18,
-                  color: streak > 0 ? Colors.orange : CyberColors.muted),
+                  color: streak > 0 ? CyberColors.warning : CyberColors.muted),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -295,7 +295,8 @@ class _NutritionCard extends StatelessWidget {
                           ? l10n.streakDays('$streak')
                           : '${l10n.streakDays('$streak')} • ${l10n.streakKeep}',
                   style: TextStyle(
-                      color: streak > 0 ? Colors.orange : CyberColors.muted,
+                      color:
+                          streak > 0 ? CyberColors.warning : CyberColors.muted,
                       fontWeight: FontWeight.w700),
                 ),
               ),
@@ -328,27 +329,35 @@ class _NutritionCard extends StatelessWidget {
                     number(proteinTarget, decimals: 1)),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const ValueKey('today-open-diary'),
-                  onPressed: onOpenDiary,
-                  icon: const Icon(Icons.menu_book_rounded),
-                  label: Text(l10n.todayOpenDiary),
-                ),
+          LayoutBuilder(builder: (context, constraints) {
+            final buttons = [
+              OutlinedButton.icon(
+                key: const ValueKey('today-open-diary'),
+                onPressed: onOpenDiary,
+                icon: const Icon(Icons.menu_book_rounded),
+                label: Text(l10n.todayOpenDiary),
               ),
+              // Outlined: the bar's scan button is the one that stands out.
+              OutlinedButton.icon(
+                key: const ValueKey('today-scan'),
+                onPressed: onScan,
+                icon: const Icon(Icons.photo_camera_rounded),
+                label: Text(l10n.navScan),
+              ),
+            ];
+            final textScale = MediaQuery.textScalerOf(context).scale(1);
+            if (constraints.maxWidth / textScale < 300) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [buttons[0], const SizedBox(height: 8), buttons[1]],
+              );
+            }
+            return Row(children: [
+              Expanded(child: buttons[0]),
               const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const ValueKey('today-scan'),
-                  onPressed: onScan,
-                  icon: const Icon(Icons.photo_camera_rounded),
-                  label: Text(l10n.navScan),
-                ),
-              ),
-            ],
-          ),
+              Expanded(child: buttons[1]),
+            ]);
+          }),
         ],
       ),
     );
@@ -384,9 +393,12 @@ class _WaterCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      l10n.waterProgress(number(ml), number(waterTargetMl)),
-                      style: Theme.of(context).textTheme.titleLarge,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        l10n.waterProgress(number(ml), number(waterTargetMl)),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                     ),
                     Text(
                       l10n.waterGlasses(
@@ -589,7 +601,7 @@ class _Bar extends StatelessWidget {
         child: LinearProgressIndicator(
           minHeight: 8,
           value: target > 0 ? (value / target).clamp(0.0, 1.0) : 0,
-          color: value > target ? Colors.orange : CyberColors.lime,
+          color: value > target ? CyberColors.warning : CyberColors.lime,
           backgroundColor: CyberColors.surfaceAlt,
         ),
       );

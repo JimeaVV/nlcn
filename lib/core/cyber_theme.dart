@@ -52,6 +52,7 @@ class AppPalette {
     required this.text,
     required this.muted,
     required this.danger,
+    required this.warning,
     required this.border,
     required this.brightness,
   });
@@ -65,6 +66,10 @@ class AppPalette {
   final Color text;
   final Color muted;
   final Color danger;
+
+  /// Amber for "over the target" and "maybe": readable on the light style
+  /// too, where plain orange on white is about 2:1.
+  final Color warning;
   final Color border;
   final Brightness brightness;
 }
@@ -90,6 +95,7 @@ class CyberColors {
   static Color get text => _palette.text;
   static Color get muted => _palette.muted;
   static Color get danger => _palette.danger;
+  static Color get warning => _palette.warning;
   static Color get border => _palette.border;
 }
 
@@ -106,6 +112,7 @@ class AppTheme {
           text: Color(0xFFF3F7FF),
           muted: Color(0xFFA8B3C7),
           danger: Color(0xFFFF5370),
+          warning: Color(0xFFFFA62B),
           border: Color(0xFF273653),
           brightness: Brightness.dark,
         ),
@@ -119,6 +126,7 @@ class AppTheme {
           text: Color(0xFF172033),
           muted: Color(0xFF667085),
           danger: Color(0xFFD92D20),
+          warning: Color(0xFFB54708),
           border: Color(0xFFD5DCE8),
           brightness: Brightness.light,
         ),
@@ -132,6 +140,7 @@ class AppTheme {
           text: Color(0xFFF0FFF7),
           muted: Color(0xFFA7C5B5),
           danger: Color(0xFFFB7185),
+          warning: Color(0xFFFB923C),
           border: Color(0xFF315748),
           brightness: Brightness.dark,
         ),
@@ -145,6 +154,7 @@ class AppTheme {
           text: Color(0xFFFFF6F0),
           muted: Color(0xFFD4B7CF),
           danger: Color(0xFFFF5D73),
+          warning: Color(0xFFFFC14D),
           border: Color(0xFF654366),
           brightness: Brightness.dark,
         ),
@@ -226,7 +236,9 @@ class AppTheme {
       // Material's default snack bar is a light grey slab on the dark styles.
       snackBarTheme: SnackBarThemeData(
         backgroundColor: p.surfaceAlt,
-        contentTextStyle: TextStyle(color: p.text, fontSize: 15),
+        // A snack bar replaces the text style outright, font included.
+        contentTextStyle:
+            TextStyle(fontFamily: 'BeVietnamPro', color: p.text, fontSize: 15),
         actionTextColor: p.primary,
         behavior: SnackBarBehavior.floating,
         elevation: 0,

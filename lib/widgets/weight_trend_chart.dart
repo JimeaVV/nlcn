@@ -37,6 +37,9 @@ class WeightTrendChart extends StatelessWidget {
               lineColor: colors.primary,
               labelColor: colors.onSurfaceVariant,
               gridColor: colors.outlineVariant,
+              // The app's font, growing with the system text size.
+              labelStyle: Theme.of(context).textTheme.bodySmall,
+              textScaler: MediaQuery.textScalerOf(context),
             ),
           ),
         ),
@@ -52,6 +55,8 @@ class _WeightPainter extends CustomPainter {
     required this.lineColor,
     required this.labelColor,
     required this.gridColor,
+    this.labelStyle,
+    this.textScaler = TextScaler.noScaling,
   });
 
   final List<WeightEntry> entries;
@@ -59,14 +64,18 @@ class _WeightPainter extends CustomPainter {
   final Color lineColor;
   final Color labelColor;
   final Color gridColor;
+  final TextStyle? labelStyle;
+  final TextScaler textScaler;
 
   void _label(Canvas canvas, String value, Offset position) {
     final painter = TextPainter(
       text: TextSpan(
         text: value,
-        style: TextStyle(color: labelColor, fontSize: 11),
+        style: (labelStyle ?? const TextStyle())
+            .copyWith(color: labelColor, fontSize: 11),
       ),
       textDirection: TextDirection.ltr,
+      textScaler: textScaler,
     )..layout();
     painter.paint(canvas, position);
   }
@@ -139,5 +148,7 @@ class _WeightPainter extends CustomPainter {
       oldDelegate.entries != entries ||
       oldDelegate.lineColor != lineColor ||
       oldDelegate.labelColor != labelColor ||
-      oldDelegate.gridColor != gridColor;
+      oldDelegate.gridColor != gridColor ||
+      oldDelegate.labelStyle != labelStyle ||
+      oldDelegate.textScaler != textScaler;
 }

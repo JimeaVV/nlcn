@@ -273,6 +273,9 @@ class ProfileScreenState extends State<ProfileScreen> {
             child: Text(context.l10n.cancel),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: CyberColors.danger,
+                foregroundColor: CyberColors.background),
             onPressed: () => Navigator.pop(context, true),
             child: Text(context.l10n.delete),
           ),
@@ -344,7 +347,6 @@ class ProfileScreenState extends State<ProfileScreen> {
   Widget _infoButton(String key, VoidCallback onPressed) => IconButton(
         key: ValueKey(key),
         tooltip: context.l10n.howCalculated,
-        visualDensity: VisualDensity.compact,
         onPressed: onPressed,
         icon: Icon(Icons.info_outline_rounded, color: CyberColors.muted),
       );
@@ -354,6 +356,7 @@ class ProfileScreenState extends State<ProfileScreen> {
     final number = context.formatNumber;
     return CyberCard(
       key: const ValueKey('profile-targets'),
+      highlight: true,
       title: l10n.dailyTargetsTitle,
       icon: Icons.flag_outlined,
       trailing: _infoButton(
@@ -449,7 +452,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                 if (!estimate.plausible)
                   Text(
                     l10n.adaptiveTdeeUnsure(number(tdee), number(formula)),
-                    style: const TextStyle(color: Colors.orange),
+                    style: TextStyle(color: CyberColors.warning),
                   )
                 else
                   OutlinedButton.icon(
@@ -540,14 +543,12 @@ class ProfileScreenState extends State<ProfileScreen> {
                 IconButton(
                   key: ValueKey('edit-weight-${entry.id}'),
                   tooltip: l10n.editWeightTooltip(_date(entry.recordedAt)),
-                  visualDensity: VisualDensity.compact,
                   onPressed: _saving ? null : () => _editWeight(entry),
                   icon: const Icon(Icons.edit_outlined, size: 20),
                 ),
                 IconButton(
                   key: ValueKey('delete-weight-${entry.id}'),
                   tooltip: l10n.deleteWeightTooltip(_date(entry.recordedAt)),
-                  visualDensity: VisualDensity.compact,
                   onPressed: _saving ? null : () => _deleteWeight(entry),
                   icon: const Icon(Icons.delete_outline_rounded, size: 20),
                 ),
@@ -651,9 +652,8 @@ class ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  LayoutBuilder(builder: (context, constraints) {
+                    final fields = [
                       Expanded(
                         child: _numberField(
                           keyName: 'profile-age',
@@ -668,7 +668,6 @@ class ProfileScreenState extends State<ProfileScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: _numberField(
                           keyName: 'profile-height',
@@ -678,7 +677,6 @@ class ProfileScreenState extends State<ProfileScreen> {
                               name: l10n.heightName, maximum: 300),
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: _numberField(
                           keyName: 'profile-weight',
@@ -688,8 +686,28 @@ class ProfileScreenState extends State<ProfileScreen> {
                               name: l10n.weightName, maximum: 500),
                         ),
                       ),
-                    ],
-                  ),
+                    ];
+                    Widget line(List<Widget> items) => Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final (i, item) in items.indexed) ...[
+                              if (i > 0) const SizedBox(width: 8),
+                              item,
+                            ],
+                          ],
+                        );
+                    final textScale = MediaQuery.textScalerOf(context).scale(1);
+                    // On a narrow phone or with large text, weight moves to
+                    // its own row instead of cutting the labels short.
+                    if (constraints.maxWidth / textScale < 330) {
+                      return Column(children: [
+                        line(fields.sublist(0, 2)),
+                        const SizedBox(height: 14),
+                        line(fields.sublist(2)),
+                      ]);
+                    }
+                    return line(fields);
+                  }),
                   const SizedBox(height: 14),
                   _Labeled(
                     label: l10n.genderShort,
@@ -714,6 +732,19 @@ class ProfileScreenState extends State<ProfileScreen> {
                     initialValue: _activity,
                     isExpanded: true,
                     decoration: InputDecoration(labelText: l10n.activityLevel),
+                    // Once chosen, the short name: the factor would be cut
+                    // off on a narrow screen.
+                    selectedItemBuilder: (context) => [
+                      for (final label in [
+                        l10n.activitySedentary(factor(1.2)),
+                        l10n.activityLight(factor(1.375)),
+                        l10n.activityModerate(factor(1.55)),
+                        l10n.activityActive(factor(1.725)),
+                        l10n.activityVeryActive(factor(1.9)),
+                      ])
+                        Text(label.split(' · ').first,
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
                     items: [
                       DropdownMenuItem(
                           value: 1.2,

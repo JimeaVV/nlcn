@@ -1527,4 +1527,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get infoTooltip => 'Giải thích';
+
+  @override
+  String diaryDishSummary(String count, String calories, String protein) {
+    return '$count thành phần • $calories kcal • $protein g protein';
+  }
 }

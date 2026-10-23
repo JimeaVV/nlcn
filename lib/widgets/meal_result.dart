@@ -16,7 +16,7 @@ class MealResult extends StatelessWidget {
     final plan = recommendation.plan;
     final target = recommendation.targetCalories;
     final meetsTargets = plan.meetsTargets(target);
-    final accent = meetsTargets ? CyberColors.lime : Colors.orange;
+    final accent = meetsTargets ? CyberColors.lime : CyberColors.warning;
     final l10n = context.l10n;
     String format(double value, [int decimals = 0]) =>
         context.formatNumber(value, decimals: decimals);

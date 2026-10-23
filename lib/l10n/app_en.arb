@@ -708,5 +708,19 @@
   "waterReminder4Body": "Thirst means your body is already a little short.",
   "waterReminder5Title": "One glass of water",
   "waterReminder5Body": "Stand up, pour a glass, then get back to it.",
-  "infoTooltip": "More info"
+  "infoTooltip": "More info",
+  "diaryDishSummary": "{count} items • {calories} kcal • {protein} g protein",
+  "@diaryDishSummary": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  }
 }

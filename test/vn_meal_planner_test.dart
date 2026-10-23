@@ -134,7 +134,8 @@ void main() {
     final vi = plan(goal: NutritionGoal.lose, calories: 1500, protein: 120);
     final rice = items(vi, 'Lunch').firstWhere((item) => item['code'] == 'com');
     // People cutting weigh rice; other goals count bowls.
-    expect(rice['display_name'], matches(RegExp(r'^\d+ g Cơm$')));
+    expect(rice['display_name'],
+        matches(RegExp('^\\d+\u00A0g Cơm\$')));
     final bowls = items(plan(), 'Lunch').firstWhere((i) => i['code'] == 'com');
     expect(bowls['display_name'], matches(RegExp(r'^[\d,]+ chén Cơm$')));
     final en = plan(language: 'en');

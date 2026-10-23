@@ -411,7 +411,7 @@ class _Progress extends StatelessWidget {
       child: LinearProgressIndicator(
         minHeight: 8,
         value: target > 0 ? (value / target).clamp(0.0, 1.0) : 0,
-        color: over ? Colors.orange : CyberColors.lime,
+        color: over ? CyberColors.warning : CyberColors.lime,
         backgroundColor: CyberColors.surfaceAlt,
       ),
     );
@@ -451,66 +451,160 @@ class _MealSection extends StatelessWidget {
     return CyberCard(
       title: l10n.mealSlotLabel(meal),
       accent: CyberColors.magenta,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      // The card paints its own background; list tiles need a Material for
+      // their ink.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (entries.isEmpty)
+              Text(l10n.diaryEmptyMeal,
+                  style: TextStyle(color: CyberColors.muted))
+            else ...[
+              for (final group in groupDiaryEntries(entries))
+                if (group.dish == null)
+                  _entryTile(context, group.entries.single)
+                else
+                  _DishGroup(
+                    dish: group.dish!,
+                    entries: group.entries,
+                    tileFor: (entry) => _entryTile(context, entry,
+                        title: group.partName(entry)),
+                  ),
+              Text(
+                l10n.kcalProteinLine(number(totals.calories),
+                    number(totals.protein, decimals: 1)),
+                style: TextStyle(color: CyberColors.muted),
+              ),
+            ],
+            if (copy != null) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: ValueKey('diary-copy-${meal.name}'),
+                  onPressed: copy!.onPressed,
+                  icon: const Icon(Icons.content_copy_rounded, size: 18),
+                  label: Text(copy!.label),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+extension on _MealSection {
+  /// One logged food; [title] replaces its name, e.g. "Cơm" inside the
+  /// "Cơm tấm" group instead of "Cơm (Cơm tấm)".
+  Widget _entryTile(BuildContext context, FoodLogEntry entry, {String? title}) {
+    final l10n = context.l10n;
+    final number = context.formatNumber;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(title ?? entry.name),
+      subtitle: Text(
+        entry.grams == null
+            ? l10n.diaryEntryDetailsNoGrams(
+                number(entry.calories),
+                number(entry.protein, decimals: 1),
+              )
+            : l10n.diaryEntryDetails(
+                context.formatMeasurement(entry.grams!),
+                number(entry.calories),
+                number(entry.protein, decimals: 1),
+              ),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          if (entries.isEmpty)
-            Text(l10n.diaryEmptyMeal,
-                style: TextStyle(color: CyberColors.muted))
-          else ...[
-            for (final entry in entries)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(entry.name),
-                subtitle: Text(
-                  entry.grams == null
-                      ? l10n.diaryEntryDetailsNoGrams(
-                          number(entry.calories),
-                          number(entry.protein, decimals: 1),
-                        )
-                      : l10n.diaryEntryDetails(
-                          context.formatMeasurement(entry.grams!),
-                          number(entry.calories),
-                          number(entry.protein, decimals: 1),
-                        ),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _FavoriteButton(
-                      starred: favoriteNames.contains(entry.name),
-                      onPressed: onToggleFavorite == null
-                          ? null
-                          : () => onToggleFavorite!(entry),
-                    ),
-                    IconButton(
-                      tooltip: l10n.diaryDeleteEntry,
-                      onPressed:
-                          onDelete == null ? null : () => onDelete!(entry),
-                      icon: const Icon(Icons.delete_outline_rounded),
-                    ),
-                  ],
-                ),
-              ),
-            Text(
-              l10n.kcalProteinLine(
-                  number(totals.calories), number(totals.protein, decimals: 1)),
-              style: TextStyle(color: CyberColors.muted),
-            ),
-          ],
-          if (copy != null) ...[
-            const SizedBox(height: 6),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: ValueKey('diary-copy-${meal.name}'),
-                onPressed: copy!.onPressed,
-                icon: const Icon(Icons.content_copy_rounded, size: 18),
-                label: Text(copy!.label),
-              ),
-            ),
-          ],
+          _FavoriteButton(
+            starred: favoriteNames.contains(entry.name),
+            onPressed: onToggleFavorite == null
+                ? null
+                : () => onToggleFavorite!(entry),
+          ),
+          IconButton(
+            tooltip: l10n.diaryDeleteEntry,
+            onPressed: onDelete == null ? null : () => onDelete!(entry),
+            icon: const Icon(Icons.delete_outline_rounded),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Foods logged from one scanned dish, e.g. "Cơm (Cơm tấm)" and
+/// "Sườn nướng (Cơm tấm)", shown as one "Cơm tấm" row that opens into its
+/// parts.
+class DiaryGroup {
+  const DiaryGroup(this.dish, this.entries);
+
+  /// Null for a food logged on its own.
+  final String? dish;
+  final List<FoodLogEntry> entries;
+
+  String partName(FoodLogEntry entry) =>
+      _dishName.firstMatch(entry.name)?.group(1) ?? entry.name;
+}
+
+final _dishName = RegExp(r'^(.+) \((.+)\)$');
+
+/// Neighbouring entries named "<part> (<dish>)" with the same dish form one
+/// group; everything else stays on its own, in the same order.
+List<DiaryGroup> groupDiaryEntries(List<FoodLogEntry> entries) {
+  final groups = <DiaryGroup>[];
+  for (final entry in entries) {
+    final dish = _dishName.firstMatch(entry.name)?.group(2);
+    final last = groups.isEmpty ? null : groups.last;
+    if (dish != null && last != null && last.dish == dish) {
+      last.entries.add(entry);
+    } else {
+      groups.add(DiaryGroup(dish, [entry]));
+    }
+  }
+  // A dish with a single part reads better as that one row.
+  return [
+    for (final group in groups)
+      group.dish != null && group.entries.length == 1
+          ? DiaryGroup(null, group.entries)
+          : group,
+  ];
+}
+
+class _DishGroup extends StatelessWidget {
+  const _DishGroup(
+      {required this.dish, required this.entries, required this.tileFor});
+
+  final String dish;
+  final List<FoodLogEntry> entries;
+  final Widget Function(FoodLogEntry entry) tileFor;
+
+  @override
+  Widget build(BuildContext context) {
+    final totals = FoodLogTotals.of(entries);
+    final number = context.formatNumber;
+    return Theme(
+      // No divider lines above and below when it opens.
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        key: ValueKey('diary-dish-$dish'),
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(left: 14),
+        title: Text(dish),
+        // Same look as a single food's details.
+        subtitle: Text(
+            context.l10n.diaryDishSummary(
+              '${entries.length}',
+              number(totals.calories),
+              number(totals.protein, decimals: 1),
+            ),
+            style: Theme.of(context).textTheme.bodyMedium),
+        children: [for (final entry in entries) tileFor(entry)],
       ),
     );
   }

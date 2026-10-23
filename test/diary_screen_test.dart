@@ -299,6 +299,48 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  test('parts of one scanned dish group together, other foods stay alone', () {
+    final now = DateTime.now();
+    final groups = groupDiaryEntries([
+      _logged('Cơm (Cơm tấm)', now, MealSlot.lunch),
+      _logged('Sườn nướng (Cơm tấm)', now, MealSlot.lunch),
+      _logged('Ức gà', now, MealSlot.lunch),
+      _logged('Bánh phở (Phở bò)', now, MealSlot.lunch),
+    ]);
+    expect([for (final g in groups) g.dish], ['Cơm tấm', null, null]);
+    expect(groups.first.entries, hasLength(2));
+    expect(groups.first.partName(groups.first.entries.last), 'Sườn nướng');
+    // A dish with one part left reads as that one row.
+    expect(groups.last.entries.single.name, 'Bánh phở (Phở bò)');
+  });
+
+  testWidgets('a scanned dish shows as one row that opens into its parts',
+      (tester) async {
+    final database = _Database();
+    final now = DateTime.now();
+    await database.addFoodLogEntries([
+      _logged('Cơm (Cơm tấm)', now, MealSlot.lunch, calories: 290),
+      _logged('Sườn nướng (Cơm tấm)', now, MealSlot.lunch, calories: 188),
+      _logged('Ức gà', now, MealSlot.lunch, calories: 248),
+    ]);
+    await _mount(tester, database);
+
+    expect(find.text('Cơm tấm'), findsOneWidget);
+    expect(find.textContaining('2 thành phần • 478 kcal'), findsOneWidget);
+    expect(find.text('Sườn nướng'), findsNothing, reason: 'closed at first');
+    expect(find.text('Ức gà'), findsOneWidget);
+
+    await tester.tap(find.text('Cơm tấm'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cơm'), findsOneWidget);
+    expect(find.text('Sườn nướng'), findsOneWidget);
+    await tester.tap(find.byTooltip('Xóa món').at(1));
+    await tester.pumpAndSettle();
+    expect([for (final e in database.entries) e.name],
+        ['Cơm (Cơm tấm)', 'Ức gà']);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('earlier days can be opened but not future ones', (tester) async {
     final database = _Database();
     final now = DateTime.now();

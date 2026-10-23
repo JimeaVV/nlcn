@@ -160,6 +160,9 @@ class SettingsScreen extends StatelessWidget {
             child: Text(l10n.cancel),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: CyberColors.danger,
+                foregroundColor: CyberColors.background),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(l10n.delete),
           ),
@@ -231,6 +234,9 @@ class SettingsScreen extends StatelessWidget {
             child: Text(l10n.cancel),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: CyberColors.danger,
+                foregroundColor: CyberColors.background),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(l10n.delete),
           ),
@@ -371,6 +377,10 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     OutlinedButton.icon(
                       key: const ValueKey('clear-history'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: CyberColors.danger,
+                        side: BorderSide(color: CyberColors.danger),
+                      ),
                       onPressed: () => _clearHistory(context),
                       icon: const Icon(Icons.delete_sweep_outlined),
                       label: Text(l10n.clearAllHistory),
@@ -436,6 +446,8 @@ extension on SettingsScreen {
                 ),
                 TextButton.icon(
                   key: const ValueKey('collect-delete'),
+                  style: TextButton.styleFrom(
+                      foregroundColor: CyberColors.danger),
                   onPressed: () => _deletePhotos(context),
                   icon: const Icon(Icons.delete_outline_rounded),
                   label: Text(l10n.collectDelete),
@@ -585,62 +597,67 @@ class _OptionTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         button: true,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: CyberColors.surfaceAlt,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? CyberColors.cyan : CyberColors.border,
-                width: selected ? 1.6 : 1,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: CyberColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: selected ? CyberColors.cyan : CyberColors.border,
+                  width: selected ? 1.6 : 1,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                preview == null
-                    ? Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: CyberColors.cyan.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(12),
+              child: Row(
+                children: [
+                  preview == null
+                      ? Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: CyberColors.cyan.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(icon, color: CyberColors.cyan),
+                        )
+                      : SizedBox.square(
+                          dimension: 44, child: Center(child: preview)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: CyberColors.text,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                        child: Icon(icon, color: CyberColors.cyan),
-                      )
-                    : SizedBox.square(
-                        dimension: 44, child: Center(child: preview)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: CyberColors.text,
-                          fontWeight: FontWeight.w800,
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: CyberColors.muted,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          color: CyberColors.muted,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Icon(
-                  selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                  color: selected ? CyberColors.lime : CyberColors.muted,
-                ),
-              ],
+                  Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                    color: selected ? CyberColors.lime : CyberColors.muted,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

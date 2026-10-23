@@ -2711,6 +2711,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Giải thích'**
   String get infoTooltip;
+
+  /// No description provided for @diaryDishSummary.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} thành phần • {calories} kcal • {protein} g protein'**
+  String diaryDishSummary(String count, String calories, String protein);
 }
 
 class _AppLocalizationsDelegate

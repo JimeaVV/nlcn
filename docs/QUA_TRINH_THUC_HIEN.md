@@ -2229,6 +2229,45 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     trả lời "dart and flutter tooling" 0.1.4, có danh sách tool. App Claude
     cần mở lại thì mới nhận PATH mới.
 
+### 2026-10-23 · Gom món đã quét trong Nhật ký, sửa lỗi giao diện theo agent ui-reviewer
+- Lý do: người dùng muốn giao diện đẹp hơn. Đây là lần đầu dùng skill
+  `ui-screenshots` và agent `ui-reviewer` trên toàn app (sau khi mở lại app
+  Claude, MCP Dart và Flutter đã kết nối: thêm thư mục dự án, phân tích file
+  qua MCP đều chạy). Agent tìm ra 10 lỗi (2 nặng, 4 trung bình, 4 nhẹ) và 5
+  đề xuất.
+- Đã làm:
+  - Nhật ký: các dòng liền nhau dạng "<thành phần> (<món>)" (ghi từ một lần
+    quét) gộp thành một dòng "Cơm tấm · 2 thành phần · 478 kcal"; bấm vào thì
+    mở ra từng thành phần, mỗi dòng vẫn xoá và đánh dấu yêu thích được. Chỉ
+    đổi cách hiện, không đổi database.
+  - Thẻ bữa ăn bọc `Material` trong suốt cho `ListTile` (lỗi nặng 1), tương
+    tự ô chọn giao diện ở Cài đặt và mục "Có thể có" ở kết quả quét.
+  - Màu `warning` (hổ phách) thêm vào cả 4 bảng màu, thay `Colors.orange`
+    viết cứng. Ở Minimal Light, chữ cam trên nền trắng chỉ đạt độ tương phản
+    khoảng 2:1; màu mới `#B54708` đạt khoảng 5:1 (lỗi nặng 2).
+  - Snack bar và nhãn biểu đồ cân nặng dùng font Be Vietnam Pro; nhãn biểu
+    đồ lớn theo cỡ chữ hệ thống.
+  - Màn nhỏ, chữ lớn: hai nút ở thẻ Đã ăn xếp chồng khi không đủ chỗ; số
+    nước uống thu nhỏ cho vừa một dòng; ô Tuổi, Cao, Nặng chia 2 + 1 khi hẹp;
+    mức vận động đã chọn hiện tên ngắn không kèm hệ số.
+  - Bỏ `visualDensity.compact` ở nút ⓘ, nút sửa và xoá cân nặng, nút −/+ ở
+    kết quả quét, để vùng bấm đủ 48 dp.
+  - Nút "Quét" trong thẻ Đã ăn đổi thành nút viền, vì nút Quét trên thanh
+    dưới mới là nút chính.
+  - Nút xoá (xoá toàn bộ lịch sử, xoá ảnh đã gom, nút "Xoá" trong hộp xác
+    nhận) dùng màu `danger`. Thẻ "Mục tiêu mỗi ngày" là thẻ nổi bật của màn
+    Hồ sơ.
+  - Thực đơn gợi ý: "150 g Cơm" dùng dấu cách không ngắt.
+- Chưa làm (để sau): thẻ "7 ngày qua" ghi cân nặng −0,4 kg trong khi thẻ cân
+  nặng ghi thay đổi 7 ngày −0,8 kg, vì hai thẻ tính theo hai cách khác nhau,
+  cần thống nhất; bữa trống thu thành một dòng có nút "+"; màn Lịch sử chưa
+  dùng `CyberCard`; đoạn giải thích TDEE thật chưa chuyển vào nút ⓘ.
+- Kiểm tra: `flutter analyze` sạch; `flutter test` 210/210 PASS, có 2 test
+  mới cho phần gom món (hàm gom và thao tác trên màn hình); test thực đơn đổi
+  theo dấu cách không ngắt. Skill `ui-screenshots`: 20/20 màn vẽ được, không
+  tràn bố cục; đã xem ảnh Hôm nay và Hồ sơ ở máy 360 px chữ ×1,3, và Nhật ký
+  ở Neon. Build APK 123.
+
 ---
 
 ## 3. Việc còn tồn đọng

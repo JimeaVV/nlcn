@@ -1183,5 +1183,19 @@
   "waterReminder4Body": "Khát nghĩa là cơ thể đã hơi thiếu nước rồi.",
   "waterReminder5Title": "Một ly nước nhé",
   "waterReminder5Body": "Đứng dậy rót một ly, rồi quay lại việc đang làm.",
-  "infoTooltip": "Giải thích"
+  "infoTooltip": "Giải thích",
+  "diaryDishSummary": "{count} thành phần • {calories} kcal • {protein} g protein",
+  "@diaryDishSummary": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  }
 }

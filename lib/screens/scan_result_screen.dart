@@ -534,35 +534,39 @@ class _ComponentsCardState extends State<_ComponentsCard> {
           // sure about them, and they would push the dish off the screen.
           if (suggestions.isNotEmpty) ...[
             const Divider(height: 20),
-            InkWell(
-              key: const ValueKey('scan-suggestions'),
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => setState(() => _showSuggestions = !_showSuggestions),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.help_outline_rounded,
-                        size: 18, color: Colors.orange),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        chosen == 0
-                            ? l10n.scanSuggestions(suggestions.length)
-                            : l10n.scanSuggestionsChosen(
-                                suggestions.length, chosen),
-                        style: TextStyle(
-                            color: CyberColors.text,
-                            fontWeight: FontWeight.w700),
+            Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                key: const ValueKey('scan-suggestions'),
+                borderRadius: BorderRadius.circular(8),
+                onTap: () =>
+                    setState(() => _showSuggestions = !_showSuggestions),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.help_outline_rounded,
+                          size: 18, color: CyberColors.warning),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          chosen == 0
+                              ? l10n.scanSuggestions(suggestions.length)
+                              : l10n.scanSuggestionsChosen(
+                                  suggestions.length, chosen),
+                          style: TextStyle(
+                              color: CyberColors.text,
+                              fontWeight: FontWeight.w700),
+                        ),
                       ),
-                    ),
-                    AnimatedRotation(
-                      turns: _showSuggestions ? .5 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(Icons.expand_more_rounded,
-                          color: CyberColors.muted),
-                    ),
-                  ],
+                      AnimatedRotation(
+                        turns: _showSuggestions ? .5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(Icons.expand_more_rounded,
+                            color: CyberColors.muted),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -649,7 +653,6 @@ class _ComponentRow extends StatelessWidget {
           ),
           IconButton(
             tooltip: l10n.scanDecrease,
-            visualDensity: VisualDensity.compact,
             onPressed: item.amount - item.step <= 0
                 ? null
                 : () {
@@ -660,7 +663,6 @@ class _ComponentRow extends StatelessWidget {
           ),
           IconButton(
             tooltip: l10n.scanIncrease,
-            visualDensity: VisualDensity.compact,
             onPressed: () {
               item.amount += item.step;
               onChanged();
@@ -682,12 +684,12 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: Colors.orange.withValues(alpha: 0.18),
+          color: CyberColors.warning.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(text,
-            style: const TextStyle(
-                color: Colors.orange,
+            style: TextStyle(
+                color: CyberColors.warning,
                 fontSize: 11,
                 fontWeight: FontWeight.w700)),
       );

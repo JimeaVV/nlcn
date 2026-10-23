@@ -22,7 +22,6 @@ class InfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
         tooltip: tooltip ?? context.l10n.infoTooltip,
-        visualDensity: VisualDensity.compact,
         onPressed: () => show(context, title, paragraphs),
         icon: Icon(Icons.info_outline_rounded, color: CyberColors.muted),
       );
