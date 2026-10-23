@@ -2200,6 +2200,35 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     lỗi tràn chữ nào.
   - Build APK 122.
 
+### 2026-10-23 · Skill chụp giao diện, agent rà giao diện, kết nối Dart MCP
+- Lý do: khi sửa giao diện, Claude chỉ thấy được ảnh người dùng tự chụp, vì
+  quy tắc dự án không cho tự chụp màn hình điện thoại. Lần chỉnh giao diện
+  trước cho thấy test thường không bắt được lỗi font (nút "THÊM MÓN" mất
+  font). Ngoài ra plugin Dart và Flutter MCP không kết nối được.
+- Đã làm:
+  - `tool/ui_screenshots/screenshots_test.dart`: vẽ Hôm nay, Nhật ký, Hồ
+    sơ, Cài đặt bằng font thật (Be Vietnam Pro, icon Material), mỗi màn ở 4
+    giao diện cộng một lần ở máy nhỏ 360 px với chữ ×1,3. Kết quả là 20 ảnh
+    PNG trong `tool/ui_screenshots/out/` (không commit). Dùng database giả
+    riêng nên không phụ thuộc các test khác. `flutter test` của CI chỉ quét
+    `test/` nên không chạy file này.
+  - Skill `ui-screenshots` (`.claude/skills/ui-screenshots/SKILL.md`): cách
+    chạy, đọc ảnh nào, kiểm tra những gì, thêm màn mới ra sao.
+  - Agent `ui-reviewer` (`.claude/agents/ui-reviewer.md`), chỉ đọc. Agent rà
+    10 quy tắc giao diện của app: màu theo theme, một thẻ nổi bật mỗi màn,
+    số liền đơn vị, chữ qua bản dịch, font theo theme, vừa màn nhỏ, tooltip
+    và vùng bấm, đoạn giải thích sau nút ⓘ, snack bar tự ẩn, không dùng tên
+    Cyberpunk.
+  - Thêm `D:\APPS\flutter\flutter\bin` vào PATH của tài khoản người dùng
+    để plugin dart-flutter chạy được `dart mcp-server`.
+- Kiểm tra:
+  - Chạy skill: 20/20 màn vẽ được trong khoảng 5 giây, không lỗi tràn bố
+    cục; đã xem ảnh máy nhỏ chữ lớn: font và icon đúng, dòng chỉ xuống ở dấu
+    "•".
+  - Mở `dart mcp-server` bằng PATH mới và gửi yêu cầu `initialize`: server
+    trả lời "dart and flutter tooling" 0.1.4, có danh sách tool. App Claude
+    cần mở lại thì mới nhận PATH mới.
+
 ---
 
 ## 3. Việc còn tồn đọng

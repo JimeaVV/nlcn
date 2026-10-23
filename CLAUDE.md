@@ -53,6 +53,10 @@ Notebook train:
 
 Build APK cho điện thoại: xem skill `build-apk`.
 
+Sửa giao diện: chạy skill `ui-screenshots` để vẽ các màn ra PNG trên máy
+tính (`flutter test tool/ui_screenshots --update-goldens`), rồi nhờ agent
+`ui-reviewer` rà các quy tắc giao diện trước khi commit.
+
 ## Quy tắc
 - **Nhật ký:** mọi thay đổi đều ghi thêm một mục vào
   `docs/QUA_TRINH_THUC_HIEN.md`, bằng tiếng Việt, đặt trước dòng `---` của mục
