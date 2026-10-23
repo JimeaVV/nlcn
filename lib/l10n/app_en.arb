@@ -175,8 +175,6 @@
   "weightChartSemantics": "Chart of {count} weigh-ins. From {firstDate}: {firstWeight} kg to {lastDate}: {lastWeight} kg. The values are listed below.",
   "settingsTitle": "SETTINGS",
   "settingsSubtitle": "Choose a language and visual style. Your selection is saved on this device.",
-  "offlineModeTitle": "Offline mode",
-  "offlineModeBody": "Meal plans, workouts and next-session suggestions run on this device. Your profile and history are saved locally.",
   "languageTitle": "Language",
   "interfaceStyle": "Interface style",
   "styleCyberpunkDescription": "Neon cyan, magenta and deep navy.",

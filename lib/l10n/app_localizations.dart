@@ -1150,18 +1150,6 @@ abstract class AppLocalizations {
   /// **'Chọn ngôn ngữ và giao diện. Lựa chọn được lưu trên máy.'**
   String get settingsSubtitle;
 
-  /// No description provided for @offlineModeTitle.
-  ///
-  /// In vi, this message translates to:
-  /// **'Chế độ offline'**
-  String get offlineModeTitle;
-
-  /// No description provided for @offlineModeBody.
-  ///
-  /// In vi, this message translates to:
-  /// **'Thực đơn, buổi tập và gợi ý cho buổi sau đều chạy trên máy. Hồ sơ và lịch sử được lưu cục bộ.'**
-  String get offlineModeBody;
-
   /// No description provided for @languageTitle.
   ///
   /// In vi, this message translates to:

@@ -2138,6 +2138,15 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   code mới thì PASS. `flutter analyze` sạch; `flutter test` 208/208 PASS.
   Build APK 119.
 
+### 2026-10-23 · Bỏ thẻ "Chế độ offline" trong Cài đặt
+- Lý do: người dùng thấy thẻ dài dòng mà không có tác dụng. Thẻ chỉ có chữ
+  giải thích app chạy trên máy, không có nút hay lựa chọn nào.
+- Đã làm: xoá thẻ khỏi màn Cài đặt và xoá hai chuỗi `offlineModeTitle`,
+  `offlineModeBody` ở cả tiếng Việt lẫn tiếng Anh. Màn Cài đặt giờ mở đầu
+  bằng phần chọn ngôn ngữ.
+- Kiểm tra: `flutter gen-l10n`; `flutter analyze` sạch; `flutter test`
+  208/208 PASS. Build APK 120.
+
 ---
 
 ## 3. Việc còn tồn đọng

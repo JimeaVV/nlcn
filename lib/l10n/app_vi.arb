@@ -449,8 +449,6 @@
   },
   "settingsTitle": "CÀI ĐẶT",
   "settingsSubtitle": "Chọn ngôn ngữ và giao diện. Lựa chọn được lưu trên máy.",
-  "offlineModeTitle": "Chế độ offline",
-  "offlineModeBody": "Thực đơn, buổi tập và gợi ý cho buổi sau đều chạy trên máy. Hồ sơ và lịch sử được lưu cục bộ.",
   "languageTitle": "Ngôn ngữ",
   "interfaceStyle": "Giao diện",
   "styleCyberpunkDescription": "Neon xanh lơ, hồng tím trên nền xanh đen.",

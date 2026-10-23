@@ -279,15 +279,6 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               CyberCard(
-                title: l10n.offlineModeTitle,
-                icon: Icons.offline_bolt_rounded,
-                child: Text(
-                  l10n.offlineModeBody,
-                  style: TextStyle(color: CyberColors.muted),
-                ),
-              ),
-              const SizedBox(height: 18),
-              CyberCard(
                 title: l10n.languageTitle,
                 icon: Icons.translate_rounded,
                 child: Column(

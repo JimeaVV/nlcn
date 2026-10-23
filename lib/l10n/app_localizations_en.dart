@@ -619,13 +619,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose a language and visual style. Your selection is saved on this device.';
 
   @override
-  String get offlineModeTitle => 'Offline mode';
-
-  @override
-  String get offlineModeBody =>
-      'Meal plans, workouts and next-session suggestions run on this device. Your profile and history are saved locally.';
-
-  @override
   String get languageTitle => 'Language';
 
   @override

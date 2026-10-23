@@ -613,13 +613,6 @@ class AppLocalizationsVi extends AppLocalizations {
       'Chọn ngôn ngữ và giao diện. Lựa chọn được lưu trên máy.';
 
   @override
-  String get offlineModeTitle => 'Chế độ offline';
-
-  @override
-  String get offlineModeBody =>
-      'Thực đơn, buổi tập và gợi ý cho buổi sau đều chạy trên máy. Hồ sơ và lịch sử được lưu cục bộ.';
-
-  @override
   String get languageTitle => 'Ngôn ngữ';
 
   @override
