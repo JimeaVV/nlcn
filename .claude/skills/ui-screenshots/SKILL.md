@@ -26,6 +26,7 @@ Mất khoảng 5–10 giây. Muốn chỉ một màn thì thêm `--plain-name di
 | `<màn>_cyberpunk.png` | giao diện Neon (mã cũ vẫn là `cyberpunk`), rộng 412 px |
 | `<màn>_minimalLight.png`, `_forest`, `_sunset` | ba giao diện còn lại |
 | `<màn>_small_large_text.png` | máy nhỏ 360 px, chữ hệ thống ×1,3 |
+| `gauge_*.png` | riêng vòng cung calo lúc gần đầy (91%) và lúc vượt mục tiêu: đoạn cuối vòng và màu `warning` |
 
 Ảnh có chiều cao cố định cho mỗi màn, nên phần dưới có thể để trống.
 

@@ -158,11 +158,15 @@ class _GaugePainter extends CustomPainter {
       ..shader = shader;
     canvas.drawArc(rect, _start, _sweep, false, arc(null, track));
     if (fraction <= 0) return;
+    // Angles run 0–2π, and the arc ends past 2π (at 390°): a gradient from
+    // 150° to 390° painted that last stretch in the first colour. Rotated to
+    // the arc's start it runs first → last over the arc's 240°, then back to
+    // first over the gap, so the round cap just before the start (at ~359°)
+    // is the first colour too.
     final gradient = SweepGradient(
-      startAngle: _start,
-      endAngle: _start + _sweep,
-      colors: colors,
-      transform: const GradientRotation(0),
+      colors: [colors.first, colors.last, colors.first],
+      stops: const [0, _sweep / (2 * math.pi), 1],
+      transform: const GradientRotation(_start),
     ).createShader(rect);
     canvas.drawArc(
         rect, _start, _sweep * fraction, false, arc(gradient, colors.first));

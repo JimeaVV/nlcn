@@ -26,6 +26,7 @@ import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/dataset_repository.dart';
 import 'package:optifit/services/reminder_service.dart';
 import 'package:optifit/services/water_reminder_service.dart';
+import 'package:optifit/widgets/intake_summary.dart';
 
 /// A day of made-up but typical data: two meals, some water, three weigh-ins.
 class _Database extends Fake implements DatabaseService {
@@ -161,7 +162,27 @@ Future<void> _loadFonts() async {
 }
 
 /// The screens, each with the view height it needs to show everything.
+const _gaugeTargets = {'target_calories': 2559.0, 'protein_target': 120.6};
+
+/// The gauge alone at the fills a short day never reaches: nearly full (the
+/// end of the arc, past 360°) and over the target.
+Widget _gauges() => ListView(
+      padding: const EdgeInsets.all(16),
+      children: const [
+        IntakeSummary(
+            totals: FoodLogTotals(
+                calories: 2311, carbs: 220, protein: 141, fat: 92),
+            targets: _gaugeTargets),
+        SizedBox(height: 24),
+        IntakeSummary(
+            totals: FoodLogTotals(
+                calories: 2900, carbs: 300, protein: 150, fat: 110),
+            targets: _gaugeTargets),
+      ],
+    );
+
 final _screens = <String, (double, Widget Function())>{
+  'gauge': (1000, _gauges),
   'today': (1250, () => TodayScreen(database: _Database())),
   'diary': (
     1150,

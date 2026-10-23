@@ -2334,6 +2334,25 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     thích chưa dùng dấu cách không ngắt), đã sửa cả hai.
   - Build APK 125.
 
+### 2026-10-23 · Sửa màu vòng cung calo khi gần đầy
+- Lý do: người dùng chụp màn Nhật ký lúc đã ăn 2.311 / 2.559 kcal. Đoạn cuối
+  vòng cung (phía dưới bên phải) bị đổi về màu xanh lơ, không chuyển tiếp sang
+  hồng như phần còn lại.
+- Nguyên nhân: dải màu khai báo từ 150° tới 390°, nhưng `SweepGradient` đo
+  góc trong khoảng 0–360°. Phần vòng từ 360° tới 390° bị tính là trước điểm bắt
+  đầu nên lấy màu đầu tiên. Ảnh chụp thử chỉ có 726 kcal (vòng ngắn) nên không
+  thấy lỗi.
+- Đã làm:
+  - Xoay dải màu tới điểm bắt đầu của vòng (`GradientRotation`), cho màu chạy
+    từ đầu tới cuối trong 240° của vòng, rồi quay lại màu đầu trong 120° còn
+    trống. Như vậy đầu tròn nhô ra trước điểm bắt đầu cũng có màu đầu, không
+    còn chấm hồng.
+  - Skill `ui-screenshots` vẽ thêm riêng vòng cung lúc gần đầy (91%) và lúc
+    vượt mục tiêu (`gauge_*.png`) ở cả 4 giao diện.
+- Kiểm tra: xem ảnh vòng gần đầy ở Neon (xanh lơ → hồng) và Minimal Light
+  (xanh → tím): cả hai đầu đúng màu. `flutter analyze` sạch; `flutter test`
+  216/216 PASS. Build APK 126.
+
 ---
 
 ## 3. Việc còn tồn đọng
