@@ -2,6 +2,10 @@
 /// The format is defined in docs/MODEL_CONTRACT.md.
 library;
 
+import 'food_variant.dart';
+
+export 'food_variant.dart';
+
 /// One component (or a dish "base" such as broth) with nutrition per 100 g.
 /// Values stay null until they are filled from a cited source.
 class VnComponent {
@@ -84,10 +88,15 @@ class VnDish {
 }
 
 class VnFoodData {
-  VnFoodData({required this.components, required this.dishes})
-      : _dishes = {for (final dish in dishes) dish.code: dish};
+  VnFoodData(
+      {required this.components, required this.dishes, FoodVariants? variants})
+      : variants = variants ?? FoodVariants.empty,
+        _dishes = {for (final dish in dishes) dish.code: dish};
 
   final Map<String, VnComponent> components;
+
+  /// The same foods by part and cooking (food_variants.csv).
+  final FoodVariants variants;
 
   /// In contract order, which is also the model's output order.
   final List<VnDish> dishes;
@@ -167,6 +176,7 @@ VnFoodData parseVnFoodData({
   required String componentsCsv,
   required String dishesCsv,
   required String dishNamesCsv,
+  String variantsCsv = '',
 }) {
   final components = <String, VnComponent>{
     for (final row in parseCsv(componentsCsv))
@@ -204,5 +214,10 @@ VnFoodData parseVnFoodData({
         parts: List.unmodifiable(parts[row['code']] ?? const []),
       ),
   ];
-  return VnFoodData(components: components, dishes: dishes);
+  return VnFoodData(
+    components: components,
+    dishes: dishes,
+    variants:
+        variantsCsv.trim().isEmpty ? null : parseFoodVariants(variantsCsv),
+  );
 }

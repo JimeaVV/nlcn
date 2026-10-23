@@ -30,10 +30,11 @@ com_tam,Cơm tấm,Broken rice
 pho_bo,Phở bò,Beef pho
 ''';
 
-VnFoodData fixtureVnFood() => parseVnFoodData(
+VnFoodData fixtureVnFood({String variantsCsv = ''}) => parseVnFoodData(
       componentsCsv: fixtureComponentsCsv,
       dishesCsv: fixtureDishesCsv,
       dishNamesCsv: fixtureDishNamesCsv,
+      variantsCsv: variantsCsv,
     );
 
 /// Serves the fixture CSVs to VnFoodRepository.

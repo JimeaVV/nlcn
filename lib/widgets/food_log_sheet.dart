@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../core/cyber_theme.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
+import '../models/food_variant.dart';
+import 'variant_picker_sheet.dart';
 import '../core/number_input.dart';
 import '../core/text_search.dart';
 
@@ -16,7 +18,11 @@ class FoodLogSheet extends StatefulWidget {
     required this.date,
     this.favorites = const [],
     this.recent = const [],
+    this.variants,
   });
+
+  /// Meat, eggs, fish and starches by part and cooking; chips open a picker.
+  final FoodVariants? variants;
 
   final List<Map<String, dynamic>> foods;
   final DateTime date;
@@ -45,8 +51,31 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
   final _carbs = TextEditingController(text: '0');
   final _fat = TextEditingController(text: '0');
   late MealSlot _meal = mealSlotFor(DateTime.now());
-  late bool _custom = widget.foods.isEmpty;
+
+  /// Typing a food in starts out only when there is nothing to pick from.
+  bool get _canPick =>
+      widget.foods.isNotEmpty || !(widget.variants?.isEmpty ?? true);
+  late bool _custom = !_canPick;
   Map<String, dynamic>? _food;
+
+  /// Bumped when a variant is picked, so the search field shows its name.
+  int _fieldVersion = 0;
+
+  Future<void> _pickVariant(String group) async {
+    final l10n = context.l10n;
+    final language = Localizations.localeOf(context).languageCode;
+    final variant = await pickFoodVariant(context,
+        variants: widget.variants!, group: group);
+    if (variant == null || !mounted) return;
+    setState(() {
+      _food = variant.toFoodMap(language, skinNamer(l10n));
+      // One egg or one bowl if it has a unit; otherwise the grams typed.
+      if (variant.unitGrams != null) {
+        _grams.text = context.formatMeasurement(variant.unitGrams!);
+      }
+      _fieldVersion++;
+    });
+  }
 
   @override
   void dispose() {
@@ -143,7 +172,7 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
               ),
               const SizedBox(height: 12),
               ..._quickFoods(l10n),
-              if (widget.foods.isNotEmpty) ...[
+              if (_canPick) ...[
                 SegmentedButton<bool>(
                   segments: [
                     ButtonSegment(
@@ -237,7 +266,29 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
   }
 
   List<Widget> _datasetFields(AppLocalizations l10n) => [
+        if (widget.variants != null && !widget.variants!.isEmpty) ...[
+          Text(l10n.variantPickHint,
+              style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (final group in variantGroups)
+                if (widget.variants!.inGroup(group).isNotEmpty)
+                  ActionChip(
+                    key: ValueKey('diary-variant-$group'),
+                    avatar: Icon(variantGroupIcon(group), size: 18),
+                    label: Text(variantGroupName(l10n, group)),
+                    onPressed: () => _pickVariant(group),
+                  ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
         Autocomplete<Map<String, dynamic>>(
+          key: ValueKey('diary-food-field-$_fieldVersion'),
+          initialValue: TextEditingValue(text: '${_food?['name'] ?? ''}'),
           displayStringForOption: (food) => '${food['name']}',
           optionsBuilder: (value) {
             if (value.text.trim().isEmpty) return const [];

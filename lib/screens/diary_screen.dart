@@ -4,12 +4,14 @@ import '../core/cyber_theme.dart';
 import '../engine/nutrition_targets.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
+import '../models/food_variant.dart';
 import '../models/user_profile.dart';
 import '../services/database_service.dart';
 import '../services/dataset_repository.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/info_button.dart';
 import '../widgets/intake_summary.dart';
+import '../widgets/variant_picker_sheet.dart';
 import '../widgets/error_box.dart';
 import '../widgets/food_log_sheet.dart';
 import '../widgets/neon_button.dart';
@@ -118,11 +120,17 @@ class DiaryScreenState extends State<DiaryScreen> {
     // Vietnamese dishes and components first, then the general food list;
     // either source failing still leaves the other and custom entry.
     final foods = <Map<String, dynamic>>[];
+    FoodVariants? variants;
+    final skinName = skinNamer(context.l10n);
     try {
       final vn = await _vnFood.load();
+      variants = vn.variants;
       foods.addAll([
         for (final component in vn.components.values)
           if (component.hasNutrition) component.toFoodMap(language),
+        // Searchable too: "uc ga luoc" finds the boiled breast.
+        for (final variant in vn.variants.all)
+          variant.toFoodMap(language, skinName),
       ]);
     } catch (_) {}
     try {
@@ -138,6 +146,7 @@ class DiaryScreenState extends State<DiaryScreen> {
         date: _day,
         favorites: _favorites,
         recent: _recent,
+        variants: variants,
       ),
     );
     if (entry == null || !mounted) return;

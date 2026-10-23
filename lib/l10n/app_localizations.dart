@@ -2777,6 +2777,102 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Ly {n} trên {total}'**
   String waterGlassSemantics(String n, String total);
+
+  /// No description provided for @variantGroupChicken.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gà'**
+  String get variantGroupChicken;
+
+  /// No description provided for @variantGroupPork.
+  ///
+  /// In vi, this message translates to:
+  /// **'Heo'**
+  String get variantGroupPork;
+
+  /// No description provided for @variantGroupBeef.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bò'**
+  String get variantGroupBeef;
+
+  /// No description provided for @variantGroupEggs.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trứng'**
+  String get variantGroupEggs;
+
+  /// No description provided for @variantGroupFish.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cá'**
+  String get variantGroupFish;
+
+  /// No description provided for @variantGroupStarch.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cơm & tinh bột'**
+  String get variantGroupStarch;
+
+  /// No description provided for @variantSkinOff.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bỏ da'**
+  String get variantSkinOff;
+
+  /// No description provided for @variantSkinOn.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cả da'**
+  String get variantSkinOn;
+
+  /// No description provided for @variantPart.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phần'**
+  String get variantPart;
+
+  /// No description provided for @variantSkin.
+  ///
+  /// In vi, this message translates to:
+  /// **'Da'**
+  String get variantSkin;
+
+  /// No description provided for @variantStyle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cách nấu'**
+  String get variantStyle;
+
+  /// No description provided for @variantChoose.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn'**
+  String get variantChoose;
+
+  /// No description provided for @variantTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'{group}: phần và cách nấu'**
+  String variantTitle(String group);
+
+  /// No description provided for @variantPer100g.
+  ///
+  /// In vi, this message translates to:
+  /// **'{kcal} kcal • {protein} g protein mỗi 100 g'**
+  String variantPer100g(String kcal, String protein);
+
+  /// No description provided for @variantPickHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn theo phần và cách nấu'**
+  String get variantPickHint;
+
+  /// No description provided for @scanRefine.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chọn phần và cách nấu'**
+  String get scanRefine;
 }
 
 class _AppLocalizationsDelegate

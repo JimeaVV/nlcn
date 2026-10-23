@@ -16,11 +16,15 @@ class PlateItem {
     this.suggested = false,
   });
 
-  final VnComponent component;
+  /// Replaced by [refine] when the user picks the part and cooking.
+  VnComponent component;
+
+  /// The variant picked for this item ("part|skin|style"), if any.
+  String? variantKey;
   bool included;
 
   /// True when [amount] counts natural units (e.g. eggs), false for grams.
-  final bool inUnits;
+  bool inUnits;
   double amount;
 
   /// The recognizer's probability, or null when not recognized by the model.
@@ -43,6 +47,21 @@ class PlateItem {
   bool get hasNutrition => grams != null && component.hasNutrition;
 
   double _scaled(double? per100) => per100! * grams! / 100;
+
+  /// Takes [replacement]'s nutrition and keeps the amount eaten: in units
+  /// when it has a unit weight, otherwise the same grams.
+  void refine(VnComponent replacement, {String? variantKey}) {
+    final eaten = grams;
+    component = replacement;
+    this.variantKey = variantKey;
+    if (inUnits && replacement.unitGrams != null) return;
+    if (inUnits) {
+      inUnits = false;
+      amount = eaten ?? 100;
+    } else if (replacement.unitGrams != null && eaten == null) {
+      amount = replacement.unitGrams!;
+    }
+  }
 
   double get calories => _scaled(component.kcalPer100g);
   double get protein => _scaled(component.proteinPer100g);
@@ -219,7 +238,12 @@ class ScanPlate {
         FoodLogEntry(
           date: date,
           meal: meal,
-          name: isSingle
+          // A dish that is only its own base row (ức gà, pizza) is named
+          // once, not "Ức gà (Ức gà)"; a sauce that is one of several parts
+          // keeps its dish.
+          name: isSingle ||
+                  (dish.parts.length == 1 &&
+                      item.component.code == '_base_${dish.code}')
               ? item.component.name(languageCode)
               : '${item.component.name(languageCode)} '
                   '(${dish.name(languageCode)})',

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:optifit/models/food_log_entry.dart';
@@ -10,6 +12,7 @@ import 'package:optifit/services/scan_camera.dart';
 import 'package:optifit/services/vn_food_repository.dart';
 import 'package:optifit/widgets/scan_button_face.dart';
 import 'package:optifit/widgets/scan_sweep.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/localized_app.dart';
 import 'helpers/vn_food_fixture.dart';
@@ -146,6 +149,54 @@ void main() {
     expect(database.added.first.source, FoodLogSource.camera);
     expect(database.added.first.confidence, 0.97);
     expect(popped, isTrue);
+  });
+
+  testWidgets('a scanned part can be set to its cut and cooking',
+      (tester) async {
+    // The picker remembers the last choice per group.
+    SharedPreferences.setMockInitialValues({});
+    _tall(tester);
+    final database = _Database();
+    await tester.pumpWidget(localizedApp(
+      home: ScanResultScreen(
+        imagePath: 'plate.jpg',
+        data: fixtureVnFood(
+            variantsCsv: File('assets/data/vn_food/food_variants.csv')
+                .readAsStringSync()),
+        recognizer: _Recognizer(const FoodRecognition(
+            dishes: {'com_tam': 0.95}, components: {'com': 0.97})),
+        database: database,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    // Rice, the egg and the chop have variants; the fixture's sauce has not.
+    expect(find.byIcon(Icons.tune_rounded), findsNWidgets(3));
+
+    await tester.tap(find.byKey(const ValueKey('refine-com')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('variant-part-com_lut')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('variant-choose')));
+    await tester.pumpAndSettle();
+    expect(find.text('Cơm gạo lứt'), findsOneWidget);
+    // Opened again, the picker starts at that pick.
+    await tester.tap(find.byKey(const ValueKey('refine-com')));
+    await tester.pumpAndSettle();
+    expect(
+        tester
+            .widget<ChoiceChip>(
+                find.byKey(const ValueKey('variant-part-com_lut')))
+            .selected,
+        isTrue);
+    await tester.tap(find.byKey(const ValueKey('variant-choose')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('scan-save')));
+    await tester.pumpAndSettle();
+    final rice = database.added.first;
+    expect(rice.name, 'Cơm gạo lứt (Cơm tấm)');
+    // 200 g at 123 kcal per 100 g.
+    expect(rice.calories, closeTo(246, 1e-9));
   });
 
   testWidgets('the scan sweep plays a full pass even for an instant answer',

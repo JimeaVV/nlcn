@@ -1578,4 +1578,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String waterGlassSemantics(String n, String total) {
     return 'Glass $n of $total';
   }
+
+  @override
+  String get variantGroupChicken => 'Chicken';
+
+  @override
+  String get variantGroupPork => 'Pork';
+
+  @override
+  String get variantGroupBeef => 'Beef';
+
+  @override
+  String get variantGroupEggs => 'Eggs';
+
+  @override
+  String get variantGroupFish => 'Fish';
+
+  @override
+  String get variantGroupStarch => 'Rice & starches';
+
+  @override
+  String get variantSkinOff => 'Skinless';
+
+  @override
+  String get variantSkinOn => 'With skin';
+
+  @override
+  String get variantPart => 'Part';
+
+  @override
+  String get variantSkin => 'Skin';
+
+  @override
+  String get variantStyle => 'Cooking';
+
+  @override
+  String get variantChoose => 'Choose';
+
+  @override
+  String variantTitle(String group) {
+    return '$group: part and cooking';
+  }
+
+  @override
+  String variantPer100g(String kcal, String protein) {
+    return '$kcal kcal • $protein g protein per 100 g';
+  }
+
+  @override
+  String get variantPickHint => 'Pick by part and cooking';
+
+  @override
+  String get scanRefine => 'Pick the part and cooking';
 }

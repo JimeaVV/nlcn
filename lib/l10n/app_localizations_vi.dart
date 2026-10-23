@@ -1567,4 +1567,56 @@ class AppLocalizationsVi extends AppLocalizations {
   String waterGlassSemantics(String n, String total) {
     return 'Ly $n trên $total';
   }
+
+  @override
+  String get variantGroupChicken => 'Gà';
+
+  @override
+  String get variantGroupPork => 'Heo';
+
+  @override
+  String get variantGroupBeef => 'Bò';
+
+  @override
+  String get variantGroupEggs => 'Trứng';
+
+  @override
+  String get variantGroupFish => 'Cá';
+
+  @override
+  String get variantGroupStarch => 'Cơm & tinh bột';
+
+  @override
+  String get variantSkinOff => 'Bỏ da';
+
+  @override
+  String get variantSkinOn => 'Cả da';
+
+  @override
+  String get variantPart => 'Phần';
+
+  @override
+  String get variantSkin => 'Da';
+
+  @override
+  String get variantStyle => 'Cách nấu';
+
+  @override
+  String get variantChoose => 'Chọn';
+
+  @override
+  String variantTitle(String group) {
+    return '$group: phần và cách nấu';
+  }
+
+  @override
+  String variantPer100g(String kcal, String protein) {
+    return '$kcal kcal • $protein g protein mỗi 100 g';
+  }
+
+  @override
+  String get variantPickHint => 'Chọn theo phần và cách nấu';
+
+  @override
+  String get scanRefine => 'Chọn phần và cách nấu';
 }

@@ -762,5 +762,38 @@
         "type": "String"
       }
     }
-  }
+  },
+  "variantGroupChicken": "Chicken",
+  "variantGroupPork": "Pork",
+  "variantGroupBeef": "Beef",
+  "variantGroupEggs": "Eggs",
+  "variantGroupFish": "Fish",
+  "variantGroupStarch": "Rice & starches",
+  "variantSkinOff": "Skinless",
+  "variantSkinOn": "With skin",
+  "variantPart": "Part",
+  "variantSkin": "Skin",
+  "variantStyle": "Cooking",
+  "variantChoose": "Choose",
+  "variantTitle": "{group}: part and cooking",
+  "@variantTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "variantPer100g": "{kcal} kcal • {protein} g protein per 100 g",
+  "@variantPer100g": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "variantPickHint": "Pick by part and cooking",
+  "scanRefine": "Pick the part and cooking"
 }

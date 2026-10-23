@@ -1230,5 +1230,38 @@
         "type": "String"
       }
     }
-  }
+  },
+  "variantGroupChicken": "Gà",
+  "variantGroupPork": "Heo",
+  "variantGroupBeef": "Bò",
+  "variantGroupEggs": "Trứng",
+  "variantGroupFish": "Cá",
+  "variantGroupStarch": "Cơm & tinh bột",
+  "variantSkinOff": "Bỏ da",
+  "variantSkinOn": "Cả da",
+  "variantPart": "Phần",
+  "variantSkin": "Da",
+  "variantStyle": "Cách nấu",
+  "variantChoose": "Chọn",
+  "variantTitle": "{group}: phần và cách nấu",
+  "@variantTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "variantPer100g": "{kcal} kcal • {protein} g protein mỗi 100 g",
+  "@variantPer100g": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "variantPickHint": "Chọn theo phần và cách nấu",
+  "scanRefine": "Chọn phần và cách nấu"
 }

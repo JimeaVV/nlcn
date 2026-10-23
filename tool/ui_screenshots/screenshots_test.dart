@@ -26,7 +26,9 @@ import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/dataset_repository.dart';
 import 'package:optifit/services/reminder_service.dart';
 import 'package:optifit/services/water_reminder_service.dart';
+import 'package:optifit/models/food_variant.dart';
 import 'package:optifit/widgets/intake_summary.dart';
+import 'package:optifit/widgets/variant_picker_sheet.dart';
 
 /// A day of made-up but typical data: two meals, some water, three weigh-ins.
 class _Database extends Fake implements DatabaseService {
@@ -188,8 +190,18 @@ Widget _gauges() => ListView(
       ],
     );
 
+/// The part and cooking picker for chicken, as it opens from the diary.
+Widget _picker() {
+  final variants = parseFoodVariants(
+      File('assets/data/vn_food/food_variants.csv').readAsStringSync());
+  return VariantPickerSheet(
+      options: variants.inGroup('ga'),
+      initial: variants.find('ga', 'uc|bo_da|luoc')!);
+}
+
 final _screens = <String, (double, Widget Function())>{
   'gauge': (1900, _gauges),
+  'picker': (700, _picker),
   'today': (1250, () => TodayScreen(database: _Database())),
   'diary': (
     1150,

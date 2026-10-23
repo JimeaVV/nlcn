@@ -2373,6 +2373,65 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   đã xem cả bốn trạng thái. `flutter analyze` sạch; `flutter test` 217/217
   PASS. Build APK 127.
 
+### 2026-10-23 · Chọn phần, da và cách nấu cho thịt, cá, trứng, cơm
+- Lý do: app tính calo trước đây chia thịt gà theo từng phần và theo sống
+  hay chín. MacroRunner gom hết vào một dòng "Thịt gà" (đùi luộc, 190 kcal
+  mỗi 100 g). Cùng 100 g mà cánh gà nướng cả da là 254 kcal, ức sống 120
+  kcal, lệch hơn gấp đôi. Người dùng muốn làm cho cả các nhóm khác; cơm thì
+  chỉ cần cơm chín vì không ai cân gạo.
+- Đã làm:
+  - `assets/data/vn_food/food_variants.csv`: 74 dòng, 6 nhóm, mỗi số đều có
+    mã nguồn (USDA SR Legacy, FNDDS, hoặc Viện Dinh dưỡng khi có món kiểu
+    Việt).
+    - Gà: ức, má đùi, tỏi, cánh × bỏ da / cả da × sống, luộc/hầm,
+      nướng/áp chảo, chiên.
+    - Heo: thăn, cốt lết, nửa nạc nửa mỡ, ba chỉ, sườn non, thịt băm.
+    - Bò: thăn, bắp, gầu/nạm, bò băm 90% và 80% nạc.
+    - Trứng: cả quả (sống, luộc, ốp la, chiên/bác) và lòng trắng. Đơn vị
+      "quả" 50 g, lòng trắng 33 g, theo USDA.
+    - Cá: hồi, rô phi, basa (gần đúng theo cá da trơn), ngừ (cả đóng hộp),
+      thu, lóc.
+    - Cơm và tinh bột, đều tính khi đã chín: cơm trắng, cơm gạo lứt, xôi,
+      bún, bánh phở, mì Ý, mì gói (tính theo vắt khô), yến mạch nấu, khoai
+      lang, khoai tây, các loại bánh mì.
+    - Tổ hợp nào USDA không có (như ức cả da chiên) thì không đưa vào, không
+      tự bịa số.
+  - `tool/check_vn_food.py` kiểm tra bảng mới: có nguồn, số hợp lệ, calo
+    khớp 4P + 4C + 9F trong 25%, không trùng dòng, nhóm và loại da hợp lệ.
+  - Bảng chọn `VariantPickerSheet`: ba hàng nút Phần, Da, Cách nấu. Tổ hợp
+    không có trong dữ liệu thì tắt. Số kcal và protein mỗi 100 g đổi theo
+    từng lần bấm. App nhớ lần chọn trước của mỗi nhóm.
+  - Ghi món bằng tay (Nhật ký): hàng nút Gà, Heo, Bò, Trứng, Cá, Cơm & tinh
+    bột mở bảng chọn. Mọi biến thể cũng tìm được bằng ô tìm kiếm (ví dụ "uc
+    ga luoc").
+  - Kết quả quét: thành phần là gà, heo, bò, cá, trứng hoặc cơm có biểu
+    tượng chỉnh cạnh tên. Bấm vào tên thì đổi được phần và cách nấu; khối
+    lượng giữ nguyên. Tên trong nhật ký thành, ví dụ, "Cơm gạo lứt (Cơm
+    tấm)".
+  - Đổi tên món "Ức gà" thành "Ức gà chín, bỏ da". Món chỉ có một dòng nền
+    (ức gà, pizza…) khi ghi vào nhật ký chỉ có một tên, không còn "Ức gà (Ức
+    gà)".
+  - Thiếu file bảng biến thể thì app vẫn chạy, chỉ không có bảng chọn.
+- Kiểm tra:
+  - `python tool/check_vn_food.py`: OK, 74 dòng biến thể.
+  - `flutter analyze` sạch; `flutter test` 225/225 PASS. Test mới gồm:
+    - đọc bảng thật và mỗi thành phần quét được đều mở đúng một dòng có thật;
+    - đổi thành phần giữ số quả hoặc số gam;
+    - tên món chỉ có dòng nền;
+    - bảng chọn tắt tổ hợp không có (cánh cả da không có chiên) và nhớ lựa
+      chọn;
+    - ghi 200 g ức luộc ra 302 kcal;
+    - đổi cơm sang cơm gạo lứt ở kết quả quét, mở lại vẫn ở lựa chọn đó, và
+      ghi đúng 246 kcal.
+  - Agent `ui-reviewer` tìm ra 3 lỗi, đều đã sửa:
+    - mở lại bảng chọn bị quên lựa chọn cũ;
+    - tên lưu cho ngôn ngữ kia bị lẫn ("Chicken breast, bỏ da");
+    - vùng bấm tên thiếu `Material`.
+    Theo góp ý, thịt nướng giờ mở ở "cốt lết, nướng" thay vì "luộc", và chọn
+    biến thể không có đơn vị thì không xoá số gam đã gõ.
+  - Skill `ui-screenshots` có thêm ảnh bảng chọn, ở cả máy nhỏ chữ ×1,3.
+  - Build APK 128.
+
 ---
 
 ## 3. Việc còn tồn đọng

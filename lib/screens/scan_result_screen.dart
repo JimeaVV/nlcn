@@ -13,6 +13,7 @@ import '../services/database_service.dart';
 import '../services/food_recognizer.dart';
 import '../services/photo_collector.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/variant_picker_sheet.dart';
 import '../widgets/error_box.dart';
 import '../widgets/food_picker_sheet.dart';
 import '../widgets/food_log_sheet.dart';
@@ -305,6 +306,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                         // Another dish starts with its suggestions folded.
                         key: ValueKey('components-${plate.dish.code}'),
                         plate: plate,
+                        variants: widget.data.variants,
                         onChanged: () => setState(() {}),
                         onAdd: _addComponent,
                       ),
@@ -465,11 +467,13 @@ class _ComponentsCard extends StatefulWidget {
   const _ComponentsCard({
     super.key,
     required this.plate,
+    required this.variants,
     required this.onChanged,
     required this.onAdd,
   });
 
   final ScanPlate plate;
+  final FoodVariants variants;
   final VoidCallback onChanged;
   final VoidCallback onAdd;
 
@@ -479,6 +483,29 @@ class _ComponentsCard extends StatefulWidget {
 
 class _ComponentsCardState extends State<_ComponentsCard> {
   bool _showSuggestions = false;
+
+  bool _canRefine(PlateItem item) {
+    final match = componentVariants[item.component.code];
+    return match != null && widget.variants.inGroup(match.$1).isNotEmpty;
+  }
+
+  /// Chicken, pork, beef, fish, eggs and rice by part and cooking: the item
+  /// keeps its amount and takes the variant's nutrition and name.
+  Future<void> _refine(PlateItem item) async {
+    final (group, key) = componentVariants[item.component.code]!;
+    // Opens at the earlier pick, if there was one.
+    final variant = await pickFoodVariant(context,
+        variants: widget.variants,
+        group: group,
+        initialKey: item.variantKey ?? key);
+    if (variant == null || !mounted) return;
+    // Each name in its own language, "bỏ da" and "skinless" alike.
+    String name(String language) => variant.label(
+        language, skinNamer(lookupAppLocalizations(Locale(language))));
+    item.refine(variant.asComponent(item.component, name('vi'), name('en')),
+        variantKey: variant.key);
+    widget.onChanged();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -499,6 +526,7 @@ class _ComponentsCardState extends State<_ComponentsCard> {
           item: item,
           language: language,
           onChanged: widget.onChanged,
+          onRefine: _canRefine(item) ? () => _refine(item) : null,
         );
     return CyberCard(
       title: l10n.scanComponentsTitle,
@@ -598,11 +626,15 @@ class _ComponentRow extends StatelessWidget {
     required this.item,
     required this.language,
     required this.onChanged,
+    this.onRefine,
   });
 
   final PlateItem item;
   final String language;
   final VoidCallback onChanged;
+
+  /// Opens the part and cooking picker; null for foods without variants.
+  final VoidCallback? onRefine;
 
   @override
   Widget build(BuildContext context) {
@@ -629,26 +661,50 @@ class _ComponentRow extends StatelessWidget {
             },
           ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(item.component.name(language),
-                          style: TextStyle(
-                              color: CyberColors.text,
-                              fontWeight: FontWeight.w700)),
+            // The name opens the part and cooking picker where there is one,
+            // so the row needs no extra button.
+            child: Semantics(
+              button: onRefine != null,
+              hint: onRefine == null ? null : l10n.scanRefine,
+              // Ink needs a Material inside the card.
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: ValueKey('refine-${item.component.code}'),
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: onRefine,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(item.component.name(language),
+                                  style: TextStyle(
+                                      color: CyberColors.text,
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                            if (onRefine != null) ...[
+                              const SizedBox(width: 4),
+                              Icon(Icons.tune_rounded,
+                                  size: 16, color: CyberColors.cyan),
+                            ],
+                            if (item.uncertain) ...[
+                              const SizedBox(width: 6),
+                              _Badge(l10n.scanMaybe),
+                            ],
+                          ],
+                        ),
+                        Text(detail,
+                            style: TextStyle(
+                                color: CyberColors.muted, fontSize: 12)),
+                      ],
                     ),
-                    if (item.uncertain) ...[
-                      const SizedBox(width: 6),
-                      _Badge(l10n.scanMaybe),
-                    ],
-                  ],
+                  ),
                 ),
-                Text(detail,
-                    style: TextStyle(color: CyberColors.muted, fontSize: 12)),
-              ],
+              ),
             ),
           ),
           IconButton(
