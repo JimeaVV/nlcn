@@ -613,10 +613,13 @@
   "todayTitle": "HÔM NAY",
   "todayLoadFailed": "Không tải được dữ liệu hôm nay. Kéo xuống để thử lại.",
   "todayOpenDiary": "Mở nhật ký",
-  "todayWeightWeek": "Thay đổi 7 ngày: {change} kg",
+  "todayWeightWeek": "Thay đổi so với {date}: {change} kg",
   "@todayWeightWeek": {
     "placeholders": {
       "change": {
+        "type": "String"
+      },
+      "date": {
         "type": "String"
       }
     }
@@ -1052,10 +1055,13 @@
       }
     }
   },
-  "weekWeight": "Cân nặng {change} kg",
+  "weekWeight": "Cân nặng {change} kg so với {date}",
   "@weekWeight": {
     "placeholders": {
       "change": {
+        "type": "String"
+      },
+      "date": {
         "type": "String"
       }
     }

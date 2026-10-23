@@ -262,7 +262,7 @@
   "todayTitle": "TODAY",
   "todayLoadFailed": "Could not load today's data. Pull down to try again.",
   "todayOpenDiary": "Open diary",
-  "todayWeightWeek": "7-day change: {change} kg",
+  "todayWeightWeek": "Change since {date}: {change} kg",
   "todayNoExercise": "No exercises logged today.",
   "todayExercisesLogged": "{count} exercises logged today",
   "todayLastWorkout": "Last workout: {plan} · {date}",
@@ -577,10 +577,13 @@
       }
     }
   },
-  "weekWeight": "Weight {change} kg",
+  "weekWeight": "Weight {change} kg since {date}",
   "@weekWeight": {
     "placeholders": {
       "change": {
+        "type": "String"
+      },
+      "date": {
         "type": "String"
       }
     }
@@ -719,6 +722,16 @@
         "type": "String"
       },
       "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayWeightWeek": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      },
+      "date": {
         "type": "String"
       }
     }

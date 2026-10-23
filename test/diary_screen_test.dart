@@ -336,8 +336,8 @@ void main() {
     expect(find.text('Sườn nướng'), findsOneWidget);
     await tester.tap(find.byTooltip('Xóa món').at(1));
     await tester.pumpAndSettle();
-    expect([for (final e in database.entries) e.name],
-        ['Cơm (Cơm tấm)', 'Ức gà']);
+    expect(
+        [for (final e in database.entries) e.name], ['Cơm (Cơm tấm)', 'Ức gà']);
     expect(tester.takeException(), isNull);
   });
 

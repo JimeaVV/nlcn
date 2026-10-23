@@ -45,8 +45,37 @@ class WeekSummary {
   /// Days with at least one exercise logged.
   final int trainingDays;
 
-  /// Newest minus oldest weigh-in of the week; null with fewer than two.
-  final double? weightChange;
+  /// The same change the weight card shows (see [weeklyWeightChange]); null
+  /// when nobody weighed in this week or there is nothing to compare with.
+  final WeightChange? weightChange;
+}
+
+/// How much the latest weigh-in differs from an earlier one, and which.
+class WeightChange {
+  const WeightChange({required this.kg, required this.since});
+
+  final double kg;
+  final DateTime since;
+}
+
+/// The latest weigh-in against the earlier one closest to a week before it
+/// (the older one on a tie). The date of that earlier weigh-in is shown with
+/// the number, so a gap of 5 or 9 days is not passed off as exactly 7.
+WeightChange? weeklyWeightChange(List<WeightEntry> weights) {
+  if (weights.length < 2) return null;
+  final sorted = List<WeightEntry>.of(weights)
+    ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
+  final latest = sorted.last;
+  final weekBefore = latest.recordedAt.subtract(const Duration(days: 7));
+  WeightEntry? best;
+  for (final entry in sorted.take(sorted.length - 1)) {
+    final distance = entry.recordedAt.difference(weekBefore).abs();
+    if (best == null ||
+        distance < best.recordedAt.difference(weekBefore).abs()) {
+      best = entry;
+    }
+  }
+  return WeightChange(kg: latest.weight - best!.weight, since: best.recordedAt);
 }
 
 WeekSummary summarizeWeek({
@@ -72,17 +101,12 @@ WeekSummary summarizeWeek({
     for (final log in workoutLogs)
       if (inWeek(log.performedAt.toLocal())) _day(log.performedAt.toLocal()),
   };
-  final weighIns = [
-    for (final weight in weights)
-      if (inWeek(weight.recordedAt)) weight,
-  ]..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
+  final weighedThisWeek = weights.any((w) => inWeek(w.recordedAt));
   return WeekSummary(
     loggedDays: days.length,
     averageCalories: average((day) => day.calories),
     averageProtein: average((day) => day.protein),
     trainingDays: trained.length,
-    weightChange: weighIns.length < 2
-        ? null
-        : weighIns.last.weight - weighIns.first.weight,
+    weightChange: weighedThisWeek ? weeklyWeightChange(weights) : null,
   );
 }

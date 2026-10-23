@@ -477,7 +477,8 @@ class _WeekCard extends StatelessWidget {
                     l10n.weekTraining('${week.trainingDays}'),
                     if (change != null)
                       l10n.weekWeight(
-                          context.formatSigned(change, decimals: 1)),
+                          context.formatSigned(change.kg, decimals: 1),
+                          formatShortDate(change.since)),
                   ].join(' • '),
                   style: muted,
                 ),
@@ -497,12 +498,8 @@ class _WeightCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final latest = weights.isEmpty ? null : weights.first;
-    // Compare with the newest weigh-in that is at least a week older.
-    final weekAgo = latest == null
-        ? null
-        : weights.where((entry) =>
-            latest.recordedAt.difference(entry.recordedAt).inDays >= 7);
-    final previous = weekAgo == null || weekAgo.isEmpty ? null : weekAgo.first;
+    // The same comparison as the week card, so both show one number.
+    final change = weeklyWeightChange(weights);
     return CyberCard(
       title: l10n.weightTracking,
       icon: Icons.monitor_weight_outlined,
@@ -518,12 +515,12 @@ class _WeightCard extends StatelessWidget {
                   formatDate(latest.recordedAt)),
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            if (previous != null) ...[
+            if (change != null) ...[
               const SizedBox(height: 4),
               Text(
-                l10n.todayWeightWeek(context.formatSigned(
-                    latest.weight - previous.weight,
-                    decimals: 1)),
+                l10n.todayWeightWeek(
+                    context.formatSigned(change.kg, decimals: 1),
+                    formatShortDate(change.since)),
                 style: TextStyle(color: CyberColors.muted),
               ),
             ],

@@ -905,8 +905,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayOpenDiary => 'Open diary';
 
   @override
-  String todayWeightWeek(String change) {
-    return '7-day change: $change kg';
+  String todayWeightWeek(String change, String date) {
+    return 'Change since $date: $change kg';
   }
 
   @override
@@ -1319,8 +1319,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String weekWeight(String change) {
-    return 'Weight $change kg';
+  String weekWeight(String change, String date) {
+    return 'Weight $change kg since $date';
   }
 
   @override

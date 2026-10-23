@@ -897,8 +897,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get todayOpenDiary => 'Mở nhật ký';
 
   @override
-  String todayWeightWeek(String change) {
-    return 'Thay đổi 7 ngày: $change kg';
+  String todayWeightWeek(String change, String date) {
+    return 'Thay đổi so với $date: $change kg';
   }
 
   @override
@@ -1309,8 +1309,8 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String weekWeight(String change) {
-    return 'Cân nặng $change kg';
+  String weekWeight(String change, String date) {
+    return 'Cân nặng $change kg so với $date';
   }
 
   @override

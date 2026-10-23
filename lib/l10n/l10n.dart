@@ -31,6 +31,10 @@ extension AppLocalizationsContext on BuildContext {
 String formatDate(DateTime value) => '${_pad(value.day)}/${_pad(value.month)}/'
     '${value.year}';
 
+/// Day and month only, e.g. 16/10, for dates within the last weeks.
+String formatShortDate(DateTime value) =>
+    '${_pad(value.day)}/${_pad(value.month)}';
+
 String formatDateTime(DateTime value) {
   final date = value.toLocal();
   return '${formatDate(date)} ${_pad(date.hour)}:${_pad(date.minute)}';

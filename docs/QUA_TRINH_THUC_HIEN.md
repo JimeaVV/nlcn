@@ -2268,6 +2268,29 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   tràn bố cục; đã xem ảnh Hôm nay và Hồ sơ ở máy 360 px chữ ×1,3, và Nhật ký
   ở Neon. Build APK 123.
 
+### 2026-10-23 · Hai thẻ ở màn Hôm nay ghi cùng một mức thay đổi cân nặng
+- Lý do: agent `ui-reviewer` phát hiện, với cùng một dữ liệu, thẻ "7 ngày
+  qua" ghi "Cân nặng −0,4 kg" còn thẻ "Theo dõi cân nặng" ghi "Thay đổi 7
+  ngày: −0,8 kg". Hai thẻ tính theo hai cách khác nhau:
+  - thẻ tuần lấy lần cân đầu và cuối *trong* 7 ngày (70,0 cách 4 ngày →
+    69,6);
+  - thẻ cân nặng lấy lần mới nhất so với lần gần nhất *cách ít nhất* 7 ngày
+    (70,4 cách 9 ngày), nhưng vẫn ghi là "7 ngày".
+- Đã làm:
+  - Một hàm chung `weeklyWeightChange` (`lib/engine/daily_habits.dart`): lấy
+    lần cân mới nhất, so với lần cân trước đó gần mốc một tuần nhất (cách
+    đều thì lấy lần cũ hơn), và trả về cả ngày của lần cân đó.
+  - Cả hai thẻ dùng hàm này và ghi rõ ngày so sánh, ví dụ "Thay đổi so với
+    14/10: −0,8 kg" và "Cân nặng −0,8 kg so với 14/10". Có cả tiếng Anh.
+  - Thẻ tuần chỉ hiện cân nặng khi trong tuần có ít nhất một lần cân.
+  - Thêm `formatShortDate` (dd/mm).
+- Kiểm tra: test mới cho `weeklyWeightChange`: chọn 9 ngày thay vì 4 ngày;
+  hai lần cách mốc bằng nhau thì lấy lần cũ hơn; chỉ có lần cân gần đây thì
+  so với lần sớm nhất; chỉ một lần cân thì không có kết quả; tuần không cân
+  thì không hiện. Test màn Hôm nay kiểm tra hai thẻ hiện cùng số và cùng
+  ngày. `flutter analyze` sạch; `flutter test` 212/212 PASS; ảnh màn Hôm nay
+  hiện −0,8 kg so với 14/10 ở cả hai thẻ. Build APK 124.
+
 ---
 
 ## 3. Việc còn tồn đọng

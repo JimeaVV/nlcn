@@ -248,7 +248,13 @@ void main() {
 
     expect(find.text('1.250 / 2.000 kcal'), findsOneWidget);
     expect(find.text('Còn 750 kcal so với mục tiêu'), findsOneWidget);
-    expect(find.text('Thay đổi 7 ngày: -0,4 kg'), findsOneWidget);
+    // Both cards compare with the same earlier weigh-in, 8 days back.
+    final since = now.subtract(const Duration(days: 8));
+    final date = '${since.day.toString().padLeft(2, '0')}/'
+        '${since.month.toString().padLeft(2, '0')}';
+    expect(find.text('Thay đổi so với $date: -0,4 kg'), findsOneWidget);
+    expect(
+        find.textContaining('Cân nặng -0,4 kg so với $date'), findsOneWidget);
     expect(find.text('Đã ghi 1 bài tập hôm nay'), findsOneWidget);
     expect(find.text('1 ngày liên tục ghi ăn'), findsOneWidget);
     expect(find.text('Ghi ăn 1/7 ngày'), findsOneWidget);
@@ -256,7 +262,8 @@ void main() {
         findsOneWidget);
     expect(find.text('So với mục tiêu 2.000 kcal: -750 kcal/ngày'),
         findsOneWidget);
-    expect(find.text('Tập 1 ngày'), findsOneWidget);
+    // Training and the weight change share the week card's last line.
+    expect(find.textContaining('Tập 1 ngày • Cân nặng'), findsOneWidget);
 
     expect(find.text('0 / 2.000 ml'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('water-add')));

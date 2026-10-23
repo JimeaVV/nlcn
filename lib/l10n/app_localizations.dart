@@ -1675,8 +1675,8 @@ abstract class AppLocalizations {
   /// No description provided for @todayWeightWeek.
   ///
   /// In vi, this message translates to:
-  /// **'Thay đổi 7 ngày: {change} kg'**
-  String todayWeightWeek(String change);
+  /// **'Thay đổi so với {date}: {change} kg'**
+  String todayWeightWeek(String change, String date);
 
   /// No description provided for @todayNoExercise.
   ///
@@ -2337,8 +2337,8 @@ abstract class AppLocalizations {
   /// No description provided for @weekWeight.
   ///
   /// In vi, this message translates to:
-  /// **'Cân nặng {change} kg'**
-  String weekWeight(String change);
+  /// **'Cân nặng {change} kg so với {date}'**
+  String weekWeight(String change, String date);
 
   /// No description provided for @weekEmpty.
   ///

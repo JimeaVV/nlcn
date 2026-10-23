@@ -446,8 +446,8 @@ extension on SettingsScreen {
                 ),
                 TextButton.icon(
                   key: const ValueKey('collect-delete'),
-                  style: TextButton.styleFrom(
-                      foregroundColor: CyberColors.danger),
+                  style:
+                      TextButton.styleFrom(foregroundColor: CyberColors.danger),
                   onPressed: () => _deletePhotos(context),
                   icon: const Icon(Icons.delete_outline_rounded),
                   label: Text(l10n.collectDelete),
