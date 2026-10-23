@@ -2080,6 +2080,24 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Kiểm tra: sinh lại `train_food_model.ipynb`; `grep 224` chỉ còn ở bảng
   kích thước và các chú thích đúng.
 
+### 2026-10-23 · Train nốt model 1.5 (epoch 7–8), đưa epoch 7 vào app
+- Lý do: bản 1.5 trước dừng ở epoch 6/8 vì hết giờ Colab. Người dùng chạy
+  tiếp epoch 7 rồi đổi tài khoản Google chạy epoch 8. Notebook gửi đi có
+  thêm một ô ở đầu, chép `last.keras`, `checkpoint.keras`, `progress.json`
+  và log của epoch 7 từ thư mục chia sẻ sang Drive tài khoản mới, nên lần
+  chạy đó tự tiếp tục từ epoch 7.
+- Kết quả: đủ 8 epoch, tổng 261 phút train. Val: epoch 7 đạt 0,8756, epoch 8
+  0,8751, nên notebook giữ epoch 7. Trên tập test, so với epoch 6 đang dùng:
+  - món top-1 0,871 (0,870), top-3 0,950 (0,949);
+  - thành phần F1 0,589 (0,577); ngưỡng mới: tick sẵn 0,5, hỏi lại 0,2;
+  - ức gà 0,75 (0,65), mực chiên 0,85 (0,83); rau xào giảm 0,77 xuống 0,69,
+    trứng chiên 0,75 xuống 0,73.
+- App dùng bản int8 12,0 MB; trên mẫu 1.000 ảnh test, int8 0,833 và
+  float16 0,827.
+- Kiểm tra: `flutter test` 207/207 PASS. Build APK 118. Lần build đầu chạy
+  cùng lúc với `flutter test` nên kẹt file tạm và không ra APK mới; build
+  lại riêng thì ra đúng versionCode 2118 và đúng chữ ký release.
+
 ---
 
 ## 3. Việc còn tồn đọng
