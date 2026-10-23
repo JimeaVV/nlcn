@@ -834,31 +834,31 @@ abstract class AppLocalizations {
   /// No description provided for @activitySedentary.
   ///
   /// In vi, this message translates to:
-  /// **'Ít vận động · ×{factor}'**
+  /// **'Hầu như không tập, ngồi nhiều · ×{factor}'**
   String activitySedentary(String factor);
 
   /// No description provided for @activityLight.
   ///
   /// In vi, this message translates to:
-  /// **'Nhẹ · ×{factor}'**
+  /// **'Tập 1–3 buổi/tuần · ×{factor}'**
   String activityLight(String factor);
 
   /// No description provided for @activityModerate.
   ///
   /// In vi, this message translates to:
-  /// **'Vừa · ×{factor}'**
+  /// **'Tập 3–5 buổi/tuần · ×{factor}'**
   String activityModerate(String factor);
 
   /// No description provided for @activityActive.
   ///
   /// In vi, this message translates to:
-  /// **'Nhiều · ×{factor}'**
+  /// **'Tập 6–7 buổi/tuần · ×{factor}'**
   String activityActive(String factor);
 
   /// No description provided for @activityVeryActive.
   ///
   /// In vi, this message translates to:
-  /// **'Rất nhiều · ×{factor}'**
+  /// **'Tập 2 buổi/ngày, hoặc làm việc nặng · ×{factor}'**
   String activityVeryActive(String factor);
 
   /// No description provided for @goal.

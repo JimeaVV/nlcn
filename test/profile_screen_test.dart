@@ -326,7 +326,7 @@ void main() {
     await reveal(tester, find.byType(DropdownButtonFormField<double>));
     await tester.tap(find.byType(DropdownButtonFormField<double>));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Nhiều · ×1,725').last);
+    await tester.tap(find.text('Tập 6–7 buổi/tuần · ×1,725').last);
     await tester.pumpAndSettle();
     await reveal(tester, find.text('Tăng cân'));
     await tester.tap(find.text('Tăng cân'));

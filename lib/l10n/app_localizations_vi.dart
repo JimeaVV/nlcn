@@ -418,27 +418,27 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String activitySedentary(String factor) {
-    return 'Ít vận động · ×$factor';
+    return 'Hầu như không tập, ngồi nhiều · ×$factor';
   }
 
   @override
   String activityLight(String factor) {
-    return 'Nhẹ · ×$factor';
+    return 'Tập 1–3 buổi/tuần · ×$factor';
   }
 
   @override
   String activityModerate(String factor) {
-    return 'Vừa · ×$factor';
+    return 'Tập 3–5 buổi/tuần · ×$factor';
   }
 
   @override
   String activityActive(String factor) {
-    return 'Nhiều · ×$factor';
+    return 'Tập 6–7 buổi/tuần · ×$factor';
   }
 
   @override
   String activityVeryActive(String factor) {
-    return 'Rất nhiều · ×$factor';
+    return 'Tập 2 buổi/ngày, hoặc làm việc nặng · ×$factor';
   }
 
   @override

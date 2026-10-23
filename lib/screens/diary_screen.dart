@@ -171,6 +171,10 @@ class DiaryScreenState extends State<DiaryScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
         content: Text(l10n.diaryDeleted),
+        // With an action Flutter keeps a snack bar until it is tapped; undo
+        // is only offered for a few seconds.
+        persist: false,
+        duration: const Duration(seconds: 5),
         action: SnackBarAction(
           label: l10n.diaryUndo,
           onPressed: () => _save([entry.withoutId()], l10n.diaryAdded),

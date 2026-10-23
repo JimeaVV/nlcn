@@ -2147,6 +2147,23 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Kiểm tra: `flutter gen-l10n`; `flutter analyze` sạch; `flutter test`
   208/208 PASS. Build APK 120.
 
+### 2026-10-23 · Thông báo "Hoàn tác" tự ẩn; mức vận động ghi theo số buổi tập
+- Lý do:
+  - Xoá một món trong Nhật ký thì thông báo "Đã xoá món… Hoàn tác" ở lại mãi
+    và che mất phần dưới. Flutter bản mới giữ một snack bar có nút bấm cho
+    tới khi được bấm (`persist` mặc định bật khi có `action`).
+  - Các mức "Ít / Nhẹ / Vừa / Nhiều / Rất nhiều" khó biết mình thuộc mức nào.
+- Đã làm:
+  - Snack bar hoàn tác đặt `persist: false` và hiện 5 giây.
+  - Mức vận động ghi theo số buổi tập, đúng với định nghĩa gốc của năm hệ số
+    TDEE nên con số tính ra không đổi: hầu như không tập (×1,2), 1–3
+    buổi/tuần (×1,375), 3–5 buổi/tuần (×1,55), 6–7 buổi/tuần (×1,725), 2
+    buổi/ngày hoặc làm việc nặng (×1,9). Có cả bản tiếng Anh.
+- Kiểm tra: test Nhật ký có thêm bước xoá món, đợi 6 giây thì nút "Hoàn
+  tác" phải biến mất. Test Hồ sơ đổi sang tên mức mới và mở danh sách ở
+  màn hình rộng 360 px, không bị tràn chữ. `flutter analyze` sạch; `flutter
+  test` 208/208 PASS. Build APK 121.
+
 ---
 
 ## 3. Việc còn tồn đọng

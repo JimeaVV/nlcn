@@ -421,27 +421,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String activitySedentary(String factor) {
-    return 'Sedentary · ×$factor';
+    return 'Little or no exercise · ×$factor';
   }
 
   @override
   String activityLight(String factor) {
-    return 'Light · ×$factor';
+    return 'Exercise 1–3 times a week · ×$factor';
   }
 
   @override
   String activityModerate(String factor) {
-    return 'Moderate · ×$factor';
+    return 'Exercise 3–5 times a week · ×$factor';
   }
 
   @override
   String activityActive(String factor) {
-    return 'Active · ×$factor';
+    return 'Exercise 6–7 times a week · ×$factor';
   }
 
   @override
   String activityVeryActive(String factor) {
-    return 'Very active · ×$factor';
+    return 'Twice a day, or a physical job · ×$factor';
   }
 
   @override

@@ -288,6 +288,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(database.entries.single.name, 'Phở bò');
     expect(database.entries.single.meal, MealSlot.lunch);
+
+    // Untouched, the undo offer goes away by itself after a few seconds.
+    await tester.tap(find.byTooltip('Xóa món'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hoàn tác'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
+    expect(find.text('Hoàn tác'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
