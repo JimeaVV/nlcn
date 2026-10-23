@@ -2098,6 +2098,28 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   cùng lúc với `flutter test` nên kẹt file tạm và không ra APK mới; build
   lại riêng thì ra đúng versionCode 2118 và đúng chữ ký release.
 
+### 2026-10-23 · Lưu kết quả mọi lần train vào `docs/ket_qua_model`
+- Lý do: kết quả các lần train nằm rải rác trên Drive của nhiều tài khoản
+  và trong thư mục tạm. Viết báo cáo và so sánh backbone sau này cần chúng ở
+  một chỗ, trong repo.
+- Đã làm:
+  - Sáu lần train thật, mỗi lần một thư mục với `results.json`,
+    `MODEL_CARD.md` và hai file log: bốn lần so backbone ở contract 1.3
+    (EfficientNetB0, EfficientNetV2-B0, MobileNetV3 của mỗi người), B3 1.4
+    và B3 1.5. Số liệu B3 1.4 lấy lại từ thư mục gốc trên Drive và khớp
+    với bản đã lưu trước đó. File model và `splits.csv` không đưa vào git vì
+    quá nặng; README ghi chỗ để chúng trên Drive.
+  - `README.md` có bảng so sánh chung và ghi rõ lần nào so được với lần nào:
+    chỉ so khi cùng contract và cùng cách train. B3 1.4 hơn nhóm 1.3 khoảng
+    17 điểm %, nhưng do cả backbone, cách train lẫn dữ liệu đều khác, nên
+    không quy hết cho backbone. Muốn so công bằng thì train lại B0 và
+    MobileNetV3 bằng notebook 1.4 với `RECIPE = 'full'`.
+  - `tool/train/compare_results.py` in được tiếng Việt trên console Windows
+    (trước đó lỗi `UnicodeEncodeError`).
+- Kiểm tra: chạy `compare_results.py` trên bốn thư mục 1.3 cho đúng bảng và
+  đúng lựa chọn EfficientNetB0 như ngày 20/10; số trong README lấy thẳng từ
+  các `results.json`.
+
 ---
 
 ## 3. Việc còn tồn đọng

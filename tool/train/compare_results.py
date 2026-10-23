@@ -92,6 +92,8 @@ def table(runs, winner):
 
 
 def main(argv=None):
+    # Windows consoles default to a legacy code page that has no Vietnamese.
+    sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('folders', nargs='+')
     parser.add_argument('--out', help='also write the table to this file')
