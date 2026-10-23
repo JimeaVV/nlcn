@@ -109,6 +109,12 @@ class CalorieGauge extends StatelessWidget {
                                     : l10n.gaugeLeftLabel,
                             style: TextStyle(color: CyberColors.muted),
                           ),
+                          SizedBox(height: width * 0.04),
+                          // Judged on the real value, so it does not flicker
+                          // through every state while the number counts up.
+                          GaugeEmblem(
+                              state: gaugeStateFor(eaten, target),
+                              size: width * 0.17),
                         ],
                       ),
                     ),
@@ -124,6 +130,59 @@ class CalorieGauge extends StatelessWidget {
           },
         );
       }),
+    );
+  }
+}
+
+/// Where the day stands, for the picture in the middle of the gauge.
+enum GaugeState { empty, eating, nearlyThere, over }
+
+GaugeState gaugeStateFor(double eaten, double? target) {
+  if (eaten <= 0) return GaugeState.empty;
+  if (target == null || target <= 0) return GaugeState.eating;
+  if (eaten > target) return GaugeState.over;
+  return eaten >= target * 0.9 ? GaugeState.nearlyThere : GaugeState.eating;
+}
+
+/// A picture instead of more words: cutlery before the first bite, a bowl
+/// in the gauge's colours while eating, a tick near the target, "stop" past
+/// it. Pops in when the state changes. Hidden from screen readers, which
+/// hear the gauge's own label.
+class GaugeEmblem extends StatelessWidget {
+  const GaugeEmblem({super.key, required this.state, required this.size});
+
+  final GaugeState state;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, color) = switch (state) {
+      GaugeState.empty => (Icons.restaurant_rounded, CyberColors.muted),
+      GaugeState.eating => (Icons.ramen_dining_rounded, null),
+      GaugeState.nearlyThere => (Icons.check_circle_rounded, CyberColors.lime),
+      GaugeState.over => (Icons.no_food_rounded, CyberColors.warning),
+    };
+    // White only as the base the bowl's gradient is painted over.
+    final picture = Icon(icon, size: size, color: color ?? Colors.white);
+    return ExcludeSemantics(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 350),
+        switchInCurve: Curves.easeOutBack,
+        transitionBuilder: (child, animation) =>
+            ScaleTransition(scale: animation, child: child),
+        child: KeyedSubtree(
+          key: ValueKey(state),
+          child: color != null
+              ? picture
+              // The bowl takes the arc's gradient.
+              : ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(
+                    colors: [CyberColors.cyan, CyberColors.magenta],
+                  ).createShader(bounds),
+                  child: picture,
+                ),
+        ),
+      ),
     );
   }
 }

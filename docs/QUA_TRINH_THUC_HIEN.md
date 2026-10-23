@@ -2353,6 +2353,26 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   (xanh → tím): cả hai đầu đúng màu. `flutter analyze` sạch; `flutter test`
   216/216 PASS. Build APK 126.
 
+### 2026-10-23 · Thêm hình trong vòng cung calo theo tiến độ trong ngày
+- Lý do: người dùng thấy chỗ dưới "kcal còn lại" trống. Họ muốn thêm một
+  hình, không muốn thêm chữ, vì thẻ đã nhiều số.
+- Đã làm: `GaugeEmblem` (`lib/widgets/intake_summary.dart`) đổi hình theo
+  `gaugeStateFor`:
+  - chưa ăn: dao dĩa, màu mờ;
+  - đang ăn, dưới 90% mục tiêu: tô mì có đũa, tô theo dải màu của vòng cung;
+  - từ 90% tới 100%: dấu ✓ màu xanh chanh;
+  - vượt mục tiêu: biểu tượng "dừng ăn" màu `warning`.
+  Đổi trạng thái thì hình phóng to ra. Trạng thái tính theo số thật, không
+  theo số đang chạy, nên hình không nhấp nháy qua các trạng thái lúc số đếm
+  lên. Trình đọc màn hình bỏ qua hình vì đã có nhãn của vòng cung.
+  - Lần đầu dùng hình bát cơm (`rice_bowl`), nhưng ở cỡ này trông như một
+    khối sọc, nên đổi sang tô mì (`ramen_dining`).
+- Kiểm tra: test `gaugeStateFor` ở các mốc 0, 50%, đúng 90%, 100% và vượt,
+  cùng trường hợp không có mục tiêu; test widget tìm đúng hình lúc đang ăn và
+  lúc vượt. Skill `ui-screenshots` vẽ thêm vòng cung lúc chưa ăn và lúc 94%;
+  đã xem cả bốn trạng thái. `flutter analyze` sạch; `flutter test` 217/217
+  PASS. Build APK 127.
+
 ---
 
 ## 3. Việc còn tồn đọng

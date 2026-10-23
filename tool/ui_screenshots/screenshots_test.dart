@@ -169,6 +169,13 @@ const _gaugeTargets = {'target_calories': 2559.0, 'protein_target': 120.6};
 Widget _gauges() => ListView(
       padding: const EdgeInsets.all(16),
       children: const [
+        IntakeSummary(totals: FoodLogTotals(), targets: _gaugeTargets),
+        SizedBox(height: 24),
+        IntakeSummary(
+            totals: FoodLogTotals(
+                calories: 2400, carbs: 250, protein: 125, fat: 85),
+            targets: _gaugeTargets),
+        SizedBox(height: 24),
         IntakeSummary(
             totals: FoodLogTotals(
                 calories: 2311, carbs: 220, protein: 141, fat: 92),
@@ -182,7 +189,7 @@ Widget _gauges() => ListView(
     );
 
 final _screens = <String, (double, Widget Function())>{
-  'gauge': (1000, _gauges),
+  'gauge': (1900, _gauges),
   'today': (1250, () => TodayScreen(database: _Database())),
   'diary': (
     1150,
