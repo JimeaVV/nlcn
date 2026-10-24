@@ -28,6 +28,11 @@
 #    and exports the best epoch so far. Then, or if the session was cut off
 #    anyway, run all again with the same settings: training continues from
 #    `last.pt` in Drive.
+# 6. To go on with another Google account: in the first account's Drive,
+#    share `macrorunner_train/detector_yolo11n/train/weights` as *Anyone
+#    with the link*, put that link in `RESUME_FROM` and run all with the
+#    other account. It copies `last.pt` and `best.pt` into its own Drive
+#    first.
 #
 # **On Kaggle**: add the dataset `thomasnguyen6868/vietfood68`, turn the GPU
 # and Internet on (MyFood downloads from Zenodo), Save & Run All. The files
@@ -65,6 +70,9 @@ KEEP_DISH_PHOTOS = False
 BACKGROUND_SHARE = 0.1
 LONG_SIDE = 640          # photos are shrunk to this once, for fast loading
 ULTRALYTICS_VERSION = '8.4.185'
+# A shared link to another Colab account's `train/weights` folder, to train
+# on from its last.pt (step 6 above). Empty: start or go on in this Drive.
+RESUME_FROM = os.environ.get('RESUME_FROM', '')
 
 ON_COLAB = 'google.colab' in sys.modules
 ON_KAGGLE = bool(os.environ.get('KAGGLE_KERNEL_RUN_TYPE'))
@@ -137,6 +145,27 @@ if ON_COLAB:
 EXTRA_ROOT = os.path.join(WORK_DIR, 'extra')
 os.makedirs(EXTRA_ROOT, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+weights_dir = os.path.join(OUTPUT_DIR, 'train', 'weights')
+if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
+    try:
+        import gdown
+    except ImportError:
+        subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'gdown'],
+                       check=True)
+        import gdown
+    stage(f'Copying last.pt and best.pt from {RESUME_FROM} ...')
+    shared = os.path.join(WORK_DIR, 'resume_from')
+    try:
+        got = gdown.download_folder(url=RESUME_FROM, output=shared, quiet=True)
+        os.makedirs(weights_dir, exist_ok=True)
+        for name in ('last.pt', 'best.pt'):
+            path = next(p for p in got or [] if os.path.basename(p) == name)
+            shutil.copy(path, weights_dir)
+    except Exception as error:
+        raise RuntimeError(
+            f'Could not copy the weights from RESUME_FROM: {error!r}. Share the '
+            'train/weights folder as "Anyone with the link".') from error
 
 myfood_dir = os.path.join(EXTRA_ROOT, 'myfood')
 if DOWNLOAD_MYFOOD and not os.path.isdir(myfood_dir):

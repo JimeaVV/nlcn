@@ -2496,6 +2496,25 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     và ghi rõ phải đổi tên bản INT8 thành `detector.tflite`.
   - `flutter test` 240/240 PASS; `check_vn_food.py` OK.
 
+### 2026-10-25 · Model phát hiện món: kết quả lần train đầu, train tiếp bằng tài khoản Colab khác
+- Kết quả lần train đầu trên Colab (YOLO11n, 640 px):
+  - 21.541 ảnh: train 17.778, val 2.454, test 1.309. Loại nào cũng có
+    trên 1.000 khung ở tập train.
+  - Dừng ở epoch 62/80 vì gần hết giờ Colab (khoảng 3,9 phút/epoch).
+  - Trên tập test: mAP50 0,830, mAP50-95 0,707, precision 0,834, recall
+    0,748; ngưỡng khung chọn theo F1 là 0,52.
+  - Tốt nhất: khoai tây chiên 0,958, cơm 0,935. Yếu nhất: chả 0,596, đậu hũ
+    0,700, gà 0,737.
+  - Bản TFLite đọc theo cách của app khớp Ultralytics 20/20 ảnh.
+- Lý do sửa: muốn chạy 18 epoch còn lại bằng tài khoản Google khác, nhưng
+  `last.pt` nằm trong Drive của tài khoản cũ, nên notebook sẽ train lại từ
+  đầu.
+- Đã làm: thêm `RESUME_FROM` vào `train_detector.py`. Đặt link chia sẻ
+  thư mục `train/weights` của tài khoản cũ, notebook tải `last.pt` và
+  `best.pt` về Drive của tài khoản mới bằng gdown rồi train tiếp.
+- Kiểm tra: chạy riêng đoạn sao chép với gdown giả: chép đúng 2 file; thư
+  mục thiếu file thì báo lỗi rõ ràng. `smoke_detector.py` vẫn chạy đúng.
+
 ---
 
 ## 3. Việc còn tồn đọng
