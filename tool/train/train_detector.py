@@ -440,6 +440,8 @@ epoch_seconds = []
 def check_time(trainer):
     """After each saved epoch: stop if the next one would not finish in time,
     leaving last.pt resumable (Ultralytics strips it once training ends)."""
+    if trainer.epoch + 1 > trainer.epochs:
+        return   # the final evaluation calls this again after the last epoch
     epoch_seconds.append(time.time() - epoch_started[0])
     epoch_started[0] = time.time()
     with open(PROGRESS + '.tmp', 'w') as f:
