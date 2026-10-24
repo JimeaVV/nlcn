@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -7,9 +8,11 @@ import '../core/cyber_theme.dart';
 import '../core/haptics.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
+import '../models/plate_detection.dart';
 import '../models/scan_plate.dart';
 import '../models/vn_food.dart';
 import '../services/database_service.dart';
+import '../services/food_detector.dart';
 import '../services/food_recognizer.dart';
 import '../services/photo_collector.dart';
 import '../widgets/cyber_card.dart';
@@ -27,6 +30,7 @@ class ScanResultScreen extends StatefulWidget {
     required this.imagePath,
     required this.data,
     required this.recognizer,
+    this.detector = const NoFoodDetector(),
     this.database,
     this.collector,
   });
@@ -34,6 +38,9 @@ class ScanResultScreen extends StatefulWidget {
   final String imagePath;
   final VnFoodData data;
   final FoodRecognizer recognizer;
+
+  /// Finds each food on the plate, when a detector is bundled.
+  final FoodDetector detector;
   final DatabaseService? database;
 
   /// Where confirmed photos are kept; [PhotoCollector.instance] by default.
@@ -45,6 +52,7 @@ class ScanResultScreen extends StatefulWidget {
 
 class _ScanResultScreenState extends State<ScanResultScreen> {
   FoodRecognition _recognition = FoodRecognition.empty;
+  PlateDetection _detection = PlateDetection.empty;
   bool _recognizing = true;
 
   // The model answers in a fraction of a second, which hid the scan sweep;
@@ -71,25 +79,51 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   }
 
   Future<void> _recognize() async {
+    // Both models at once; either may fail without stopping the other.
+    final detecting = widget.detector.detect(widget.imagePath).then(
+        (found) => found,
+        onError: (Object _) => PlateDetection.empty);
     FoodRecognition result;
     try {
       result = await widget.recognizer.recognize(widget.imagePath);
     } catch (_) {
       result = FoodRecognition.empty;
     }
+    final found = await detecting;
     if (!mounted) return;
     setState(() {
       _recognition = result;
+      _detection = found;
       _recognizing = false;
       final top = result.topDishes(1);
-      // A confident guess opens directly; otherwise the user picks.
-      if (top.isNotEmpty &&
+      final confident = top.isNotEmpty &&
           !result.looksUnknown &&
-          top.first.value >= result.thresholds.confidentDish) {
+          top.first.value >= result.thresholds.confidentDish;
+      // Several foods on the plate: one row each, unless a confident dish
+      // already holds them all (cơm tấm with its egg and pork).
+      final dish = confident ? widget.data.dish(top.first.key) : null;
+      final detected = _detectedPlate;
+      _detectedCount = detected?.items.length;
+      if (detected != null && (dish == null || !dishShowsAll(dish, found))) {
+        _plate = detected;
+        Haptics.found();
+      } else if (confident) {
+        // A confident guess opens directly; otherwise the user picks.
         _choose(top.first.key);
         Haptics.found();
       }
     });
+  }
+
+  /// How many foods the plate built from the detector's boxes has, when at
+  /// least two; null otherwise.
+  int? _detectedCount;
+
+  /// A fresh plate from the detector's boxes.
+  ScanPlate? get _detectedPlate {
+    if (_detection.codes.length < 2) return null;
+    final plate = ScanPlate.detected(widget.data, _detection);
+    return plate.items.length < 2 ? null : plate;
   }
 
   void _choose(String code) {
@@ -209,7 +243,9 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
       await _keepPhoto(
           plate.isSingle
               ? 'single_${plate.items.first.component.code}'
-              : plate.dish.code,
+              : plate.isDetected
+                  ? 'plate'
+                  : plate.dish.code,
           plate.dish.nameVi);
       Haptics.strong();
       if (mounted) Navigator.pop(context, true);
@@ -259,6 +295,8 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                             color: CyberColors.muted, size: 48),
                       ),
                     ),
+                    if (!_recognizing && _detection.foods.isNotEmpty)
+                      _DetectionBoxes(detection: _detection),
                     if (_recognizing || _sweepShown) const ScanSweep(),
                   ],
                 ),
@@ -279,9 +317,14 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   data: widget.data,
                   selected: plate?.dish.code,
                   chosenName: plate?.dish.name(language),
+                  detectedCount: _detectedCount,
                   onChoose: (code) {
                     Haptics.tap();
                     setState(() => _choose(code));
+                  },
+                  onChooseDetected: () {
+                    Haptics.tap();
+                    setState(() => _plate = _detectedPlate);
                   },
                   onPickOther: _pickDish,
                 ),
@@ -365,6 +408,8 @@ class _DishCard extends StatelessWidget {
     required this.chosenName,
     required this.onChoose,
     required this.onPickOther,
+    this.detectedCount,
+    this.onChooseDetected,
   });
 
   final FoodRecognition recognition;
@@ -377,11 +422,16 @@ class _DishCard extends StatelessWidget {
   final ValueChanged<String> onChoose;
   final VoidCallback onPickOther;
 
+  /// How many foods the detector found, when several.
+  final int? detectedCount;
+  final VoidCallback? onChooseDetected;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final language = Localizations.localeOf(context).languageCode;
     final top = recognition.topDishes();
+    final detected = selected == ScanPlate.detectedPlateCode;
 
     return CyberCard(
       highlight: true,
@@ -393,6 +443,9 @@ class _DishCard extends StatelessWidget {
           if (!modelAvailable)
             Text(l10n.scanModelPending,
                 style: TextStyle(color: CyberColors.muted))
+          else if (detected)
+            Text(l10n.scanDetectedHint,
+                style: TextStyle(color: CyberColors.muted))
           else if (recognition.looksUnknown)
             Text(l10n.scanNotInApp, style: TextStyle(color: CyberColors.muted))
           else if (top.isEmpty)
@@ -400,12 +453,23 @@ class _DishCard extends StatelessWidget {
           else if (top.first.value < recognition.thresholds.confidentDish)
             Text(l10n.scanLowConfidence,
                 style: TextStyle(color: CyberColors.muted)),
-          if (top.isNotEmpty) ...[
+          if (top.isNotEmpty || detectedCount != null) ...[
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
+                if (detectedCount case final count?)
+                  ChoiceChip(
+                    showCheckmark: false,
+                    key: const ValueKey('guess-detected'),
+                    avatar: Icon(Icons.center_focus_strong_rounded,
+                        size: 18, color: CyberColors.cyan),
+                    selected: detected,
+                    label: Text(l10n.scanDetectedPlate(count)),
+                    // Tapped again it keeps what the user changed.
+                    onSelected: (_) => detected ? null : onChooseDetected?.call(),
+                  ),
                 for (final guess in top)
                   ChoiceChip(
                     // A checkmark would widen the chip and re-wrap the row.
@@ -421,6 +485,7 @@ class _DishCard extends StatelessWidget {
             ),
           ],
           if (chosenName != null &&
+              !detected &&
               !top.any((guess) => guess.key == selected)) ...[
             const SizedBox(height: 10),
             Text(chosenName!, style: Theme.of(context).textTheme.titleLarge),
@@ -449,6 +514,116 @@ class _DishCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A box around each food the detector found, with its name. The photo is
+/// shown cropped to fill its frame, so the boxes are cropped the same way.
+class _DetectionBoxes extends StatelessWidget {
+  const _DetectionBoxes({required this.detection});
+
+  final PlateDetection detection;
+
+  @override
+  Widget build(BuildContext context) {
+    // Short names fit small boxes: "Trứng", not "Trứng kho / trứng luộc".
+    final name = context.l10n.detectorClassName;
+    return Semantics(
+      label: context.l10n
+          .scanBoxesLabel(detection.codes.map(name).join(', ')),
+      child: ExcludeSemantics(
+        child: CustomPaint(
+          key: const ValueKey('scan-boxes'),
+          painter: _BoxesPainter(
+            detection: detection,
+            names: {for (final code in detection.codes) code: name(code)},
+            colour: CyberColors.cyan,
+            labelStyle: DefaultTextStyle.of(context).style.copyWith(
+                color: CyberColors.background,
+                fontSize: 12,
+                fontWeight: FontWeight.w700),
+            textScaler: MediaQuery.textScalerOf(context),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BoxesPainter extends CustomPainter {
+  _BoxesPainter({
+    required this.detection,
+    required this.names,
+    required this.colour,
+    required this.labelStyle,
+    required this.textScaler,
+  });
+
+  final PlateDetection detection;
+  final Map<String, String> names;
+  final Color colour;
+
+  /// The app's font, so Vietnamese names draw on the photo.
+  final TextStyle labelStyle;
+  final TextScaler textScaler;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (detection.width <= 0 || detection.height <= 0) return;
+    // BoxFit.cover: scaled to fill, centred, the overflow cut off.
+    final scale = size.width / detection.width > size.height / detection.height
+        ? size.width / detection.width
+        : size.height / detection.height;
+    final shown = Size(detection.width * scale, detection.height * scale);
+    final offset = Offset((size.width - shown.width) / 2,
+        (size.height - shown.height) / 2);
+    final stroke = Paint()
+      ..color = colour
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+    for (final food in detection.foods) {
+      final box = Rect.fromLTRB(
+        offset.dx + food.box.left * shown.width,
+        offset.dy + food.box.top * shown.height,
+        offset.dx + food.box.right * shown.width,
+        offset.dy + food.box.bottom * shown.height,
+      );
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(box, const Radius.circular(8)), stroke);
+      // At least 40 px wide, never wider than the photo.
+      final room = math.max(40.0, math.min(box.width, size.width) - 8);
+      TextPainter label(String text) => TextPainter(
+            text: TextSpan(text: text, style: labelStyle),
+            textDirection: TextDirection.ltr,
+            textScaler: textScaler,
+            maxLines: 1,
+            ellipsis: '…',
+          )..layout(maxWidth: room);
+      // The score goes first when the box is too narrow for both.
+      final name = names[food.code] ?? '';
+      var text = label('$name ${(food.score * 100).round()}%');
+      if (text.didExceedMaxLines) text = label(name);
+      // Inside the box's top edge, so it stays on the photo.
+      final at = Offset(
+          box.left.clamp(0, math.max(0, size.width - text.width - 8)),
+          box.top.clamp(0, math.max(0, size.height - text.height - 4)));
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(at.dx, at.dy, text.width + 8, text.height + 4),
+              const Radius.circular(6)),
+          Paint()..color = colour);
+      text.paint(canvas, at + const Offset(4, 2));
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_BoxesPainter old) =>
+      old.detection != detection ||
+      old.colour != colour ||
+      old.labelStyle != labelStyle ||
+      old.textScaler != textScaler;
 }
 
 /// Servings offered for the whole dish.

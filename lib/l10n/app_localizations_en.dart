@@ -1630,4 +1630,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanRefine => 'Pick the part and cooking';
+
+  @override
+  String scanDetectedPlate(int count) {
+    return '$count foods on the plate';
+  }
+
+  @override
+  String get scanDetectedHint => 'One row below for each food on the plate.';
+
+  @override
+  String scanBoxesLabel(String foods) {
+    return 'Photo with a box around each food found: $foods';
+  }
+
+  @override
+  String detectorClassName(String code) {
+    String _temp0 = intl.Intl.selectLogic(
+      code,
+      {
+        'com': 'Rice',
+        'bun': 'Vermicelli',
+        'mi': 'Noodles',
+        'banh_mi_o': 'Bread',
+        'ga': 'Chicken',
+        'thit_kho': 'Braised pork',
+        'thit_nuong': 'Grilled pork',
+        'heo': 'Pork',
+        'bo': 'Beef',
+        'ca': 'Fish',
+        'tom': 'Shrimp',
+        'muc': 'Squid',
+        'trung': 'Egg',
+        'dau_hu': 'Tofu',
+        'cha': 'Pork roll',
+        'cha_gio': 'Spring roll',
+        'rau': 'Greens',
+        'dua_leo_ca_chua': 'Cucumber, tomato',
+        'do_chua': 'Pickles',
+        'khoai_tay_chien': 'Fries',
+        'canh': 'Soup',
+        'other': 'Food',
+      },
+    );
+    return '$_temp0';
+  }
 }

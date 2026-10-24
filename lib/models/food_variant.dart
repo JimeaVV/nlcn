@@ -157,4 +157,6 @@ const componentVariants = <String, (String group, String key)>{
   'thit_kho': ('heo', 'nac_mo||luoc'),
   'thit_nuong': ('heo', 'cot_let||nuong'),
   'suon_nuong': ('heo', 'cot_let||nuong'),
+  // Plain pork the plate detector found (contract §7.1).
+  'heo': ('heo', 'nac_mo||luoc'),
 };

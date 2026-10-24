@@ -5,7 +5,7 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.5**
+- `contract_version`: **1.6**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
@@ -22,7 +22,10 @@ nào thì phải báo người kia, tăng `contract_version` và ghi vào
     Food-101, MyFood và các khung trong VietFood67; ảnh người dùng tự lưu
     trong app cũng dùng để train (mục 5). Model 1.5 train tiếp từ model
     1.4: 65 món cũ giữ nguyên thứ tự, món mới nối vào sau.
-- Cập nhật: 2026-10-22
+  - 1.6: thêm model thứ hai, **phát hiện từng món trên đĩa** bằng YOLO (mục
+    7): 21 lớp, mỗi lớp ứng với một thành phần hoặc một nhóm biến thể của
+    app. Model nhận diện món (mục 6) không đổi, vẫn là model 1.5.
+- Cập nhật: 2026-10-24
 
 ---
 
@@ -286,6 +289,9 @@ index.csv          file,label,name,model_guess,model_confidence,saved_at
   `trung_luoc`… (món lẻ có cùng nghĩa); `new_<tên>` vào lớp `khac`.
 - `model_guess` là món model đoán lúc chụp: ảnh model đoán sai là ảnh
   đáng train nhất.
+- Từ v1.6, `label` là `plate` khi người dùng ghi một đĩa nhiều món do
+  model phát hiện tìm ra (mục 7). Notebook nhận diện món bỏ qua nhãn này;
+  ảnh để dành khoanh khung cho model phát hiện sau.
 
 ## 6. Định dạng model đưa vào app
 Đặt trong `assets/models/`:
@@ -363,13 +369,112 @@ component_dishes: com_tam, com_phan
 (cần TensorFlow) tạo một model chưa train, đúng định dạng trên. Đây cũng là
 mẫu cách xuất model. **Không** đưa model giả vào `assets/models/`.
 
-## 7. Giai đoạn YOLO (tuần 5–7, nâng cấp)
-- Lớp của YOLO = các thành phần trong `components.txt` (có thể chỉ lấy một
-  phần), cùng mã.
-- Nhãn theo định dạng YOLO (`class cx cy w h`), gán bằng Roboflow hoặc CVAT.
-- Dùng để **đếm** (2 trứng, 2 miếng sườn) và **gợi ý khẩu phần** từ diện tích
-  khung. Định dạng đầu ra sẽ được bổ sung vào contract khi bắt đầu tuần 5.
-- License Ultralytics: AGPL-3.0, phải ghi rõ trong báo cáo.
+## 7. Model phát hiện món trên đĩa (YOLO, từ v1.6)
+**Vì sao cần:** model ở mục 6 chỉ trả lời "ảnh này là món gì". Một đĩa
+cơm trắng với ức gà không phải món nào trong 91 món, nên khi thử thật model
+đoán "Cà ri gà" 49%. Model phát hiện tìm **từng thứ trên đĩa**, mỗi thứ một
+khung, nên đĩa đó ra "cơm" và "thịt gà". Nó cũng đếm được (2 quả trứng, 3
+cuốn chả giò).
+
+Đặt trong `assets/models/`, **không bắt buộc**: thiếu thì app chạy như cũ.
+```
+detector.tflite        model
+detector_classes.txt   mỗi dòng một mã lớp, đúng thứ tự đầu ra
+DETECTOR_CARD.md       ngày train, dữ liệu, kết quả, ngưỡng
+```
+
+### 7.1. Danh sách lớp
+Thứ tự dưới đây là thứ tự đầu ra, không được đổi; lớp mới chỉ nối vào
+cuối. Cột "Trong app" là thứ app đưa vào đĩa khi thấy lớp đó. Lớp có nhóm
+biến thể thì người dùng bấm vào tên để chọn phần và cách nấu (mục 4,
+`food_variants.csv`).
+
+| # | Mã lớp | Khung VietFood67 | Mặt nạ MyFood | Trong app |
+|---|---|---|---|---|
+| 0 | `com` | Com | rice | `com` (nhóm Cơm & tinh bột) |
+| 1 | `bun` | Bun | | `bun` |
+| 2 | `mi` | Mi | spaghetti | `mi` |
+| 3 | `banh_mi_o` | Banh mi | | `banh_mi_o` |
+| 4 | `ga` | Thit ga | chicken_breast | `ga` (nhóm Gà) |
+| 5 | `thit_kho` | Thit kho | | `thit_kho` (nhóm Heo) |
+| 6 | `thit_nuong` | Thit nuong | | `thit_nuong` (nhóm Heo) |
+| 7 | `heo` | Thit heo, Heo quay | | biến thể heo "nửa nạc nửa mỡ, luộc" (nhóm Heo) |
+| 8 | `bo` | Thit bo | steak | `bo` (nhóm Bò) |
+| 9 | `ca` | Ca | | `ca` (nhóm Cá) |
+| 10 | `tom` | Tom | | `tom` |
+| 11 | `muc` | Muc | | `_base_muc_chien` |
+| 12 | `trung` | Trung | boiled_egg, fried_egg | `trung_kho` (nhóm Trứng) |
+| 13 | `dau_hu` | Dau hu | | `dau_hu` |
+| 14 | `cha` | Cha | | `cha_lua` |
+| 15 | `cha_gio` | Cha gio | | `_base_cha_gio` |
+| 16 | `rau` | Rau, Bong cai | salad | `rau_nau` |
+| 17 | `dua_leo_ca_chua` | Dua leo, Ca chua | | `dua_leo_ca_chua` |
+| 18 | `do_chua` | Dua chua | | `do_chua` |
+| 19 | `khoai_tay_chien` | Khoai tay chien | | `_base_khoai_tay_chien` |
+| 20 | `canh` | Canh | | `_base_canh_chua` (**ước lượng**: mọi loại canh tính như canh chua) |
+
+- Mã lớp trùng mã thành phần khi có thành phần đó (`com`, `ga`…). Các lớp
+  `heo`, `muc`, `trung`, `cha`, `cha_gio`, `rau`, `khoai_tay_chien`, `canh`
+  không có thành phần cùng tên, app đổi theo bảng trên.
+- Dinh dưỡng của mọi lớp lấy từ `components.csv` và `food_variants.csv`,
+  không có số mới.
+- Khung VietFood67 khác không thuộc lớp nào (người, chanh, ớt, nấm…) là nền.
+- Ảnh VietFood67 có khung **cả món** (Phở, Cơm tấm, Bún bò Huế…) mặc định
+  không dùng: trong khung đó, cơm, trứng, chả thường không được khoanh riêng,
+  nên train vào sẽ dạy model rằng chúng là nền. Notebook có cờ
+  `KEEP_DISH_PHOTOS` để thử dùng.
+- MyFood: mỗi vùng liền của một giá trị mặt nạ là một khung (hai quả trứng
+  thành hai khung). Táo và đậu (bean) là nền.
+
+### 7.2. Định dạng model
+| Mục | Quy định |
+|---|---|
+| Đầu vào | `float32`, ảnh **RGB, giá trị 0–1** (khác model mục 6, vốn nhận 0–255). Dạng `[1, 3, S, S]` (bản xuất LiteRT của Ultralytics) hoặc `[1, S, S, 3]` (bản xuất cũ qua onnx2tf); app nhận cả hai, đọc S từ file. Mặc định S = 640 |
+| Tiền xử lý | App: thu nhỏ ảnh giữ tỉ lệ cho cạnh dài bằng S, đặt vào giữa, phần thừa tô xám (114, 114, 114) như lúc train ("letterbox") |
+| Đầu ra | Một tensor `float32 [1, 4 + số_lớp, A]` (A = 8400 khi S = 640); app cũng nhận dạng chuyển vị `[1, A, 4 + số_lớp]`. Bốn dòng đầu là `cx, cy, w, h` của khung, chia cho S (0–1); nếu giá trị lớn hơn 2 thì app coi là pixel và tự chia. Các dòng sau là điểm của từng lớp, 0–1 |
+| NMS | Không nằm trong model. App bỏ khung dưới `threshold_box`, rồi với mỗi lớp bỏ khung trùng khung điểm cao hơn quá `threshold_iou` |
+| Lượng tử hoá | FP32 hoặc INT8 động (`w8a32`). Notebook xuất bản INT8 tên `detector_int8.tflite`; muốn dùng thì đổi tên thành `detector.tflite`, vì app chỉ đọc tên đó |
+| Kích thước | YOLO11n: khoảng 10 MB (FP32), 3 MB (INT8) |
+| Tốc độ | Mục tiêu ≤ 400 ms mỗi ảnh trên điện thoại tầm trung |
+
+**`DETECTOR_CARD.md`**, mỗi dòng `khoá: giá trị` như `MODEL_CARD.md`:
+```
+contract_version: 1.6
+threshold_box: 0.35
+threshold_iou: 0.5
+```
+Thiếu dòng nào thì app dùng số mặc định ở trên. Thẻ cũng ghi mAP50 và
+mAP50-95 của từng lớp trên tập test.
+
+**App kiểm tra khi nạp model:** đầu vào float32 bốn chiều, có một chiều
+bằng 3; đầu ra có một chiều bằng `4 + số dòng của detector_classes.txt`;
+mọi mã lớp phải có trong bảng ở 7.1. Sai thì app bỏ qua model phát hiện và
+chỉ dùng model mục 6.
+
+### 7.3. App dùng kết quả thế nào
+- Chạy cả hai model trên cùng ảnh.
+- Thấy từ **2 lớp khác nhau** trở lên thì app mở sẵn "Đĩa có N món", mỗi
+  món một dòng. Các món model mục 6 đoán vẫn hiện bên cạnh để bấm chọn.
+- Ngoại lệ: model mục 6 chắc chắn (từ `threshold_confident_dish`) **và**
+  mọi lớp thấy được đều là thành phần của món đó (ví dụ cơm tấm có cơm,
+  trứng, thịt nướng). Khi đó app mở món như cũ, vì công thức món đủ hơn
+  (có nước mắm, mỡ hành).
+- Chỉ thấy 1 lớp, hoặc không thấy gì, thì như cũ.
+- Mỗi lớp thành một dòng trên đĩa, với khẩu phần thường gặp
+  (`typicalPortion`). Riêng `trung`, `cha_gio`, `banh_mi_o` lấy **số khung**
+  làm số quả / cuốn / ổ. Tôm, chả lụa thường được khoanh cả đống trong một
+  khung nên không đếm.
+- Khung được vẽ lên ảnh, cùng tên và điểm.
+- Ước lượng số gam từ diện tích khung **chưa làm**: cần biết cỡ đĩa thật.
+
+### 7.4. Train
+- Notebook `tool/train/train_detector.ipynb`, sinh từ `train_detector.py`.
+  Người dùng tự chạy trên Colab (GPU T4).
+- Dữ liệu: khung có sẵn của VietFood67 và mặt nạ MyFood đổi ra khung, giữ
+  cách chia train/val/test của từng bộ.
+- Model: YOLO11n của Ultralytics, bắt đầu từ trọng số COCO.
+- License Ultralytics: **AGPL-3.0**, phải ghi rõ trong báo cáo. MyFood: CC
+  BY 4.0.
 
 ## 8. Ghi vào nhật ký ăn uống
 Mỗi thành phần người dùng xác nhận được ghi thành **một dòng `food_log`**:

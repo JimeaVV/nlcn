@@ -16,17 +16,21 @@ import 'package:optifit/core/locale_controller.dart';
 import 'package:optifit/l10n/app_localizations.dart';
 import 'package:optifit/models/food_log_entry.dart';
 import 'package:optifit/models/history_models.dart';
+import 'package:optifit/models/plate_detection.dart';
 import 'package:optifit/models/user_profile.dart';
 import 'package:optifit/models/weight_entry.dart';
 import 'package:optifit/screens/diary_screen.dart';
 import 'package:optifit/screens/profile_screen.dart';
+import 'package:optifit/screens/scan_result_screen.dart';
 import 'package:optifit/screens/settings_screen.dart';
 import 'package:optifit/screens/today_screen.dart';
 import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/dataset_repository.dart';
+import 'package:optifit/services/food_detector.dart';
+import 'package:optifit/services/food_recognizer.dart';
 import 'package:optifit/services/reminder_service.dart';
 import 'package:optifit/services/water_reminder_service.dart';
-import 'package:optifit/models/food_variant.dart';
+import 'package:optifit/models/vn_food.dart';
 import 'package:optifit/widgets/intake_summary.dart';
 import 'package:optifit/widgets/variant_picker_sheet.dart';
 
@@ -199,9 +203,54 @@ Widget _picker() {
       initial: variants.find('ga', 'uc|bo_da|luoc')!);
 }
 
+class _Recognizer implements FoodRecognizer {
+  @override
+  bool get isAvailable => true;
+
+  @override
+  Future<FoodRecognition> recognize(String imagePath) async =>
+      const FoodRecognition(dishes: {'ca_ri': 0.49, 'com_ga': 0.2});
+}
+
+/// Rice, chicken, two eggs and plain pork: the longest names the plate
+/// detector makes.
+class _Detector implements FoodDetector {
+  @override
+  bool get isAvailable => true;
+
+  @override
+  Future<PlateDetection> detect(String imagePath) async =>
+      const PlateDetection(foods: [
+        DetectedFood(code: 'com', score: .93, box: Rect.fromLTRB(.05, .3, .5, .9)),
+        DetectedFood(code: 'ga', score: .88, box: Rect.fromLTRB(.5, .15, .9, .55)),
+        DetectedFood(code: 'trung', score: .81, box: Rect.fromLTRB(.55, .6, .75, .85)),
+        DetectedFood(code: 'trung', score: .77, box: Rect.fromLTRB(.75, .6, .95, .85)),
+        DetectedFood(code: 'heo', score: .52, box: Rect.fromLTRB(.1, .05, .45, .3)),
+      ], width: 1200, height: 900);
+}
+
+/// The scan result of a plate the dish model cannot name.
+Widget _scan() {
+  String read(String name) =>
+      File('assets/data/vn_food/$name').readAsStringSync();
+  return ScanResultScreen(
+    imagePath: 'missing.jpg',
+    data: parseVnFoodData(
+      componentsCsv: read('components.csv'),
+      dishesCsv: read('dishes.csv'),
+      dishNamesCsv: read('dish_names.csv'),
+      variantsCsv: read('food_variants.csv'),
+    ),
+    recognizer: _Recognizer(),
+    detector: _Detector(),
+    database: _Database(),
+  );
+}
+
 final _screens = <String, (double, Widget Function())>{
   'gauge': (1900, _gauges),
   'picker': (700, _picker),
+  'scan': (1500, _scan),
   'today': (1250, () => TodayScreen(database: _Database())),
   'diary': (
     1150,

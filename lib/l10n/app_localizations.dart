@@ -2873,6 +2873,30 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Chọn phần và cách nấu'**
   String get scanRefine;
+
+  /// Chip for the plate built from the detector boxes; count is at least 2
+  ///
+  /// In vi, this message translates to:
+  /// **'Đĩa có {count} món'**
+  String scanDetectedPlate(int count);
+
+  /// No description provided for @scanDetectedHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mỗi món trên đĩa một dòng bên dưới.'**
+  String get scanDetectedHint;
+
+  /// Screen-reader label of the boxes drawn on the photo
+  ///
+  /// In vi, this message translates to:
+  /// **'Ảnh có khung quanh các món tìm thấy: {foods}'**
+  String scanBoxesLabel(String foods);
+
+  /// Short name of a plate detector class, drawn on the photo
+  ///
+  /// In vi, this message translates to:
+  /// **'{code, select, com{Cơm} bun{Bún} mi{Mì} banh_mi_o{Bánh mì} ga{Gà} thit_kho{Thịt kho} thit_nuong{Thịt nướng} heo{Heo} bo{Bò} ca{Cá} tom{Tôm} muc{Mực} trung{Trứng} dau_hu{Đậu hũ} cha{Chả} cha_gio{Chả giò} rau{Rau} dua_leo_ca_chua{Dưa leo, cà chua} do_chua{Đồ chua} khoai_tay_chien{Khoai tây chiên} canh{Canh} other{Món}}'**
+  String detectorClassName(String code);
 }
 
 class _AppLocalizationsDelegate

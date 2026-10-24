@@ -1619,4 +1619,49 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get scanRefine => 'Chọn phần và cách nấu';
+
+  @override
+  String scanDetectedPlate(int count) {
+    return 'Đĩa có $count món';
+  }
+
+  @override
+  String get scanDetectedHint => 'Mỗi món trên đĩa một dòng bên dưới.';
+
+  @override
+  String scanBoxesLabel(String foods) {
+    return 'Ảnh có khung quanh các món tìm thấy: $foods';
+  }
+
+  @override
+  String detectorClassName(String code) {
+    String _temp0 = intl.Intl.selectLogic(
+      code,
+      {
+        'com': 'Cơm',
+        'bun': 'Bún',
+        'mi': 'Mì',
+        'banh_mi_o': 'Bánh mì',
+        'ga': 'Gà',
+        'thit_kho': 'Thịt kho',
+        'thit_nuong': 'Thịt nướng',
+        'heo': 'Heo',
+        'bo': 'Bò',
+        'ca': 'Cá',
+        'tom': 'Tôm',
+        'muc': 'Mực',
+        'trung': 'Trứng',
+        'dau_hu': 'Đậu hũ',
+        'cha': 'Chả',
+        'cha_gio': 'Chả giò',
+        'rau': 'Rau',
+        'dua_leo_ca_chua': 'Dưa leo, cà chua',
+        'do_chua': 'Đồ chua',
+        'khoai_tay_chien': 'Khoai tây chiên',
+        'canh': 'Canh',
+        'other': 'Món',
+      },
+    );
+    return '$_temp0';
+  }
 }

@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:optifit/models/food_log_entry.dart';
+import 'package:optifit/models/plate_detection.dart';
 import 'package:optifit/screens/scan_result_screen.dart';
 import 'package:optifit/screens/scan_screen.dart';
 import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/dataset_repository.dart';
+import 'package:optifit/services/food_detector.dart';
 import 'package:optifit/services/food_recognizer.dart';
 import 'package:optifit/services/scan_camera.dart';
 import 'package:optifit/services/vn_food_repository.dart';
@@ -44,6 +46,25 @@ class _Recognizer implements FoodRecognizer {
     paths.add(imagePath);
     return result;
   }
+}
+
+class _Detector implements FoodDetector {
+  _Detector(List<String> codes)
+      : result = PlateDetection(foods: [
+          for (final (i, code) in codes.indexed)
+            DetectedFood(
+                code: code,
+                score: 0.9 - i * 0.1,
+                box: Rect.fromLTWH(0.1 + i * 0.3, 0.2, 0.25, 0.4)),
+        ], width: 1200, height: 900);
+
+  final PlateDetection result;
+
+  @override
+  bool get isAvailable => true;
+
+  @override
+  Future<PlateDetection> detect(String imagePath) async => result;
 }
 
 class _Datasets extends DatasetRepository {
@@ -197,6 +218,77 @@ void main() {
     expect(rice.name, 'Cơm gạo lứt (Cơm tấm)');
     // 200 g at 123 kcal per 100 g.
     expect(rice.calories, closeTo(246, 1e-9));
+  });
+
+  testWidgets('several foods found on the plate become one row each',
+      (tester) async {
+    _tall(tester);
+    final database = _Database();
+    await tester.pumpWidget(localizedApp(
+      home: ScanResultScreen(
+        imagePath: 'plate.jpg',
+        data: fixtureVnFood(
+            variantsCsv: File('assets/data/vn_food/food_variants.csv')
+                .readAsStringSync()),
+        // The dish model is unsure and wrong, as with rice and chicken.
+        recognizer: _Recognizer(const FoodRecognition(
+            dishes: {'pho_bo': 0.49, 'com_tam': 0.06})),
+        detector: _Detector(['com', 'tom', 'heo']),
+        database: database,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final chip = find.byKey(const ValueKey('guess-detected'));
+    expect(tester.widget<ChoiceChip>(chip).selected, isTrue);
+    expect(find.text('Đĩa có 3 món'), findsOneWidget);
+    expect(find.byKey(const ValueKey('scan-boxes')), findsOneWidget);
+    expect(
+        find.bySemanticsLabel(
+            RegExp('khung quanh các món tìm thấy: Cơm, Tôm, Heo')),
+        findsOneWidget);
+    // The dish guesses stay one tap away, and the plate comes back.
+    await tester.tap(find.byKey(const ValueKey('guess-pho_bo')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ChoiceChip>(chip).selected, isFalse);
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('scan-save')));
+    await tester.pumpAndSettle();
+    expect([for (final entry in database.added) entry.name],
+        ['Cơm', 'Tôm', 'Heo nửa nạc nửa mỡ, luộc / hầm']);
+    // Rice at the fixture's usual 150 g (the median of its dishes).
+    expect(database.added.first.grams, 150);
+    expect(database.added.first.source, FoodLogSource.camera);
+  });
+
+  testWidgets('a confident dish that holds every food found is kept',
+      (tester) async {
+    _tall(tester);
+    await tester.pumpWidget(localizedApp(
+      home: ScanResultScreen(
+        imagePath: 'plate.jpg',
+        data: fixtureVnFood(
+            variantsCsv: File('assets/data/vn_food/food_variants.csv')
+                .readAsStringSync()),
+        recognizer: _Recognizer(const FoodRecognition(
+            dishes: {'com_tam': 0.9}, components: {'com': 0.9})),
+        // Its pork box is the dish's chop.
+        detector: _Detector(['com', 'heo']),
+        database: _Database(),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(
+        tester
+            .widget<ChoiceChip>(find.byKey(const ValueKey('guess-com_tam')))
+            .selected,
+        isTrue);
+    expect(
+        tester
+            .widget<ChoiceChip>(find.byKey(const ValueKey('guess-detected')))
+            .selected,
+        isFalse);
   });
 
   testWidgets('the scan sweep plays a full pass even for an instant answer',

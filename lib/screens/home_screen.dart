@@ -4,6 +4,7 @@ import '../core/cyber_theme.dart';
 import '../core/locale_controller.dart';
 import '../l10n/l10n.dart';
 import '../services/dataset_repository.dart';
+import '../services/food_detector.dart';
 import '../services/food_recognizer.dart';
 import '../services/recommendation_service.dart';
 import '../services/reminder_service.dart';
@@ -64,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Checks once whether a food model is bundled; its interpreter opens on
   // the first photo.
   late final Future<FoodRecognizer> recognizer = loadFoodRecognizer();
+  late final Future<FoodDetector> detector = loadFoodDetector();
 
   /// Set while Scan is open, so a double tap cannot open a second camera.
   bool _scanning = false;
@@ -105,9 +107,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final bool? logged;
     try {
       final model = await recognizer;
+      final plates = await detector;
       if (!mounted) return;
       logged = await Navigator.of(context).push<bool>(MaterialPageRoute(
-        builder: (_) => ScanScreen(datasets: datasets, recognizer: model),
+        builder: (_) => ScanScreen(
+            datasets: datasets, recognizer: model, detector: plates),
       ));
     } finally {
       _scanning = false;

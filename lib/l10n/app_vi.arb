@@ -1263,5 +1263,12 @@
     }
   },
   "variantPickHint": "Chọn theo phần và cách nấu",
-  "scanRefine": "Chọn phần và cách nấu"
+  "scanRefine": "Chọn phần và cách nấu",
+  "scanDetectedPlate": "Đĩa có {count} món",
+  "@scanDetectedPlate": {"description": "Chip for the plate built from the detector boxes; count is at least 2", "placeholders": {"count": {"type": "int"}}},
+  "scanDetectedHint": "Mỗi món trên đĩa một dòng bên dưới.",
+  "scanBoxesLabel": "Ảnh có khung quanh các món tìm thấy: {foods}",
+  "@scanBoxesLabel": {"description": "Screen-reader label of the boxes drawn on the photo", "placeholders": {"foods": {"type": "String"}}},
+  "detectorClassName": "{code, select, com{Cơm} bun{Bún} mi{Mì} banh_mi_o{Bánh mì} ga{Gà} thit_kho{Thịt kho} thit_nuong{Thịt nướng} heo{Heo} bo{Bò} ca{Cá} tom{Tôm} muc{Mực} trung{Trứng} dau_hu{Đậu hũ} cha{Chả} cha_gio{Chả giò} rau{Rau} dua_leo_ca_chua{Dưa leo, cà chua} do_chua{Đồ chua} khoai_tay_chien{Khoai tây chiên} canh{Canh} other{Món}}",
+  "@detectorClassName": {"description": "Short name of a plate detector class, drawn on the photo", "placeholders": {"code": {"type": "String"}}}
 }

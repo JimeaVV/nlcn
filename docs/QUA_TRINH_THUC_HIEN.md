@@ -2432,6 +2432,70 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Skill `ui-screenshots` có thêm ảnh bảng chọn, ở cả máy nhỏ chữ ×1,3.
   - Build APK 128.
 
+### 2026-10-24 · Bắt đầu giai đoạn YOLO: model phát hiện từng món trên đĩa
+- Lý do: chụp thử một đĩa chỉ có cơm trắng và ức gà, app đoán "Cà ri gà"
+  49%, "Thịt kho trứng" 8%, "Cơm trắng" 6%. Model nhận diện chỉ trả lời "ảnh
+  là món gì" trong 91 món; một đĩa tự gắp không phải món nào cả. Cần model
+  tìm từng thứ trên đĩa, mỗi thứ một khung.
+- Đã làm:
+  - Contract lên **1.6**, viết lại mục 7:
+    - 21 lớp, mỗi lớp ứng với một thành phần hoặc nhóm biến thể của app
+      (cơm, thịt gà, trứng, heo, rau…). Dinh dưỡng lấy từ bảng có sẵn,
+      không thêm số mới. Canh nói chung tạm tính như canh chua, ghi rõ là
+      ước lượng.
+    - Định dạng: đầu vào ảnh 0–1, dạng `[1, 3, S, S]` hoặc `[1, S, S, 3]`;
+      đầu ra `[1, 4 + 21, A]`. NMS do app làm. Ngưỡng ghi trong
+      `DETECTOR_CARD.md`.
+    - Mục 5 thêm nhãn ảnh `plate` cho đĩa nhiều món.
+  - Notebook `tool/train/train_detector.ipynb` (YOLO11n, Ultralytics
+    8.4.185):
+    - lấy khung VietFood67, đổi về 21 lớp; bỏ ảnh có khung cả món (phở, cơm
+      tấm…) vì cơm, trứng bên trong thường không được khoanh riêng;
+    - mặt nạ MyFood đổi ra khung, mỗi vùng liền một khung (hai quả trứng là
+      hai khung);
+    - thu nhỏ ảnh một lần cho train nhanh; tự dừng trước giới hạn Colab và
+      train tiếp ở lần chạy sau;
+    - chọn ngưỡng theo F1 trên tập val, đo trên tập test, xuất TFLite (LiteRT), ONNX,
+      thẻ model; chạy lại model đã xuất theo đúng cách app đọc để so với
+      Ultralytics.
+  - App:
+    - `lib/models/plate_detection.dart`: đọc nhãn và ngưỡng, letterbox, giải
+      mã đầu ra cả hai dạng, NMS theo lớp.
+    - `lib/services/food_detector.dart`: chạy model trong isolate. Không có
+      model trong `assets/models` thì app chạy như cũ.
+    - `ScanPlate.detected`: mỗi lớp một dòng, khẩu phần thường gặp; trứng,
+      chả giò, bánh mì đếm theo số khung (tôm, chả lụa thường bị khoanh cả
+      đống trong một khung nên không đếm). Heo chưa có thành phần riêng nên lấy biến
+      thể "nửa nạc nửa mỡ, luộc". Dòng nào cũng bấm vào được để đổi phần và
+      cách nấu.
+    - Màn kết quả quét chạy cả hai model cùng lúc. Thấy từ 2 món trở lên
+      thì mở sẵn "Đĩa có N món" và vẽ khung, tên, điểm lên ảnh. Nếu model
+      nhận diện chắc chắn và mọi món thấy được đều thuộc món đó (cơm tấm có
+      cơm, trứng, thịt) thì giữ món, vì công thức có cả nước mắm, mỡ hành.
+  - Chưa làm: ước lượng số gam từ diện tích khung (cần biết cỡ đĩa thật).
+- Kiểm tra:
+  - `python tool/train/test/smoke_detector.py` trên ảnh giả: lần đầu tự
+    dừng sau epoch 1, lần sau train tiếp đến hết; ảnh có khung cả món bị bỏ
+    đúng 20 ảnh; cách app giải mã khớp Ultralytics 12/12 ảnh (trên Windows
+    kiểm bằng bản ONNX).
+  - Xuất thử một YOLO11n 21 lớp chưa train sang TFLite: đầu vào
+    `[1, 3, 640, 640]`, đầu ra `[1, 25, 8400]`, đúng contract.
+  - `flutter analyze` sạch; test mới: giải mã cả hai dạng đầu ra, khung về
+    đúng chỗ trên ảnh ngang, NMS, đếm trứng, heo từ biến thể, màn quét với
+    đĩa cơm + tôm + heo ghi đúng 3 dòng, cơm tấm chắc chắn vẫn giữ món.
+  - Skill `ui-screenshots` thêm màn kết quả quét. Lần vẽ đầu thấy nhãn trên
+    khung không có font tiếng Việt và chip "Đĩa có: Cơm + Thịt gà + Tr…" bị
+    cắt ở máy 360 px; đã sửa (dùng font app, chip ghi "Đĩa có 4 món").
+  - Agent `ui-reviewer` tìm ra 3 lỗi, đều đã sửa: nhãn có thể gây lỗi khi
+    vẽ nếu khung rộng gần hết ảnh; tên dài bị cắt thành "Trứn…" (giờ dùng
+    tên ngắn từng lớp: Trứng, Heo…, khung hẹp thì bỏ %); câu gợi ý dài 4
+    dòng (rút còn một câu). Bấm lại chip đang chọn không còn xoá phần đã
+    chỉnh.
+  - Agent `model-contract-reviewer`: contract, notebook, app và bảng dinh
+    dưỡng khớp nhau. Theo góp ý, chỉ đếm khung cho trứng, chả giò, bánh mì,
+    và ghi rõ phải đổi tên bản INT8 thành `detector.tflite`.
+  - `flutter test` 240/240 PASS; `check_vn_food.py` OK.
+
 ---
 
 ## 3. Việc còn tồn đọng

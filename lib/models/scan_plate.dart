@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../services/food_recognizer.dart';
 import 'food_log_entry.dart';
+import 'plate_detection.dart';
 import 'vn_food.dart';
 
 /// One component on the scanned plate and the amount the user confirmed.
@@ -162,7 +163,43 @@ class ScanPlate {
     ]);
   }
 
+  /// The foods the plate detector found (contract §7.3), each at its usual
+  /// portion; eggs, spring rolls and bread get one unit per box
+  /// ([countedDetectorClasses]). The stand-in dish is named after them: "Cơm + Thịt gà".
+  factory ScanPlate.detected(VnFoodData data, PlateDetection detection) {
+    final items = <PlateItem>[];
+    for (final code in detection.codes) {
+      final component = detectedComponent(data, code);
+      if (component == null ||
+          items.any((item) => item.component.code == component.code)) {
+        continue;
+      }
+      final typical = typicalPortion(data, component);
+      items.add(PlateItem(
+        component: component,
+        included: true,
+        inUnits: typical.inUnits,
+        amount: typical.inUnits && countedDetectorClasses.contains(code)
+            ? detection.count(code).toDouble()
+            : typical.amount,
+        confidence: detection.score(code),
+      ));
+    }
+    String names(String language) =>
+        items.map((item) => item.component.name(language)).join(' + ');
+    final dish = VnDish(
+      code: detectedPlateCode,
+      nameVi: names('vi'),
+      nameEn: names('en'),
+      parts: [
+        for (final item in items) VnDishPart(component: item.component.code),
+      ],
+    );
+    return ScanPlate._(data, dish, items);
+  }
+
   static const singleCodePrefix = '_single_';
+  static const detectedPlateCode = '_detected';
 
   final VnFoodData _data;
   final VnDish dish;
@@ -170,6 +207,9 @@ class ScanPlate {
 
   /// True for a plate from [ScanPlate.single].
   bool get isSingle => dish.code.startsWith(singleCodePrefix);
+
+  /// True for a plate from [ScanPlate.detected].
+  bool get isDetected => dish.code == detectedPlateCode;
 
   /// Servings of the whole dish, 1 for the usual portion.
   double get portion => _portion;
@@ -242,6 +282,7 @@ class ScanPlate {
           // once, not "Ức gà (Ức gà)"; a sauce that is one of several parts
           // keeps its dish.
           name: isSingle ||
+                  isDetected ||
                   (dish.parts.length == 1 &&
                       item.component.code == '_base_${dish.code}')
               ? item.component.name(languageCode)
@@ -257,6 +298,54 @@ class ScanPlate {
         ),
     ];
   }
+}
+
+/// Components that count as the same food as a detector class when
+/// checking a dish: an egg box on cơm tấm is its fried egg.
+const _detectorAlso = <String, Set<String>>{
+  'trung': {'trung_op_la', '_base_trung_chien'},
+  'cha': {'cha_trung'},
+  'rau': {'rau_song'},
+  'ga': {'ga_chien', '_base_uc_ga'},
+  'heo': {'thit_kho', 'thit_nuong', 'suon_nuong', 'bi'},
+  'thit_nuong': {'suon_nuong'},
+  'bo': {'_base_bo_bit_tet'},
+  'ca': {'_base_ca_kho', '_base_ca_hoi'},
+  'mi': {'_base_mi_y'},
+};
+
+/// True when every food in [detection] is a part of [dish], so the dish's
+/// recipe already describes the plate (contract §7.3).
+bool dishShowsAll(VnDish dish, PlateDetection detection) {
+  final parts = {for (final part in dish.parts) part.component};
+  return detection.codes.every((code) =>
+      parts.contains(detectorFoods[code]) ||
+      (_detectorAlso[code] ?? const {}).any(parts.contains));
+}
+
+/// The app food for detector class [code] (contract §7.1), or null when
+/// the data has none.
+VnComponent? detectedComponent(VnFoodData data, String code) {
+  final food = detectorFoods[code];
+  if (food == null) return null;
+  final component = data.components[food];
+  if (component != null) return component;
+  final (group, key) = detectorVariantFoods[code] ?? ('', '');
+  final variant = data.variants.find(group, key);
+  if (variant == null) return null;
+  // A variant without skin names itself, so no skin names are needed.
+  String name(String language) => variant.label(language, (_) => '');
+  return VnComponent(
+    code: food,
+    nameVi: name('vi'),
+    nameEn: name('en'),
+    kcalPer100g: variant.kcal,
+    proteinPer100g: variant.protein,
+    carbPer100g: variant.carbs,
+    fatPer100g: variant.fat,
+    unitNameVi: variant.unitNameVi,
+    unitGrams: variant.unitGrams,
+  );
 }
 
 /// How much of [component] a plate usually holds when it is added outside the

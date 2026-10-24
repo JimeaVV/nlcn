@@ -795,5 +795,11 @@
     }
   },
   "variantPickHint": "Pick by part and cooking",
-  "scanRefine": "Pick the part and cooking"
+  "scanRefine": "Pick the part and cooking",
+  "scanDetectedPlate": "{count} foods on the plate",
+  "@scanDetectedPlate": {"placeholders": {"count": {"type": "int"}}},
+  "scanDetectedHint": "One row below for each food on the plate.",
+  "scanBoxesLabel": "Photo with a box around each food found: {foods}",
+  "@scanBoxesLabel": {"placeholders": {"foods": {"type": "String"}}},
+  "detectorClassName": "{code, select, com{Rice} bun{Vermicelli} mi{Noodles} banh_mi_o{Bread} ga{Chicken} thit_kho{Braised pork} thit_nuong{Grilled pork} heo{Pork} bo{Beef} ca{Fish} tom{Shrimp} muc{Squid} trung{Egg} dau_hu{Tofu} cha{Pork roll} cha_gio{Spring roll} rau{Greens} dua_leo_ca_chua{Cucumber, tomato} do_chua{Pickles} khoai_tay_chien{Fries} canh{Soup} other{Food}}"
 }

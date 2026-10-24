@@ -22,12 +22,16 @@ thì Android coi là app khác, không cài đè được và mất dữ liệu.
   - `engine/`: thuật toán gợi ý.
   - `l10n/`: bản dịch, sinh bằng `flutter gen-l10n`.
 - `assets/models/`: model app đang dùng: `food_v1.tflite`, `dishes.txt`,
-  `components.txt`, `MODEL_CARD.md`.
+  `components.txt`, `MODEL_CARD.md`. Model phát hiện món trên đĩa (YOLO,
+  không bắt buộc): `detector.tflite`, `detector_classes.txt`,
+  `DETECTOR_CARD.md`.
 - `assets/data/vn_food/`: CSV món Việt, thành phần và khẩu phần, có nguồn.
 - `tool/train/`: notebook train model.
   - Code gốc là `train_food_model.py`. File `.ipynb` được sinh từ đó.
   - Thử nhanh nằm trong `tool/train/test/`.
-- `docs/MODEL_CONTRACT.md`: thỏa thuận giữa app và model (đang ở 1.5): danh
+  - Model phát hiện món: `train_detector.py`, thử bằng
+    `tool/train/test/smoke_detector.py` (cần `ultralytics==8.4.185`).
+- `docs/MODEL_CONTRACT.md`: thỏa thuận giữa app và model (đang ở 1.6): danh
   sách món, thành phần, định dạng đầu vào và đầu ra, các dòng trong
   `MODEL_CARD.md`.
 - `backend/`: bản Python gốc, chỉ giữ để tham khảo thuật toán. App không cần
