@@ -2515,6 +2515,35 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Kiểm tra: chạy riêng đoạn sao chép với gdown giả: chép đúng 2 file; thư
   mục thiếu file thì báo lỗi rõ ràng. `smoke_detector.py` vẫn chạy đúng.
 
+### 2026-10-25 · Đưa model phát hiện món đã train xong vào app, build APK 129
+- Lý do: lần train tiếp bằng tài khoản Colab thứ hai đã chạy hết 80/80
+  epoch (bắt đầu lại từ epoch 63 nhờ `RESUME_FROM`). Lúc này mới có model
+  thật để đưa vào app.
+- Kết quả trên tập test: 1.296 ảnh, mAP50 0,832, mAP50-95 0,708, precision
+  0,815, recall 0,759, ngưỡng khung 0,48.
+  - So với lúc dừng ở epoch 62: mAP50 chỉ tăng thêm 0,002, recall tăng
+    0,011, nên model đã gần hết sức ở cỡ YOLO11n với bộ dữ liệu này.
+  - Cơm 0,942, gà 0,742. Yếu nhất là chả 0,607 và đậu hũ 0,713.
+- Đã làm:
+  - đưa `detector.tflite` (10,7 MB, FP32), `detector_classes.txt` và
+    `DETECTOR_CARD.md` vào `assets/models`;
+  - `assets/models/README.md` ghi thêm 3 file này;
+  - thêm test đọc thẳng các file thật bằng `DetectorLabels.parse`: đủ 21
+    lớp đúng thứ tự, contract 1.6, không còn dòng "not finished".
+  - Build APK 129 (`MacroRunner-129-arm64.apk`): versionCode 2129, chứng
+    chỉ ký `e3b83ac4fe9118e4…`, APK có đủ 3 file trong
+    `assets/flutter_assets/assets/models/`.
+- Kiểm tra:
+  - TF Lite 2.18 trên máy tính đọc được model: đầu vào `[1, 3, 640, 640]`,
+    đầu ra `[1, 25, 8400]`, tọa độ khung trong khoảng 0–1, khoảng 28 ms một
+    lần chạy (CPU máy tính, 4 luồng).
+  - Agent `model-contract-reviewer` không thấy chỗ lệch nào với contract
+    1.6.
+  - `flutter analyze` sạch, `flutter test` qua 241 test,
+    `check_vn_food.py` OK.
+- Chưa kiểm tra được: tốc độ và kết quả nhận diện trên điện thoại. Lúc build
+  xong, adb không kết nối được với máy qua Wi-Fi.
+
 ---
 
 ## 3. Việc còn tồn đọng

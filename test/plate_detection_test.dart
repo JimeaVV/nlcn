@@ -71,6 +71,20 @@ void main() {
       expect(labels.thresholdIou, 0.5);
     });
 
+    test('the detector in assets/models, if any, is one the app reads', () {
+      final classes = File('assets/models/detector_classes.txt');
+      final card = File('assets/models/DETECTOR_CARD.md');
+      if (!classes.existsSync()) return;
+      final labels = DetectorLabels.parse(
+          classesTxt: classes.readAsStringSync(),
+          card: card.readAsStringSync());
+      expect(labels.classes, _classes);
+      expect(card.readAsStringSync(), contains('contract_version: 1.6'));
+      expect(card.readAsStringSync(), isNot(contains('not finished')));
+      expect(RegExp('^threshold_box:', multiLine: true)
+          .hasMatch(card.readAsStringSync()), isTrue);
+    });
+
     test('an unknown class rejects the detector', () {
       expect(() => DetectorLabels.parse(classesTxt: 'com\npizza'),
           throwsFormatException);
