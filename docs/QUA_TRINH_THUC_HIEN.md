@@ -2664,6 +2664,16 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Bản Colab đưa người dùng: `QUICK_TEST = False`, `FINETUNE_FROM` là link
   `detector_best.pt` hiện có. Ước tính 3 giờ trong một phiên Colab:
   khoảng 30 phút tải dữ liệu và dựng dataset, khoảng 4,5 phút mỗi epoch.
+- Sửa sau lần chạy đầu trên Colab: Ultralytics báo `finetune_from.pt is
+  not a loadable checkpoint (invalid load key, '<')`.
+  - Nguyên nhân: Colab cài sẵn gdown bản cũ. Gặp link dạng
+    `.../file/d/<id>/view`, bản này tải về trang web thay cho file. Trên
+    máy tính là gdown 6.4.2, tự đọc được link nên lúc thử không thấy lỗi.
+  - Đã sửa: notebook lấy id file từ link để tải, và kiểm tra file tải về
+    là checkpoint (file zip, bắt đầu bằng `PK`). File hỏng còn sót từ lần
+    trước sẽ được tải lại.
+  - Kiểm tra bằng gdown 5.2.0, có đặt sẵn một file HTML hỏng: tải lại ra
+    đúng 5,5 MB. `smoke_detector.py` vẫn OK.
 
 ---
 

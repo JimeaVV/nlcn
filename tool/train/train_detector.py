@@ -114,6 +114,7 @@ COLAB_ROOT = os.environ.get('COLAB_ROOT', '/content')
 # ## Setup: Ultralytics, Drive, the datasets
 
 # %%
+import re
 import shutil
 import subprocess
 
@@ -196,16 +197,32 @@ if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
             f'Could not copy the weights from RESUME_FROM: {error!r}. Share the '
             'train/weights folder as "Anyone with the link".') from error
 
+
+
+def is_checkpoint(path):
+    """True for a file torch.save wrote (a zip). A sharing link that is not
+    public, or an old gdown given a /view link, saves the web page instead."""
+    with open(path, 'rb') as f:
+        return f.read(2) == b'PK'
+
+
 if FINETUNE_FROM:
     if os.path.exists(FINETUNE_FROM):
         MODEL = FINETUNE_FROM
     else:
         MODEL = os.path.join(WORK_DIR, 'finetune_from.pt')
-        if not os.path.exists(MODEL):
+        if not os.path.exists(MODEL) or not is_checkpoint(MODEL):
             stage(f'Copying the weights to fine-tune from {FINETUNE_FROM} ...')
+            # The file id, not the link: Colab's gdown downloads the page
+            # behind a .../file/d/<id>/view link.
+            match = re.search(r'/d/([\w-]{20,})|[?&]id=([\w-]{20,})',
+                              FINETUNE_FROM)
+            file_id = next(g for g in match.groups() if g) if match else ''
             try:
-                load_gdown().download(url=FINETUNE_FROM, output=MODEL + '.part',
-                                      quiet=True)
+                load_gdown().download(id=file_id or FINETUNE_FROM,
+                                      output=MODEL + '.part', quiet=True)
+                if not is_checkpoint(MODEL + '.part'):
+                    raise ValueError('got a web page, not detector_best.pt')
                 os.replace(MODEL + '.part', MODEL)
             except Exception as error:
                 raise RuntimeError(
