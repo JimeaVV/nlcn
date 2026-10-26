@@ -2629,6 +2629,42 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - APK 134 (versionCode 2134, chứng chỉ `e3b83ac4fe9118e4…`) cài lên điện
     thoại.
 
+### 2026-10-26 · Model phát hiện món: thêm dữ liệu FoodInsSeg, train tiếp từ model đã có
+- Lý do: model phát hiện món thấy cơm nhưng không thấy mấy miếng thịt heo
+  thái mỏng trên cơm (điểm cao nhất 0,005). Các lớp yếu trên tập test là
+  chả 0,607, đậu hũ 0,713 và gà 0,742. Cần thêm ảnh có khung quanh từng
+  miếng thịt.
+- Tìm dữ liệu:
+  - FoodInsSeg (CC BY-NC-SA 4.0, giống VietFood67): 7.118 ảnh của
+    FoodSeg103, mỗi miếng thức ăn một mask kèm khung, định dạng COCO, zip
+    1,3 GB trên Google Drive của tác giả.
+  - Dataset "canteen food" kiểu cơm phần trên Roboflow có bước kiểm tra
+    chống bot, không đọc được. Chả gần như không có nguồn nào; đậu hũ chỉ
+    có 68 ảnh trong FoodSeg103.
+- Đã làm (`train_detector.py`, sinh lại `.ipynb`):
+  - Thêm FoodInsSeg vào dữ liệu: đổi 16 nhóm của nó sang lớp của app
+    (pork → heo, chicken duck → ga, rice → com, tofu → dau_hu…).
+  - Bỏ ảnh có món dễ nhầm mà nó không gắn nhãn theo lớp của mình (bánh mì,
+    mì, mì Ý, súp, xúc xích, hoành thánh…), để model không học rằng chúng
+    là nền.
+  - Tập test của FoodInsSeg chia đôi thành val và test.
+  - Kết quả trên dữ liệu thật: thêm 3.408 ảnh (train 2.387). Tập train có
+    thêm 1.461 khung heo, 2.483 khung gà, 1.359 khung cơm, 272 khung đậu
+    hũ. Bỏ 2.329 ảnh vì có món dễ nhầm.
+  - Thêm `FINETUNE_FROM`: link chia sẻ tới `detector_best.pt` của lần train
+    trước. Notebook bắt đầu từ trọng số đó, SGD lr0 0,002 (bằng 1/5 lúc
+    train mới), 30 epoch, lưu vào thư mục riêng `detector_yolo11n_finetune`.
+- Kiểm tra:
+  - `smoke_detector.py` chạy 3 lượt trên dữ liệu giả có thêm FoodInsSeg
+    giả: bị cắt giờ, train tiếp, rồi fine-tune từ model vừa tạo. Ảnh có
+    bánh mì bị bỏ đúng 2 ảnh; cách app đọc model khớp Ultralytics 15/15
+    ảnh.
+  - Tải thử `detector_best.pt` qua link bằng gdown 6.4.2: 5,5 MB, đủ 21
+    lớp.
+- Bản Colab đưa người dùng: `QUICK_TEST = False`, `FINETUNE_FROM` là link
+  `detector_best.pt` hiện có. Ước tính 3 giờ trong một phiên Colab:
+  khoảng 30 phút tải dữ liệu và dựng dataset, khoảng 4,5 phút mỗi epoch.
+
 ---
 
 ## 3. Việc còn tồn đọng

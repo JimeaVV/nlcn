@@ -9,8 +9,9 @@
 # `assets/models/`: `detector.tflite`, `detector_classes.txt` and
 # `DETECTOR_CARD.md`.
 #
-# Data: the boxes VietFood67 already has, and MyFood's masks turned into
-# boxes. Each keeps its own train/val/test split.
+# Data: the boxes VietFood67 already has, MyFood's masks turned into boxes,
+# and FoodInsSeg's boxes around each piece of food (sliced pork, chicken,
+# tofu on rice). Each keeps its own train/val/test split.
 #
 # **On Google Colab**
 # 1. *Runtime → Change runtime type → T4 GPU*.
@@ -33,12 +34,19 @@
 #    with the link*, put that link in `RESUME_FROM` and run all with the
 #    other account. It copies `last.pt` and `best.pt` into its own Drive
 #    first.
+# 7. To make a finished model better instead of training from scratch: put
+#    a shared link to its `export/detector_best.pt` in `FINETUNE_FROM`. The
+#    run starts from those weights with a lower learning rate for
+#    `FINETUNE_EPOCHS` epochs, and saves to its own folder
+#    `detector_yolo11n_finetune`, so the earlier run stays as it was. Steps
+#    5 and 6 work the same for it.
 #
 # **On Kaggle**: add the dataset `thomasnguyen6868/vietfood68`, turn the GPU
-# and Internet on (MyFood downloads from Zenodo), Save & Run All. The files
-# are in the *Output* tab.
+# and Internet on (MyFood downloads from Zenodo, FoodInsSeg from Google
+# Drive), Save & Run All. The files are in the *Output* tab.
 #
-# Ultralytics is AGPL-3.0; VietFood67 is CC BY-NC-SA 4.0; MyFood is CC BY 4.0.
+# Ultralytics is AGPL-3.0; VietFood67 and FoodInsSeg are CC BY-NC-SA 4.0;
+# MyFood is CC BY 4.0.
 
 # %%
 import os
@@ -73,6 +81,15 @@ ULTRALYTICS_VERSION = '8.4.185'
 # A shared link to another Colab account's `train/weights` folder, to train
 # on from its last.pt (step 6 above). Empty: start or go on in this Drive.
 RESUME_FROM = os.environ.get('RESUME_FROM', '')
+# A shared link to a finished run's `export/detector_best.pt` (or a path to
+# it), to fine-tune from (step 7 above). Empty: start from the COCO weights.
+FINETUNE_FROM = os.environ.get('FINETUNE_FROM', '')
+FINETUNE_EPOCHS = 30
+# lr0 for fine-tuning, a fifth of the 0.01 that SGD starts a fresh run with,
+# so it learns the new photos without forgetting the old ones.
+FINETUNE_LR = 0.002
+if FINETUNE_FROM and not QUICK_TEST:
+    EPOCHS = FINETUNE_EPOCHS
 
 ON_COLAB = 'google.colab' in sys.modules
 ON_KAGGLE = bool(os.environ.get('KAGGLE_KERNEL_RUN_TYPE'))
@@ -88,6 +105,9 @@ VF67_REF = 'thomasnguyen6868/vietfood68'
 MYFOOD_URL = ('https://zenodo.org/records/4041488/files/'
               'MyFood%20Dataset.zip?download=1')
 DOWNLOAD_MYFOOD = os.environ.get('DOWNLOAD_MYFOOD', '1') == '1'
+# FoodInsSeg on the authors' Google Drive (1.3 GB zip).
+FOODINSSEG_ID = '1Wa8_j4flJOMM6a2QGpiPga0r1GC__Rg2'
+DOWNLOAD_FOODINSSEG = os.environ.get('DOWNLOAD_FOODINSSEG', '1') == '1'
 COLAB_ROOT = os.environ.get('COLAB_ROOT', '/content')
 
 # %% [markdown]
@@ -114,7 +134,9 @@ if ON_COLAB:
     print('Allow Google Drive access in the window that opens now.', flush=True)
     drive.mount(os.path.join(COLAB_ROOT, 'drive'))
     OUTPUT_DIR = os.path.join(COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train',
-                              'detector_yolo11n' + ('_quick' if QUICK_TEST else ''))
+                              'detector_yolo11n'
+                              + ('_finetune' if FINETUNE_FROM else '')
+                              + ('_quick' if QUICK_TEST else ''))
     WORK_DIR = os.path.join(COLAB_ROOT, 'detector_data')
 
     from google.colab import userdata
@@ -146,14 +168,21 @@ EXTRA_ROOT = os.path.join(WORK_DIR, 'extra')
 os.makedirs(EXTRA_ROOT, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-weights_dir = os.path.join(OUTPUT_DIR, 'train', 'weights')
-if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
+
+
+def load_gdown():
     try:
         import gdown
     except ImportError:
         subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'gdown'],
                        check=True)
         import gdown
+    return gdown
+
+
+weights_dir = os.path.join(OUTPUT_DIR, 'train', 'weights')
+if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
+    gdown = load_gdown()
     stage(f'Copying last.pt and best.pt from {RESUME_FROM} ...')
     shared = os.path.join(WORK_DIR, 'resume_from')
     try:
@@ -166,6 +195,22 @@ if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
         raise RuntimeError(
             f'Could not copy the weights from RESUME_FROM: {error!r}. Share the '
             'train/weights folder as "Anyone with the link".') from error
+
+if FINETUNE_FROM:
+    if os.path.exists(FINETUNE_FROM):
+        MODEL = FINETUNE_FROM
+    else:
+        MODEL = os.path.join(WORK_DIR, 'finetune_from.pt')
+        if not os.path.exists(MODEL):
+            stage(f'Copying the weights to fine-tune from {FINETUNE_FROM} ...')
+            try:
+                load_gdown().download(url=FINETUNE_FROM, output=MODEL + '.part',
+                                      quiet=True)
+                os.replace(MODEL + '.part', MODEL)
+            except Exception as error:
+                raise RuntimeError(
+                    f'Could not copy FINETUNE_FROM: {error!r}. Share '
+                    'detector_best.pt as "Anyone with the link".') from error
 
 myfood_dir = os.path.join(EXTRA_ROOT, 'myfood')
 if DOWNLOAD_MYFOOD and not os.path.isdir(myfood_dir):
@@ -181,6 +226,23 @@ if DOWNLOAD_MYFOOD and not os.path.isdir(myfood_dir):
     except Exception as error:   # no Internet: train without it
         print(f'  MyFood FAILED ({error}): eggs, steak and chicken breast get '
               'fewer boxes. On Kaggle, turn Internet on.', flush=True)
+
+foodinsseg_dir = os.path.join(EXTRA_ROOT, 'foodinsseg')
+if DOWNLOAD_FOODINSSEG and not os.path.isdir(foodinsseg_dir):
+    import zipfile
+    stage('Downloading FoodInsSeg (1.3 GB) ...')
+    try:
+        load_gdown().download(id=FOODINSSEG_ID, output=foodinsseg_dir + '.zip',
+                              quiet=True)
+        with zipfile.ZipFile(foodinsseg_dir + '.zip') as z:
+            z.extractall(foodinsseg_dir + '.part')
+        os.replace(foodinsseg_dir + '.part', foodinsseg_dir)
+        os.remove(foodinsseg_dir + '.zip')
+    except Exception as error:
+        # Google Drive refuses a file many people downloaded that day.
+        raise RuntimeError(
+            f'Could not download FoodInsSeg: {error!r}. Try again later, or set '
+            'DOWNLOAD_FOODINSSEG to 0 to train without it.') from error
 stage(f'Photos from {INPUT_ROOT} and {EXTRA_ROOT} | results to {OUTPUT_DIR}')
 
 # %% [markdown]
@@ -239,6 +301,22 @@ assert set(VF_CLASS) | VF_DISH_BOXES <= set(VF_NAMES)
 MYFOOD_CLASS = {4: 'trung', 5: 'ga', 6: 'com', 7: 'rau', 8: 'mi', 9: 'trung',
                 10: 'bo'}
 MIN_PIECE = 0.004        # MyFood specks smaller than this share of the photo
+# FoodInsSeg: category name → class.
+FIS_CLASS = {
+    'rice': 'com', 'pork': 'heo', 'chicken duck': 'ga', 'steak': 'bo',
+    'fish': 'ca', 'shrimp': 'tom', 'egg': 'trung', 'tofu': 'dau_hu',
+    'french fries': 'khoai_tay_chien', 'cucumber': 'dua_leo_ca_chua',
+    'tomato': 'dua_leo_ca_chua', 'lettuce': 'rau', 'broccoli': 'rau',
+    'cabbage': 'rau', 'bean sprouts': 'rau', 'rape': 'rau',
+}
+# Foods that may look like one of ours without being labelled as it (bread
+# as bánh mì, noodles as bún or mì, wontons as chả giò). Photos with them
+# are left out, so the model is not taught that they are background.
+FIS_UNSURE = {
+    'bread', 'noodles', 'pasta', 'soup', 'fried meat', 'sausage',
+    'wonton dumplings', 'hanamaki baozi', 'hamburg', 'salad',
+    'other ingredients',
+}
 
 # %% [markdown]
 # ## Build the YOLO dataset
@@ -246,6 +324,7 @@ MIN_PIECE = 0.004        # MyFood specks smaller than this share of the photo
 # `WORK_DIR/yolo/{images,labels}/{train,val,test}`.
 
 # %%
+import json
 import random
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
@@ -372,6 +451,45 @@ def myfood_items(root):
     return items
 
 
+def foodinsseg_items(root):
+    """FoodInsSeg's COCO boxes. Its test photos are halved into val and
+    test."""
+    kept, background = [], []
+    for json_name, folder in (('Train.json', 'train'), ('Test.json', 'test')):
+        with open(os.path.join(root, 'annotations', json_name)) as f:
+            coco = json.load(f)
+        names = {c['id']: c['name'] for c in coco['categories']}
+        unknown = (set(FIS_CLASS) | FIS_UNSURE) - set(names.values())
+        assert not unknown, f'FoodInsSeg has no category {unknown}'
+        per_image = {}
+        for a in coco['annotations']:
+            per_image.setdefault(a['image_id'], []).append(a)
+        for image in coco['images']:
+            found = per_image.get(image['id'], [])
+            if any(names[a['category_id']] in FIS_UNSURE for a in found):
+                skipped['foodinsseg: unsure food'] += 1
+                continue
+            width, height = image['width'], image['height']
+            boxes = []
+            for a in found:
+                code = FIS_CLASS.get(names[a['category_id']])
+                left, top, w, h = a['bbox']
+                if code and w > 0 and h > 0:
+                    boxes.append((CLASS_INDEX[code], (left + w / 2) / width,
+                                  (top + h / 2) / height, w / width,
+                                  h / height))
+            split = ('train' if folder == 'train' else
+                     'val' if image['id'] % 2 == 0 else 'test')
+            item = (os.path.join(root, 'images', folder, image['file_name']),
+                    split, boxes)
+            (kept if boxes else background).append(item)
+    random.shuffle(background)
+    background = background[:int(BACKGROUND_SHARE * len(kept))]
+    stage(f'FoodInsSeg: {len(kept)} photos with boxes, {len(background)} '
+          'background')
+    return kept + background
+
+
 def write(index_item):
     index, (source, image, split, boxes) = index_item
     name = f'{source}_{index:06d}'
@@ -401,6 +519,9 @@ for root in find_roots(INPUT_ROOT, lambda folder, _: is_detection_root(folder)):
 for root in find_roots(EXTRA_ROOT, lambda folder, files:
                        os.path.isdir(os.path.join(folder, 'train_ann'))):
     items += [('myfood', *item) for item in myfood_items(root)]
+for root in find_roots(EXTRA_ROOT, lambda folder, files: os.path.exists(
+        os.path.join(folder, 'annotations', 'Train.json'))):
+    items += [('fis', *item) for item in foodinsseg_items(root)]
 if QUICK_TEST:
     random.shuffle(items)
     items = items[:300]
@@ -448,8 +569,6 @@ with open(DATA_YAML, 'w') as f:
 # after every epoch. A later run with the same settings resumes `last.pt`.
 
 # %%
-import json
-
 from ultralytics import YOLO
 
 RUN_DIR = os.path.join(OUTPUT_DIR, 'train')
@@ -501,7 +620,9 @@ if os.path.exists(BEST) and not resume:
 else:
     model = YOLO(LAST if resume else MODEL)
     model.add_callback('on_fit_epoch_end', check_time)
-    stage(('Resuming ' + LAST) if resume else f'Training from {MODEL}')
+    stage(('Resuming ' + LAST) if resume else
+          f'Fine-tuning from {FINETUNE_FROM}' if FINETUNE_FROM else
+          f'Training from {MODEL}')
     try:
         if resume:
             model.train(resume=True)
@@ -509,7 +630,9 @@ else:
             model.train(data=DATA_YAML, epochs=EPOCHS, imgsz=IMGSZ, batch=BATCH,
                         patience=PATIENCE, seed=SEED, project=OUTPUT_DIR,
                         name='train', exist_ok=True, workers=2 if ON_COLAB else 4,
-                        plots=not QUICK_TEST, cos_lr=True, close_mosaic=10)
+                        plots=not QUICK_TEST, cos_lr=True, close_mosaic=10,
+                        **(dict(optimizer='SGD', lr0=FINETUNE_LR,
+                                warmup_epochs=1) if FINETUNE_FROM else {}))
     except OutOfTime as stop:
         finished = False
         stage(f'Time limit: {stop}. Run all again to continue from last.pt.')
@@ -675,11 +798,14 @@ lines = [
     f'threshold_box: {threshold_box:.2f}',
     'threshold_iou: 0.5',
     '',
-    f'- Trained: {date.today().isoformat()}, {MODEL} with Ultralytics '
+    f'- Trained: {date.today().isoformat()}, '
+    + (f'fine-tuned from {FINETUNE_FROM}' if FINETUNE_FROM else MODEL)
+    + f' with Ultralytics '
     f'{ultralytics.__version__}, {IMGSZ} px'
     + ('' if finished else ' (training not finished: best epoch so far)')
     + (', QUICK TEST' if QUICK_TEST else ''),
-    f"- Photos: {dict(photos_per_split)} (VietFood67 boxes, MyFood masks)",
+    f"- Photos: {dict(photos_per_split)} (VietFood67 boxes, MyFood masks, "
+    'FoodInsSeg boxes)',
     f"- Test: mAP50 {results['map50']:.3f}, mAP50-95 {results['map50_95']:.3f}, "
     f"precision {results['precision']:.3f}, recall {results['recall']:.3f}",
     f'- Files: ' + ', '.join(f'{k} {v / 1e6:.1f} MB' for k, v in exported.items()),

@@ -1,6 +1,7 @@
-"""Runs the detector notebook end to end on tiny fake data, on the CPU, twice:
-first cut off by a time limit after one epoch, then resumed to the end.
-Checks the files it leaves behind. Use it after every change to
+"""Runs the detector notebook end to end on tiny fake data, on the CPU, three
+times: first cut off by a time limit after one epoch, then resumed to the
+end, then fine-tuned from the model that made. Checks the files it leaves
+behind. Use it after every change to
 train_detector.py, before sending the notebook to Colab.
 
     python tool/train/test/smoke_detector.py
@@ -12,6 +13,7 @@ minutes. The logs stay in the work folder it prints.
 """
 import json
 import os
+import shutil
 import random
 import subprocess
 import sys
@@ -71,6 +73,41 @@ def make(root):
                 draw.ellipse((200, 130, 260, 190), fill=fills[1])
             im.save(os.path.join(myfood, split, f'lunch_{i}.png'))
             mask.save(os.path.join(myfood, f'{split}_ann', f'lunch_{i}.png'))
+    # FoodInsSeg: rice with two pork slices, and a photo with bread (left
+    # out).
+    fis = os.path.join(root, 'work', 'extra', 'foodinsseg')
+    os.makedirs(os.path.join(fis, 'annotations'), exist_ok=True)
+    categories = [{'id': 66, 'name': 'rice'}, {'id': 47, 'name': 'pork'},
+                  {'id': 58, 'name': 'bread'}] + [
+        {'id': 200 + i, 'name': name} for i, name in enumerate(
+            ['chicken duck', 'steak', 'fish', 'shrimp', 'egg', 'tofu',
+             'french fries', 'cucumber', 'tomato', 'lettuce', 'broccoli',
+             'cabbage', 'bean sprouts', 'rape', 'noodles', 'pasta', 'soup',
+             'fried meat', 'sausage', 'wonton dumplings', 'hanamaki baozi',
+             'hamburg', 'salad', 'other ingredients'])]
+    for json_name, folder in (('Train.json', 'train'), ('Test.json', 'test')):
+        os.makedirs(os.path.join(fis, 'images', folder), exist_ok=True)
+        images, annotations = [], []
+        for i in range(6):
+            im = Image.new('RGB', (512, 384), (70, 60, 60))
+            draw = ImageDraw.Draw(im)
+            boxes = [(66, [40, 60, 220, 260])]
+            boxes += ([(58, [300, 100, 150, 120])] if i == 0 else
+                      [(47, [300, 80, 90, 70]), (47, [320, 200, 100, 80])])
+            for category, (left, top, w, h) in boxes:
+                draw.rectangle((left, top, left + w, top + h),
+                               fill={66: (245, 245, 235), 47: (190, 150, 130),
+                                     58: (210, 170, 110)}[category])
+                annotations.append({'id': len(annotations), 'image_id': i,
+                                    'category_id': category,
+                                    'bbox': [left, top, w, h]})
+            name = f'{folder}{i:03d}.jpg'
+            im.save(os.path.join(fis, 'images', folder, name))
+            images.append({'id': i, 'width': 512, 'height': 384,
+                           'file_name': name})
+        with open(os.path.join(fis, 'annotations', json_name), 'w') as f:
+            json.dump({'images': images, 'annotations': annotations,
+                       'categories': categories}, f)
 
 
 def run(work, name, **env):
@@ -94,10 +131,13 @@ def main():
     env = {'INPUT_ROOT': os.path.join(work, 'input'),
            'OUTPUT_DIR': os.path.join(work, 'output'),
            'WORK_DIR': os.path.join(work, 'work'),
-           'MODEL': 'yolo11n.yaml', 'DOWNLOAD_MYFOOD': '0'}
+           'MODEL': 'yolo11n.yaml', 'DOWNLOAD_MYFOOD': '0',
+           'DOWNLOAD_FOODINSSEG': '0'}
     first = run(work, 'cut', TIME_LIMIT_HOURS='0.01', **env)
     assert 'Time limit: stopped after epoch 1 of 2' in first, first[-2000:]
     assert "'vf67: whole-dish box': 20" in first, 'pho photos not left out'
+    assert "'foodinsseg: unsure food': 2" in first, 'bread photos not left out'
+    assert 'FoodInsSeg: 10 photos with boxes' in first, first[-2000:]
     second = run(work, 'resume', TIME_LIMIT_HOURS='0', **env)
     assert 'Resuming' in second, second[-2000:]
     assert 'Training done' in second
@@ -115,6 +155,16 @@ def main():
         results = json.load(f)
     assert 'app_decoding_matches' in results, 'exported model not checked'
     print(card)
+    # Fine-tune the model just made, into its own folder.
+    weights = os.path.join(work, 'detector_best.pt')
+    shutil.copy(os.path.join(export, 'detector_best.pt'), weights)
+    tuned = run(work, 'finetune', TIME_LIMIT_HOURS='0', **{
+        **env, 'OUTPUT_DIR': os.path.join(work, 'output_finetune'),
+        'FINETUNE_FROM': weights})
+    assert 'Fine-tuning from' in tuned and 'Training done' in tuned, tuned[-2000:]
+    with open(os.path.join(work, 'output_finetune', 'export',
+                           'DETECTOR_CARD.md'), encoding='utf-8') as f:
+        assert 'fine-tuned from' in f.read()
     print('decoding check:', results['app_decoding_matches'],
           '| input', results['input_shape'], '| output', results['output_shape'])
     print('smoke_detector: OK')
