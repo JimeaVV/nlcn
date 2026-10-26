@@ -2576,6 +2576,8 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   ảnh màn hình, xem Cài đặt, Nhật ký ở máy nhỏ chữ ×1,3 và Hôm nay ở nền
   sáng. Agent `ui-reviewer` không thấy lỗi. Ba điểm nó nêu đã sửa: nút (i)
   ở Sao lưu, khoảng cách dưới tiêu đề, và ảnh chưa có bữa 2 món.
+- Build APK 130 (`MacroRunner-130-arm64.apk`, 35,2 MB): versionCode 2130,
+  chứng chỉ ký `e3b83ac4fe9118e4…`, đã cài lên điện thoại qua adb Wi-Fi.
 
 ---
 
