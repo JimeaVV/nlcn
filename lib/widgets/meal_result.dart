@@ -24,7 +24,6 @@ class MealResult extends StatelessWidget {
       children: [
         CyberCard(
           title: l10n.mealTargetsTitle,
-          icon: Icons.speed_rounded,
           child: Row(children: [
             Expanded(
                 child: MetricTile(
@@ -48,6 +47,7 @@ class MealResult extends StatelessWidget {
         const SizedBox(height: 14),
         CyberCard(
           title: l10n.mealComparisonTitle,
+          // Says whether the plan meets the targets, so it stays.
           icon: meetsTargets
               ? Icons.check_circle_outline_rounded
               : Icons.info_outline_rounded,
@@ -83,8 +83,6 @@ class MealResult extends StatelessWidget {
         const SizedBox(height: 14),
         CyberCard(
           title: l10n.mealsTitle,
-          icon: Icons.ramen_dining_rounded,
-          accent: CyberColors.magenta,
           child: Column(
             children: recommendation.plan.meals.entries.map((entry) {
               final meal = entry.value;

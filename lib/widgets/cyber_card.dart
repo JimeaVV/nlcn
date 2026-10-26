@@ -53,20 +53,25 @@ class CyberCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (title != null) ...[
-            Row(
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, color: resolvedAccent, size: 21),
-                  const SizedBox(width: 9),
-                ],
-                Expanded(
-                  child: Text(
-                    title!,
-                    style: Theme.of(context).textTheme.titleMedium,
+            // As tall as an info button, so cards with and without one leave
+            // the same gap under the title.
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Row(
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, color: resolvedAccent, size: 21),
+                    const SizedBox(width: 9),
+                  ],
+                  Expanded(
+                    child: Text(
+                      title!,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
-                ),
-                if (trailing != null) trailing!,
-              ],
+                  if (trailing != null) trailing!,
+                ],
+              ),
             ),
             const SizedBox(height: 16),
           ],

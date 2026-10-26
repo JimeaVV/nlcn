@@ -3,42 +3,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppStyle { cyberpunk, minimalLight, forest, sunset }
 
-/// Style names are proper names; descriptions are localized in Settings.
+/// A style's name and background are localized in Settings.
 class AppStyleInfo {
-  const AppStyleInfo({
-    required this.style,
-    required this.name,
-    required this.icon,
-  });
+  const AppStyleInfo({required this.style, required this.icon});
 
   final AppStyle style;
-  final String name;
   final IconData icon;
 }
 
 const appStyleOptions = <AppStyleInfo>[
-  AppStyleInfo(
-    style: AppStyle.cyberpunk,
-    // Shown to the user; the enum keeps its old name, which saved settings
-    // still use.
-    name: 'Neon',
-    icon: Icons.bolt_rounded,
-  ),
-  AppStyleInfo(
-    style: AppStyle.minimalLight,
-    name: 'Minimal Light',
-    icon: Icons.light_mode_rounded,
-  ),
-  AppStyleInfo(
-    style: AppStyle.forest,
-    name: 'Forest',
-    icon: Icons.forest_rounded,
-  ),
-  AppStyleInfo(
-    style: AppStyle.sunset,
-    name: 'Sunset',
-    icon: Icons.wb_twilight_rounded,
-  ),
+  // The enum keeps its old name, which saved settings still use.
+  AppStyleInfo(style: AppStyle.cyberpunk, icon: Icons.bolt_rounded),
+  AppStyleInfo(style: AppStyle.minimalLight, icon: Icons.light_mode_rounded),
+  AppStyleInfo(style: AppStyle.forest, icon: Icons.forest_rounded),
+  AppStyleInfo(style: AppStyle.sunset, icon: Icons.wb_twilight_rounded),
 ];
 
 class AppPalette {

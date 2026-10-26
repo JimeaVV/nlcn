@@ -615,18 +615,22 @@ class AppLocalizationsVi extends AppLocalizations {
   String get interfaceStyle => 'Giao diện';
 
   @override
-  String get styleCyberpunkDescription =>
-      'Neon xanh lơ, hồng tím trên nền xanh đen.';
+  String get styleCyan => 'Xanh lơ';
 
   @override
-  String get styleMinimalLightDescription => 'Sáng, gọn gàng và dễ đọc.';
+  String get styleBlue => 'Xanh dương';
 
   @override
-  String get styleForestDescription =>
-      'Tông xanh lá dịu mắt, mang cảm giác tự nhiên.';
+  String get styleGreen => 'Xanh lá';
 
   @override
-  String get styleSunsetDescription => 'Điểm nhấn cam ấm và tím.';
+  String get styleOrange => 'Cam';
+
+  @override
+  String get styleDarkBackground => 'Nền tối';
+
+  @override
+  String get styleLightBackground => 'Nền sáng';
 
   @override
   String get errorDataUnavailable =>
@@ -1080,8 +1084,8 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String kcalProteinLine(String kcal, String protein) {
-    return '$kcal kcal • protein $protein g';
+  String mealTotalKcal(String kcal) {
+    return '$kcal kcal';
   }
 
   @override
@@ -1318,10 +1322,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get remindersTitle => 'Nhắc ghi bữa';
-
-  @override
-  String get remindersBody =>
-      'Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.';
 
   @override
   String get remindersSwitch => 'Bật nhắc nhở';

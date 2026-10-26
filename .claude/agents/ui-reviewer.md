@@ -30,7 +30,8 @@ Người gọi có thể chỉ định file hoặc khoảng commit khác.
    `lib/l10n/app_vi.arb` và `app_en.arb`. Hai file có cùng khoá, và đã chạy
    `flutter gen-l10n` (file `app_localizations*.dart` khớp với `.arb`).
    Không viết cứng tiếng Việt hay tiếng Anh trong widget; ngoại lệ là tên
-   riêng (tên giao diện, "BMR", "TDEE").
+   riêng ("BMR", "TDEE"). Tên giao diện cũng dịch, đặt theo màu nhấn
+   ("Xanh lơ", "Cam"), không đặt tên kiểu quảng cáo.
 5. **Font theo theme.** Không tạo `TextStyle(...)` mới để truyền vào
    `textStyle:` của nút hay theme con, vì như vậy mất font Be Vietnam Pro.
    Dùng `Theme.of(context).textTheme.xxx?.copyWith(...)`.
@@ -44,10 +45,17 @@ Người gọi có thể chỉ định file hoặc khoảng commit khác.
    lỗi khi vẽ.
 8. **Thẻ gọn.** Đoạn giải thích dài hơn khoảng hai dòng nên nằm sau
    `InfoButton` (`lib/widgets/info_button.dart`), không nằm sẵn trong thẻ.
+   - Chỉ thẻ `highlight` có `icon` ở tiêu đề; thẻ khác chỉ có chữ. Ngoại lệ
+     là icon báo trạng thái (đạt/chưa đạt). Thẻ không highlight cũng không
+     cần `accent`, vì màu đó không hiện ở đâu.
+   - `InfoButton` chỉ đặt khi nội dung có thông tin mới: công thức, cách
+     ước lượng, ảnh lưu ở đâu. Nếu nó chỉ nhắc lại nhãn nút hay hộp xác nhận
+     thì bỏ.
+   - Không lặp cùng một con số hai lần trong một thẻ.
 9. **Thông báo.** `SnackBar` có `action` phải đặt `persist: false` và một
    `duration`, nếu không nó ở lại mãi.
 10. **Thương hiệu.** Không dùng tên, hình hay thương hiệu của CD Projekt Red
-    hoặc Cyberpunk: Edgerunners. Giao diện neon hiển thị tên là "Neon".
+    hoặc Cyberpunk: Edgerunners. Giao diện neon (mã `cyberpunk`) hiển thị tên là "Xanh lơ".
 
 ## Cách làm
 1. Đọc diff, sau đó đọc toàn bộ những widget bị đổi, không chỉ dòng diff.

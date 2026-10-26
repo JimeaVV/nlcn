@@ -405,11 +405,17 @@ class _MealSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final totals = FoodLogTotals.of(entries);
-    final number = context.formatNumber;
+    final groups = groupDiaryEntries(entries);
     return CyberCard(
       title: l10n.mealSlotLabel(meal),
-      accent: CyberColors.magenta,
+      // A meal of one row already shows its numbers on that row.
+      trailing: groups.length < 2
+          ? null
+          : Text(
+              l10n.mealTotalKcal(
+                  context.formatNumber(FoodLogTotals.of(entries).calories)),
+              style: TextStyle(color: CyberColors.muted),
+            ),
       // The card paints its own background; list tiles need a Material for
       // their ink.
       child: Material(
@@ -421,7 +427,7 @@ class _MealSection extends StatelessWidget {
               Text(l10n.diaryEmptyMeal,
                   style: TextStyle(color: CyberColors.muted))
             else ...[
-              for (final group in groupDiaryEntries(entries))
+              for (final group in groups)
                 if (group.dish == null)
                   _entryTile(context, group.entries.single)
                 else
@@ -431,11 +437,6 @@ class _MealSection extends StatelessWidget {
                     tileFor: (entry) => _entryTile(context, entry,
                         title: group.partName(entry)),
                   ),
-              Text(
-                l10n.kcalProteinLine(number(totals.calories),
-                    number(totals.protein, decimals: 1)),
-                style: TextStyle(color: CyberColors.muted),
-              ),
             ],
             if (copy != null) ...[
               const SizedBox(height: 6),

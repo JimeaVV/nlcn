@@ -621,17 +621,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interfaceStyle => 'Interface style';
 
   @override
-  String get styleCyberpunkDescription => 'Neon cyan, magenta and deep navy.';
+  String get styleCyan => 'Cyan';
 
   @override
-  String get styleMinimalLightDescription => 'Bright, clean and easy to read.';
+  String get styleBlue => 'Blue';
 
   @override
-  String get styleForestDescription =>
-      'Calm green palette for a natural fitness look.';
+  String get styleGreen => 'Green';
 
   @override
-  String get styleSunsetDescription => 'Warm orange and violet accents.';
+  String get styleOrange => 'Orange';
+
+  @override
+  String get styleDarkBackground => 'Dark background';
+
+  @override
+  String get styleLightBackground => 'Light background';
 
   @override
   String get errorDataUnavailable =>
@@ -1089,8 +1094,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String kcalProteinLine(String kcal, String protein) {
-    return '$kcal kcal • P $protein g';
+  String mealTotalKcal(String kcal) {
+    return '$kcal kcal';
   }
 
   @override
@@ -1328,10 +1333,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remindersTitle => 'Meal reminders';
-
-  @override
-  String get remindersBody =>
-      'Notifications from the phone itself, no internet needed. They may come a few minutes late.';
 
   @override
   String get remindersSwitch => 'Turn on reminders';

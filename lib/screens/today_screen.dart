@@ -236,7 +236,6 @@ class _ProfilePrompt extends StatelessWidget {
     final l10n = context.l10n;
     return CyberCard(
       title: l10n.mealProfileRequiredTitle,
-      icon: Icons.person_outline_rounded,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -334,8 +333,6 @@ class _WaterCard extends StatelessWidget {
     return CyberCard(
       key: const ValueKey('today-water'),
       title: l10n.waterTitle,
-      icon: Icons.water_drop_outlined,
-      accent: CyberColors.cyan,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -400,8 +397,6 @@ class _WeekCard extends StatelessWidget {
     return CyberCard(
       key: const ValueKey('today-week'),
       title: l10n.weekTitle,
-      icon: Icons.calendar_view_week_rounded,
-      accent: CyberColors.magenta,
       child: week.loggedDays == 0 && week.trainingDays == 0 && change == null
           ? Text(l10n.weekEmpty, style: muted)
           : Column(
@@ -451,8 +446,6 @@ class _WeightCard extends StatelessWidget {
     final change = weeklyWeightChange(weights);
     return CyberCard(
       title: l10n.weightTracking,
-      icon: Icons.monitor_weight_outlined,
-      accent: CyberColors.magenta,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -503,8 +496,6 @@ class _TrainingCard extends StatelessWidget {
     final last = lastWorkout;
     return CyberCard(
       title: l10n.navWorkout,
-      icon: Icons.fitness_center_rounded,
-      accent: CyberColors.lime,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

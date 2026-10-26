@@ -226,7 +226,6 @@ class MealScreenState extends State<MealScreen> {
           else if (profile == null)
             CyberCard(
               title: l10n.mealProfileRequiredTitle,
-              icon: Icons.person_outline_rounded,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

@@ -416,8 +416,6 @@ class ProfileScreenState extends State<ProfileScreen> {
     return CyberCard(
       key: const ValueKey('profile-adaptive-tdee'),
       title: l10n.adaptiveTdeeTitle,
-      icon: Icons.insights_rounded,
-      accent: CyberColors.lime,
       trailing: _infoButton(
         'adaptive-tdee-info',
         () => _showInfo(l10n.adaptiveTdeeTitle, [l10n.adaptiveTdeeInfo]),
@@ -481,7 +479,6 @@ class ProfileScreenState extends State<ProfileScreen> {
     final shown = _showAllWeights ? _weights : _weights.take(5).toList();
     return CyberCard(
       title: l10n.weightTracking,
-      icon: Icons.monitor_weight_outlined,
       trailing: _infoButton(
         'weight-info',
         () => _showInfo(l10n.weightTracking, [l10n.weightHistoryNote]),
@@ -646,7 +643,6 @@ class ProfileScreenState extends State<ProfileScreen> {
           ],
           CyberCard(
             title: l10n.personalInfo,
-            icon: Icons.person_outline_rounded,
             child: Form(
               key: _formKey,
               child: Column(

@@ -450,10 +450,12 @@
   "settingsTitle": "CÀI ĐẶT",
   "languageTitle": "Ngôn ngữ",
   "interfaceStyle": "Giao diện",
-  "styleCyberpunkDescription": "Neon xanh lơ, hồng tím trên nền xanh đen.",
-  "styleMinimalLightDescription": "Sáng, gọn gàng và dễ đọc.",
-  "styleForestDescription": "Tông xanh lá dịu mắt, mang cảm giác tự nhiên.",
-  "styleSunsetDescription": "Điểm nhấn cam ấm và tím.",
+  "styleCyan": "Xanh lơ",
+  "styleBlue": "Xanh dương",
+  "styleGreen": "Xanh lá",
+  "styleOrange": "Cam",
+  "styleDarkBackground": "Nền tối",
+  "styleLightBackground": "Nền sáng",
   "errorDataUnavailable": "Không đọc được dữ liệu thực phẩm và bài tập đi kèm ứng dụng.",
   "errorMealNotFound": "Không tìm được thực đơn phù hợp với mục tiêu hiện tại. Hãy thử lại hoặc điều chỉnh mục tiêu.",
   "errorWorkoutNotFound": "Không có bài tập phù hợp với lựa chọn này. Hãy thử thời gian dài hơn hoặc nhóm bài khác.",
@@ -726,13 +728,10 @@
       }
     }
   },
-  "kcalProteinLine": "{kcal} kcal • protein {protein} g",
-  "@kcalProteinLine": {
+  "mealTotalKcal": "{kcal} kcal",
+  "@mealTotalKcal": {
     "placeholders": {
       "kcal": {
-        "type": "String"
-      },
-      "protein": {
         "type": "String"
       }
     }
@@ -1068,7 +1067,6 @@
   },
   "weekEmpty": "Chưa có dữ liệu trong 7 ngày qua.",
   "remindersTitle": "Nhắc ghi bữa",
-  "remindersBody": "Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.",
   "remindersSwitch": "Bật nhắc nhở",
   "remindersDenied": "Chưa được cấp quyền thông báo. Hãy bật trong Cài đặt của Android.",
   "remindersChangeTime": "Đổi giờ nhắc {meal}",

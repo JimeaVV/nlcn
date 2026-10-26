@@ -705,8 +705,6 @@ class _ComponentsCardState extends State<_ComponentsCard> {
         );
     return CyberCard(
       title: l10n.scanComponentsTitle,
-      icon: Icons.checklist_rounded,
-      accent: CyberColors.magenta,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

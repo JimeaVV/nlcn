@@ -253,13 +253,18 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  String _styleDescription(AppLocalizations l10n, AppStyle style) =>
-      switch (style) {
-        AppStyle.cyberpunk => l10n.styleCyberpunkDescription,
-        AppStyle.minimalLight => l10n.styleMinimalLightDescription,
-        AppStyle.forest => l10n.styleForestDescription,
-        AppStyle.sunset => l10n.styleSunsetDescription,
+  /// Named after its accent colour, which the preview beside it shows.
+  String _styleName(AppLocalizations l10n, AppStyle style) => switch (style) {
+        AppStyle.cyberpunk => l10n.styleCyan,
+        AppStyle.minimalLight => l10n.styleBlue,
+        AppStyle.forest => l10n.styleGreen,
+        AppStyle.sunset => l10n.styleOrange,
       };
+
+  String _styleBackground(AppLocalizations l10n, AppStyle style) =>
+      AppTheme.paletteFor(style).brightness == Brightness.dark
+          ? l10n.styleDarkBackground
+          : l10n.styleLightBackground;
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +287,6 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.languageTitle,
-                icon: Icons.translate_rounded,
                 child: SizedBox(
                   width: double.infinity,
                   child: SegmentedButton<AppLanguage>(
@@ -304,7 +308,6 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.interfaceStyle,
-                icon: Icons.palette_outlined,
                 child: Column(
                   children: [
                     for (final option in appStyleOptions)
@@ -316,8 +319,8 @@ class SettingsScreen extends StatelessWidget {
                           size: 40,
                           ringColor: Colors.transparent,
                         ),
-                        title: option.name,
-                        subtitle: _styleDescription(l10n, option.style),
+                        title: _styleName(l10n, option.style),
+                        subtitle: _styleBackground(l10n, option.style),
                         selected: themeController.style == option.style,
                         onTap: () => themeController.setStyle(option.style),
                       ),
@@ -338,7 +341,6 @@ class SettingsScreen extends StatelessWidget {
               CyberCard(
                 key: const ValueKey('backup-card'),
                 title: l10n.backupTitle,
-                icon: Icons.backup_outlined,
                 trailing: InfoButton(
                     key: const ValueKey('backup-info'),
                     title: l10n.backupTitle,
@@ -365,13 +367,6 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.dataTitle,
-                icon: Icons.storage_rounded,
-                // The confirmation dialog says the same before anything is
-                // deleted.
-                trailing: InfoButton(
-                    key: const ValueKey('data-info'),
-                    title: l10n.dataTitle,
-                    paragraphs: [l10n.clearAllBody]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -402,7 +397,6 @@ extension on SettingsScreen {
     return CyberCard(
       key: const ValueKey('collect-card'),
       title: l10n.collectTitle,
-      icon: Icons.photo_library_outlined,
       trailing: InfoButton(
           key: const ValueKey('collect-info'),
           title: l10n.collectTitle,
@@ -467,8 +461,6 @@ extension on SettingsScreen {
     return CyberCard(
       key: const ValueKey('water-reminders-card'),
       title: l10n.waterRemindersTitle,
-      icon: Icons.water_drop_outlined,
-      accent: CyberColors.cyan,
       trailing: InfoButton(
           key: const ValueKey('water-reminders-info'),
           title: l10n.waterRemindersTitle,
@@ -531,11 +523,6 @@ extension on SettingsScreen {
     return CyberCard(
       key: const ValueKey('reminders-card'),
       title: l10n.remindersTitle,
-      icon: Icons.notifications_active_outlined,
-      trailing: InfoButton(
-          key: const ValueKey('reminders-info'),
-          title: l10n.remindersTitle,
-          paragraphs: [l10n.remindersBody]),
       // The card paints its own background; the tiles need a Material for
       // their ink.
       child: Material(

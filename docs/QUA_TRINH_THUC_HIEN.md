@@ -2544,6 +2544,39 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Chưa kiểm tra được: tốc độ và kết quả nhận diện trên điện thoại. Lúc build
   xong, adb không kết nối được với máy qua Wi-Fi.
 
+### 2026-10-26 · Giao diện bớt "trông như AI làm": bỏ số lặp, đổi tên giao diện, bớt icon và nút (i)
+- Lý do: vẽ lại các màn ra PNG và rà xem giao diện có giống mẫu do AI sinh
+  ra không. Thấy ba chỗ dễ nhận ra nhất:
+  - ở Nhật ký, mỗi bữa có một dòng tổng lặp lại đúng con số của dòng món
+    phía trên;
+  - tên giao diện bằng tiếng Anh, kèm mô tả kiểu quảng cáo ("mang cảm giác
+    tự nhiên");
+  - thẻ nào cũng có icon màu ở tiêu đề, nhiều thẻ có thêm nút (i).
+- Đã làm:
+  - Nhật ký: bỏ dòng tổng ở cuối thẻ bữa. Bữa có từ 2 dòng trở lên thì tổng
+    kcal hiện cạnh tên bữa; bữa 1 dòng thì không hiện, vì dòng món đã có số.
+  - Tên giao diện đặt theo màu nhấn và có bản dịch: Xanh lơ (trước là
+    Neon), Xanh dương (Minimal Light), Xanh lá (Forest), Cam (Sunset). Mô tả
+    chỉ còn "Nền tối" hoặc "Nền sáng", lấy từ bảng màu. Mã trong code giữ
+    nguyên nên cài đặt đã lưu không bị mất.
+  - Chỉ thẻ chính của mỗi màn (thẻ có viền sáng) còn icon ở tiêu đề. Riêng
+    thẻ so sánh thực đơn với mục tiêu vẫn giữ icon đạt/chưa đạt vì nó báo
+    trạng thái. Bỏ luôn các `accent` không còn hiện ở đâu.
+  - Cài đặt: bỏ nút (i) ở Nhắc ghi bữa và Dữ liệu, vì nội dung chỉ nhắc
+    lại nhãn nút hoặc hộp xác nhận. Vẫn giữ nút (i) ở Sao lưu (file JSON
+    gồm những gì), Nhắc uống nước, Gom ảnh, Hồ sơ và vòng calo, vì ở đó có
+    thông tin mới.
+  - Hàng tiêu đề thẻ luôn cao 48 dp, bằng nút (i), để thẻ có nút và thẻ
+    không có nút cách nội dung đều nhau.
+  - Dữ liệu vẽ ảnh có thêm một bữa trưa 2 món, để thấy tổng ở tiêu đề.
+  - Cập nhật quy tắc trong agent `ui-reviewer` cho khớp.
+- Kiểm tra: `flutter gen-l10n`, `flutter analyze` sạch, `flutter test` qua
+  242 test. Có 1 test mới: bữa 1 món không hiện tổng. Test món đã quét
+  kiểm tra thêm tổng kcal ở tiêu đề bữa. Vẽ lại 35
+  ảnh màn hình, xem Cài đặt, Nhật ký ở máy nhỏ chữ ×1,3 và Hôm nay ở nền
+  sáng. Agent `ui-reviewer` không thấy lỗi. Ba điểm nó nêu đã sửa: nút (i)
+  ở Sao lưu, khoảng cách dưới tiêu đề, và ảnh chưa có bữa 2 món.
+
 ---
 
 ## 3. Việc còn tồn đọng

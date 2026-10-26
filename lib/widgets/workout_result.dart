@@ -40,7 +40,6 @@ class WorkoutResult extends StatelessWidget {
       children: [
         CyberCard(
           title: l10n.sessionSummary,
-          accent: CyberColors.lime,
           child: Column(
             children: [
               Row(
@@ -90,7 +89,6 @@ class WorkoutResult extends StatelessWidget {
         const SizedBox(height: 14),
         CyberCard(
           title: l10n.exerciseSequence,
-          accent: CyberColors.cyan,
           child: exercises.isEmpty
               ? Text(l10n.noExerciseData)
               : Column(

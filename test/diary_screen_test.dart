@@ -334,6 +334,8 @@ void main() {
     expect(find.textContaining('2 thành phần • 478 kcal'), findsOneWidget);
     expect(find.text('Sườn nướng'), findsNothing, reason: 'closed at first');
     expect(find.text('Ức gà'), findsOneWidget);
+    // Two rows, so the meal shows its total next to its name.
+    expect(find.text('726 kcal'), findsOneWidget);
 
     await tester.tap(find.text('Cơm tấm'));
     await tester.pumpAndSettle();
@@ -344,6 +346,15 @@ void main() {
     expect(
         [for (final e in database.entries) e.name], ['Cơm (Cơm tấm)', 'Ức gà']);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a meal of one food does not repeat its numbers as a total',
+      (tester) async {
+    final database = _Database();
+    await database.addFoodLogEntries(
+        [_logged('Ức gà', DateTime.now(), MealSlot.lunch, calories: 248)]);
+    await _mount(tester, database);
+    expect(find.textContaining('248 kcal'), findsOneWidget);
   });
 
   testWidgets('earlier days can be opened but not future ones', (tester) async {

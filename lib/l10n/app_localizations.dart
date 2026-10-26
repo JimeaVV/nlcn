@@ -1156,29 +1156,41 @@ abstract class AppLocalizations {
   /// **'Giao diện'**
   String get interfaceStyle;
 
-  /// No description provided for @styleCyberpunkDescription.
+  /// No description provided for @styleCyan.
   ///
   /// In vi, this message translates to:
-  /// **'Neon xanh lơ, hồng tím trên nền xanh đen.'**
-  String get styleCyberpunkDescription;
+  /// **'Xanh lơ'**
+  String get styleCyan;
 
-  /// No description provided for @styleMinimalLightDescription.
+  /// No description provided for @styleBlue.
   ///
   /// In vi, this message translates to:
-  /// **'Sáng, gọn gàng và dễ đọc.'**
-  String get styleMinimalLightDescription;
+  /// **'Xanh dương'**
+  String get styleBlue;
 
-  /// No description provided for @styleForestDescription.
+  /// No description provided for @styleGreen.
   ///
   /// In vi, this message translates to:
-  /// **'Tông xanh lá dịu mắt, mang cảm giác tự nhiên.'**
-  String get styleForestDescription;
+  /// **'Xanh lá'**
+  String get styleGreen;
 
-  /// No description provided for @styleSunsetDescription.
+  /// No description provided for @styleOrange.
   ///
   /// In vi, this message translates to:
-  /// **'Điểm nhấn cam ấm và tím.'**
-  String get styleSunsetDescription;
+  /// **'Cam'**
+  String get styleOrange;
+
+  /// No description provided for @styleDarkBackground.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nền tối'**
+  String get styleDarkBackground;
+
+  /// No description provided for @styleLightBackground.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nền sáng'**
+  String get styleLightBackground;
 
   /// No description provided for @errorDataUnavailable.
   ///
@@ -2002,11 +2014,11 @@ abstract class AppLocalizations {
   /// **'{value} g protein'**
   String proteinGrams(String value);
 
-  /// No description provided for @kcalProteinLine.
+  /// No description provided for @mealTotalKcal.
   ///
   /// In vi, this message translates to:
-  /// **'{kcal} kcal • protein {protein} g'**
-  String kcalProteinLine(String kcal, String protein);
+  /// **'{kcal} kcal'**
+  String mealTotalKcal(String kcal);
 
   /// No description provided for @mealMacroLine.
   ///
@@ -2351,12 +2363,6 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Nhắc ghi bữa'**
   String get remindersTitle;
-
-  /// No description provided for @remindersBody.
-  ///
-  /// In vi, this message translates to:
-  /// **'Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.'**
-  String get remindersBody;
 
   /// No description provided for @remindersSwitch.
   ///

@@ -67,6 +67,17 @@ class _Database extends Fake implements DatabaseService {
           calories: 248,
           protein: 46.5,
           fat: 5.4),
+      // A second row, so the lunch card shows its total.
+      FoodLogEntry(
+          id: 4,
+          date: now,
+          meal: MealSlot.lunch,
+          name: 'Cơm',
+          grams: 150,
+          calories: 193,
+          protein: 4,
+          carbs: 42,
+          fat: 0.4),
     ];
     weights = [
       WeightEntry(id: 3, weight: 69.6, recordedAt: now),
