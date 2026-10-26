@@ -1,34 +1,34 @@
 # Detector card
 
 contract_version: 1.6
-threshold_box: 0.48
+threshold_box: 0.35
 threshold_iou: 0.5
 
-- Trained: 2026-10-24, yolo11n.pt with Ultralytics 8.4.185, 640 px
-- Photos: {'train': 17804, 'val': 2441, 'test': 1296} (VietFood67 boxes, MyFood masks)
-- Test: mAP50 0.832, mAP50-95 0.708, precision 0.815, recall 0.759
+- Trained: 2026-10-26, fine-tuned from https://drive.google.com/file/d/1tw-qrwKxF486cxxlaLttHCvRtc3abE1d/view?usp=sharing with Ultralytics 8.4.185, 640 px
+- Photos: {'val': 2967, 'test': 1811, 'train': 20171} (VietFood67 boxes, MyFood masks, FoodInsSeg boxes)
+- Test: mAP50 0.632, mAP50-95 0.527, precision 0.695, recall 0.585
 - Files: detector.tflite 10.7 MB, detector_int8.tflite 3.0 MB
 
 | class | test boxes | mAP50 | mAP50-95 |
 |---|---|---|---|
-| com | 115 | 0.942 | 0.813 |
-| bun | 35 | 0.881 | 0.736 |
-| mi | 68 | 0.906 | 0.755 |
-| banh_mi_o | 68 | 0.913 | 0.781 |
-| ga | 100 | 0.742 | 0.589 |
-| thit_kho | 58 | 0.924 | 0.835 |
-| thit_nuong | 51 | 0.882 | 0.770 |
-| heo | 109 | 0.781 | 0.660 |
-| bo | 78 | 0.849 | 0.734 |
-| ca | 154 | 0.828 | 0.714 |
-| tom | 60 | 0.845 | 0.710 |
-| muc | 77 | 0.822 | 0.713 |
-| trung | 193 | 0.796 | 0.662 |
-| dau_hu | 45 | 0.713 | 0.604 |
-| cha | 77 | 0.607 | 0.475 |
-| cha_gio | 69 | 0.758 | 0.656 |
-| rau | 128 | 0.751 | 0.607 |
-| dua_leo_ca_chua | 145 | 0.731 | 0.604 |
-| do_chua | 26 | 0.934 | 0.841 |
-| khoai_tay_chien | 51 | 0.956 | 0.798 |
-| canh | 47 | 0.902 | 0.818 |
+| com | 247 | 0.700 | 0.567 |
+| bun | 35 | 0.896 | 0.735 |
+| mi | 68 | 0.928 | 0.771 |
+| banh_mi_o | 68 | 0.920 | 0.805 |
+| ga | 545 | 0.323 | 0.240 |
+| thit_kho | 58 | 0.901 | 0.815 |
+| thit_nuong | 51 | 0.762 | 0.676 |
+| heo | 328 | 0.309 | 0.249 |
+| bo | 413 | 0.405 | 0.305 |
+| ca | 234 | 0.642 | 0.544 |
+| tom | 226 | 0.460 | 0.350 |
+| muc | 77 | 0.798 | 0.691 |
+| trung | 239 | 0.659 | 0.537 |
+| dau_hu | 81 | 0.394 | 0.325 |
+| cha | 77 | 0.573 | 0.457 |
+| cha_gio | 69 | 0.728 | 0.641 |
+| rau | 745 | 0.365 | 0.246 |
+| dua_leo_ca_chua | 1109 | 0.372 | 0.265 |
+| do_chua | 26 | 0.944 | 0.853 |
+| khoai_tay_chien | 347 | 0.296 | 0.203 |
+| canh | 47 | 0.898 | 0.801 |

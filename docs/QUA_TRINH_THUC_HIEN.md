@@ -2675,6 +2675,28 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   - Kiểm tra bằng gdown 5.2.0, có đặt sẵn một file HTML hỏng: tải lại ra
     đúng 5,5 MB. `smoke_detector.py` vẫn OK.
 
+### 2026-10-27 · Đưa model phát hiện món đã fine-tune với FoodInsSeg vào app (APK 135)
+- Vì sao: lần chạy Colab đã train xong 30/30 epoch. Điểm trong card thấp
+  hơn bản cũ (mAP50 0,632 so với 0,832), nhưng bộ test giờ có thêm khoảng
+  500 ảnh FoodInsSeg khó hơn, nên hai số này không so trực tiếp được.
+- So trên cùng bộ ảnh: 459 ảnh test FoodInsSeg (nửa id lẻ, cùng cách gán
+  nhãn với notebook), chấm cả hai `detector_best.pt` trên máy tính:
+  - mAP50: 0,088 (cũ), 0,232 (mới).
+  - Theo kiểu app dùng (mỗi ảnh có báo đúng món có trong đĩa không, với
+    ngưỡng của từng card: 0,48 cũ, 0,35 mới): tìm ra 214/778 món (28%) so
+    với 376/778 (48%). Báo nhầm: 204 lần so với 161 lần.
+  - Heo vẫn yếu: 7/61 ảnh. Model hay gọi heo là bò hoặc gà.
+- Các lớp chỉ có trong VietFood67 gần như giữ nguyên (bún, mì, bánh mì,
+  canh lệch dưới 0,03 mAP50); riêng thịt nướng giảm từ 0,882 xuống 0,762.
+- Ảnh cơm + heo người dùng chụp: cả hai model chỉ ra cơm (0,87 cũ, 0,66
+  mới), chưa ra heo.
+- Đã làm: chép `detector.tflite` và `DETECTOR_CARD.md` mới vào
+  `assets/models` (`threshold_box` từ 0,48 xuống 0,35); danh sách lớp
+  không đổi, vẫn contract 1.6.
+- Kiểm tra: `flutter analyze` sạch, `flutter test` 244 test đều qua. Build
+  APK 135 (35,2 MB), chữ ký khớp chứng chỉ release, đã cài lên điện thoại.
+  Chưa quét thử trên điện thoại.
+
 ---
 
 ## 3. Việc còn tồn đọng
