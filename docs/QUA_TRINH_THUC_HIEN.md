@@ -2606,6 +2606,29 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Còn lại: model không nhận ra mấy miếng thịt heo thái mỏng trên cơm (điểm
   cao nhất 0,005). Khi chỉ tìm được 1 món, app vẫn quay về đoán cả món.
 
+### 2026-10-26 · Màn Kết quả quét dùng cả khi model phát hiện món chỉ tìm được 1 món
+- Lý do: với đĩa cơm có thịt heo thái mỏng, model phát hiện món chỉ tìm được
+  cơm (90%). Trước đây app chỉ dựng đĩa từ khung khi tìm được từ 2 món trở
+  lên, nên lần này quay về đoán cả món ("Cà ri gà 31%"), sai hẳn. Người
+  dùng muốn thấy món đã tìm được, rồi tự thêm phần còn thiếu.
+- Đã làm (`scan_result_screen.dart`):
+  - Tìm được 1 món mà model món không chắc: dựng đĩa từ món đó, chip "Đĩa có
+    1 món" được chọn. Câu gợi ý bảo người dùng bấm Thêm thành phần cho món
+    còn thiếu.
+  - Model món chắc chắn thì vẫn mở món đó như cũ; chip "Đĩa có 1 món" chỉ
+    là một lựa chọn.
+  - Từ 2 món trở lên: giữ nguyên quy tắc cũ.
+  - Chuỗi tiếng Anh "{count} foods on the plate" đổi sang dạng số ít/số
+    nhiều.
+- Kiểm tra:
+  - test mới cho cả hai trường hợp; `flutter analyze` sạch, `flutter test`
+    qua 244 test.
+  - Agent `ui-reviewer` thấy câu gợi ý ban đầu ("Mới tìm được 1 món…") lặp
+    số 1 với chip ngay trên, nên rút còn "Món nào còn thiếu thì bấm Thêm
+    thành phần."
+  - APK 134 (versionCode 2134, chứng chỉ `e3b83ac4fe9118e4…`) cài lên điện
+    thoại.
+
 ---
 
 ## 3. Việc còn tồn đọng

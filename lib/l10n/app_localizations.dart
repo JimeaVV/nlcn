@@ -2880,7 +2880,7 @@ abstract class AppLocalizations {
   /// **'Chọn phần và cách nấu'**
   String get scanRefine;
 
-  /// Chip for the plate built from the detector boxes; count is at least 2
+  /// Chip for the plate built from the detector boxes; count is at least 1
   ///
   /// In vi, this message translates to:
   /// **'Đĩa có {count} món'**
@@ -2891,6 +2891,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Mỗi món trên đĩa một dòng bên dưới.'**
   String get scanDetectedHint;
+
+  /// No description provided for @scanDetectedOneHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Món nào còn thiếu thì bấm Thêm thành phần.'**
+  String get scanDetectedOneHint;
 
   /// Screen-reader label of the boxes drawn on the photo
   ///

@@ -1634,11 +1634,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String scanDetectedPlate(int count) {
-    return '$count foods on the plate';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count foods on the plate',
+      one: '1 food on the plate',
+    );
+    return '$_temp0';
   }
 
   @override
   String get scanDetectedHint => 'One row below for each food on the plate.';
+
+  @override
+  String get scanDetectedOneHint => 'Add anything missing with Add component.';
 
   @override
   String scanBoxesLabel(String foods) {

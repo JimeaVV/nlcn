@@ -1629,6 +1629,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get scanDetectedHint => 'Mỗi món trên đĩa một dòng bên dưới.';
 
   @override
+  String get scanDetectedOneHint =>
+      'Món nào còn thiếu thì bấm Thêm thành phần.';
+
+  @override
   String scanBoxesLabel(String foods) {
     return 'Ảnh có khung quanh các món tìm thấy: $foods';
   }

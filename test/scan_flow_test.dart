@@ -291,6 +291,41 @@ void main() {
         isFalse);
   });
 
+  testWidgets('one food found beats an unsure guess; a sure dish wins',
+      (tester) async {
+    _tall(tester);
+    Future<void> scan(FoodRecognition guess) async {
+      await tester.pumpWidget(localizedApp(
+        home: ScanResultScreen(
+          key: UniqueKey(),
+          imagePath: 'plate.jpg',
+          data: fixtureVnFood(),
+          recognizer: _Recognizer(guess),
+          // Only the rice: the pork slices on it were missed.
+          detector: _Detector(['com']),
+          database: _Database(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    await scan(const FoodRecognition(dishes: {'pho_bo': 0.31}));
+    final chip = find.byKey(const ValueKey('guess-detected'));
+    expect(tester.widget<ChoiceChip>(chip).selected, isTrue);
+    expect(find.text('Đĩa có 1 món'), findsOneWidget);
+    expect(find.textContaining('Món nào còn thiếu'), findsOneWidget);
+    expect(find.byKey(const ValueKey('scan-save')), findsOneWidget);
+
+    await scan(const FoodRecognition(
+        dishes: {'com_tam': 0.9}, components: {'com': 0.9}));
+    expect(
+        tester
+            .widget<ChoiceChip>(find.byKey(const ValueKey('guess-com_tam')))
+            .selected,
+        isTrue);
+    expect(tester.widget<ChoiceChip>(chip).selected, isFalse);
+  });
+
   testWidgets('the scan sweep plays a full pass even for an instant answer',
       (tester) async {
     _tall(tester);

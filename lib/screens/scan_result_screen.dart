@@ -80,8 +80,9 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
 
   Future<void> _recognize() async {
     // Both models at once; either may fail without stopping the other.
-    final detecting = widget.detector.detect(widget.imagePath).then(
-        (found) => found, onError: (Object error, StackTrace stack) {
+    final detecting = widget.detector
+        .detect(widget.imagePath)
+        .then((found) => found, onError: (Object error, StackTrace stack) {
       debugPrint('Plate detector failed: $error\n$stack');
       return PlateDetection.empty;
     });
@@ -102,11 +103,15 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
           !result.looksUnknown &&
           top.first.value >= result.thresholds.confidentDish;
       // Several foods on the plate: one row each, unless a confident dish
-      // already holds them all (cơm tấm with its egg and pork).
+      // already holds them all (cơm tấm with its egg and pork). A single food
+      // found (rice, the pork missed) still beats an unsure guess: the user
+      // adds the rest.
       final dish = confident ? widget.data.dish(top.first.key) : null;
       final detected = _detectedPlate;
       _detectedCount = detected?.items.length;
-      if (detected != null && (dish == null || !dishShowsAll(dish, found))) {
+      final several = (detected?.items.length ?? 0) >= 2;
+      if (detected != null &&
+          (dish == null || (several && !dishShowsAll(dish, found)))) {
         _plate = detected;
         Haptics.found();
       } else if (confident) {
@@ -117,15 +122,15 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     });
   }
 
-  /// How many foods the plate built from the detector's boxes has, when at
-  /// least two; null otherwise.
+  /// How many foods the plate built from the detector's boxes has; null
+  /// when it found none.
   int? _detectedCount;
 
   /// A fresh plate from the detector's boxes.
   ScanPlate? get _detectedPlate {
-    if (_detection.codes.length < 2) return null;
+    if (_detection.codes.isEmpty) return null;
     final plate = ScanPlate.detected(widget.data, _detection);
-    return plate.items.length < 2 ? null : plate;
+    return plate.items.isEmpty ? null : plate;
   }
 
   void _choose(String code) {
@@ -424,7 +429,7 @@ class _DishCard extends StatelessWidget {
   final ValueChanged<String> onChoose;
   final VoidCallback onPickOther;
 
-  /// How many foods the detector found, when several.
+  /// How many foods the detector found, if any.
   final int? detectedCount;
   final VoidCallback? onChooseDetected;
 
@@ -446,7 +451,10 @@ class _DishCard extends StatelessWidget {
             Text(l10n.scanModelPending,
                 style: TextStyle(color: CyberColors.muted))
           else if (detected)
-            Text(l10n.scanDetectedHint,
+            Text(
+                detectedCount == 1
+                    ? l10n.scanDetectedOneHint
+                    : l10n.scanDetectedHint,
                 style: TextStyle(color: CyberColors.muted))
           else if (recognition.looksUnknown)
             Text(l10n.scanNotInApp, style: TextStyle(color: CyberColors.muted))
@@ -470,7 +478,8 @@ class _DishCard extends StatelessWidget {
                     selected: detected,
                     label: Text(l10n.scanDetectedPlate(count)),
                     // Tapped again it keeps what the user changed.
-                    onSelected: (_) => detected ? null : onChooseDetected?.call(),
+                    onSelected: (_) =>
+                        detected ? null : onChooseDetected?.call(),
                   ),
                 for (final guess in top)
                   ChoiceChip(
@@ -530,8 +539,7 @@ class _DetectionBoxes extends StatelessWidget {
     // Short names fit small boxes: "Trứng", not "Trứng kho / trứng luộc".
     final name = context.l10n.detectorClassName;
     return Semantics(
-      label: context.l10n
-          .scanBoxesLabel(detection.codes.map(name).join(', ')),
+      label: context.l10n.scanBoxesLabel(detection.codes.map(name).join(', ')),
       child: ExcludeSemantics(
         child: CustomPaint(
           key: const ValueKey('scan-boxes'),
@@ -576,8 +584,8 @@ class _BoxesPainter extends CustomPainter {
         ? size.width / detection.width
         : size.height / detection.height;
     final shown = Size(detection.width * scale, detection.height * scale);
-    final offset = Offset((size.width - shown.width) / 2,
-        (size.height - shown.height) / 2);
+    final offset = Offset(
+        (size.width - shown.width) / 2, (size.height - shown.height) / 2);
     final stroke = Paint()
       ..color = colour
       ..style = PaintingStyle.stroke
