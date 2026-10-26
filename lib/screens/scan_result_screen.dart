@@ -81,8 +81,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   Future<void> _recognize() async {
     // Both models at once; either may fail without stopping the other.
     final detecting = widget.detector.detect(widget.imagePath).then(
-        (found) => found,
-        onError: (Object _) => PlateDetection.empty);
+        (found) => found, onError: (Object error, StackTrace stack) {
+      debugPrint('Plate detector failed: $error\n$stack');
+      return PlateDetection.empty;
+    });
     FoodRecognition result;
     try {
       result = await widget.recognizer.recognize(widget.imagePath);

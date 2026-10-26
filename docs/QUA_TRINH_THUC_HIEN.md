@@ -2579,6 +2579,33 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Build APK 130 (`MacroRunner-130-arm64.apk`, 35,2 MB): versionCode 2130,
   chứng chỉ ký `e3b83ac4fe9118e4…`, đã cài lên điện thoại qua adb Wi-Fi.
 
+### 2026-10-26 · Sửa lỗi model phát hiện món không chạy trên điện thoại
+- Lý do: quét một đĩa cơm với thịt heo trên APK 130, màn Kết quả quét không
+  hiện khung món nào. Chạy `detector.tflite` trên máy tính với chính ảnh đó
+  thì model thấy cơm (điểm 0,80), nên lỗi nằm ở app.
+- Tìm lỗi: lỗi của model phát hiện món bị màn Kết quả quét bỏ qua mà không
+  ghi log. Bản 131 ghi lỗi ra log và cho thấy:
+  `Illegal argument in isolate message: object is unsendable ...
+  IsolateInterpreter`.
+  - Bước đọc ảnh chạy trong một isolate khác bằng `Isolate.run`. Hàm gửi
+    sang được viết ngay trong `detect`, nên Dart gói theo cả biến `runner`
+    nằm cùng chỗ (trình chạy model và các cổng liên lạc của nó). Isolate
+    không nhận những thứ này.
+  - Vì vậy model phát hiện món chưa lần nào chạy được trên điện thoại. Test
+    không bắt được vì test dùng model giả.
+- Đã làm:
+  - tách bước đọc ảnh ra hàm riêng `prepareDetectorInputInBackground`, giống
+    cách model nhận diện món đang làm;
+  - màn Kết quả quét ghi lỗi của model phát hiện món ra log;
+  - thêm test chạy hàm đó qua isolate thật với một file ảnh.
+- Kiểm tra:
+  - `flutter analyze` sạch, `flutter test` qua 243 test;
+  - APK 132 (versionCode 2132, chứng chỉ `e3b83ac4fe9118e4…`) cài lên điện
+    thoại. Quét lại ảnh đó: `Detector timing: photo 184 ms, model 154 ms,
+    1 foods`, tổng 338 ms, dưới mục tiêu 400 ms.
+- Còn lại: model không nhận ra mấy miếng thịt heo thái mỏng trên cơm (điểm
+  cao nhất 0,005). Khi chỉ tìm được 1 món, app vẫn quay về đoán cả món.
+
 ---
 
 ## 3. Việc còn tồn đọng

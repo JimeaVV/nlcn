@@ -29,8 +29,7 @@ class NoFoodDetector implements FoodDetector {
   bool get isAvailable => false;
 
   @override
-  Future<PlateDetection> detect(String imagePath) async =>
-      PlateDetection.empty;
+  Future<PlateDetection> detect(String imagePath) async => PlateDetection.empty;
 }
 
 /// The photo fitted into the detector's input, and how it was fitted.
@@ -50,7 +49,8 @@ DetectorInput prepareDetectorInput(Uint8List encoded,
       height: box.fittedHeight,
       interpolation: img.Interpolation.linear);
   const grey = 114 / 255;
-  final input = Float32List(size * size * 3)..fillRange(0, size * size * 3, grey);
+  final input = Float32List(size * size * 3)
+    ..fillRange(0, size * size * 3, grey);
   final plane = size * size;
   for (var y = 0; y < fitted.height; y++) {
     for (var x = 0; x < fitted.width; x++) {
@@ -69,6 +69,15 @@ DetectorInput prepareDetectorInput(Uint8List encoded,
   }
   return (input: input, letterbox: box);
 }
+
+/// [prepareDetectorInput] off the UI isolate: decoding a phone photo takes a
+/// second or two in pure Dart. It lives outside [TfliteFoodDetector.detect]
+/// on purpose: a closure made there carries the interpreter and its ports
+/// along, and the isolate refuses them ("object is unsendable").
+Future<DetectorInput> prepareDetectorInputInBackground(String imagePath,
+        {required int size, required bool channelsFirst}) =>
+    Isolate.run(() => prepareDetectorInput(File(imagePath).readAsBytesSync(),
+        size: size, channelsFirst: channelsFirst));
 
 /// Runs the bundled detector; the interpreter opens on the first photo.
 class TfliteFoodDetector implements FoodDetector {
@@ -95,11 +104,8 @@ class TfliteFoodDetector implements FoodDetector {
     final clock = Stopwatch()..start();
     final size = runner.inputSize;
     final channelsFirst = runner.channelsFirst;
-    // Decoding a phone photo takes a second or two in pure Dart.
-    final prepared = await Isolate.run(() => prepareDetectorInput(
-        File(imagePath).readAsBytesSync(),
-        size: size,
-        channelsFirst: channelsFirst));
+    final prepared = await prepareDetectorInputInBackground(imagePath,
+        size: size, channelsFirst: channelsFirst);
     final photo = clock.elapsed;
     // One run at a time: a busy isolate interpreter returns zeros.
     final output = _previousRun.then((_) => runner.run(prepared.input));
@@ -157,8 +163,8 @@ class _DetectorRunner {
       }
       final isolate =
           await IsolateInterpreter.create(address: interpreter.address);
-      return _DetectorRunner._(interpreter, isolate, size, channelsFirst,
-          outputs.first.shape);
+      return _DetectorRunner._(
+          interpreter, isolate, size, channelsFirst, outputs.first.shape);
     } catch (_) {
       interpreter.close();
       rethrow;
@@ -174,8 +180,8 @@ class _DetectorRunner {
   Future<Float32List> run(Float32List input) async {
     final output =
         Float32List(_interpreter.getOutputTensors().first.numElements());
-    await _isolate.runForMultipleInputs(
-        [input.buffer.asUint8List()], {0: output.buffer});
+    await _isolate
+        .runForMultipleInputs([input.buffer.asUint8List()], {0: output.buffer});
     return output;
   }
 }

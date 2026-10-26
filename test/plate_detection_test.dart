@@ -163,6 +163,18 @@ void main() {
       expect(first.input[2 * 8], 1, reason: 'red plane');
       expect(first.input[64 + 2 * 8], 0, reason: 'green plane');
     });
+
+    test('a photo file is prepared in another isolate', () async {
+      final dir = Directory.systemTemp.createTempSync('detector_photo');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final file = File('${dir.path}/plate.png')
+        ..writeAsBytesSync(img.encodePng(
+            img.Image(width: 4, height: 2)..clear(img.ColorRgb8(255, 0, 0))));
+      final prepared = await prepareDetectorInputInBackground(file.path,
+          size: 8, channelsFirst: true);
+      expect(prepared.letterbox.top, 2);
+      expect(prepared.input[2 * 8], 1);
+    });
   });
 
   group('a plate from boxes', () {
