@@ -2697,6 +2697,70 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   APK 135 (35,2 MB), chữ ký khớp chứng chỉ release, đã cài lên điện thoại.
   Chưa quét thử trên điện thoại.
 
+### 2026-10-27 · Model phát hiện món: tự khoanh khung ảnh món Việt, thêm Open Images, chuyển sang YOLO11s 512 px
+- Vì sao: train thêm epoch trên dữ liệu cũ gần như không lên nữa (điểm dừng
+  ở khoảng 0,55). Nhóm không có thời gian tự chụp và vẽ khung vài trăm ảnh.
+  Tìm hiểu các app trên Google Play: họ mạnh nhờ model lớn chạy trên máy
+  chủ và hàng triệu ảnh, nên hướng phù hợp với app offline là cho một model
+  lớn khoanh khung lúc train ("model lớn dạy model nhỏ") và dùng model nhỏ
+  to hơn một bậc.
+- Notebook mới `tool/train/autolabel_detector.ipynb` (sinh từ
+  `autolabel_detector.py`):
+  - Lấy ảnh món Việt có sẵn (30VNFoods, VinaFood21, 20FoodVN), tối đa 700
+    ảnh mỗi món, bỏ ảnh trùng giữa các bộ.
+  - Grounding DINO (base) tìm các thứ món đó có; lớp của khung lấy theo tên
+    món. Ví dụ thịt trên đĩa cơm tấm là `thit_nuong`, thịt trên đĩa bún đậu
+    là `heo`.
+  - Model phát hiện hiện có (bản fine-tune APK 135) kiểm tra lại. Khung yếu
+    (điểm 0,3–0,45) chỉ giữ khi model cũng thấy đồ ăn ở đó. Món model chắc
+    (từ 0,6) mà Grounding DINO bỏ sót thì thêm vào, để không bị học thành
+    nền.
+  - Bỏ các món có sợi trong nước (phở, bún bò, hủ tiếu, mì Quảng, cao lầu).
+    Grounding DINO khoanh cả bát thành "sợi", còn VietFood67 khoanh cả bát
+    thành một món, nên hai cách sẽ dạy model ngược nhau.
+  - Open Images: khung khoai tây chiên, tôm trên đĩa hoặc bát. Cà chua, dưa
+    leo, bông cải, bắp cải thì phải có đĩa hoặc bát, vì có ảnh sạp chợ cũng
+    được gắn nhãn "đồ ăn". Bỏ lớp Egg vì phần lớn là trứng Phục Sinh. Bỏ ảnh
+    có hơn 8 khung, và ảnh có cơm, sợi hay thịt mà Open Images không
+    khoanh.
+  - Kết quả là `autolabel.zip`, cộng `preview.jpg` (24 ảnh đã khoanh để xem
+    bằng mắt) và `AUTOLABEL_CARD.md`.
+- `train_detector`:
+  - Mặc định YOLO11s ở 512 px, 60 epoch, train từ trọng số COCO. Trên COCO,
+    YOLO11s đạt 47,0 mAP50-95 so với 39,5 của YOLO11n (bảng của
+    Ultralytics).
+  - Tự tìm `autolabel.zip` trong Drive (hoặc dùng link `AUTOLABEL_FROM`) và
+    chỉ đưa vào tập train. Tập val và test giữ nguyên khung người vẽ, nên so
+    được với card của bản fine-tune.
+  - Kết quả lưu ở thư mục riêng `detector_yolo11s`. Bản fine-tune giờ lưu ở
+    `detector_finetune`, vì tên model mặc định không nói model được
+    fine-tune to cỡ nào.
+- Contract vẫn 1.6, vì danh sách lớp và định dạng không đổi (app đọc S từ
+  file). Mục 7.2 ghi thêm S = 512, A = 5376 và cỡ file YOLO11s (ước tính
+  theo số tham số). Mục 7.4 ghi nguồn dữ liệu và license mới. Mục 7.3 sửa
+  cho khớp code: thấy 1 lớp thì vẫn mở "Đĩa có 1 món" khi model món không
+  chắc.
+- Kiểm tra:
+  - Thử Grounding DINO trên 33 ảnh thật của 30VNFoods và 24 ảnh Open Images
+    (bộ val).
+    - Khung bún, chả giò, thịt nướng, heo luộc, bánh mì, tôm, cá kho khá
+      đúng.
+    - Còn sót món chưa được khoanh, và có vài nhãn sai: ớt bị gọi là đồ
+      chua, chén nước mắm là trứng. Lần chạy thứ hai, sau khi siết điều
+      kiện, giữ 16/18 ảnh món và 13/22 ảnh Open Images.
+  - Tốc độ trên CPU khoảng 10 giây mỗi ảnh. Trên T4 ước tính khoảng 0,3
+    giây, chưa đo.
+  - `smoke_autolabel.py` (mới) qua, kiểm tra:
+    - tên thư mục ra món, kể cả bỏ phở;
+    - bỏ ảnh trùng;
+    - lọc dòng Open Images;
+    - zip và card.
+  - `smoke_detector.py` qua, có thêm `autolabel.zip` giả: đọc được 3 ảnh món
+    và 2 ảnh Open Images, card ghi nguồn mới.
+- Chưa biết: khung tự động có nhiễu, nên chưa chắc nó giúp hay làm hại. Phải
+  xem điểm test sau khi train. Vì đổi cả model lẫn dữ liệu cùng lúc, nếu
+  điểm khác thì chưa tách được phần nào do model, phần nào do dữ liệu.
+
 ---
 
 ## 3. Việc còn tồn đọng

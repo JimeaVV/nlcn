@@ -31,6 +31,8 @@ thì Android coi là app khác, không cài đè được và mất dữ liệu.
   - Thử nhanh nằm trong `tool/train/test/`.
   - Model phát hiện món: `train_detector.py`, thử bằng
     `tool/train/test/smoke_detector.py` (cần `ultralytics==8.4.185`).
+    Khung tự động cho nó: `autolabel_detector.py` (Grounding DINO), thử bằng
+    `tool/train/test/smoke_autolabel.py` (cần thêm `transformers`).
 - `docs/MODEL_CONTRACT.md`: thỏa thuận giữa app và model (đang ở 1.6): danh
   sách món, thành phần, định dạng đầu vào và đầu ra, các dòng trong
   `MODEL_CARD.md`.

@@ -2,7 +2,7 @@
 # # MacroRunner – train the plate detector (YOLO)
 #
 # Trains the second model of `docs/MODEL_CONTRACT.md` (contract 1.6, §7): a
-# YOLO11n that finds each food on a plate with a box, so a plate of plain
+# YOLO11s at 512 px that finds each food on a plate with a box, so a plate of plain
 # rice and chicken breast comes out as "com" and "ga" instead of the dish
 # the classifier knows best. 21 classes, each one an app component or a
 # group of variants. The result is the three files the app reads from
@@ -11,7 +11,10 @@
 #
 # Data: the boxes VietFood67 already has, MyFood's masks turned into boxes,
 # and FoodInsSeg's boxes around each piece of food (sliced pork, chicken,
-# tofu on rice). Each keeps its own train/val/test split.
+# tofu on rice). Each keeps its own train/val/test split. Also, if found,
+# `autolabel.zip` from `autolabel_detector.ipynb`: Vietnamese dish photos
+# boxed by Grounding DINO, and Open Images boxes. Those are machine-made, so
+# they go to train only, and val and test stay comparable between runs.
 #
 # **On Google Colab**
 # 1. *Runtime → Change runtime type → T4 GPU*.
@@ -20,7 +23,10 @@
 # 3. *Runtime → Run all*, then allow Google Drive in the window that opens
 #    within the first seconds. VietFood67 downloads once per session (26 GB,
 #    about 15 minutes). Results go to Google Drive, folder
-#    `macrorunner_train/detector_yolo11n`.
+#    `macrorunner_train/detector_yolo11s`. Run `autolabel_detector.ipynb`
+#    first with the same Google account: this notebook then finds
+#    `macrorunner_train/detector_autolabel/autolabel.zip` by itself. From
+#    another account, put a share link to that zip in `AUTOLABEL_FROM`.
 # 4. Run once with `QUICK_TEST = True` (about 25 minutes, most of it the
 #    download), then set `QUICK_TEST = False` and run all again in the same
 #    session, so nothing downloads twice.
@@ -30,7 +36,7 @@
 #    anyway, run all again with the same settings: training continues from
 #    `last.pt` in Drive.
 # 6. To go on with another Google account: in the first account's Drive,
-#    share `macrorunner_train/detector_yolo11n/train/weights` as *Anyone
+#    share `macrorunner_train/detector_yolo11s/train/weights` as *Anyone
 #    with the link*, put that link in `RESUME_FROM` and run all with the
 #    other account. It copies `last.pt` and `best.pt` into its own Drive
 #    first.
@@ -38,12 +44,17 @@
 #    a shared link to its `export/detector_best.pt` in `FINETUNE_FROM`. The
 #    run starts from those weights with a lower learning rate for
 #    `FINETUNE_EPOCHS` epochs, and saves to its own folder
-#    `detector_yolo11n_finetune`, so the earlier run stays as it was. Steps
+#    `detector_finetune`, so the earlier run stays as it was. Set `IMGSZ` to
+#    the size that model was trained at (640 for the YOLO11n). Steps
 #    5 and 6 work the same for it.
 #
-# **On Kaggle**: add the dataset `thomasnguyen6868/vietfood68`, turn the GPU
-# and Internet on (MyFood downloads from Zenodo, FoodInsSeg from Google
+# **On Kaggle**: add the dataset `thomasnguyen6868/vietfood68`, and the
+# output of `autolabel_detector.ipynb` (it holds `autolabel.zip`), turn the
+# GPU and Internet on (MyFood downloads from Zenodo, FoodInsSeg from Google
 # Drive), Save & Run All. The files are in the *Output* tab.
+#
+# Time on a T4: about 9 minutes an epoch, so the 60 epochs take two free
+# Colab sessions (step 5), or one Kaggle run.
 #
 # Ultralytics is AGPL-3.0; VietFood67 and FoodInsSeg are CC BY-NC-SA 4.0;
 # MyFood is CC BY 4.0.
@@ -63,9 +74,12 @@ def stage(text):
 
 
 QUICK_TEST = True        # True: 300 photos, 2 epochs at 320 px.
-MODEL = os.environ.get('MODEL', 'yolo11n.pt')   # COCO weights to start from
-IMGSZ = 320 if QUICK_TEST else 640
-EPOCHS = 2 if QUICK_TEST else 80
+# COCO weights to start from. YOLO11s finds more than YOLO11n (COCO mAP50-95
+# 47.0 against 39.5) at about three times the work; 512 px instead of 640
+# keeps it near the phone's 400 ms.
+MODEL = os.environ.get('MODEL', 'yolo11s.pt')
+IMGSZ = 320 if QUICK_TEST else 512
+EPOCHS = 2 if QUICK_TEST else 60
 BATCH = 16 if QUICK_TEST else 32
 PATIENCE = 20            # epochs without a better val mAP before stopping
 SEED = 0
@@ -85,6 +99,9 @@ RESUME_FROM = os.environ.get('RESUME_FROM', '')
 # it), to fine-tune from (step 7 above). Empty: start from the COCO weights.
 FINETUNE_FROM = os.environ.get('FINETUNE_FROM', '')
 FINETUNE_EPOCHS = 30
+# `autolabel.zip` from autolabel_detector.ipynb: a path or a shared link.
+# Empty: look for it in this Drive (Colab) or the inputs (Kaggle).
+AUTOLABEL_FROM = os.environ.get('AUTOLABEL_FROM', '')
 # lr0 for fine-tuning, a fifth of the 0.01 that SGD starts a fresh run with,
 # so it learns the new photos without forgetting the old ones.
 FINETUNE_LR = 0.002
@@ -135,8 +152,10 @@ if ON_COLAB:
     print('Allow Google Drive access in the window that opens now.', flush=True)
     drive.mount(os.path.join(COLAB_ROOT, 'drive'))
     OUTPUT_DIR = os.path.join(COLAB_ROOT, 'drive', 'MyDrive', 'macrorunner_train',
-                              'detector_yolo11n'
-                              + ('_finetune' if FINETUNE_FROM else '')
+                              # Fine-tuning keeps the size of the model it
+                              # starts from, which MODEL does not say.
+                              'detector_' + ('finetune' if FINETUNE_FROM else
+                                             os.path.splitext(os.path.basename(MODEL))[0])
                               + ('_quick' if QUICK_TEST else ''))
     WORK_DIR = os.path.join(COLAB_ROOT, 'detector_data')
 
@@ -260,6 +279,33 @@ if DOWNLOAD_FOODINSSEG and not os.path.isdir(foodinsseg_dir):
         raise RuntimeError(
             f'Could not download FoodInsSeg: {error!r}. Try again later, or set '
             'DOWNLOAD_FOODINSSEG to 0 to train without it.') from error
+
+autolabel_dir = os.path.join(EXTRA_ROOT, 'autolabel')
+autolabel_zip = AUTOLABEL_FROM
+if not autolabel_zip:
+    places = [os.path.join(folder, 'autolabel.zip')
+              for folder, _, files in os.walk(INPUT_ROOT, followlinks=True)
+              if 'autolabel.zip' in files]
+    if ON_COLAB:
+        places.insert(0, os.path.join(COLAB_ROOT, 'drive', 'MyDrive',
+                                      'macrorunner_train', 'detector_autolabel',
+                                      'autolabel.zip'))
+    autolabel_zip = next((p for p in places if os.path.exists(p)), '')
+if autolabel_zip and not os.path.isdir(autolabel_dir):
+    import zipfile
+    if not os.path.exists(autolabel_zip):
+        stage(f'Copying autolabel.zip from {autolabel_zip} ...')
+        match = re.search(r'/d/([\w-]{20,})|[?&]id=([\w-]{20,})', autolabel_zip)
+        file_id = next(g for g in match.groups() if g) if match else autolabel_zip
+        autolabel_zip = os.path.join(WORK_DIR, 'autolabel.zip')
+        load_gdown().download(id=file_id, output=autolabel_zip, quiet=True)
+    stage(f'Unzipping {autolabel_zip} ...')
+    with zipfile.ZipFile(autolabel_zip) as z:
+        z.extractall(autolabel_dir + '.part')
+    os.replace(autolabel_dir + '.part', autolabel_dir)
+if not os.path.isdir(autolabel_dir):
+    print('No autolabel.zip: training without the boxed dish photos. Run '
+          'autolabel_detector.ipynb first, or set AUTOLABEL_FROM.', flush=True)
 stage(f'Photos from {INPUT_ROOT} and {EXTRA_ROOT} | results to {OUTPUT_DIR}')
 
 # %% [markdown]
@@ -507,6 +553,26 @@ def foodinsseg_items(root):
     return kept + background
 
 
+def autolabel_items(root):
+    """autolabel_detector.ipynb's boxes, for train only. The photos are
+    already shrunk."""
+    items = []
+    labels = os.path.join(root, 'labels', 'train')
+    for name in sorted(os.listdir(labels)):
+        stem = os.path.splitext(name)[0]
+        boxes = []
+        with open(os.path.join(labels, name)) as f:
+            for line in f:
+                c, cx, cy, w, h = line.split()
+                boxes.append((int(c), float(cx), float(cy), float(w), float(h)))
+        if boxes:
+            items.append((stem.split('_')[0], os.path.join(
+                root, 'images', 'train', stem + '.jpg'), 'train', boxes))
+    stage(f'Autolabel: {sum(i[0] == "auto" for i in items)} dish photos, '
+          f'{sum(i[0] == "oi" for i in items)} Open Images photos')
+    return items
+
+
 def write(index_item):
     index, (source, image, split, boxes) = index_item
     name = f'{source}_{index:06d}'
@@ -539,6 +605,8 @@ for root in find_roots(EXTRA_ROOT, lambda folder, files:
 for root in find_roots(EXTRA_ROOT, lambda folder, files: os.path.exists(
         os.path.join(folder, 'annotations', 'Train.json'))):
     items += [('fis', *item) for item in foodinsseg_items(root)]
+if os.path.isdir(os.path.join(EXTRA_ROOT, 'autolabel', 'labels')):
+    items += autolabel_items(os.path.join(EXTRA_ROOT, 'autolabel'))
 if QUICK_TEST:
     random.shuffle(items)
     items = items[:300]
@@ -822,7 +890,9 @@ lines = [
     + ('' if finished else ' (training not finished: best epoch so far)')
     + (', QUICK TEST' if QUICK_TEST else ''),
     f"- Photos: {dict(photos_per_split)} (VietFood67 boxes, MyFood masks, "
-    'FoodInsSeg boxes)',
+    'FoodInsSeg boxes'
+    + (', Grounding DINO and Open Images boxes in train'
+       if any(item[0] in ('auto', 'oi') for item in items) else '') + ')',
     f"- Test: mAP50 {results['map50']:.3f}, mAP50-95 {results['map50_95']:.3f}, "
     f"precision {results['precision']:.3f}, recall {results['recall']:.3f}",
     f'- Files: ' + ', '.join(f'{k} {v / 1e6:.1f} MB' for k, v in exported.items()),

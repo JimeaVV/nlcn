@@ -429,12 +429,12 @@ biến thể thì người dùng bấm vào tên để chọn phần và cách n
 ### 7.2. Định dạng model
 | Mục | Quy định |
 |---|---|
-| Đầu vào | `float32`, ảnh **RGB, giá trị 0–1** (khác model mục 6, vốn nhận 0–255). Dạng `[1, 3, S, S]` (bản xuất LiteRT của Ultralytics) hoặc `[1, S, S, 3]` (bản xuất cũ qua onnx2tf); app nhận cả hai, đọc S từ file. Mặc định S = 640 |
+| Đầu vào | `float32`, ảnh **RGB, giá trị 0–1** (khác model mục 6, vốn nhận 0–255). Dạng `[1, 3, S, S]` (bản xuất LiteRT của Ultralytics) hoặc `[1, S, S, 3]` (bản xuất cũ qua onnx2tf); app nhận cả hai, đọc S từ file. YOLO11n dùng S = 640, YOLO11s dùng S = 512 |
 | Tiền xử lý | App: thu nhỏ ảnh giữ tỉ lệ cho cạnh dài bằng S, đặt vào giữa, phần thừa tô xám (114, 114, 114) như lúc train ("letterbox") |
-| Đầu ra | Một tensor `float32 [1, 4 + số_lớp, A]` (A = 8400 khi S = 640); app cũng nhận dạng chuyển vị `[1, A, 4 + số_lớp]`. Bốn dòng đầu là `cx, cy, w, h` của khung, chia cho S (0–1); nếu giá trị lớn hơn 2 thì app coi là pixel và tự chia. Các dòng sau là điểm của từng lớp, 0–1 |
+| Đầu ra | Một tensor `float32 [1, 4 + số_lớp, A]` (A = 8400 khi S = 640, 5376 khi S = 512); app cũng nhận dạng chuyển vị `[1, A, 4 + số_lớp]`. Bốn dòng đầu là `cx, cy, w, h` của khung, chia cho S (0–1); nếu giá trị lớn hơn 2 thì app coi là pixel và tự chia. Các dòng sau là điểm của từng lớp, 0–1 |
 | NMS | Không nằm trong model. App bỏ khung dưới `threshold_box`, rồi với mỗi lớp bỏ khung trùng khung điểm cao hơn quá `threshold_iou` |
 | Lượng tử hoá | FP32 hoặc INT8 động (`w8a32`). Notebook xuất bản INT8 tên `detector_int8.tflite`; muốn dùng thì đổi tên thành `detector.tflite`, vì app chỉ đọc tên đó |
-| Kích thước | YOLO11n: khoảng 10 MB (FP32), 3 MB (INT8) |
+| Kích thước | YOLO11n: khoảng 10 MB (FP32), 3 MB (INT8). YOLO11s: khoảng 37 MB (FP32), 10 MB (INT8), ước tính theo số tham số |
 | Tốc độ | Mục tiêu ≤ 400 ms mỗi ảnh trên điện thoại tầm trung |
 
 **`DETECTOR_CARD.md`**, mỗi dòng `khoá: giá trị` như `MODEL_CARD.md`:
@@ -459,7 +459,9 @@ chỉ dùng model mục 6.
   mọi lớp thấy được đều là thành phần của món đó (ví dụ cơm tấm có cơm,
   trứng, thịt nướng). Khi đó app mở món như cũ, vì công thức món đủ hơn
   (có nước mắm, mỡ hành).
-- Chỉ thấy 1 lớp, hoặc không thấy gì, thì như cũ.
+- Chỉ thấy 1 lớp: app mở "Đĩa có 1 món" khi model mục 6 không chắc món
+  nào hoặc đoán là món ngoài app (`khac`), để người dùng thêm phần còn lại; model mục 6 chắc thì mở món như cũ.
+  Không thấy gì thì như cũ.
 - Mỗi lớp thành một dòng trên đĩa, với khẩu phần thường gặp
   (`typicalPortion`). Riêng `trung`, `cha_gio`, `banh_mi_o` lấy **số khung**
   làm số quả / cuốn / ổ. Tôm, chả lụa thường được khoanh cả đống trong một
@@ -470,11 +472,26 @@ chỉ dùng model mục 6.
 ### 7.4. Train
 - Notebook `tool/train/train_detector.ipynb`, sinh từ `train_detector.py`.
   Người dùng tự chạy trên Colab (GPU T4).
-- Dữ liệu: khung có sẵn của VietFood67 và mặt nạ MyFood đổi ra khung, giữ
-  cách chia train/val/test của từng bộ.
-- Model: YOLO11n của Ultralytics, bắt đầu từ trọng số COCO.
+- Dữ liệu: khung có sẵn của VietFood67, mặt nạ MyFood đổi ra khung, và khung
+  từng miếng của FoodInsSeg; giữ cách chia train/val/test của từng bộ.
+- Thêm vào **train** (không vào val, test): `autolabel.zip` do notebook
+  `tool/train/autolabel_detector.ipynb` làm.
+  - Ảnh món Việt của 30VNFoods, VinaFood21, 20FoodVN được Grounding DINO
+    khoanh theo các thứ món đó có. Lớp của khung lấy theo tên món (thịt
+    trên đĩa cơm tấm là `thit_nuong`). Model phát hiện hiện có kiểm tra lại
+    từng khung.
+  - Món có sợi nằm trong nước (phở, bún bò, hủ tiếu, mì Quảng) không dùng,
+    vì VietFood67 khoanh cả bát thành một món chứ không khoanh `bun`, `mi`.
+  - Khung khoai tây chiên, tôm, cà chua, dưa leo, bông cải, bắp cải trên
+    đĩa hay bát của Open Images.
+  - Khung do máy làm nên chỉ dùng để train; điểm test vẫn đo trên khung do
+    người vẽ, so được với các lần train trước.
+- Model: YOLO11s của Ultralytics ở 512 px, bắt đầu từ trọng số COCO. Bản
+  YOLO11n 640 px (train từ đầu, rồi fine-tune với FoodInsSeg) là bản trước,
+  và vẫn là bản trong `assets/models` cho đến khi bản YOLO11s train xong.
 - License Ultralytics: **AGPL-3.0**, phải ghi rõ trong báo cáo. MyFood: CC
-  BY 4.0.
+  BY 4.0. FoodInsSeg: CC BY-NC-SA 4.0. Open Images: khung CC BY 4.0, ảnh
+  theo license từng ảnh (phần lớn CC BY 2.0). Grounding DINO: Apache-2.0.
 
 ## 8. Ghi vào nhật ký ăn uống
 Mỗi thành phần người dùng xác nhận được ghi thành **một dòng `food_log`**:

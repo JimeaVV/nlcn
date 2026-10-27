@@ -18,6 +18,7 @@ import random
 import subprocess
 import sys
 import tempfile
+import zipfile
 
 from PIL import Image, ImageDraw
 
@@ -108,6 +109,24 @@ def make(root):
         with open(os.path.join(fis, 'annotations', json_name), 'w') as f:
             json.dump({'images': images, 'annotations': annotations,
                        'categories': categories}, f)
+    # autolabel.zip as autolabel_detector.py writes it: three boxed dish
+    # photos (rice 0 and grilled pork 6), two Open Images ones (fries 19) and
+    # one whose boxes were all too small to keep (left out).
+    folder = os.path.join(root, 'input', 'autolabel-output')
+    os.makedirs(folder, exist_ok=True)
+    with zipfile.ZipFile(os.path.join(folder, 'autolabel.zip'), 'w') as z:
+        for name, lines in (('auto_000000', ['0 0.3 0.5 0.3 0.4', '6 0.7 0.5 0.3 0.3']),
+                            ('auto_000001', ['0 0.4 0.5 0.4 0.5']),
+                            ('auto_000002', ['6 0.5 0.5 0.4 0.4']),
+                            ('oi_000003', ['19 0.5 0.5 0.5 0.4']),
+                            ('oi_000004', ['19 0.4 0.6 0.3 0.3']),
+                            ('auto_000005', [])):
+            im = Image.new('RGB', (320, 240), (80, 70, 60))
+            ImageDraw.Draw(im).rectangle((60, 60, 180, 180), fill=(240, 240, 230))
+            im.save(os.path.join(root, 'photo.jpg'))
+            z.write(os.path.join(root, 'photo.jpg'), f'images/train/{name}.jpg')
+            z.writestr(f'labels/train/{name}.txt', ''.join(l + '\n' for l in lines))
+        z.writestr('sources.csv', 'name,source,dish,photo\n')
 
 
 def run(work, name, **env):
@@ -138,6 +157,7 @@ def main():
     assert "'vf67: whole-dish box': 20" in first, 'pho photos not left out'
     assert "'foodinsseg: unsure food': 2" in first, 'bread photos not left out'
     assert 'FoodInsSeg: 10 photos with boxes' in first, first[-2000:]
+    assert 'Autolabel: 3 dish photos, 2 Open Images photos' in first, first[-2000:]
     second = run(work, 'resume', TIME_LIMIT_HOURS='0', **env)
     assert 'Resuming' in second, second[-2000:]
     assert 'Training done' in second
@@ -151,6 +171,7 @@ def main():
     with open(os.path.join(export, 'DETECTOR_CARD.md'), encoding='utf-8') as f:
         card = f.read()
     assert 'contract_version: 1.6' in card and 'threshold_box:' in card
+    assert 'Grounding DINO and Open Images boxes in train' in card, card
     with open(os.path.join(export, 'results.json')) as f:
         results = json.load(f)
     assert 'app_decoding_matches' in results, 'exported model not checked'
