@@ -1,6 +1,7 @@
 """Runs the detector notebook end to end on tiny fake data, on the CPU, three
 times: first cut off by a time limit after one epoch, then resumed to the
-end, then fine-tuned from the model that made. Checks the files it leaves
+end from a copy of its weights in other folders (as on Kaggle), then
+fine-tuned from the model that made. Checks the files it leaves
 behind. Use it after every change to
 train_detector.py, before sending the notebook to Colab.
 
@@ -158,10 +159,25 @@ def main():
     assert "'foodinsseg: unsure food': 2" in first, 'bread photos not left out'
     assert 'FoodInsSeg: 10 photos with boxes' in first, first[-2000:]
     assert 'Autolabel: 3 dish photos, 2 Open Images photos' in first, first[-2000:]
-    second = run(work, 'resume', TIME_LIMIT_HOURS='0', **env)
+    # Go on elsewhere, as on Kaggle from an earlier version's output: other
+    # output and work folders, the weights found under RESUME_FROM.
+    earlier = os.path.join(work, 'input', 'earlier-version')
+    shutil.copytree(os.path.join(work, 'output', 'train', 'weights'),
+                    os.path.join(earlier, 'train', 'weights'))
+    env = {**env, 'OUTPUT_DIR': os.path.join(work, 'output2'),
+           'WORK_DIR': os.path.join(work, 'work2')}
+    shutil.copytree(os.path.join(work, 'work', 'extra'),
+                    os.path.join(work, 'work2', 'extra'))
+    second = run(work, 'resume', TIME_LIMIT_HOURS='0',
+                 RESUME_FROM=os.path.join(work, 'input'), **env)
+    assert 'Copying last.pt and best.pt' in second, second[-2000:]
     assert 'Resuming' in second, second[-2000:]
     assert 'Training done' in second
-    export = os.path.join(work, 'output', 'export')
+    with open(os.path.join(work, 'output', 'train', 'results.csv')) as f:
+        assert len(f.read().strip().splitlines()) == 2, 'epoch 2 in the old folder'
+    with open(os.path.join(work, 'output2', 'progress.json')) as f:
+        assert json.load(f)['epoch'] == 2, 'epoch 2 not trained here'
+    export = os.path.join(work, 'output2', 'export')
     for name in ('detector_classes.txt', 'DETECTOR_CARD.md', 'results.json',
                  'detector_best.pt'):
         assert os.path.exists(os.path.join(export, name)), name

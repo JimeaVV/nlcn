@@ -2761,6 +2761,46 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   xem điểm test sau khi train. Vì đổi cả model lẫn dữ liệu cùng lúc, nếu
   điểm khác thì chưa tách được phần nào do model, phần nào do dữ liệu.
 
+### 2026-10-27 · Kết quả gán nhãn tự động; train YOLO11s 40 epoch trên Kaggle
+- Kết quả `autolabel_detector.ipynb` trên Colab (83 phút):
+  - Giữ 9.094 ảnh (9.037 ảnh món, 57 ảnh Open Images). Bỏ 1.686 ảnh món vì
+    không tìm thấy món nào, và 26 ảnh Open Images có cơm, sợi hay thịt chưa
+    được khoanh. `autolabel.zip` nặng 786 MB.
+  - Lớp nào cũng có khung. Ít nhất là mì (30), khoai tây chiên (41), mực
+    (48); heo có 960 khung, phần lớn từ bún đậu.
+  - Xem 24 ảnh trong `preview.jpg`: khoảng 2/3 khung đúng (cá kho, trứng
+    trong thịt kho, bánh mì, bún đậu, cơm với thịt nướng). Lỗi còn gặp:
+    sót món, gỏi gà bị khoanh cả đĩa thành rau, bánh mì chảo bị khoanh cả
+    chảo thành trứng.
+  - Open Images chỉ còn 57 ảnh vì điều kiện lọc chặt; gần như không ảnh
+    hưởng tới lần train.
+- Vì sao sửa: tính lại theo số ảnh thật (khoảng 29.300 ảnh train so với
+  20.171 lần fine-tune trước, và YOLO11s ở 512 px nặng gấp khoảng 2 lần
+  YOLO11n ở 640 px), mỗi epoch mất khoảng 12 phút (ước tính). 60 epoch là
+  khoảng 12 giờ, cần 4 phiên Colab. Người dùng muốn chạy trên Kaggle (11
+  giờ một lượt).
+- Đã làm trong `train_detector.py`:
+  - `EPOCHS` từ 60 xuống 40 (khoảng 8 giờ, vừa một lượt Kaggle). Không đặt
+    80 rồi dừng giữa chừng, vì tốc độ học giảm theo cosin trên tổng số
+    epoch và 10 epoch cuối tắt mosaic: dừng ở 40/80 thì tốc độ học còn
+    khoảng 50% và chưa qua đoạn tắt mosaic, kém hơn chạy hết 40/40.
+  - `RESUME_FROM` nhận thêm một thư mục trên máy, ví dụ `/kaggle/input`
+    sau khi thêm output của version trước. Notebook tìm đúng một thư mục có
+    cả `last.pt` và `best.pt` bên dưới; thấy 0 hoặc nhiều hơn 1 thì báo lỗi.
+  - Khi train tiếp, truyền `data`, `save_dir` và `workers` của máy hiện tại.
+    `last.pt` lưu đường dẫn của máy đã tạo ra nó, nên trước đây train tiếp
+    từ Colab sang Kaggle sẽ tìm ảnh ở `/content/...` và ghi kết quả ra đó.
+  - Phần hướng dẫn đầu notebook có thêm 4 bước cho Kaggle.
+- Kiểm tra:
+  - `smoke_detector.py`: lượt train tiếp giờ chép `last.pt` từ một thư mục
+    trong input sang thư mục output và work khác. Kiểm tra epoch 2 được
+    train ở thư mục mới, thư mục cũ vẫn chỉ có 1 epoch. Cả 3 lượt đều qua,
+    cách app đọc model khớp Ultralytics 15/15 ảnh.
+  - Link `autolabel.zip` tải được khi không đăng nhập: trả về file zip
+    823.965.780 byte.
+- Bản Kaggle đưa người dùng: `QUICK_TEST = False` và `AUTOLABEL_FROM` là
+  link `autolabel.zip`.
+
 ---
 
 ## 3. Việc còn tồn đọng

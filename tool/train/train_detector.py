@@ -48,13 +48,23 @@
 #    the size that model was trained at (640 for the YOLO11n). Steps
 #    5 and 6 work the same for it.
 #
-# **On Kaggle**: add the dataset `thomasnguyen6868/vietfood68`, and the
-# output of `autolabel_detector.ipynb` (it holds `autolabel.zip`), turn the
-# GPU and Internet on (MyFood downloads from Zenodo, FoodInsSeg from Google
-# Drive), Save & Run All. The files are in the *Output* tab.
+# **On Kaggle**
+# 1. Add the dataset `thomasnguyen6868/vietfood68`. For the boxed dish
+#    photos, put a share link to `autolabel.zip` in `AUTOLABEL_FROM`, or add
+#    a dataset that holds it.
+# 2. *Accelerator*: GPU T4 x2 (training uses one) or P100. Turn Internet on:
+#    MyFood downloads from Zenodo, FoodInsSeg and `autolabel.zip` from Google
+#    Drive.
+# 3. *Save Version → Save & Run All (Commit)*. The files are in the
+#    *Output* tab. At 11 hours training stops by itself and exports the best
+#    epoch so far.
+# 4. To go on from there: add that version's output to the notebook
+#    (*Add Input → Your Work*), set `RESUME_FROM = '/kaggle/input'` and save a
+#    new version. A Colab run's shared `train/weights` link works there too.
 #
-# Time on a T4: about 9 minutes an epoch, so the 60 epochs take two free
-# Colab sessions (step 5), or one Kaggle run.
+# Time on a T4 (estimate): about 12 minutes an epoch with the boxed dish
+# photos, so the 40 epochs take about 8 hours: one Kaggle run, or two to
+# three free Colab sessions (step 5).
 #
 # Ultralytics is AGPL-3.0; VietFood67 and FoodInsSeg are CC BY-NC-SA 4.0;
 # MyFood is CC BY 4.0.
@@ -79,7 +89,10 @@ QUICK_TEST = True        # True: 300 photos, 2 epochs at 320 px.
 # keeps it near the phone's 400 ms.
 MODEL = os.environ.get('MODEL', 'yolo11s.pt')
 IMGSZ = 320 if QUICK_TEST else 512
-EPOCHS = 2 if QUICK_TEST else 60
+# The learning rate falls to its lowest over all EPOCHS and the last 10 go
+# without mosaic, so a run cut off halfway ends worse than a shorter one
+# run to the end: set this to what there is time for.
+EPOCHS = 2 if QUICK_TEST else 40
 BATCH = 16 if QUICK_TEST else 32
 PATIENCE = 20            # epochs without a better val mAP before stopping
 SEED = 0
@@ -93,7 +106,8 @@ BACKGROUND_SHARE = 0.1
 LONG_SIDE = 640          # photos are shrunk to this once, for fast loading
 ULTRALYTICS_VERSION = '8.4.185'
 # A shared link to another Colab account's `train/weights` folder, to train
-# on from its last.pt (step 6 above). Empty: start or go on in this Drive.
+# on from its last.pt (step 6 above), or a folder here holding one (Kaggle
+# step 4). Empty: start or go on in this Drive.
 RESUME_FROM = os.environ.get('RESUME_FROM', '')
 # A shared link to a finished run's `export/detector_best.pt` (or a path to
 # it), to fine-tune from (step 7 above). Empty: start from the COCO weights.
@@ -202,11 +216,22 @@ def load_gdown():
 
 weights_dir = os.path.join(OUTPUT_DIR, 'train', 'weights')
 if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
-    gdown = load_gdown()
     stage(f'Copying last.pt and best.pt from {RESUME_FROM} ...')
-    shared = os.path.join(WORK_DIR, 'resume_from')
     try:
-        got = gdown.download_folder(url=RESUME_FROM, output=shared, quiet=True)
+        if os.path.exists(RESUME_FROM):
+            # A folder here, e.g. /kaggle/input with the last version's
+            # output added: the one weights folder somewhere under it.
+            folders = sorted({folder for folder, _, files in
+                              os.walk(RESUME_FROM, followlinks=True)
+                              if 'last.pt' in files and 'best.pt' in files})
+            if len(folders) != 1:
+                raise ValueError(f'{len(folders)} folders with last.pt and '
+                                 f'best.pt: {folders}')
+            got = [os.path.join(folders[0], n) for n in ('last.pt', 'best.pt')]
+        else:
+            got = load_gdown().download_folder(
+                url=RESUME_FROM, output=os.path.join(WORK_DIR, 'resume_from'),
+                quiet=True)
         os.makedirs(weights_dir, exist_ok=True)
         for name in ('last.pt', 'best.pt'):
             path = next(p for p in got or [] if os.path.basename(p) == name)
@@ -214,7 +239,8 @@ if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
     except Exception as error:
         raise RuntimeError(
             f'Could not copy the weights from RESUME_FROM: {error!r}. Share the '
-            'train/weights folder as "Anyone with the link".') from error
+            'train/weights folder as "Anyone with the link", or on Kaggle add '
+            'only the one earlier output that holds it.') from error
 
 
 
@@ -710,7 +736,10 @@ else:
           f'Training from {MODEL}')
     try:
         if resume:
-            model.train(resume=True)
+            # last.pt keeps the folders of the machine it came from: point it
+            # at this one's photos and output.
+            model.train(resume=True, data=DATA_YAML, save_dir=RUN_DIR,
+                        workers=2 if ON_COLAB else 4)
         else:
             model.train(data=DATA_YAML, epochs=EPOCHS, imgsz=IMGSZ, batch=BATCH,
                         patience=PATIENCE, seed=SEED, project=OUTPUT_DIR,
