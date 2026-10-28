@@ -260,7 +260,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(database.savedWeights.single.date, yesterday);
     expect(database.savedWeights.single.weight, 71.25);
-    expect(find.textContaining('Gần nhất: 70 kg'), findsOneWidget);
+    // The newest weigh-in is the list's first row; the header says the change.
+    expect(find.textContaining('Gần nhất'), findsNothing);
+    expect(find.textContaining('Thay đổi: '), findsOneWidget);
 
     final edit = find.byKey(const ValueKey('edit-weight-2'));
     await reveal(tester, edit);
@@ -492,7 +494,7 @@ void main() {
     ]);
     await open(tester, database);
     await reveal(tester, find.byKey(const ValueKey('profile-adaptive-tdee')));
-    expect(find.textContaining('Hiện có 0 ngày ghi ăn, 1 lần cân.'),
+    expect(find.textContaining('Ghi ăn 0/10 ngày · cân 1/3 lần'),
         findsOneWidget);
     expect(find.byKey(const ValueKey('adaptive-tdee-use')), findsNothing);
   });

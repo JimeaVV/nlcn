@@ -10,12 +10,17 @@ import '../models/food_log_entry.dart';
 /// The day's intake: a calorie gauge, where the energy came from (C/P/F) and
 /// a bar per macronutrient. Shared by Today and the diary.
 class IntakeSummary extends StatelessWidget {
-  const IntakeSummary({super.key, required this.totals, this.targets});
+  const IntakeSummary(
+      {super.key, required this.totals, this.targets, this.compact = false});
 
   final FoodLogTotals totals;
 
   /// From calculateNutritionTargets; null without a profile.
   final Map<String, dynamic>? targets;
+
+  /// A one-line calorie bar instead of the gauge, for the Diary, where the
+  /// meals matter more and Today already shows the gauge.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +32,10 @@ class IntakeSummary extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        CalorieGauge(eaten: totals.calories, target: calorieTarget),
+        if (compact)
+          CalorieLine(eaten: totals.calories, target: calorieTarget)
+        else
+          CalorieGauge(eaten: totals.calories, target: calorieTarget),
         const SizedBox(height: 12),
         MacroChips(totals: totals),
         const SizedBox(height: 16),
@@ -51,12 +59,8 @@ class CalorieGauge extends StatelessWidget {
     final l10n = context.l10n;
     final number = context.formatNumber;
     final target = this.target;
-    final semantics = target == null
-        ? '${number(eaten)} kcal'
-        : '${l10n.diaryCaloriesProgress(number(eaten), number(target))}. '
-            '${eaten <= target ? l10n.diaryRemaining(number(target - eaten)) : l10n.diaryOver(number(eaten - target))}';
     return Semantics(
-      label: semantics,
+      label: _calorieSemantics(context, eaten, target),
       excludeSemantics: true,
       child: LayoutBuilder(builder: (context, constraints) {
         final width = math.min(constraints.maxWidth, 260.0);
@@ -130,6 +134,96 @@ class CalorieGauge extends StatelessWidget {
           },
         );
       }),
+    );
+  }
+}
+
+/// What screen readers hear for the gauge and the calorie line.
+String _calorieSemantics(BuildContext context, double eaten, double? target) {
+  final l10n = context.l10n;
+  final number = context.formatNumber;
+  if (target == null) return '${number(eaten)} kcal';
+  return '${l10n.diaryCaloriesProgress(number(eaten), number(target))}. '
+      '${eaten <= target ? l10n.diaryRemaining(number(target - eaten)) : l10n.diaryOver(number(eaten - target))}';
+}
+
+/// The gauge's numbers on one line over a thin bar: eaten / target on the
+/// left, what is left (or over) on the right. Amber past the target.
+class CalorieLine extends StatelessWidget {
+  const CalorieLine({super.key, required this.eaten, this.target});
+
+  final double eaten;
+  final double? target;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final number = context.formatNumber;
+    final target = this.target;
+    final over = target != null && eaten > target;
+    final big = target == null ? eaten : (target - eaten).abs();
+    return Semantics(
+      label: _calorieSemantics(context, eaten, target),
+      excludeSemantics: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Wraps to two lines on a narrow phone with large text.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.end,
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              if (target != null)
+                Text(
+                  l10n.diaryCaloriesProgress(number(eaten), number(target)),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    number(big),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: over ? CyberColors.warning : null,
+                        ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    target == null
+                        ? l10n.gaugeEatenLabel
+                        : over
+                            ? l10n.gaugeOverLabel
+                            : l10n.gaugeLeftLabel,
+                    style: TextStyle(color: CyberColors.muted),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (target != null && target > 0) ...[
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: (eaten / target).clamp(0.0, 1.0)),
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, _) => LinearProgressIndicator(
+                  value: value,
+                  minHeight: 8,
+                  color: over ? CyberColors.warning : CyberColors.cyan,
+                  backgroundColor: CyberColors.surfaceAlt,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

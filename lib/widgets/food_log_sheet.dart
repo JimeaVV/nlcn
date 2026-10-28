@@ -339,7 +339,7 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
           key: key,
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: label),
+          decoration: InputDecoration(labelText: label, errorMaxLines: 3),
           onChanged: (_) => setState(() {}),
           validator: (value) => _range(value, 1000, l10n.diaryMacroError),
         );
@@ -364,21 +364,39 @@ class _FoodLogSheetState extends State<FoodLogSheet> {
             _range(value, 10000, l10n.diaryCustomCaloriesError),
       ),
       const SizedBox(height: 12),
-      Row(
-        children: [
+      LayoutBuilder(builder: (context, constraints) {
+        final fields = [
           Expanded(
               child: macro(const ValueKey('diary-custom-protein'), _protein,
-                  l10n.proteinLabel)),
-          const SizedBox(width: 8),
+                  l10n.diaryProteinLabel)),
           Expanded(
               child: macro(const ValueKey('diary-custom-carbs'), _carbs,
                   l10n.diaryCarbsLabel)),
-          const SizedBox(width: 8),
           Expanded(
               child: macro(const ValueKey('diary-custom-fat'), _fat,
                   l10n.diaryFatLabel)),
-        ],
-      ),
+        ];
+        Widget line(List<Widget> items) => Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final (i, item) in items.indexed) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  item,
+                ],
+              ],
+            );
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        // As in Profile: on a narrow phone or with large text, fat moves to
+        // its own row instead of cutting the labels short.
+        if (constraints.maxWidth / textScale < 330) {
+          return Column(children: [
+            line(fields.sublist(0, 2)),
+            const SizedBox(height: 12),
+            line(fields.sublist(2)),
+          ]);
+        }
+        return line(fields);
+      }),
       const SizedBox(height: 12),
       TextFormField(
         key: const ValueKey('diary-custom-grams'),

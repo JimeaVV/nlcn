@@ -416,18 +416,30 @@ class ProfileScreenState extends State<ProfileScreen> {
     return CyberCard(
       key: const ValueKey('profile-adaptive-tdee'),
       title: l10n.adaptiveTdeeTitle,
+      // The full conditions live behind the info button; the card keeps
+      // only how far along the data is.
       trailing: _infoButton(
         'adaptive-tdee-info',
-        () => _showInfo(l10n.adaptiveTdeeTitle, [l10n.adaptiveTdeeInfo]),
+        () => _showInfo(l10n.adaptiveTdeeTitle, [
+          if (tdee == null)
+            l10n.adaptiveTdeeNeedMore(
+              '${rules.minLoggedDays}',
+              '${rules.minWeighIns}',
+              '${rules.minWeighInSpanDays}',
+              '${estimate.loggedDays}',
+              '${estimate.weighIns}',
+            ),
+          l10n.adaptiveTdeeInfo,
+        ]),
       ),
       child: tdee == null
           ? Text(
-              l10n.adaptiveTdeeNeedMore(
+              l10n.adaptiveTdeeProgress(
+                '${estimate.loggedDays}',
                 '${rules.minLoggedDays}',
+                '${estimate.weighIns}',
                 '${rules.minWeighIns}',
                 '${rules.minWeighInSpanDays}',
-                '${estimate.loggedDays}',
-                '${estimate.weighIns}',
               ),
               style: TextStyle(color: CyberColors.muted),
             )
@@ -449,7 +461,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 10),
                 if (!estimate.plausible)
                   Text(
-                    l10n.adaptiveTdeeUnsure(number(tdee), number(formula)),
+                    l10n.adaptiveTdeeUnsure,
                     style: TextStyle(color: CyberColors.warning),
                   )
                 else
@@ -489,13 +501,9 @@ class ProfileScreenState extends State<ProfileScreen> {
           if (_weights.isEmpty)
             Text(l10n.noWeights, style: TextStyle(color: CyberColors.muted))
           else ...[
-            Text(
-              l10n.latestWeight(weight(chronological.last.weight),
-                  _date(chronological.last.recordedAt)),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            // The latest weigh-in is the list's first row, so the header
+            // only says how much it changed.
             if (chronological.length > 1) ...[
-              const SizedBox(height: 4),
               Text(
                 l10n.weightChange(
                   context.formatSigned(
@@ -506,8 +514,8 @@ class ProfileScreenState extends State<ProfileScreen> {
                 ),
                 style: TextStyle(color: CyberColors.muted),
               ),
+              const SizedBox(height: 10),
             ],
-            const SizedBox(height: 10),
             WeightTrendChart(entries: chronological),
           ],
           const SizedBox(height: 12),
@@ -627,7 +635,6 @@ class ProfileScreenState extends State<ProfileScreen> {
     String factor(double value) => context.formatNumber(value,
         decimals: value.toString().split('.').last.length);
     final segmentStyle = SegmentedButton.styleFrom(
-      visualDensity: VisualDensity.compact,
       selectedForegroundColor: CyberColors.background,
       selectedBackgroundColor: CyberColors.cyan,
     );

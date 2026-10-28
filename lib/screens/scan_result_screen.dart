@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
@@ -20,6 +21,7 @@ import '../widgets/variant_picker_sheet.dart';
 import '../widgets/error_box.dart';
 import '../widgets/food_picker_sheet.dart';
 import '../widgets/food_log_sheet.dart';
+import '../widgets/intake_summary.dart';
 import '../widgets/scan_sweep.dart';
 
 /// Confirms what is on a photographed plate and logs it to today's diary.
@@ -406,6 +408,9 @@ class _Appear extends StatelessWidget {
       );
 }
 
+/// Below this a dish guess other than the best one is left out.
+const _minRunnerUp = 0.3;
+
 class _DishCard extends StatelessWidget {
   const _DishCard({
     required this.recognition,
@@ -437,7 +442,14 @@ class _DishCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final language = Localizations.localeOf(context).languageCode;
-    final top = recognition.topDishes();
+    // The best guess always shows; the runners-up only when the model gives
+    // them a real chance, so a 20% guess does not read as an answer. "Other
+    // dish" still opens the full list.
+    final top = [
+      for (final (i, guess) in recognition.topDishes().indexed)
+        if (i == 0 || guess.value >= _minRunnerUp || guess.key == selected)
+          guess,
+    ];
     final detected = selected == ScanPlate.detectedPlateCode;
 
     return CyberCard(
@@ -501,14 +513,15 @@ class _DishCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(chosenName!, style: Theme.of(context).textTheme.titleLarge),
           ],
-          if (recognition.timing case final timing?) ...[
+          // How long the model took is for whoever builds the app.
+          if (kDebugMode && recognition.timing != null) ...[
             const SizedBox(height: 8),
             Text(
               key: const ValueKey('scan-timing'),
               l10n.scanTiming(
-                  _seconds(context, timing.total),
-                  _seconds(context, timing.prepare),
-                  _seconds(context, timing.model)),
+                  _seconds(context, recognition.timing!.total),
+                  _seconds(context, recognition.timing!.prepare),
+                  _seconds(context, recognition.timing!.model)),
               style: TextStyle(color: CyberColors.muted, fontSize: 12),
             ),
           ],
@@ -836,6 +849,7 @@ class _ComponentRow extends StatelessWidget {
         children: [
           Checkbox(
             value: item.included,
+            semanticLabel: item.component.name(language),
             onChanged: (value) {
               Haptics.tap();
               item.included = value ?? false;
@@ -891,7 +905,7 @@ class _ComponentRow extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: l10n.scanDecrease,
+            tooltip: l10n.scanDecrease(item.component.name(language)),
             onPressed: item.amount - item.step <= 0
                 ? null
                 : () {
@@ -901,7 +915,7 @@ class _ComponentRow extends StatelessWidget {
             icon: const Icon(Icons.remove_circle_outline),
           ),
           IconButton(
-            tooltip: l10n.scanIncrease,
+            tooltip: l10n.scanIncrease(item.component.name(language)),
             onPressed: () {
               item.amount += item.step;
               onChanged();
@@ -992,7 +1006,6 @@ class _TotalBar extends StatelessWidget {
                             ),
                             Text(
                               l10n.scanMacroGrams(
-                                  context.formatNumber(totals.protein),
                                   context.formatNumber(totals.carbs),
                                   context.formatNumber(totals.fat)),
                               style: TextStyle(
@@ -1070,10 +1083,11 @@ class _MacroSplit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Same order and colours as the Today and Diary cards.
     final parts = [
-      (totals.protein * 4, CyberColors.cyan),
-      (totals.carbs * 4, CyberColors.lime),
-      (totals.fat * 9, CyberColors.magenta),
+      (totals.carbs * 4, macroColor('carbs')),
+      (totals.protein * 4, macroColor('protein')),
+      (totals.fat * 9, macroColor('fat')),
     ];
     final sum = parts.fold<double>(0, (total, part) => total + part.$1);
     return ClipRRect(

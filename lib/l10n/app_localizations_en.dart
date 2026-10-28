@@ -828,6 +828,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryCustomCaloriesError => 'Enter calories from 0 to 10000.';
 
   @override
+  String get diaryProteinLabel => 'Protein (g)';
+
+  @override
   String get diaryCarbsLabel => 'Carbs (g)';
 
   @override
@@ -991,10 +994,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanUnitFallback => 'pc';
 
   @override
-  String get scanDecrease => 'Decrease';
+  String scanDecrease(String name) {
+    return 'Decrease $name';
+  }
 
   @override
-  String get scanIncrease => 'Increase';
+  String scanIncrease(String name) {
+    return 'Increase $name';
+  }
 
   @override
   String scanMissingNutrition(String names) {
@@ -1139,8 +1146,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String scanMacroGrams(String protein, String carbs, String fat) {
-    return 'Protein $protein g · Carbs $carbs g · Fat $fat g';
+  String scanMacroGrams(String carbs, String fat) {
+    return 'Carbs $carbs g · Fat $fat g';
   }
 
   @override
@@ -1203,6 +1210,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String restTimerFor(String name) {
+    return 'Start rest timer: $name';
+  }
+
+  @override
+  String logResultFor(String name) {
+    return 'Log result: $name';
+  }
+
+  @override
   String get restTimerStart => 'Start rest timer';
 
   @override
@@ -1252,15 +1269,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String adaptiveTdeeProgress(String haveDays, String days, String haveWeighIns,
+      String weighIns, String span) {
+    return 'Logged $haveDays/$days days · weighed $haveWeighIns/$weighIns times; the first and last weigh-in must be $span+ days apart.';
+  }
+
+  @override
   String adaptiveTdeeNeedMore(String days, String weighIns, String span,
       String haveDays, String haveWeighIns) {
     return 'More data needed from the last 4 weeks: food logged on at least $days days and at least $weighIns weigh-ins, the first and last $span or more days apart. So far: $haveDays logged days, $haveWeighIns weigh-ins.';
   }
 
   @override
-  String adaptiveTdeeUnsure(String tdee, String formula) {
-    return 'This is far from the formula ($tdee vs $formula kcal), maybe because some days were not logged in full. Better not use it as a target yet.';
-  }
+  String get adaptiveTdeeUnsure =>
+      'This is far from the formula, maybe because some days were not logged in full. Better not use it as a target yet.';
 
   @override
   String get adaptiveTdeeInfo =>

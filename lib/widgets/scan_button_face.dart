@@ -30,11 +30,14 @@ class ScanButtonFace extends StatelessWidget {
     final p = AppTheme.paletteFor(style);
     final ring = ringColor ?? p.surface;
     final ringWidth = size * 0.08;
+    // The light style's white surface on its dark blue; the dark styles'
+    // bright faces (cyan, green, orange) need their dark background colour
+    // to reach 3:1.
     final icon = Icon(
       style == AppStyle.minimalLight
           ? Icons.photo_camera_outlined
           : Icons.photo_camera_rounded,
-      color: Colors.white,
+      color: style == AppStyle.minimalLight ? p.surface : p.background,
       size: size * 0.48,
     );
 
@@ -124,7 +127,7 @@ class ScanButtonFace extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              // Sun at the top, dusk at the bottom; the white icon sits on
+              // Sun at the top, dusk at the bottom; the dark icon sits on
               // the orange middle for contrast.
               gradient: LinearGradient(
                 begin: Alignment.topCenter,

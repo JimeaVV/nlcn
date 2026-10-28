@@ -2801,6 +2801,51 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
 - Bản Kaggle đưa người dùng: `QUICK_TEST = False` và `AUTOLABEL_FROM` là
   link `autolabel.zip`.
 
+### 2026-10-28 · Rà giao diện (UI/UX) và sửa 13 lỗi trên các màn chính
+
+- Vì sao: người dùng nhờ đánh giá giao diện. Vẽ 35 ảnh các màn Hôm nay,
+  Nhật ký, Hồ sơ, Cài đặt, Kết quả quét bằng `tool/ui_screenshots` (bốn
+  giao diện và máy nhỏ 360 px, chữ ×1,3), nhờ agent `ui-reviewer` rà code,
+  rồi đối chiếu với checklist của skill ui-ux-pro-max. Người dùng đồng ý
+  sửa 13 lỗi đầu danh sách.
+- Đã làm:
+  - Kết quả quét: thanh tỉ lệ năng lượng dùng chung `macroColor()` với Hôm
+    nay (trước đây màu protein và carb bị đảo). Dòng dưới tổng chỉ còn carb
+    và béo, vì protein đã có ở dòng trên (trước đây ghi hai lần: "52,8 g
+    protein" và "Đạm 53 g").
+  - Nút Quét: icon máy ảnh màu nền tối thay cho trắng ở ba giao diện tối.
+    Trắng trên cyan hay xanh lá chỉ đạt khoảng 1,4–1,8:1, dưới mức 3:1 cho
+    hình.
+  - Ô nhập protein, carb, béo khi ghi món tự nhập: máy hẹp hoặc chữ lớn thì
+    ô béo xuống dòng như ô tuổi, cao, nặng ở Hồ sơ; lỗi được hiện tới 3
+    dòng; nhãn Protein có thêm "(g)".
+  - Biểu đồ cân nặng: đo nhãn trước rồi mới đặt lề, nên chữ lớn không còn
+    đè nhãn kg lên ngày.
+  - Nhật ký: thay vòng cung calo bằng một dòng "đã ăn / mục tiêu" và một
+    thanh mảnh (`CalorieLine`), vì Hôm nay đã có vòng cung; các bữa ăn lên
+    cao hơn khoảng 200 px.
+  - Hồ sơ: thẻ TDEE chỉ ghi tiến độ ("Ghi ăn 0/10 ngày · cân 3/3 lần…"),
+    điều kiện đầy đủ chuyển vào nút (i); câu cảnh báo bỏ hai con số đã có ở
+    trên. Thẻ cân nặng bỏ dòng "Gần nhất" vì trùng dòng đầu danh sách. Nút
+    chọn giới tính và mục tiêu bỏ `VisualDensity.compact` để đủ cao 48 dp.
+  - Hôm nay: ghi chú 2 lít nước chuyển vào nút (i). Dòng "So với mục tiêu"
+    của 7 ngày qua chỉ hiện khi có từ 3 ngày ghi ăn.
+  - Đọc màn hình: ô tick thành phần có tên món, nút Giảm/Tăng đọc kèm tên
+    thành phần, nút bấm giờ nghỉ và ghi kết quả đọc kèm tên bài tập.
+  - Kết quả quét: gợi ý món thứ hai trở đi dưới 30% bị ẩn (vẫn chọn được ở
+    "Món khác"); thời gian chạy model chỉ hiện ở bản debug.
+  - Cài đặt: nút xuất và xóa ảnh đã gom bị tắt khi chưa có ảnh.
+  - Bộ vẽ ảnh: truyền hành động cho hai nút "Mở nhật ký" và "Quét" ở Hôm
+    nay. Trước đó ảnh vẽ chúng ở trạng thái tắt nên trông như bị mờ; trong
+    app thật chúng vẫn bật.
+- Kiểm tra: `flutter gen-l10n`, `flutter analyze` (không lỗi), `flutter
+  test` (244 test đạt; sửa 3 test theo giao diện mới), vẽ lại 35 ảnh và
+  xem lại các màn đã sửa ở máy nhỏ chữ lớn. Agent `ui-reviewer` rà lại phần
+  đã sửa: không có lỗi chặn; đã sửa thêm 3 lỗi nhẹ nó nêu (dòng thay đổi
+  cân nặng để chữ mờ, icon nút Quét ở giao diện sáng lấy màu từ bảng màu,
+  bỏ khai báo thừa trong `app_en.arb`). Build APK 137 (kèm model phát hiện
+  món YOLO11s INT8 đang thử) và cài lên điện thoại để người dùng duyệt.
+
 ---
 
 ## 3. Việc còn tồn đọng

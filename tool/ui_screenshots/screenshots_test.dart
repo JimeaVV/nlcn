@@ -262,7 +262,11 @@ final _screens = <String, (double, Widget Function())>{
   'gauge': (1900, _gauges),
   'picker': (700, _picker),
   'scan': (1500, _scan),
-  'today': (1250, () => TodayScreen(database: _Database())),
+  // Callbacks as in HomeScreen, so the card's links are drawn enabled.
+  'today': (
+    1250,
+    () => TodayScreen(database: _Database(), onOpenDiary: () {}, onScan: () {})
+  ),
   'diary': (
     1150,
     () => DiaryScreen(database: _Database(), datasets: _Datasets())

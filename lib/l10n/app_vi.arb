@@ -557,6 +557,7 @@
   "diaryCustomNameError": "Nhập tên món.",
   "diaryCustomCalories": "Calo (kcal)",
   "diaryCustomCaloriesError": "Nhập calo từ 0 đến 10000.",
+  "diaryProteinLabel": "Protein (g)",
   "diaryCarbsLabel": "Carb (g)",
   "diaryFatLabel": "Chất béo (g)",
   "diaryMacroError": "Từ 0 đến 1000 g.",
@@ -666,8 +667,22 @@
   "scanAddComponent": "Thêm thành phần",
   "scanNoNutrition": "chưa có số liệu",
   "scanUnitFallback": "phần",
-  "scanDecrease": "Giảm",
-  "scanIncrease": "Tăng",
+  "scanDecrease": "Giảm {name}",
+  "@scanDecrease": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanIncrease": "Tăng {name}",
+  "@scanIncrease": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "scanMissingNutrition": "Chưa có số liệu dinh dưỡng cho: {names}. Bỏ chọn các phần này hoặc bổ sung số liệu để ghi vào nhật ký.",
   "@scanMissingNutrition": {
     "placeholders": {
@@ -779,12 +794,9 @@
       }
     }
   },
-  "scanMacroGrams": "Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g",
+  "scanMacroGrams": "Carb {carbs} g · Béo {fat} g",
   "@scanMacroGrams": {
     "placeholders": {
-      "protein": {
-        "type": "String"
-      },
       "carbs": {
         "type": "String"
       },
@@ -884,6 +896,22 @@
       }
     }
   },
+  "restTimerFor": "Bấm giờ nghỉ: {name}",
+  "@restTimerFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "logResultFor": "Ghi kết quả: {name}",
+  "@logResultFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "restTimerStart": "Bấm giờ nghỉ",
   "restTimerLabel": "Nghỉ {time}",
   "@restTimerLabel": {
@@ -947,6 +975,26 @@
       }
     }
   },
+  "adaptiveTdeeProgress": "Ghi ăn {haveDays}/{days} ngày · cân {haveWeighIns}/{weighIns} lần; lần cân đầu và cuối cần cách nhau từ {span} ngày.",
+  "@adaptiveTdeeProgress": {
+    "placeholders": {
+      "haveDays": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      },
+      "haveWeighIns": {
+        "type": "String"
+      },
+      "weighIns": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
   "adaptiveTdeeNeedMore": "Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất {days} ngày và cân ít nhất {weighIns} lần, lần đầu và lần cuối cách nhau từ {span} ngày. Hiện có {haveDays} ngày ghi ăn, {haveWeighIns} lần cân.",
   "@adaptiveTdeeNeedMore": {
     "placeholders": {
@@ -967,17 +1015,7 @@
       }
     }
   },
-  "adaptiveTdeeUnsure": "Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.",
-  "@adaptiveTdeeUnsure": {
-    "placeholders": {
-      "tdee": {
-        "type": "String"
-      },
-      "formula": {
-        "type": "String"
-      }
-    }
-  },
+  "adaptiveTdeeUnsure": "Kết quả lệch xa công thức, có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.",
   "adaptiveTdeeInfo": "TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.",
   "waterTitle": "Nước uống",
   "waterProgress": "{drunk} / {target} ml",

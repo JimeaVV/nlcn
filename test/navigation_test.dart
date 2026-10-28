@@ -264,8 +264,8 @@ void main() {
     expect(find.text('Ghi ăn 1/7 ngày'), findsOneWidget);
     expect(find.text('Mỗi ngày có ghi: trung bình 1.250 kcal • 58,0 g protein'),
         findsOneWidget);
-    expect(find.text('So với mục tiêu 2.000 kcal: -750 kcal/ngày'),
-        findsOneWidget);
+    // One logged day is too few to compare the week with the target.
+    expect(find.textContaining('So với mục tiêu'), findsNothing);
     // Training and the weight change share the week card's last line.
     expect(find.textContaining('Tập 1 ngày • Cân nặng'), findsOneWidget);
 

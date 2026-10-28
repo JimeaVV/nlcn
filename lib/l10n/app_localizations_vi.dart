@@ -819,6 +819,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get diaryCustomCaloriesError => 'Nhập calo từ 0 đến 10000.';
 
   @override
+  String get diaryProteinLabel => 'Protein (g)';
+
+  @override
   String get diaryCarbsLabel => 'Carb (g)';
 
   @override
@@ -981,10 +984,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get scanUnitFallback => 'phần';
 
   @override
-  String get scanDecrease => 'Giảm';
+  String scanDecrease(String name) {
+    return 'Giảm $name';
+  }
 
   @override
-  String get scanIncrease => 'Tăng';
+  String scanIncrease(String name) {
+    return 'Tăng $name';
+  }
 
   @override
   String scanMissingNutrition(String names) {
@@ -1129,8 +1136,8 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String scanMacroGrams(String protein, String carbs, String fat) {
-    return 'Đạm $protein g · Tinh bột $carbs g · Béo $fat g';
+  String scanMacroGrams(String carbs, String fat) {
+    return 'Carb $carbs g · Béo $fat g';
   }
 
   @override
@@ -1192,6 +1199,16 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String restTimerFor(String name) {
+    return 'Bấm giờ nghỉ: $name';
+  }
+
+  @override
+  String logResultFor(String name) {
+    return 'Ghi kết quả: $name';
+  }
+
+  @override
   String get restTimerStart => 'Bấm giờ nghỉ';
 
   @override
@@ -1241,15 +1258,20 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
+  String adaptiveTdeeProgress(String haveDays, String days, String haveWeighIns,
+      String weighIns, String span) {
+    return 'Ghi ăn $haveDays/$days ngày · cân $haveWeighIns/$weighIns lần; lần cân đầu và cuối cần cách nhau từ $span ngày.';
+  }
+
+  @override
   String adaptiveTdeeNeedMore(String days, String weighIns, String span,
       String haveDays, String haveWeighIns) {
     return 'Cần thêm dữ liệu trong 4 tuần gần nhất: ghi ăn ít nhất $days ngày và cân ít nhất $weighIns lần, lần đầu và lần cuối cách nhau từ $span ngày. Hiện có $haveDays ngày ghi ăn, $haveWeighIns lần cân.';
   }
 
   @override
-  String adaptiveTdeeUnsure(String tdee, String formula) {
-    return 'Kết quả lệch xa công thức ($tdee so với $formula kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.';
-  }
+  String get adaptiveTdeeUnsure =>
+      'Kết quả lệch xa công thức, có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.';
 
   @override
   String get adaptiveTdeeInfo =>

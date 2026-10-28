@@ -333,6 +333,7 @@ class _WaterCard extends StatelessWidget {
     return CyberCard(
       key: const ValueKey('today-water'),
       title: l10n.waterTitle,
+      trailing: InfoButton(title: l10n.waterTitle, paragraphs: [l10n.waterNote]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -372,9 +373,6 @@ class _WaterCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           WaterGlasses(ml: ml, onSet: (value) => onAdd(value - ml)),
-          const SizedBox(height: 6),
-          Text(l10n.waterNote,
-              style: TextStyle(color: CyberColors.muted, fontSize: 12)),
         ],
       ),
     );
@@ -408,7 +406,9 @@ class _WeekCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(l10n.weekAverage(number(week.averageCalories),
                       number(week.averageProtein, decimals: 1))),
-                  if (target != null)
+                  // One or two days, today's half-logged one among them,
+                  // say little about the week's average against the target.
+                  if (target != null && week.loggedDays >= 3)
                     Text(
                       l10n.weekVsTarget(number(target),
                           context.formatSigned(week.averageCalories - target)),

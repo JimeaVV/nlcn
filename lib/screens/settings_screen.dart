@@ -417,36 +417,45 @@ extension on SettingsScreen {
               future: photos.stats(),
               builder: (context, snapshot) {
                 final stats = snapshot.data;
-                return Text(
-                  key: const ValueKey('collect-stats'),
-                  stats == null || stats.photos == 0
-                      ? l10n.collectEmpty
-                      : l10n.collectStats('${stats.photos}',
-                          context.formatNumber(stats.bytes / 1e6, decimals: 1)),
-                  style: Theme.of(context).textTheme.titleMedium,
+                // Nothing to export or delete until a photo is kept.
+                final has = stats != null && stats.photos > 0;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      key: const ValueKey('collect-stats'),
+                      has
+                          ? l10n.collectStats(
+                              '${stats.photos}',
+                              context.formatNumber(stats.bytes / 1e6,
+                                  decimals: 1))
+                          : l10n.collectEmpty,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          key: const ValueKey('collect-export'),
+                          onPressed: has ? () => _exportPhotos(context) : null,
+                          icon: const Icon(Icons.ios_share_rounded),
+                          label: Text(l10n.collectExport),
+                        ),
+                        TextButton.icon(
+                          key: const ValueKey('collect-delete'),
+                          style: TextButton.styleFrom(
+                              foregroundColor: CyberColors.danger),
+                          onPressed: has ? () => _deletePhotos(context) : null,
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          label: Text(l10n.collectDelete),
+                        ),
+                      ],
+                    ),
+                  ],
                 );
               },
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  key: const ValueKey('collect-export'),
-                  onPressed: () => _exportPhotos(context),
-                  icon: const Icon(Icons.ios_share_rounded),
-                  label: Text(l10n.collectExport),
-                ),
-                TextButton.icon(
-                  key: const ValueKey('collect-delete'),
-                  style:
-                      TextButton.styleFrom(foregroundColor: CyberColors.danger),
-                  onPressed: () => _deletePhotos(context),
-                  icon: const Icon(Icons.delete_outline_rounded),
-                  label: Text(l10n.collectDelete),
-                ),
-              ],
             ),
           ],
         ),

@@ -239,6 +239,7 @@
   "diaryCustomNameError": "Enter a food name.",
   "diaryCustomCalories": "Calories (kcal)",
   "diaryCustomCaloriesError": "Enter calories from 0 to 10000.",
+  "diaryProteinLabel": "Protein (g)",
   "diaryCarbsLabel": "Carbs (g)",
   "diaryFatLabel": "Fat (g)",
   "diaryMacroError": "0 to 1000 g.",
@@ -288,8 +289,8 @@
   "scanAddComponent": "Add component",
   "scanNoNutrition": "no data yet",
   "scanUnitFallback": "pc",
-  "scanDecrease": "Decrease",
-  "scanIncrease": "Increase",
+  "scanDecrease": "Decrease {name}",
+  "scanIncrease": "Increase {name}",
   "scanMissingNutrition": "No nutrition data yet for: {names}. Untick them or add the data to log this plate.",
   "scanTotal": "Total: {calories} kcal • {protein} g protein",
   "scanNothingSelected": "Select at least one component.",
@@ -330,7 +331,7 @@
   "scanPortion": "Whole-dish portion",
   "scanSuggestions": "Might also be there ({count})",
   "scanSuggestionsChosen": "Might also be there ({count}) · {chosen} chosen",
-  "scanMacroGrams": "Protein {protein} g · Carbs {carbs} g · Fat {fat} g",
+  "scanMacroGrams": "Carbs {carbs} g · Fat {fat} g",
   "scanTiming": "Recognized in {total} s (photo {photo} s · model {model} s)",
   "diaryFavorites": "Favorites",
   "diaryRecent": "Recent",
@@ -409,6 +410,8 @@
       }
     }
   },
+  "restTimerFor": "Start rest timer: {name}",
+  "logResultFor": "Log result: {name}",
   "restTimerStart": "Start rest timer",
   "restTimerLabel": "Rest {time}",
   "@restTimerLabel": {
@@ -472,6 +475,7 @@
       }
     }
   },
+  "adaptiveTdeeProgress": "Logged {haveDays}/{days} days · weighed {haveWeighIns}/{weighIns} times; the first and last weigh-in must be {span}+ days apart.",
   "adaptiveTdeeNeedMore": "More data needed from the last 4 weeks: food logged on at least {days} days and at least {weighIns} weigh-ins, the first and last {span} or more days apart. So far: {haveDays} logged days, {haveWeighIns} weigh-ins.",
   "@adaptiveTdeeNeedMore": {
     "placeholders": {
@@ -492,17 +496,7 @@
       }
     }
   },
-  "adaptiveTdeeUnsure": "This is far from the formula ({tdee} vs {formula} kcal), maybe because some days were not logged in full. Better not use it as a target yet.",
-  "@adaptiveTdeeUnsure": {
-    "placeholders": {
-      "tdee": {
-        "type": "String"
-      },
-      "formula": {
-        "type": "String"
-      }
-    }
-  },
+  "adaptiveTdeeUnsure": "This is far from the formula, maybe because some days were not logged in full. Better not use it as a target yet.",
   "adaptiveTdeeInfo": "Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.",
   "waterTitle": "Water",
   "waterProgress": "{drunk} / {target} ml",

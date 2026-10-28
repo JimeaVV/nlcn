@@ -364,7 +364,10 @@ class _Summary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          IntakeSummary(totals: totals, targets: hasTargets ? targets : null),
+          IntakeSummary(
+              totals: totals,
+              targets: hasTargets ? targets : null,
+              compact: true),
           if (!hasTargets) ...[
             const SizedBox(height: 10),
             Text(l10n.diaryNoTarget,
