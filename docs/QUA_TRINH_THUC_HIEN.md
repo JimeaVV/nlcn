@@ -2846,6 +2846,35 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   bỏ khai báo thừa trong `app_en.arb`). Build APK 137 (kèm model phát hiện
   món YOLO11s INT8 đang thử) và cài lên điện thoại để người dùng duyệt.
 
+### 2026-10-28 · Màn quét bị treo với model phát hiện món YOLO11s INT8: chống treo và đổi sang bản float32
+
+- Vì sao: trên APK 137, quét món thì màn hình đứng mãi ở "Đang nhận diện".
+  Log điện thoại: `E/tflite: Input tensor 207 lacks data`, rồi
+  `Bad state: failed precondition` trong `IsolateInterpreter`. Model nhận
+  diện món vẫn chạy (124 ms); chỉ model phát hiện món hỏng.
+  - Bản INT8 (`quantize='w8a32'`, xuất bằng LiteRT) không chạy được với
+    runtime của `tflite_flutter` 0.12.1. Detector cũ (YOLO11n) chạy được vì
+    app dùng file float32 10,7 MB, nên bản INT8 chưa từng được thử trên máy.
+  - Lỗi xảy ra trong isolate của `tflite_flutter` nên lời gọi không bao giờ
+    trả về. App chờ mãi và không quay về đoán cả món.
+- Đã làm:
+  - `food_detector.dart`: thêm `detectorTimeout` 8 giây. Một lần chạy lỗi
+    hoặc quá giờ thì detector bị đánh dấu hỏng, các lần quét sau bỏ qua nó
+    ngay. `scan_result_screen.dart` cũng chờ detector tối đa 8 giây rồi
+    đoán cả món.
+  - Thêm test: detector không bao giờ trả lời thì sau 8 giây màn quét vẫn
+    hiện kết quả của model món.
+  - Thay `assets/models/detector.tflite` bằng bản float32 của cùng lần train
+    YOLO11s ngày 27/10 (`export/detector.tflite` trong `results.zip` của
+    Kaggle, 37,9 MB). Bản INT8 cất ở `build/models_backup/`.
+    `DETECTOR_CARD.md` ghi rõ app dùng bản float32 và vì sao.
+- Kiểm tra: `flutter analyze` sạch, `flutter test` 245 test đạt. APK 138
+  (versionCode 2138, 61,2 MB, chứng chỉ `e3b83ac4fe9118e4…`) đã cài lên
+  điện thoại. Quét đĩa cơm tấm: hết treo, log ghi `Detector timing: photo
+  157 ms, model 182 ms, 4 foods` (tổng 339 ms, ngang YOLO11n trước đây) và
+  model món 187 ms. Lần này khoanh được cả thịt nướng (89%), cơm (94%) và
+  dưa leo.
+
 ---
 
 ## 3. Việc còn tồn đọng

@@ -84,6 +84,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     // Both models at once; either may fail without stopping the other.
     final detecting = widget.detector
         .detect(widget.imagePath)
+        .timeout(detectorTimeout)
         .then((found) => found, onError: (Object error, StackTrace stack) {
       debugPrint('Plate detector failed: $error\n$stack');
       return PlateDetection.empty;

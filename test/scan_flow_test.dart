@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -65,6 +66,16 @@ class _Detector implements FoodDetector {
 
   @override
   Future<PlateDetection> detect(String imagePath) async => result;
+}
+
+/// A detector whose model never answers, like a file the runtime cannot run.
+class _SilentDetector implements FoodDetector {
+  @override
+  bool get isAvailable => true;
+
+  @override
+  Future<PlateDetection> detect(String imagePath) =>
+      Completer<PlateDetection>().future;
 }
 
 class _Datasets extends DatasetRepository {
@@ -324,6 +335,27 @@ void main() {
             .selected,
         isTrue);
     expect(tester.widget<ChoiceChip>(chip).selected, isFalse);
+  });
+
+  testWidgets('a detector that never answers does not hang the scan',
+      (tester) async {
+    _tall(tester);
+    await tester.pumpWidget(localizedApp(
+      home: ScanResultScreen(
+        imagePath: 'plate.jpg',
+        data: fixtureVnFood(),
+        recognizer: _Recognizer(const FoodRecognition(
+            dishes: {'com_tam': 0.9}, components: {'com': 0.9})),
+        detector: _SilentDetector(),
+        database: _Database(),
+      ),
+    ));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Cơm tấm · 90%'), findsNothing, reason: 'still waiting');
+    await tester.pump(detectorTimeout);
+    await tester.pump();
+    expect(find.text('Cơm tấm · 90%'), findsOneWidget,
+        reason: 'falls back to the dish model');
   });
 
   testWidgets('the scan sweep plays a full pass even for an instant answer',

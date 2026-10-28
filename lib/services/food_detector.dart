@@ -13,6 +13,11 @@ import 'tflite_food_recognizer.dart' show modelFolder;
 /// Where the optional plate detector ships (docs/MODEL_CONTRACT.md §7).
 const detectorAsset = '$modelFolder/detector.tflite';
 
+/// How long a scan waits for the detector before it goes on with the dish
+/// model alone. A run takes well under a second; a model the runtime cannot
+/// execute fails inside tflite_flutter's isolate and never answers at all.
+const detectorTimeout = Duration(seconds: 8);
+
 /// Finds each food on a photo of a plate.
 abstract interface class FoodDetector {
   /// False when no detector is bundled; scanning then uses the dish model
@@ -89,11 +94,16 @@ class TfliteFoodDetector implements FoodDetector {
   Future<_DetectorRunner>? _runner;
   Future<void> _previousRun = Future.value();
 
+  /// Set once a run fails or times out. The interpreter is then stuck, so
+  /// later photos skip the detector at once instead of waiting again.
+  Object? _broken;
+
   @override
   bool get isAvailable => true;
 
   @override
   Future<PlateDetection> detect(String imagePath) async {
+    if (_broken case final error?) throw StateError('Detector broken: $error');
     final _DetectorRunner runner;
     try {
       runner = await (_runner ??= _DetectorRunner.open(_bundle, labels));
@@ -110,8 +120,15 @@ class TfliteFoodDetector implements FoodDetector {
     // One run at a time: a busy isolate interpreter returns zeros.
     final output = _previousRun.then((_) => runner.run(prepared.input));
     _previousRun = output.then<void>((_) {}, onError: (_) {});
+    final Float32List raw;
+    try {
+      raw = await output.timeout(detectorTimeout);
+    } catch (error) {
+      _broken = error;
+      rethrow;
+    }
     final foods = decodeDetections(
-        await output, runner.outputShape, labels, prepared.letterbox);
+        raw, runner.outputShape, labels, prepared.letterbox);
     debugPrint('Detector timing: photo ${photo.inMilliseconds} ms, model '
         '${(clock.elapsed - photo).inMilliseconds} ms, ${foods.length} foods');
     return PlateDetection(
