@@ -2875,6 +2875,57 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   model món 187 ms. Lần này khoanh được cả thịt nướng (89%), cơm (94%) và
   dưa leo.
 
+### 2026-10-28 · Xem chỗ yếu của YOLO11s; ngưỡng riêng từng lớp; detector float16 (APK 139)
+
+**Vì sao.** YOLO11s đã chạy được trên điện thoại (bản float32, 37.9 MB). Cần
+biết model còn cải thiện được ở đâu, và giảm dung lượng app khi bản INT8 không
+chạy được.
+
+**Train thêm có giúp không.** Không. Trong `results.csv` của lần train 40 epoch,
+mAP50 trên tập val là 0.657 ở epoch 20, 0.696 ở epoch 30 và 0.697 ở epoch 40.
+Từ epoch 30, `val/cls_loss` tăng (1.16 lên 1.19) trong khi `train/cls_loss`
+vẫn giảm, nghĩa là model bắt đầu học thuộc tập train. Sáu lớp `ga`, `heo`,
+`bo`, `rau`, `dua_leo_ca_chua`, `khoai_tay_chien` chiếm 68% số box test
+(3,487/5,090) nhưng chỉ đạt mAP50 0.32–0.39. Phần lớn nhãn của các lớp này
+lấy từ FoodInsSeg và MyFood, và mỗi bộ vẽ box một kiểu: có bộ vẽ một box cho
+từng lát, có bộ vẽ một box cho cả đĩa.
+
+**Gà, heo, bò bị nhầm với nhau.** Theo confusion matrix trên tập val (2,940
+ảnh), heo thật bị đoán là bò 16% và là gà 11%; bò thật bị đoán là heo 14%.
+Trên 459 ảnh cơm phần, ở ngưỡng 0.38, các nhầm lẫn nhiều nhất là tôm → gà
+(20), heo → bò (16), cá → gà (14), gà → cá (12), bò → heo (11).
+
+**Ngưỡng riêng từng lớp.** Tìm ngưỡng cho F1 cao nhất ở từng lớp. Chỉnh trên một
+nửa số ảnh cơm phần rồi đo trên nửa còn lại, sau đó đổi vai hai nửa.
+- Tính theo từng box: F1 tăng từ 0.32 lên 0.35, nhưng số box báo sai tăng gấp
+  4 (264 lên 1,023). Không đáng.
+- Tính theo "món có trên đĩa hay không", là thứ app hiển thị: số món tìm được
+  tăng từ 50% lên 64% và từ 55% lên 70%, F1 tăng từ 0.574 lên 0.612 và từ
+  0.613 lên 0.634. Đổi lại, số món báo sai gần gấp đôi (96 lên 178).
+- Ngưỡng tốt nhất đều thấp hơn 0.38. Với cơm, rau, dưa leo cà chua và khoai
+  tây chiên, ngưỡng 0.10–0.16 tìm thêm 9–19 ảnh mà chỉ báo sai thêm 3–18.
+  Với gà và heo, hạ ngưỡng thì báo sai tăng mạnh (gà 44 lên 114, heo 27 lên
+  64).
+- Ngưỡng không chữa được việc nhầm gà, heo, bò. Chưa đưa vào app, vì đọc
+  ngưỡng riêng từng lớp là thay đổi contract.
+
+**Detector float16.** Ultralytics không xuất được TFLite trên Windows, nên viết
+`tool/train/tflite_to_fp16.py`. Script đọc file float32 đang chạy được trên
+điện thoại, lưu 181 tensor trọng số dưới dạng float16, và thêm trước mỗi tensor
+một op `DEQUANTIZE` để giải nén về float32 khi nạp model. Graph, đầu vào và đầu
+ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
+- Kiểm tra trên 459 ảnh cơm phần, giải mã giống app (letterbox, ngưỡng 0.38,
+  NMS 0.5): cùng danh sách món ở 458/459 ảnh, cùng box (IoU > 0.9) ở 454/459
+  ảnh. Điểm số lệch nhau tối đa 0.033.
+- Trên PC cả hai bản đều mất 96 ms một ảnh.
+- Cập nhật `DETECTOR_CARD.md` và dòng "Lượng tử hoá" trong
+  `docs/MODEL_CONTRACT.md`. Không tăng phiên bản contract vì đầu vào, đầu ra
+  và các dòng trong card không đổi.
+- `flutter analyze` không báo lỗi, `flutter test` đạt 248/248. APK 139 (43.3
+  MB, chữ ký khớp) đã cài lên điện thoại.
+- Trên điện thoại (Xiaomi 8 nhân), detector mất 184 ms và 158 ms cho 2 ảnh
+  (bản float32 trước đó mất 339 ms). Mỗi ảnh nhận ra 1–2 món.
+
 ---
 
 ## 3. Việc còn tồn đọng

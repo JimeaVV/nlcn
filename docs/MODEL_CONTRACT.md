@@ -433,7 +433,7 @@ biến thể thì người dùng bấm vào tên để chọn phần và cách n
 | Tiền xử lý | App: thu nhỏ ảnh giữ tỉ lệ cho cạnh dài bằng S, đặt vào giữa, phần thừa tô xám (114, 114, 114) như lúc train ("letterbox") |
 | Đầu ra | Một tensor `float32 [1, 4 + số_lớp, A]` (A = 8400 khi S = 640, 5376 khi S = 512); app cũng nhận dạng chuyển vị `[1, A, 4 + số_lớp]`. Bốn dòng đầu là `cx, cy, w, h` của khung, chia cho S (0–1); nếu giá trị lớn hơn 2 thì app coi là pixel và tự chia. Các dòng sau là điểm của từng lớp, 0–1 |
 | NMS | Không nằm trong model. App bỏ khung dưới `threshold_box`, rồi với mỗi lớp bỏ khung trùng khung điểm cao hơn quá `threshold_iou` |
-| Lượng tử hoá | FP32 hoặc INT8 động (`w8a32`). Notebook xuất bản INT8 tên `detector_int8.tflite`; muốn dùng thì đổi tên thành `detector.tflite`, vì app chỉ đọc tên đó |
+| Lượng tử hoá | Trọng số FP32 hoặc FP16; đầu vào và đầu ra vẫn là float32. App đang dùng bản FP16, tạo từ file FP32 bằng `python tool/train/tflite_to_fp16.py detector.tflite detector_fp16.tflite`. Bản INT8 động (`w8a32`, file `detector_int8.tflite`) không chạy được với tflite_flutter 0.12.1 ("Input tensor 207 lacks data") nên không dùng |
 | Kích thước | YOLO11n: khoảng 10 MB (FP32), 3 MB (INT8). YOLO11s: khoảng 37 MB (FP32), 10 MB (INT8), ước tính theo số tham số |
 | Tốc độ | Mục tiêu ≤ 400 ms mỗi ảnh trên điện thoại tầm trung |
 

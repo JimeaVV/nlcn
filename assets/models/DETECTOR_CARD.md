@@ -8,7 +8,7 @@ threshold_iou: 0.5
 - Photos: {'test': 1819, 'train': 29284, 'val': 2940} (VietFood67 boxes, MyFood masks, FoodInsSeg boxes, Grounding DINO and Open Images boxes in train)
 - Test: mAP50 0.646, mAP50-95 0.556, precision 0.699, recall 0.601
 - Files: detector.tflite 37.9 MB, detector_int8.tflite 9.9 MB
-- In the app: detector.tflite (float32). The INT8 file (w8a32) fails on the phone with tflite_flutter 0.12.1 ("Input tensor 207 lacks data")
+- In the app: detector.tflite with float16 weights, 19.1 MB, made from the float32 file by tool/train/tflite_to_fp16.py; input and output stay float32. On 459 cơm phần photos it finds the same foods as the float32 file on 458. The INT8 file (w8a32) fails on the phone with tflite_flutter 0.12.1 ("Input tensor 207 lacks data")
 
 | class | test boxes | mAP50 | mAP50-95 |
 |---|---|---|---|
