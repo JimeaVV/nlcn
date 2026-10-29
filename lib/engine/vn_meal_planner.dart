@@ -574,7 +574,7 @@ class _Planner {
     final name = c.name(language);
     final label = units != null && language == 'vi' && c.unitNameVi != null
         ? '${_count(units)} ${c.unitNameVi} $name'
-        : '${grams.round()} g $name';
+        : '${grams.round()}\u00A0g $name';
     return _Choice(
       code: c.code,
       kind: kind,
@@ -603,7 +603,7 @@ class _Planner {
       pro += c.proteinPer100g! * g / 100;
       carb += c.carbPer100g! * g / 100;
       fatG += c.fatPer100g! * g / 100;
-      parts.add('${g.round()} g ${c.name(language)}');
+      parts.add('${g.round()}\u00A0g ${c.name(language)}');
     }
     final name = dish.name(language);
     final label = language == 'vi'

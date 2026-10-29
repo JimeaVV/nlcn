@@ -11,8 +11,12 @@ import '../models/user_profile.dart';
 import '../models/weight_entry.dart';
 import '../services/database_service.dart';
 import '../services/home_widget_sync.dart';
+import '../services/water_reminder_service.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/error_box.dart';
+import '../widgets/info_button.dart';
+import '../widgets/intake_summary.dart';
+import '../widgets/water_glasses.dart';
 
 /// Overview of the current day: intake against targets, weight trend and
 /// training, with shortcuts into the other tabs.
@@ -24,7 +28,11 @@ class TodayScreen extends StatefulWidget {
     this.onOpenWorkout,
     this.onOpenProfile,
     this.onScan,
+    this.waterReminders,
   });
+
+  /// Scheduled again whenever the day's water is known or changes.
+  final WaterReminderController? waterReminders;
 
   final DatabaseService? database;
   final VoidCallback? onOpenDiary;
@@ -110,6 +118,7 @@ class TodayScreenState extends State<TodayScreen> {
         _loadFailed = false;
       });
       _syncHomeWidget();
+      _refreshWaterReminders();
     } catch (_) {
       if (!mounted || version != _loadVersion) return;
       setState(() {
@@ -134,6 +143,16 @@ class TodayScreenState extends State<TodayScreen> {
       }
     }
     _syncHomeWidget();
+    _refreshWaterReminders();
+  }
+
+  /// Reaching the goal ends today's water reminders; opening the app also
+  /// schedules the days ahead again.
+  void _refreshWaterReminders() {
+    widget.waterReminders?.refresh(
+      texts: WaterReminderTexts.of(context.l10n),
+      goalReachedToday: _water >= waterTargetMl,
+    );
   }
 
   /// The home-screen widget shows the same numbers as this screen.
@@ -145,7 +164,7 @@ class TodayScreenState extends State<TodayScreen> {
     HomeWidgetSync.update(
       title: l10n.widgetTitle,
       calories: target == null
-          ? '${number(_eaten.calories)} kcal'
+          ? '${number(_eaten.calories)}\u00A0kcal'
           : l10n.diaryCaloriesProgress(number(_eaten.calories), number(target)),
       water: l10n.widgetWater(number(_water / 1000, decimals: 1),
           number(waterTargetMl / 1000, decimals: 1)),
@@ -217,7 +236,6 @@ class _ProfilePrompt extends StatelessWidget {
     final l10n = context.l10n;
     return CyberCard(
       title: l10n.mealProfileRequiredTitle,
-      icon: Icons.person_outline_rounded,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -254,81 +272,45 @@ class _NutritionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final number = context.formatNumber;
-    final calorieTarget = (targets?['target_calories'] as num?)?.toDouble();
-    final proteinTarget = (targets?['protein_target'] as num?)?.toDouble();
     return CyberCard(
+      highlight: true,
       title: l10n.diaryEaten,
       icon: Icons.local_fire_department_outlined,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        StreakBadge(
             key: const ValueKey('today-streak'),
-            children: [
-              Icon(Icons.whatshot_rounded,
-                  size: 18,
-                  color: streak > 0 ? Colors.orange : CyberColors.muted),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  streak == 0
-                      ? l10n.streakNone
-                      : loggedToday
-                          ? l10n.streakDays('$streak')
-                          : '${l10n.streakDays('$streak')} • ${l10n.streakKeep}',
-                  style: TextStyle(
-                      color: streak > 0 ? Colors.orange : CyberColors.muted,
-                      fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            calorieTarget == null
-                ? '${number(eaten.calories)} kcal'
-                : l10n.diaryCaloriesProgress(
-                    number(eaten.calories), number(calorieTarget)),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          if (calorieTarget != null) ...[
-            const SizedBox(height: 6),
-            _Bar(value: eaten.calories, target: calorieTarget),
-            const SizedBox(height: 6),
-            Text(
-              eaten.calories <= calorieTarget
-                  ? l10n.diaryRemaining(number(calorieTarget - eaten.calories))
-                  : l10n.diaryOver(number(eaten.calories - calorieTarget)),
-              style: TextStyle(color: CyberColors.muted),
+            days: streak,
+            loggedToday: loggedToday),
+        InfoButton(title: l10n.macroInfoTitle, paragraphs: [l10n.macroInfo]),
+      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (streak == 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(l10n.streakNone,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: CyberColors.muted)),
             ),
-          ],
-          const SizedBox(height: 10),
-          Text(
-            proteinTarget == null
-                ? l10n.proteinGrams(number(eaten.protein, decimals: 1))
-                : l10n.diaryProteinProgress(number(eaten.protein, decimals: 1),
-                    number(proteinTarget, decimals: 1)),
-          ),
-          const SizedBox(height: 12),
-          Row(
+          IntakeSummary(totals: eaten, targets: targets),
+          const SizedBox(height: 8),
+          // Small links: the bar's scan button is the one that stands out.
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
             children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const ValueKey('today-open-diary'),
-                  onPressed: onOpenDiary,
-                  icon: const Icon(Icons.menu_book_rounded),
-                  label: Text(l10n.todayOpenDiary),
-                ),
+              TextButton.icon(
+                key: const ValueKey('today-open-diary'),
+                onPressed: onOpenDiary,
+                icon: const Icon(Icons.menu_book_rounded),
+                label: Text(l10n.todayOpenDiary),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const ValueKey('today-scan'),
-                  onPressed: onScan,
-                  icon: const Icon(Icons.photo_camera_rounded),
-                  label: Text(l10n.navScan),
-                ),
+              TextButton.icon(
+                key: const ValueKey('today-scan'),
+                onPressed: onScan,
+                icon: const Icon(Icons.photo_camera_rounded),
+                label: Text(l10n.navScan),
               ),
             ],
           ),
@@ -351,8 +333,7 @@ class _WaterCard extends StatelessWidget {
     return CyberCard(
       key: const ValueKey('today-water'),
       title: l10n.waterTitle,
-      icon: Icons.water_drop_outlined,
-      accent: CyberColors.cyan,
+      trailing: InfoButton(title: l10n.waterTitle, paragraphs: [l10n.waterNote]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -367,9 +348,12 @@ class _WaterCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      l10n.waterProgress(number(ml), number(waterTargetMl)),
-                      style: Theme.of(context).textTheme.titleLarge,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        l10n.waterProgress(number(ml), number(waterTargetMl)),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                     ),
                     Text(
                       l10n.waterGlasses(
@@ -387,19 +371,8 @@ class _WaterCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              minHeight: 8,
-              value: (ml / waterTargetMl).clamp(0.0, 1.0),
-              color: CyberColors.cyan,
-              backgroundColor: CyberColors.surfaceAlt,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(l10n.waterNote,
-              style: TextStyle(color: CyberColors.muted, fontSize: 12)),
+          const SizedBox(height: 4),
+          WaterGlasses(ml: ml, onSet: (value) => onAdd(value - ml)),
         ],
       ),
     );
@@ -422,8 +395,6 @@ class _WeekCard extends StatelessWidget {
     return CyberCard(
       key: const ValueKey('today-week'),
       title: l10n.weekTitle,
-      icon: Icons.calendar_view_week_rounded,
-      accent: CyberColors.magenta,
       child: week.loggedDays == 0 && week.trainingDays == 0 && change == null
           ? Text(l10n.weekEmpty, style: muted)
           : Column(
@@ -435,7 +406,9 @@ class _WeekCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(l10n.weekAverage(number(week.averageCalories),
                       number(week.averageProtein, decimals: 1))),
-                  if (target != null)
+                  // One or two days, today's half-logged one among them,
+                  // say little about the week's average against the target.
+                  if (target != null && week.loggedDays >= 3)
                     Text(
                       l10n.weekVsTarget(number(target),
                           context.formatSigned(week.averageCalories - target)),
@@ -448,7 +421,8 @@ class _WeekCard extends StatelessWidget {
                     l10n.weekTraining('${week.trainingDays}'),
                     if (change != null)
                       l10n.weekWeight(
-                          context.formatSigned(change, decimals: 1)),
+                          context.formatSigned(change.kg, decimals: 1),
+                          formatShortDate(change.since)),
                   ].join(' • '),
                   style: muted,
                 ),
@@ -468,16 +442,10 @@ class _WeightCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final latest = weights.isEmpty ? null : weights.first;
-    // Compare with the newest weigh-in that is at least a week older.
-    final weekAgo = latest == null
-        ? null
-        : weights.where((entry) =>
-            latest.recordedAt.difference(entry.recordedAt).inDays >= 7);
-    final previous = weekAgo == null || weekAgo.isEmpty ? null : weekAgo.first;
+    // The same comparison as the week card, so both show one number.
+    final change = weeklyWeightChange(weights);
     return CyberCard(
       title: l10n.weightTracking,
-      icon: Icons.monitor_weight_outlined,
-      accent: CyberColors.magenta,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -489,12 +457,12 @@ class _WeightCard extends StatelessWidget {
                   formatDate(latest.recordedAt)),
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            if (previous != null) ...[
+            if (change != null) ...[
               const SizedBox(height: 4),
               Text(
-                l10n.todayWeightWeek(context.formatSigned(
-                    latest.weight - previous.weight,
-                    decimals: 1)),
+                l10n.todayWeightWeek(
+                    context.formatSigned(change.kg, decimals: 1),
+                    formatShortDate(change.since)),
                 style: TextStyle(color: CyberColors.muted),
               ),
             ],
@@ -528,8 +496,6 @@ class _TrainingCard extends StatelessWidget {
     final last = lastWorkout;
     return CyberCard(
       title: l10n.navWorkout,
-      icon: Icons.fitness_center_rounded,
-      accent: CyberColors.lime,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -558,22 +524,4 @@ class _TrainingCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Bar extends StatelessWidget {
-  const _Bar({required this.value, required this.target});
-
-  final double value;
-  final double target;
-
-  @override
-  Widget build(BuildContext context) => ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: LinearProgressIndicator(
-          minHeight: 8,
-          value: target > 0 ? (value / target).clamp(0.0, 1.0) : 0,
-          color: value > target ? Colors.orange : CyberColors.lime,
-          backgroundColor: CyberColors.surfaceAlt,
-        ),
-      );
 }

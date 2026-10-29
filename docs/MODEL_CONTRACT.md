@@ -5,7 +5,7 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.4**
+- `contract_version`: **1.6**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
@@ -17,7 +17,15 @@ nào thì phải báo người kia, tăng `contract_version` và ghi vào
   - 1.4: thêm 13 món đã có ảnh trong các bộ công khai nhưng trước đó bị gom
     vào `khac` (món 53–65); `khac` còn lẩu và gỏi ngó sen. Kích thước ảnh
     vào do model quyết định, app đọc từ file `.tflite` (mục 6).
-- Cập nhật: 2026-10-20
+  - 1.5: thêm 26 món ăn hằng ngày (món 66–91): món lẻ như cơm trắng, ức gà,
+    trứng, và món quốc tế phổ biến như pizza, sushi, ramen. Ảnh lấy từ
+    Food-101, MyFood và các khung trong VietFood67; ảnh người dùng tự lưu
+    trong app cũng dùng để train (mục 5). Model 1.5 train tiếp từ model
+    1.4: 65 món cũ giữ nguyên thứ tự, món mới nối vào sau.
+  - 1.6: thêm model thứ hai, **phát hiện từng món trên đĩa** bằng YOLO (mục
+    7): 21 lớp, mỗi lớp ứng với một thành phần hoặc một nhóm biến thể của
+    app. Model nhận diện món (mục 6) không đổi, vẫn là model 1.5.
+- Cập nhật: 2026-10-24
 
 ---
 
@@ -36,12 +44,15 @@ Quy tắc đặt mã: chữ thường, không dấu, nối bằng `_`. Mã dùng
 nhãn trong `labels.csv`, thứ tự trong `dishes.txt` và khoá trong bảng dinh
 dưỡng của app.
 
-Gồm **52 món**:
+Gồm **91 món**:
 - món 1–20 là danh sách ban đầu, phần lớn có trong bộ ảnh 30VNFoods;
 - món 21–40 lấy theo bộ ảnh VinaFood21 (chỉ trùng `bo_kho` với danh sách
   ban đầu);
-- món 41–52 là các món phổ biến có nhiều ảnh trong 30VNFoods, 20FoodVN và
-  VietFood67.
+- món 41–65 là các món phổ biến có nhiều ảnh trong 30VNFoods, 20FoodVN và
+  VietFood67;
+- món 66–91 là món ăn hằng ngày, cả món lẻ (cơm trắng, ức gà, trứng) lẫn
+  món quốc tế. Ảnh lấy từ Food-101, MyFood và các khung trong VietFood67
+  (cắt riêng phần cơm, rau, đậu hũ, chả giò trên dĩa).
 
 Model có thêm một đầu ra cuối cùng `khac` (món không có trong app), không
 nằm trong bảng này; xem mục 6.
@@ -49,12 +60,18 @@ nằm trong bảng này; xem mục 6.
 Món nào chỉ gồm một thứ (bánh tét, bắp nướng…) thì không cần gán nhãn thành
 phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 
+Món 66–91 chỉ có dòng nền (ức gà, pizza…) thì ảnh của chúng **không** dạy
+đầu ra thành phần: ức gà có thịt gà, sushi có cơm và cá, nhưng dinh dưỡng đã
+nằm ở dòng nền nên các thành phần đó không có trong công thức món. Món mới
+có công thức bằng thành phần (cơm trắng là `com`, trứng luộc là
+`trung_kho`…) thì dạy như các món cũ.
+
 | # | Mã | Tên hiển thị (vi) | Ghi chú |
 |---|---|---|---|
 | 1 | `com_tam` | Cơm tấm | |
 | 2 | `com_phan` | Cơm phần (cơm + món mặn tự chọn) | Thành phần thay đổi nhiều, dựa hẳn vào đầu ra `components` |
 | 3 | `com_ga` | Cơm gà | |
-| 4 | `com_chien` | Cơm chiên | |
+| 4 | `com_chien` | Cơm chiên | Từ v1.5 thêm Food-101 (fried rice) |
 | 5 | `pho_bo` | Phở bò | |
 | 6 | `pho_ga` | Phở gà | |
 | 7 | `bun_bo_hue` | Bún bò Huế | |
@@ -77,7 +94,7 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 | 24 | `banh_hoi` | Bánh hỏi | VinaFood21 |
 | 25 | `thit_kho_trung` | Thịt kho trứng | VinaFood21; thành phần `thit_kho`, `trung_kho` |
 | 26 | `banh_can` | Bánh căn | VinaFood21 |
-| 27 | `ca_ri` | Cà ri gà | VinaFood21 |
+| 27 | `ca_ri` | Cà ri gà | VinaFood21; từ v1.5 thêm Food-101 (chicken curry) |
 | 28 | `bap_nuong` | Bắp nướng | VinaFood21 |
 | 29 | `banh_trang_tron` | Bánh tráng trộn | VinaFood21 |
 | 30 | `hoanh_thanh_nuoc` | Hoành thánh nước | VinaFood21 |
@@ -110,12 +127,38 @@ phần; toàn bộ dinh dưỡng nằm ở dòng nền `_base_<mã món>`.
 | 57 | `nem_chua` | Nem chua | 30VNFoods |
 | 58 | `banh_pia` | Bánh pía | 30VNFoods |
 | 59 | `bun_ca` | Bún cá | 20FoodVN (bún cá), VietFood67 (bún chả cá) |
-| 60 | `khoai_tay_chien` | Khoai tây chiên | VietFood67 |
-| 61 | `salad` | Salad | VietFood67 |
-| 62 | `hamburger` | Hamburger | VietFood67 |
+| 60 | `khoai_tay_chien` | Khoai tây chiên | VietFood67, Food-101 (french fries) |
+| 61 | `salad` | Salad | VietFood67, Food-101 (caesar, greek, beet, caprese salad), MyFood (salad) |
+| 62 | `hamburger` | Hamburger | VietFood67, Food-101 (hamburger) |
 | 63 | `nui_xao_bo` | Nui xào bò | VietFood67 |
 | 64 | `sup_cua` | Súp cua | VietFood67 |
 | 65 | `nom_hoa_chuoi` | Nộm hoa chuối | VietFood67 |
+| 66 | `com_trang` | Cơm trắng | MyFood (rice), VietFood67 (khung `Com`) |
+| 67 | `uc_ga` | Ức gà | MyFood (chicken breast) |
+| 68 | `trung_luoc` | Trứng luộc | MyFood (boiled egg) |
+| 69 | `trung_op` | Trứng ốp la | MyFood (fried egg) |
+| 70 | `trung_chien` | Trứng chiên / ốp lết | Food-101 (omelette) |
+| 71 | `bo_bit_tet` | Bò bít tết | Food-101 (steak, filet mignon, prime rib), MyFood (steak) |
+| 72 | `mi_y` | Mì Ý | Food-101 (spaghetti bolognese, carbonara), MyFood (spaghetti) |
+| 73 | `tao` | Táo | MyFood (apple) |
+| 74 | `dau_hu_chien` | Đậu hũ chiên / sốt cà | VietFood67 (khung `Dau hu`) |
+| 75 | `rau_xao` | Rau luộc / xào | VietFood67 (khung `Rau` trên dĩa cơm phần) |
+| 76 | `cha_gio` | Chả giò | Food-101 (spring rolls), VietFood67 (khung `Cha gio`) |
+| 77 | `ga_ran` | Gà rán / cánh gà chiên | Food-101 (chicken wings) |
+| 78 | `ca_hoi` | Cá hồi áp chảo / nướng | Food-101 (grilled salmon) |
+| 79 | `muc_chien` | Mực chiên | Food-101 (fried calamari) |
+| 80 | `sui_cao` | Sủi cảo / há cảo hấp | Food-101 (dumplings, gyoza) |
+| 81 | `pizza` | Pizza | Food-101 (pizza) |
+| 82 | `sushi` | Sushi | Food-101 (sushi) |
+| 83 | `sashimi` | Sashimi | Food-101 (sashimi) |
+| 84 | `ramen` | Ramen | Food-101 (ramen) |
+| 85 | `hot_dog` | Hot dog | Food-101 (hot dog) |
+| 86 | `sandwich` | Sandwich | Food-101 (club, grilled cheese, pulled pork, lobster roll sandwich) |
+| 87 | `pancake` | Bánh pancake | Food-101 (pancakes) |
+| 88 | `banh_waffle` | Bánh waffle | Food-101 (waffles) |
+| 89 | `banh_donut` | Bánh donut | Food-101 (donuts) |
+| 90 | `banh_kem` | Bánh kem / bánh ngọt | Food-101 (chocolate cake, cheesecake, red velvet cake, strawberry shortcake, carrot cake, cupcakes) |
+| 91 | `kem` | Kem | Food-101 (ice cream) |
 
 ## 3. Danh sách thành phần (đầu ra `components`)
 Thành phần dùng chung giữa các món, nên mỗi thành phần chỉ cần một dòng dinh
@@ -233,6 +276,23 @@ img_0002.jpg,pho_bo,banh_pho|bo|rau_song
   30% ảnh tự chụp** và được người kiểm tra lại toàn bộ.
 - Có dùng AI hỗ trợ gán nhãn thì ghi vào `SOURCES.md` và báo cáo.
 
+**Ảnh người dùng tự lưu trong app** (từ v1.5): bật "Lưu ảnh để train" trong
+Cài đặt thì mỗi lần ghi món bằng camera, app giữ một bản ảnh nhỏ (cạnh dài
+640 px) kèm món người dùng đã xác nhận. Nút xuất cho ra một file zip:
+```
+index.csv          file,label,name,model_guess,model_confidence,saved_at
+<nhãn>/<số>.jpg    ảnh, mỗi nhãn một thư mục
+```
+- `label` là mã món, hoặc `single_<mã thành phần>` khi người dùng ghi một
+  thứ ăn riêng, hoặc `new_<tên>` khi món không có trong app.
+- Notebook đổi `single_com` thành `com_trang`, `single_trung_kho` thành
+  `trung_luoc`… (món lẻ có cùng nghĩa); `new_<tên>` vào lớp `khac`.
+- `model_guess` là món model đoán lúc chụp: ảnh model đoán sai là ảnh
+  đáng train nhất.
+- Từ v1.6, `label` là `plate` khi người dùng ghi một đĩa nhiều món do
+  model phát hiện tìm ra (mục 7). Notebook nhận diện món bỏ qua nhãn này;
+  ảnh để dành khoanh khung cho model phát hiện sau.
+
 ## 6. Định dạng model đưa vào app
 Đặt trong `assets/models/`:
 ```
@@ -248,7 +308,7 @@ MODEL_CARD.md       ngày train, phiên bản dữ liệu, kiến trúc, kết q
 | Tiền xử lý | App: cắt vuông ở giữa ảnh rồi resize về N×N (bilinear). **Việc chuẩn hoá pixel nằm trong model** (lớp `Rescaling`/preprocess), app không tự chuẩn hoá |
 | Đầu ra 1 `dish` | `float32 [1, số_món]`, softmax (tổng bằng 1) |
 | Đầu ra 2 `components` | `float32 [1, số_thành_phần]`, sigmoid (mỗi giá trị 0–1, độc lập) |
-| Lượng tử hoá | float16 |
+| Lượng tử hoá | float16 hoặc int8 (B3 từ v1.4 dùng int8) |
 | Kích thước | Mục tiêu ≤ 15 MB |
 | Tốc độ | Mục tiêu ≤ 300 ms mỗi ảnh trên điện thoại tầm trung |
 
@@ -262,8 +322,9 @@ Món có xác suất cao nhất dưới `0.5` thì app hiện top-3 cho người
 
 **Lớp `khac` (từ v1.3):** dòng cuối của `dishes.txt` là `khac`. Lớp này
 train bằng ảnh của các món không có trong app. Từ v1.4 đó là lẩu (món ăn
-chung nồi, không tính được khẩu phần một người) và gỏi ngó sen; nếu gắn
-thêm bộ ảnh khác, lớp nào không khớp món của app cũng vào `khac`.
+chung nồi, không tính được khẩu phần một người) và gỏi ngó sen; từ v1.5 có
+thêm các lớp Food-101 chưa có trong app (taco, lasagna…). Lớp nào của bộ
+ảnh khác không khớp món của app cũng vào `khac`.
 - `khac` không có dinh dưỡng và không hiện trong danh sách gợi ý.
 - `khac` từ `threshold_confident_dish` trở lên thì app báo "có thể món này
   chưa có trong app" và mở danh sách món cho người dùng chọn, không đoán bừa
@@ -308,13 +369,129 @@ component_dishes: com_tam, com_phan
 (cần TensorFlow) tạo một model chưa train, đúng định dạng trên. Đây cũng là
 mẫu cách xuất model. **Không** đưa model giả vào `assets/models/`.
 
-## 7. Giai đoạn YOLO (tuần 5–7, nâng cấp)
-- Lớp của YOLO = các thành phần trong `components.txt` (có thể chỉ lấy một
-  phần), cùng mã.
-- Nhãn theo định dạng YOLO (`class cx cy w h`), gán bằng Roboflow hoặc CVAT.
-- Dùng để **đếm** (2 trứng, 2 miếng sườn) và **gợi ý khẩu phần** từ diện tích
-  khung. Định dạng đầu ra sẽ được bổ sung vào contract khi bắt đầu tuần 5.
-- License Ultralytics: AGPL-3.0, phải ghi rõ trong báo cáo.
+## 7. Model phát hiện món trên đĩa (YOLO, từ v1.6)
+**Vì sao cần:** model ở mục 6 chỉ trả lời "ảnh này là món gì". Một đĩa
+cơm trắng với ức gà không phải món nào trong 91 món, nên khi thử thật model
+đoán "Cà ri gà" 49%. Model phát hiện tìm **từng thứ trên đĩa**, mỗi thứ một
+khung, nên đĩa đó ra "cơm" và "thịt gà". Nó cũng đếm được (2 quả trứng, 3
+cuốn chả giò).
+
+Đặt trong `assets/models/`, **không bắt buộc**: thiếu thì app chạy như cũ.
+```
+detector.tflite        model
+detector_classes.txt   mỗi dòng một mã lớp, đúng thứ tự đầu ra
+DETECTOR_CARD.md       ngày train, dữ liệu, kết quả, ngưỡng
+```
+
+### 7.1. Danh sách lớp
+Thứ tự dưới đây là thứ tự đầu ra, không được đổi; lớp mới chỉ nối vào
+cuối. Cột "Trong app" là thứ app đưa vào đĩa khi thấy lớp đó. Lớp có nhóm
+biến thể thì người dùng bấm vào tên để chọn phần và cách nấu (mục 4,
+`food_variants.csv`).
+
+| # | Mã lớp | Khung VietFood67 | Mặt nạ MyFood | Trong app |
+|---|---|---|---|---|
+| 0 | `com` | Com | rice | `com` (nhóm Cơm & tinh bột) |
+| 1 | `bun` | Bun | | `bun` |
+| 2 | `mi` | Mi | spaghetti | `mi` |
+| 3 | `banh_mi_o` | Banh mi | | `banh_mi_o` |
+| 4 | `ga` | Thit ga | chicken_breast | `ga` (nhóm Gà) |
+| 5 | `thit_kho` | Thit kho | | `thit_kho` (nhóm Heo) |
+| 6 | `thit_nuong` | Thit nuong | | `thit_nuong` (nhóm Heo) |
+| 7 | `heo` | Thit heo, Heo quay | | biến thể heo "nửa nạc nửa mỡ, luộc" (nhóm Heo) |
+| 8 | `bo` | Thit bo | steak | `bo` (nhóm Bò) |
+| 9 | `ca` | Ca | | `ca` (nhóm Cá) |
+| 10 | `tom` | Tom | | `tom` |
+| 11 | `muc` | Muc | | `_base_muc_chien` |
+| 12 | `trung` | Trung | boiled_egg, fried_egg | `trung_kho` (nhóm Trứng) |
+| 13 | `dau_hu` | Dau hu | | `dau_hu` |
+| 14 | `cha` | Cha | | `cha_lua` |
+| 15 | `cha_gio` | Cha gio | | `_base_cha_gio` |
+| 16 | `rau` | Rau, Bong cai | salad | `rau_nau` |
+| 17 | `dua_leo_ca_chua` | Dua leo, Ca chua | | `dua_leo_ca_chua` |
+| 18 | `do_chua` | Dua chua | | `do_chua` |
+| 19 | `khoai_tay_chien` | Khoai tay chien | | `_base_khoai_tay_chien` |
+| 20 | `canh` | Canh | | `_base_canh_chua` (**ước lượng**: mọi loại canh tính như canh chua) |
+
+- Mã lớp trùng mã thành phần khi có thành phần đó (`com`, `ga`…). Các lớp
+  `heo`, `muc`, `trung`, `cha`, `cha_gio`, `rau`, `khoai_tay_chien`, `canh`
+  không có thành phần cùng tên, app đổi theo bảng trên.
+- Dinh dưỡng của mọi lớp lấy từ `components.csv` và `food_variants.csv`,
+  không có số mới.
+- Khung VietFood67 khác không thuộc lớp nào (người, chanh, ớt, nấm…) là nền.
+- Ảnh VietFood67 có khung **cả món** (Phở, Cơm tấm, Bún bò Huế…) mặc định
+  không dùng: trong khung đó, cơm, trứng, chả thường không được khoanh riêng,
+  nên train vào sẽ dạy model rằng chúng là nền. Notebook có cờ
+  `KEEP_DISH_PHOTOS` để thử dùng.
+- MyFood: mỗi vùng liền của một giá trị mặt nạ là một khung (hai quả trứng
+  thành hai khung). Táo và đậu (bean) là nền.
+
+### 7.2. Định dạng model
+| Mục | Quy định |
+|---|---|
+| Đầu vào | `float32`, ảnh **RGB, giá trị 0–1** (khác model mục 6, vốn nhận 0–255). Dạng `[1, 3, S, S]` (bản xuất LiteRT của Ultralytics) hoặc `[1, S, S, 3]` (bản xuất cũ qua onnx2tf); app nhận cả hai, đọc S từ file. YOLO11n dùng S = 640, YOLO11s dùng S = 512 |
+| Tiền xử lý | App: thu nhỏ ảnh giữ tỉ lệ cho cạnh dài bằng S, đặt vào giữa, phần thừa tô xám (114, 114, 114) như lúc train ("letterbox") |
+| Đầu ra | Một tensor `float32 [1, 4 + số_lớp, A]` (A = 8400 khi S = 640, 5376 khi S = 512); app cũng nhận dạng chuyển vị `[1, A, 4 + số_lớp]`. Bốn dòng đầu là `cx, cy, w, h` của khung, chia cho S (0–1); nếu giá trị lớn hơn 2 thì app coi là pixel và tự chia. Các dòng sau là điểm của từng lớp, 0–1 |
+| NMS | Không nằm trong model. App bỏ khung dưới `threshold_box`, rồi với mỗi lớp bỏ khung trùng khung điểm cao hơn quá `threshold_iou` |
+| Lượng tử hoá | Trọng số FP32 hoặc FP16; đầu vào và đầu ra vẫn là float32. App đang dùng bản FP16, tạo từ file FP32 bằng `python tool/train/tflite_to_fp16.py detector.tflite detector_fp16.tflite`. Bản INT8 động (`w8a32`, file `detector_int8.tflite`) không chạy được với tflite_flutter 0.12.1 ("Input tensor 207 lacks data") nên không dùng |
+| Kích thước | YOLO11n: khoảng 10 MB (FP32), 3 MB (INT8). YOLO11s: khoảng 37 MB (FP32), 10 MB (INT8), ước tính theo số tham số |
+| Tốc độ | Mục tiêu ≤ 400 ms mỗi ảnh trên điện thoại tầm trung |
+
+**`DETECTOR_CARD.md`**, mỗi dòng `khoá: giá trị` như `MODEL_CARD.md`:
+```
+contract_version: 1.6
+threshold_box: 0.35
+threshold_iou: 0.5
+```
+Thiếu dòng nào thì app dùng số mặc định ở trên. Thẻ cũng ghi mAP50 và
+mAP50-95 của từng lớp trên tập test.
+
+**App kiểm tra khi nạp model:** đầu vào float32 bốn chiều, có một chiều
+bằng 3; đầu ra có một chiều bằng `4 + số dòng của detector_classes.txt`;
+mọi mã lớp phải có trong bảng ở 7.1. Sai thì app bỏ qua model phát hiện và
+chỉ dùng model mục 6.
+
+### 7.3. App dùng kết quả thế nào
+- Chạy cả hai model trên cùng ảnh.
+- Thấy từ **2 lớp khác nhau** trở lên thì app mở sẵn "Đĩa có N món", mỗi
+  món một dòng. Các món model mục 6 đoán vẫn hiện bên cạnh để bấm chọn.
+- Ngoại lệ: model mục 6 chắc chắn (từ `threshold_confident_dish`) **và**
+  mọi lớp thấy được đều là thành phần của món đó (ví dụ cơm tấm có cơm,
+  trứng, thịt nướng). Khi đó app mở món như cũ, vì công thức món đủ hơn
+  (có nước mắm, mỡ hành).
+- Chỉ thấy 1 lớp: app mở "Đĩa có 1 món" khi model mục 6 không chắc món
+  nào hoặc đoán là món ngoài app (`khac`), để người dùng thêm phần còn lại; model mục 6 chắc thì mở món như cũ.
+  Không thấy gì thì như cũ.
+- Mỗi lớp thành một dòng trên đĩa, với khẩu phần thường gặp
+  (`typicalPortion`). Riêng `trung`, `cha_gio`, `banh_mi_o` lấy **số khung**
+  làm số quả / cuốn / ổ. Tôm, chả lụa thường được khoanh cả đống trong một
+  khung nên không đếm.
+- Khung được vẽ lên ảnh, cùng tên và điểm.
+- Ước lượng số gam từ diện tích khung **chưa làm**: cần biết cỡ đĩa thật.
+
+### 7.4. Train
+- Notebook `tool/train/train_detector.ipynb`, sinh từ `train_detector.py`.
+  Người dùng tự chạy trên Colab (GPU T4).
+- Dữ liệu: khung có sẵn của VietFood67, mặt nạ MyFood đổi ra khung, và khung
+  từng miếng của FoodInsSeg; giữ cách chia train/val/test của từng bộ.
+- Thêm vào **train** (không vào val, test): `autolabel.zip` do notebook
+  `tool/train/autolabel_detector.ipynb` làm.
+  - Ảnh món Việt của 30VNFoods, VinaFood21, 20FoodVN được Grounding DINO
+    khoanh theo các thứ món đó có. Lớp của khung lấy theo tên món (thịt
+    trên đĩa cơm tấm là `thit_nuong`). Model phát hiện hiện có kiểm tra lại
+    từng khung.
+  - Món có sợi nằm trong nước (phở, bún bò, hủ tiếu, mì Quảng) không dùng,
+    vì VietFood67 khoanh cả bát thành một món chứ không khoanh `bun`, `mi`.
+  - Khung khoai tây chiên, tôm, cà chua, dưa leo, bông cải, bắp cải trên
+    đĩa hay bát của Open Images.
+  - Khung do máy làm nên chỉ dùng để train; điểm test vẫn đo trên khung do
+    người vẽ, so được với các lần train trước.
+- Model: YOLO11s của Ultralytics ở 512 px, bắt đầu từ trọng số COCO. Bản
+  YOLO11n 640 px (train từ đầu, rồi fine-tune với FoodInsSeg) là bản trước,
+  và vẫn là bản trong `assets/models` cho đến khi bản YOLO11s train xong.
+- License Ultralytics: **AGPL-3.0**, phải ghi rõ trong báo cáo. MyFood: CC
+  BY 4.0. FoodInsSeg: CC BY-NC-SA 4.0. Open Images: khung CC BY 4.0, ảnh
+  theo license từng ảnh (phần lớn CC BY 2.0). Grounding DINO: Apache-2.0.
 
 ## 8. Ghi vào nhật ký ăn uống
 Mỗi thành phần người dùng xác nhận được ghi thành **một dòng `food_log`**:

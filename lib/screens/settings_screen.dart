@@ -6,8 +6,14 @@ import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
 import '../services/backup_service.dart';
 import '../services/database_service.dart';
+import '../services/photo_collector.dart';
+import '../engine/daily_habits.dart';
 import '../services/reminder_service.dart';
+import '../services/water_reminder_service.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/info_button.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../widgets/scan_button_face.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -18,9 +24,15 @@ class SettingsScreen extends StatelessWidget {
     this.database,
     this.onHistoryCleared,
     this.reminders,
+    this.waterReminders,
     this.backup = const BackupService(),
     this.onDataRestored,
+    this.collector,
   });
+
+  /// Kept scan photos; [PhotoCollector.instance] by default.
+  final PhotoCollector? collector;
+  PhotoCollector get _photos => collector ?? PhotoCollector.instance;
 
   final ThemeController themeController;
   final LocaleController localeController;
@@ -31,6 +43,9 @@ class SettingsScreen extends StatelessWidget {
 
   /// Meal reminders; the card is hidden without it.
   final ReminderController? reminders;
+
+  /// Water reminders; the card is hidden without it.
+  final WaterReminderController? waterReminders;
   final BackupService backup;
 
   /// Called after a backup replaced all data.
@@ -65,6 +80,102 @@ class SettingsScreen extends StatelessWidget {
     if (time == null) return;
     await controller.setTime(meal, time,
         texts: _reminderTexts(l10n), channelName: l10n.reminderChannel);
+  }
+
+  /// Whether today's water already reaches the goal; reminders then skip
+  /// the rest of today.
+  Future<bool> _waterGoalReached() async {
+    try {
+      return await _database.getWater(DateTime.now()) >= waterTargetMl;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _toggleWaterReminders(BuildContext context, bool value) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final allowed = await waterReminders!.setEnabled(value,
+        texts: WaterReminderTexts.of(l10n),
+        goalReachedToday: await _waterGoalReached());
+    if (!allowed) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.remindersDenied)));
+    }
+  }
+
+  Future<void> _setWaterInterval(BuildContext context, double hours) async {
+    final texts = WaterReminderTexts.of(context.l10n);
+    await waterReminders!.setInterval(hours,
+        texts: texts, goalReachedToday: await _waterGoalReached());
+  }
+
+  Future<void> _pickWaterTime(BuildContext context,
+      {required bool start}) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final controller = waterReminders!;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: start ? controller.from : controller.to,
+    );
+    if (time == null) return;
+    final saved = await controller.setWindow(
+        start ? time : controller.from, start ? controller.to : time,
+        texts: WaterReminderTexts.of(l10n),
+        goalReachedToday: await _waterGoalReached());
+    if (!saved) {
+      messenger
+          .showSnackBar(SnackBar(content: Text(l10n.waterRemindersBadWindow)));
+    }
+  }
+
+  Future<void> _exportPhotos(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final dir = await getTemporaryDirectory();
+      final zip = await _photos.exportZip(
+          '${dir.path}/macrorunner_photos_${diaryDateKey(DateTime.now())}.zip');
+      if (zip == null) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.collectEmpty)));
+        return;
+      }
+      await SharePlus.instance.share(ShareParams(files: [XFile(zip.path)]));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.collectExportFailed)));
+    }
+  }
+
+  Future<void> _deletePhotos(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.collectDeleteTitle),
+        content: Text(l10n.collectDeleteBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: CyberColors.danger,
+                foregroundColor: CyberColors.background),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _photos.clear();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.collectDeleted)));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.clearAllFailed)));
+    }
   }
 
   Future<void> _export(BuildContext context) async {
@@ -123,6 +234,9 @@ class SettingsScreen extends StatelessWidget {
             child: Text(l10n.cancel),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: CyberColors.danger,
+                foregroundColor: CyberColors.background),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(l10n.delete),
           ),
@@ -139,13 +253,18 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  String _styleDescription(AppLocalizations l10n, AppStyle style) =>
-      switch (style) {
-        AppStyle.cyberpunk => l10n.styleCyberpunkDescription,
-        AppStyle.minimalLight => l10n.styleMinimalLightDescription,
-        AppStyle.forest => l10n.styleForestDescription,
-        AppStyle.sunset => l10n.styleSunsetDescription,
+  /// Named after its accent colour, which the preview beside it shows.
+  String _styleName(AppLocalizations l10n, AppStyle style) => switch (style) {
+        AppStyle.cyberpunk => l10n.styleCyan,
+        AppStyle.minimalLight => l10n.styleBlue,
+        AppStyle.forest => l10n.styleGreen,
+        AppStyle.sunset => l10n.styleOrange,
       };
+
+  String _styleBackground(AppLocalizations l10n, AppStyle style) =>
+      AppTheme.paletteFor(style).brightness == Brightness.dark
+          ? l10n.styleDarkBackground
+          : l10n.styleLightBackground;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +273,8 @@ class SettingsScreen extends StatelessWidget {
         themeController,
         localeController,
         if (reminders != null) reminders!,
+        if (waterReminders != null) waterReminders!,
+        _photos,
       ]),
       builder: (context, _) {
         final l10n = context.l10n;
@@ -163,42 +284,30 @@ class SettingsScreen extends StatelessWidget {
             children: [
               Text(l10n.settingsTitle,
                   style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 6),
-              Text(
-                l10n.settingsSubtitle,
-                style: TextStyle(color: CyberColors.muted),
-              ),
-              const SizedBox(height: 18),
-              CyberCard(
-                title: l10n.offlineModeTitle,
-                icon: Icons.offline_bolt_rounded,
-                child: Text(
-                  l10n.offlineModeBody,
-                  style: TextStyle(color: CyberColors.muted),
-                ),
-              ),
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.languageTitle,
-                icon: Icons.translate_rounded,
-                child: Column(
-                  children: [
-                    for (final language in AppLanguage.values)
-                      _OptionTile(
-                        key: ValueKey('language-${language.name}'),
-                        icon: Icons.language_rounded,
-                        title: language.nativeName,
-                        subtitle: language.name.toUpperCase(),
-                        selected: localeController.language == language,
-                        onTap: () => localeController.setLanguage(language),
-                      ),
-                  ],
+                child: SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<AppLanguage>(
+                    showSelectedIcon: false,
+                    segments: [
+                      for (final language in AppLanguage.values)
+                        ButtonSegment(
+                          value: language,
+                          label: Text(language.nativeName,
+                              key: ValueKey('language-${language.name}')),
+                        ),
+                    ],
+                    selected: {localeController.language},
+                    onSelectionChanged: (value) =>
+                        localeController.setLanguage(value.single),
+                  ),
                 ),
               ),
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.interfaceStyle,
-                icon: Icons.palette_outlined,
                 child: Column(
                   children: [
                     for (final option in appStyleOptions)
@@ -210,8 +319,8 @@ class SettingsScreen extends StatelessWidget {
                           size: 40,
                           ringColor: Colors.transparent,
                         ),
-                        title: option.name,
-                        subtitle: _styleDescription(l10n, option.style),
+                        title: _styleName(l10n, option.style),
+                        subtitle: _styleBackground(l10n, option.style),
                         selected: themeController.style == option.style,
                         onTap: () => themeController.setStyle(option.style),
                       ),
@@ -222,17 +331,23 @@ class SettingsScreen extends StatelessWidget {
                 const SizedBox(height: 18),
                 _remindersCard(context, l10n),
               ],
+              if (waterReminders != null) ...[
+                const SizedBox(height: 18),
+                _waterRemindersCard(context, l10n),
+              ],
+              const SizedBox(height: 18),
+              _collectCard(context, l10n),
               const SizedBox(height: 18),
               CyberCard(
                 key: const ValueKey('backup-card'),
                 title: l10n.backupTitle,
-                icon: Icons.backup_outlined,
+                trailing: InfoButton(
+                    key: const ValueKey('backup-info'),
+                    title: l10n.backupTitle,
+                    paragraphs: [l10n.backupBody]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.backupBody,
-                        style: TextStyle(color: CyberColors.muted)),
-                    const SizedBox(height: 12),
                     FilledButton.icon(
                       key: const ValueKey('backup-export'),
                       onPressed: () => _export(context),
@@ -252,15 +367,15 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 18),
               CyberCard(
                 title: l10n.dataTitle,
-                icon: Icons.storage_rounded,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.clearAllBody,
-                        style: TextStyle(color: CyberColors.muted)),
-                    const SizedBox(height: 12),
                     OutlinedButton.icon(
                       key: const ValueKey('clear-history'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: CyberColors.danger,
+                        side: BorderSide(color: CyberColors.danger),
+                      ),
                       onPressed: () => _clearHistory(context),
                       icon: const Icon(Icons.delete_sweep_outlined),
                       label: Text(l10n.clearAllHistory),
@@ -277,12 +392,146 @@ class SettingsScreen extends StatelessWidget {
 }
 
 extension on SettingsScreen {
+  Widget _collectCard(BuildContext context, AppLocalizations l10n) {
+    final photos = _photos;
+    return CyberCard(
+      key: const ValueKey('collect-card'),
+      title: l10n.collectTitle,
+      trailing: InfoButton(
+          key: const ValueKey('collect-info'),
+          title: l10n.collectTitle,
+          paragraphs: [l10n.collectBody]),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile(
+              key: const ValueKey('collect-switch'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.collectSwitch),
+              value: photos.enabled,
+              onChanged: photos.setEnabled,
+            ),
+            FutureBuilder(
+              future: photos.stats(),
+              builder: (context, snapshot) {
+                final stats = snapshot.data;
+                // Nothing to export or delete until a photo is kept.
+                final has = stats != null && stats.photos > 0;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      key: const ValueKey('collect-stats'),
+                      has
+                          ? l10n.collectStats(
+                              '${stats.photos}',
+                              context.formatNumber(stats.bytes / 1e6,
+                                  decimals: 1))
+                          : l10n.collectEmpty,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          key: const ValueKey('collect-export'),
+                          onPressed: has ? () => _exportPhotos(context) : null,
+                          icon: const Icon(Icons.ios_share_rounded),
+                          label: Text(l10n.collectExport),
+                        ),
+                        TextButton.icon(
+                          key: const ValueKey('collect-delete'),
+                          style: TextButton.styleFrom(
+                              foregroundColor: CyberColors.danger),
+                          onPressed: has ? () => _deletePhotos(context) : null,
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          label: Text(l10n.collectDelete),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _waterRemindersCard(BuildContext context, AppLocalizations l10n) {
+    final controller = waterReminders!;
+    String hours(double value) => l10n.waterRemindersHours(context
+        .formatNumber(value, decimals: value == value.roundToDouble() ? 0 : 1));
+    return CyberCard(
+      key: const ValueKey('water-reminders-card'),
+      title: l10n.waterRemindersTitle,
+      trailing: InfoButton(
+          key: const ValueKey('water-reminders-info'),
+          title: l10n.waterRemindersTitle,
+          paragraphs: [
+            l10n.waterRemindersBody(
+                '${context.formatNumber(waterTargetMl)}\u00A0ml'),
+          ]),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile(
+              key: const ValueKey('water-reminders-switch'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.waterRemindersSwitch),
+              value: controller.enabled,
+              onChanged: (value) => _toggleWaterReminders(context, value),
+            ),
+            Text(l10n.waterRemindersEvery,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final option in waterReminderIntervals)
+                  ChoiceChip(
+                    key: ValueKey('water-every-$option'),
+                    label: Text(hours(option)),
+                    selected: controller.everyHours == option,
+                    onSelected: controller.enabled
+                        ? (_) => _setWaterInterval(context, option)
+                        : null,
+                  ),
+              ],
+            ),
+            for (final start in [true, false])
+              ListTile(
+                key: ValueKey(start ? 'water-from' : 'water-to'),
+                contentPadding: EdgeInsets.zero,
+                enabled: controller.enabled,
+                leading: const Icon(Icons.schedule_rounded),
+                title: Text(
+                    start ? l10n.waterRemindersFrom : l10n.waterRemindersTo),
+                trailing: Text(
+                  (start ? controller.from : controller.to).format(context),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                onTap: () => _pickWaterTime(context, start: start),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _remindersCard(BuildContext context, AppLocalizations l10n) {
     final controller = reminders!;
     return CyberCard(
       key: const ValueKey('reminders-card'),
       title: l10n.remindersTitle,
-      icon: Icons.notifications_active_outlined,
       // The card paints its own background; the tiles need a Material for
       // their ink.
       child: Material(
@@ -290,8 +539,6 @@ extension on SettingsScreen {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.remindersBody,
-                style: TextStyle(color: CyberColors.muted)),
             SwitchListTile(
               key: const ValueKey('reminders-switch'),
               contentPadding: EdgeInsets.zero,
@@ -346,62 +593,67 @@ class _OptionTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         button: true,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: CyberColors.surfaceAlt,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? CyberColors.cyan : CyberColors.border,
-                width: selected ? 1.6 : 1,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: CyberColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: selected ? CyberColors.cyan : CyberColors.border,
+                  width: selected ? 1.6 : 1,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                preview == null
-                    ? Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: CyberColors.cyan.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(12),
+              child: Row(
+                children: [
+                  preview == null
+                      ? Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: CyberColors.cyan.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(icon, color: CyberColors.cyan),
+                        )
+                      : SizedBox.square(
+                          dimension: 44, child: Center(child: preview)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: CyberColors.text,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                        child: Icon(icon, color: CyberColors.cyan),
-                      )
-                    : SizedBox.square(
-                        dimension: 44, child: Center(child: preview)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: CyberColors.text,
-                          fontWeight: FontWeight.w800,
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: CyberColors.muted,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          color: CyberColors.muted,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Icon(
-                  selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                  color: selected ? CyberColors.lime : CyberColors.muted,
-                ),
-              ],
+                  Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                    color: selected ? CyberColors.lime : CyberColors.muted,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

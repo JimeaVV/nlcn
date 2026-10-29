@@ -1881,6 +1881,1069 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
     `drawable/ic_stat_notify`, chữ ký release khớp.
   - Đã cài đè lên điện thoại test; app mở được, log không có lỗi.
 
+### 2026-10-22 · Ô tìm kiếm khi chọn món, và ghi "ăn riêng một thứ"
+- Thử thật trên điện thoại với model B3:
+  - Quét rất nhanh: 0,19–0,22 giây mỗi lần, trong đó model chạy 0,07–0,10
+    giây.
+  - Cơm trắng trong nồi và ức gà luộc bị đoán thành xôi, bánh đúc, há cảo,
+    vì đó không phải "món" trong 65 món model được học.
+  - Chạy lại model trên ảnh cắt từ màn hình: đầu ra thành phần nhận ra cơm
+    chắc 100%, nhưng gà luộc thì 0%.
+- Vấn đề khi ghi tay: danh sách "Món khác" chỉ có 65 món, cuộn dài, không tìm
+  được, và không chọn được một thứ ăn riêng (cơm, gà, trứng…).
+- Sửa:
+  - Bảng chọn mới (`FoodPickerSheet`) có ô tìm kiếm, gõ không dấu cũng được.
+    Bảng có hai nhóm: **Món** và **Ăn riêng một thứ** (các thành phần, kèm
+    kcal/100 g).
+  - Kết quả khớp đủ mọi từ hiện trước. Sau đó hiện các mục có một từ bắt đầu
+    bằng từ đã gõ, nên gõ "ức gà" vẫn ra "Thịt gà" dù không món nào tên như
+    vậy. Chỉ so phần đầu từ, vì so cả chuỗi con thì "uc" khớp nhầm "bánh
+    đúc".
+  - Chọn một thứ ăn riêng tạo đĩa chỉ gồm thứ đó, với khẩu phần thường gặp
+    (`ScanPlate.single`). Nhật ký ghi đúng tên thứ đó, không kèm tên món.
+  - Bảng "Thêm thành phần" cũng có ô tìm kiếm.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 196/196 PASS. Có thêm test: tìm
+    "pho" ra Phở bò, tìm "tom luoc" ra Tôm, chọn Tôm rồi ghi được một dòng
+    tên "Tôm".
+  - Build APK 113 (24,4 MB). Chưa cài lên điện thoại vì máy mất kết nối adb.
+
+### 2026-10-22 · Gom ảnh của chính người dùng để dạy model, và ghi món chưa có
+- Lý do: nhiều món hay ăn (yến mạch, khoai lang, gạo lứt, sữa chua Hy Lạp,
+  bánh mì đen, bơ đậu phộng, shake protein, mì gói, trà sữa) không có bộ ảnh
+  công khai nào dùng được. Đã tìm trên Hugging Face, Kaggle, Roboflow và danh
+  sách lớp của ISIA Food-500. Ảnh người dùng tự chụp lại khớp đúng chén bát,
+  ánh sáng và góc chụp thật, nên dạy model tốt hơn ảnh trên mạng.
+- `PhotoCollector` (`lib/services/photo_collector.dart`):
+  - Mặc định tắt; bật trong Cài đặt, thẻ "Gom ảnh để dạy model".
+  - Khi bật, mỗi lần ghi một món đã quét, app giữ lại ảnh (cạnh dài nhất 640
+    px, JPEG 85, khoảng 60 KB) trong thư mục `training_photos/<nhãn>/`.
+  - Nhãn là mã món, `single_<thành phần>` cho thứ ăn riêng, hoặc
+    `new_<tên>` cho món chưa có (ví dụ "Yến mạch" thành `new_yen_mach`).
+  - `index.csv` ghi tên món người dùng xác nhận, kèm món model đoán và độ tin
+    cậy. Ảnh model đoán sai là ảnh đáng train nhất.
+  - Ảnh chỉ nằm trong máy. "Xuất ảnh đã gom (zip)" mở bảng chia sẻ của
+    Android; "Xóa ảnh đã gom" có hỏi xác nhận và không đụng tới nhật ký ăn.
+  - Lưu ảnh trước khi rời màn kết quả, vì ảnh quét bị xóa ngay sau đó. Lỗi
+    khi lưu ảnh không chặn việc ghi món.
+- Bảng chọn món có thêm mục "Món chưa có trong danh sách…": nhập tên và dinh
+  dưỡng như món tự nhập trong nhật ký, ghi vào bữa đang chọn, và giữ ảnh dưới
+  nhãn `new_<tên>`.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 200/200 PASS.
+  - Test mới: không lưu gì khi đang tắt; ảnh 1600×1200 được thu còn 640×480;
+    `index.csv` đúng cột; nhãn `new_` sinh từ tên tiếng Việt; nhãn có `../`
+    bị chặn; file zip có ảnh và chỉ mục; xóa sạch được.
+  - Hai test cũ của màn Cài đặt phải cuộn xa hơn vì có thêm thẻ mới.
+  - Build APK 114 (24,5 MB) và cài đè lên điện thoại test.
+
+### 2026-10-22 · Contract 1.5: thêm 26 món ăn hằng ngày, notebook train tiếp từ B3
+- Lý do: người dùng muốn app nhận được cả món lẻ (cơm trắng, ức gà, trứng)
+  và món phổ biến không phải món Việt (pizza, sushi, mì Ý…), để dùng lâu dài.
+  Train lại từ đầu tốn 10 tiếng; train tiếp từ model B3 của contract 1.4 chỉ
+  cần khoảng 8 epoch.
+- Chọn món theo ảnh có sẵn, mỗi món phải có ít nhất một bộ ảnh:
+  - Food-101 (Kaggle `kmader/food41`, 1.000 ảnh mỗi lớp): pizza, sushi,
+    sashimi, ramen, hot dog, bít tết, ốp lết, mì Ý, chả giò, cánh gà, cá hồi,
+    mực chiên, sủi cảo, sandwich, pancake, waffle, donut, bánh kem, kem. Một
+    số lớp gộp vào món cũ: cơm chiên, khoai tây chiên, salad, cà ri gà. Các
+    lớp còn lại vào `khac`.
+  - MyFood (Zenodo, CC BY 4.0, khoảng 1.250 ảnh có mask): cơm, ức gà, trứng
+    luộc, trứng ốp la, bít tết, mì Ý, táo. Notebook cắt theo mask, nên một
+    dĩa cơm trưa cho ra nhiều ảnh, mỗi ảnh một món.
+  - VietFood67: cắt riêng khung cơm, đậu hũ, chả giò, và rau trên dĩa cơm
+    phần (rau cạnh phở, bún là rau sống nên không lấy).
+  - Không dùng ISIA Food-500: bản trên Hugging Face chỉ có 40 ảnh mỗi lớp,
+    và không có yến mạch, sữa chua Hy Lạp, bơ đậu phộng, trà sữa. Các món đó
+    vẫn chờ ảnh người dùng tự lưu.
+- Dữ liệu dinh dưỡng (`assets/data/vn_food`):
+  - 26 món mới trong `dish_names.csv` và `dishes.csv`; 20 dòng nền mới trong
+    `components.csv`, nguồn USDA FoodData Central (SR Legacy hoặc FNDDS) có
+    mã cụ thể. Khối lượng một cái, một miếng ghi rõ là ước lượng của nhóm,
+    trừ quả táo (182 g theo USDA).
+  - Món nào là một thành phần sẵn có thì dùng thành phần đó: cơm trắng là
+    `com`, trứng luộc là `trung_kho`, gà rán là `ga_chien`…
+  - Mã món đậu hũ là `dau_hu_chien` để không trùng mã thành phần `dau_hu`.
+- `docs/MODEL_CONTRACT.md` lên 1.5: bảng món 66–91; ảnh của món chỉ có dòng
+  nền (ức gà, sushi…) không dạy đầu ra thành phần, vì trên ảnh có gà, có cơm
+  nhưng công thức món không ghi; mô tả file zip ảnh tự lưu (mục 5).
+- Notebook (`tool/train/train_food_model.py`):
+  - `EXPERIMENT = 'continue'` (mặc định): tìm `checkpoint.keras` của B3 1.4
+    (trên Drive, trong input của Kaggle, hoặc `WARM_START`). Chép backbone và
+    đầu ra thành phần nguyên vẹn; đầu ra món chép theo từng cột: 65 món cũ giữ
+    chỗ, `khac` chuyển xuống cuối, 26 món mới bắt đầu từ trọng số mới. Train
+    1 epoch đầu ra rồi 8 epoch fine-tune với learning rate 1e-4, bằng một
+    phần ba lần trước, để không làm hỏng những gì 1.4 đã học.
+  - `progress.json` ghi thêm thí nghiệm và phiên bản contract. Nhờ vậy, khi
+    gắn output của lần 1.4 vào Kaggle, notebook không nhầm nó là lần chạy
+    dở của chính mình.
+  - Ảnh có thêm khung cắt (`box`); bản thu nhỏ và mã hash tính trên phần cắt.
+  - Tự tải MyFood; đọc file zip ảnh tự lưu (Kaggle: thêm như dataset; Colab:
+    để trong Drive `macrorunner_train/my_photos/`). Nhãn `single_com` thành
+    `com_trang`, `new_<tên>` vào `khac`.
+- App: chỉ đổi dữ liệu. Bảng chọn món đã có 91 món, nên ghi tay pizza, ức
+  gà… được ngay, trước khi có model mới.
+- Kiểm tra:
+  - `python tool/check_vn_food.py`: OK, 104/104 dòng có dinh dưỡng và nguồn.
+  - `flutter analyze` sạch; `flutter test` PASS (sửa test đếm món 65 → 91).
+  - Smoke test notebook trên dữ liệu giả, có thêm Food-101, MyFood, zip ảnh
+    tự lưu và một model 1.4 giả: PASS cả 3 chế độ (một máy, cắt ngang rồi
+    chạy tiếp, giả lập Colab với model và zip trên Drive). Lần chạy tìm thấy
+    model 1.4, chép trọng số rồi train tiếp; nhãn `single_bi` (không có món
+    lẻ tương ứng) bị bỏ qua đúng như thiết kế.
+  - Agent `model-contract-reviewer`: mã và thứ tự món khớp ở mọi nơi. Đã sửa
+    theo góp ý: lớp Food-101 gần giống món của app (filet mignon, prime rib,
+    salad củ dền, caprese, sandwich thịt kéo, lobster roll) gộp vào món đó
+    thay vì `khac`; frozen yogurt và salad rong biển bỏ qua; `MODEL_CARD`
+    ghi rằng điểm test có thể cao hơn thực tế vì ảnh được chia lại.
+  - Build APK 115 (24,5 MB), chữ ký release đúng; chưa cài lên điện thoại
+    theo yêu cầu, gửi file cho người dùng tự cài.
+
+### 2026-10-22 · Notebook báo ngay khi Drive thiếu model 1.4, hoặc tự tải từ link
+- Lý do: người dùng train 1.5 bằng một tài khoản Google khác. Trước đây,
+  nếu Drive của tài khoản đó chưa có `checkpoint.keras` của B3, notebook
+  chỉ báo lỗi khi bắt đầu train, tức là sau khoảng 40 phút tải dữ liệu.
+- Đã làm: trên Colab, ngay sau khi kết nối Drive, notebook kiểm tra file
+  `macrorunner_train/efficientnetb3_finetune/checkpoint.keras` (hoặc đường
+  dẫn trong `WARM_START`). Thiếu file thì dừng ngay và chỉ chỗ cần chép file
+  vào; có file thì in đường dẫn sẽ dùng.
+- Thêm `WARM_START_URL`: link chia sẻ của `checkpoint.keras`. Drive chưa có
+  file thì notebook tự tải về bằng `gdown` (lấy mã file trong link, vì bản
+  `gdown` mới bỏ tham số `fuzzy`), khỏi chép tay. Bản gửi người dùng điền sẵn
+  link bản B3 30 epoch (val 0,867). Repo để trống, không lộ link Drive.
+- Kiểm tra: `smoke_test.py --colab` PASS. Tải thật file qua link: 217 MB,
+  mở được, ảnh vào 300×300, 66 đầu ra món, 25 thành phần. Smoke test dùng
+  chính file này làm điểm xuất phát: PASS.
+
+### 2026-10-22 · Nhắc uống nước
+- Lý do: người dùng muốn được nhắc uống nước đều trong ngày, mỗi lần một
+  câu khác nhau, tự bật tắt và chọn khoảng cách giữa hai lần nhắc.
+- `WaterReminderController` (`lib/services/water_reminder_service.dart`):
+  - Mặc định tắt. Tuỳ chọn nhắc mỗi 1; 1,5; 2; 3 hoặc 4 tiếng (mặc định 2),
+    trong khung giờ đổi được (mặc định 8:00–22:00) để không nhắc lúc ngủ.
+  - 5 câu nhắc (tiếng Việt và tiếng Anh). Mỗi thông báo chọn ngẫu nhiên một
+    câu, không lặp lại câu ngay trước đó.
+  - Android không có kiểu thông báo lặp lại mà mỗi lần đổi chữ, nên app hẹn
+    sẵn từng thông báo cho 7 ngày tới (tối đa 7 × 24 cái, dưới giới hạn 500
+    của Android). Mỗi lần mở màn Hôm nay hoặc ghi nước thì hẹn lại; quá 7
+    ngày không mở app thì hết nhắc (ghi trong thẻ Cài đặt).
+  - Hôm nào đã uống đủ mục tiêu (2.000 ml) thì bỏ các lần nhắc còn lại trong
+    ngày.
+  - Các lần hẹn lại chạy lần lượt, để hai lần chồng nhau không để lại thông
+    báo trùng.
+- Kênh thông báo riêng "Nhắc uống nước", nên có thể tắt tiếng riêng trong
+  Android. Mã thông báo 1000–1999, tách khỏi nhắc bữa (100–199).
+- Sửa lỗi cũ: tắt nhắc bữa trước đây xoá mọi thông báo đã hẹn (`cancelAll`).
+  Giờ mỗi loại chỉ xoá mã của mình. Phần khởi tạo thông báo dùng chung nằm
+  ở `lib/services/local_notifications.dart`.
+- Cài đặt có thẻ "Nhắc uống nước": công tắc, các nút chọn số tiếng, giờ bắt
+  đầu và kết thúc. Giờ kết thúc không sau giờ bắt đầu thì báo lỗi và không
+  đổi gì.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 207/207 PASS.
+  - 7 test mới: giờ nhắc đúng theo khoảng cách, khung giờ và giờ hiện tại;
+    nhắc mỗi 1,5 tiếng; câu nhắc luôn là một trong 5 câu và không lặp liền;
+    đủ nước thì hôm nay thôi nhắc; quyền bị từ chối; khung giờ sai; cài đặt
+    còn sau khi mở lại app; tắt nhắc nước không đụng tới nhắc bữa; bật và đổi
+    khoảng cách từ thẻ Cài đặt.
+  - Build APK 116.
+
+### 2026-10-22 · Đưa model 1.5 (B3 train tiếp, 91 món) vào app
+- Lý do: lần train tiếp từ B3 1.4 trên Colab (tài khoản khác, tự tải model
+  1.4 qua link) đã xong. Colab hết giờ sau epoch 6/8; notebook dừng gọn và
+  xuất epoch tốt nhất (val 0,873, vẫn đang tăng chậm).
+- Kết quả trên tập test (22.229 ảnh), so với B3 1.4:
+  - Món top-1: 0,870 (1.4: 0,860); top-3: 0,949 (0,941).
+  - Thành phần F1: 0,577 (0,468). Lần đầu có món được tin phần thành phần
+    (`component_dishes`): mì Quảng, xôi, cơm trắng, đậu hũ.
+  - 26 món mới: phần lớn 0,79–0,97, như pizza 0,907, bò bít tết 0,930, chả
+    giò 0,933, cơm trắng 0,950. Yếu nhất là ức gà 0,650 và cá hồi 0,727.
+    Táo và trứng luộc đạt 1,0 nhưng chỉ có khoảng 15 ảnh test, chưa nói lên
+    gì.
+  - Món cũ tăng nhờ ảnh Food-101: salad 0,479 lên 0,907, khoai tây chiên
+    0,698 lên 0,897, cà ri 0,667 lên 0,838. Món cũ giảm nhiều nhất: há cảo
+    0,932 xuống 0,844 (dễ nhầm với sủi cảo mới), gà nướng 0,899 xuống 0,840.
+  - Lưu ý: ảnh được chia lại vì có thêm bộ ảnh, nên một phần ảnh test model
+    1.4 đã thấy khi train; điểm có thể cao hơn thực tế (ghi trong MODEL_CARD).
+- App dùng bản int8 (12,0 MB; trên mẫu ảnh test int8 0,838, float16 0,839).
+  Ngưỡng mới: tick sẵn 0,55, hỏi lại 0,25.
+- Kiểm tra: `flutter test` 207/207 PASS, trong đó có test mã món của model
+  phải có trong bảng dinh dưỡng; đầu vào 300×300, đầu ra 92 món và 25 thành
+  phần. Build APK 117.
+
+### 2026-10-22 · Sửa chú thích cũ "224×224" trong notebook
+- Lý do: người dùng thấy mục "Input pipeline" ghi ảnh vào 224×224 trong khi
+  đang train B3. Chú thích đó viết từ hồi dùng EfficientNetB0; code thật dùng
+  biến `IMG` (300×300 với B3) nên kết quả train không bị ảnh hưởng.
+- Đã làm: sửa chú thích ở mục "Input pipeline" và phần thu nhỏ ảnh
+  (`SHRUNK_SIDE`) cho đúng kích thước theo từng backbone. Không đổi code.
+- Kiểm tra: sinh lại `train_food_model.ipynb`; `grep 224` chỉ còn ở bảng
+  kích thước và các chú thích đúng.
+
+### 2026-10-23 · Train nốt model 1.5 (epoch 7–8), đưa epoch 7 vào app
+- Lý do: bản 1.5 trước dừng ở epoch 6/8 vì hết giờ Colab. Người dùng chạy
+  tiếp epoch 7 rồi đổi tài khoản Google chạy epoch 8. Notebook gửi đi có
+  thêm một ô ở đầu, chép `last.keras`, `checkpoint.keras`, `progress.json`
+  và log của epoch 7 từ thư mục chia sẻ sang Drive tài khoản mới, nên lần
+  chạy đó tự tiếp tục từ epoch 7.
+- Kết quả: đủ 8 epoch, tổng 261 phút train. Val: epoch 7 đạt 0,8756, epoch 8
+  0,8751, nên notebook giữ epoch 7. Trên tập test, so với epoch 6 đang dùng:
+  - món top-1 0,871 (0,870), top-3 0,950 (0,949);
+  - thành phần F1 0,589 (0,577); ngưỡng mới: tick sẵn 0,5, hỏi lại 0,2;
+  - ức gà 0,75 (0,65), mực chiên 0,85 (0,83); rau xào giảm 0,77 xuống 0,69,
+    trứng chiên 0,75 xuống 0,73.
+- App dùng bản int8 12,0 MB; trên mẫu 1.000 ảnh test, int8 0,833 và
+  float16 0,827.
+- Kiểm tra: `flutter test` 207/207 PASS. Build APK 118. Lần build đầu chạy
+  cùng lúc với `flutter test` nên kẹt file tạm và không ra APK mới; build
+  lại riêng thì ra đúng versionCode 2118 và đúng chữ ký release.
+
+### 2026-10-23 · Lưu kết quả mọi lần train vào `docs/ket_qua_model`
+- Lý do: kết quả các lần train nằm rải rác trên Drive của nhiều tài khoản
+  và trong thư mục tạm. Viết báo cáo và so sánh backbone sau này cần chúng ở
+  một chỗ, trong repo.
+- Đã làm:
+  - Sáu lần train thật, mỗi lần một thư mục với `results.json`,
+    `MODEL_CARD.md` và hai file log: bốn lần so backbone ở contract 1.3
+    (EfficientNetB0, EfficientNetV2-B0, MobileNetV3 của mỗi người), B3 1.4
+    và B3 1.5. Số liệu B3 1.4 lấy lại từ thư mục gốc trên Drive và khớp
+    với bản đã lưu trước đó. File model và `splits.csv` không đưa vào git vì
+    quá nặng; README ghi chỗ để chúng trên Drive.
+  - `README.md` có bảng so sánh chung và ghi rõ lần nào so được với lần nào:
+    chỉ so khi cùng contract và cùng cách train. B3 1.4 hơn nhóm 1.3 khoảng
+    17 điểm %, nhưng do cả backbone, cách train lẫn dữ liệu đều khác, nên
+    không quy hết cho backbone. Muốn so công bằng thì train lại B0 và
+    MobileNetV3 bằng notebook 1.4 với `RECIPE = 'full'`.
+  - `tool/train/compare_results.py` in được tiếng Việt trên console Windows
+    (trước đó lỗi `UnicodeEncodeError`).
+- Kiểm tra: chạy `compare_results.py` trên bốn thư mục 1.3 cho đúng bảng và
+  đúng lựa chọn EfficientNetB0 như ngày 20/10; số trong README lấy thẳng từ
+  các `results.json`.
+
+### 2026-10-23 · Sửa lỗi màn xám khi xóa hết số cân nặng trong Hồ sơ
+- Lý do: người dùng xóa trắng ô cân nặng trong Hồ sơ thì cả màn hình thành
+  màu xám (bản release hiện màn xám khi một widget không vẽ được).
+- Nguyên nhân: phần xem trước mục tiêu dinh dưỡng dựng hồ sơ nháp bằng
+  `parseDecimal(...)!`. Ô trống thì `parseDecimal` trả về `null`, dấu `!`
+  ném lỗi null-check. Phần xem trước chỉ bắt `ArgumentError` và
+  `FormatException`, nên lỗi lọt ra ngoài lúc vẽ. Ô chiều cao và hai ô mục
+  tiêu tự đặt cũng dính lỗi y vậy.
+- Đã làm: `_draft()` dùng `_decimal()`. Số không đọc được thì ném
+  `FormatException`, phần xem trước chỉ để trống, và form vẫn báo ô nào
+  thiếu khi bấm lưu. Hai chỗ `!` còn lại (hộp thoại cân nặng, ghi bài tập)
+  chạy sau khi form đã kiểm tra hợp lệ nên giữ nguyên.
+- Kiểm tra: test mới xóa trắng ô cân nặng rồi ô chiều cao, xem màn hình vẫn
+  còn và bấm lưu thì không lưu gì; nhập lại 72 kg thì lưu được. Chạy test với
+  code cũ thì báo đúng lỗi `Null check operator used on a null value`; với
+  code mới thì PASS. `flutter analyze` sạch; `flutter test` 208/208 PASS.
+  Build APK 119.
+
+### 2026-10-23 · Bỏ thẻ "Chế độ offline" trong Cài đặt
+- Lý do: người dùng thấy thẻ dài dòng mà không có tác dụng. Thẻ chỉ có chữ
+  giải thích app chạy trên máy, không có nút hay lựa chọn nào.
+- Đã làm: xoá thẻ khỏi màn Cài đặt và xoá hai chuỗi `offlineModeTitle`,
+  `offlineModeBody` ở cả tiếng Việt lẫn tiếng Anh. Màn Cài đặt giờ mở đầu
+  bằng phần chọn ngôn ngữ.
+- Kiểm tra: `flutter gen-l10n`; `flutter analyze` sạch; `flutter test`
+  208/208 PASS. Build APK 120.
+
+### 2026-10-23 · Thông báo "Hoàn tác" tự ẩn; mức vận động ghi theo số buổi tập
+- Lý do:
+  - Xoá một món trong Nhật ký thì thông báo "Đã xoá món… Hoàn tác" ở lại mãi
+    và che mất phần dưới. Flutter bản mới giữ một snack bar có nút bấm cho
+    tới khi được bấm (`persist` mặc định bật khi có `action`).
+  - Các mức "Ít / Nhẹ / Vừa / Nhiều / Rất nhiều" khó biết mình thuộc mức nào.
+- Đã làm:
+  - Snack bar hoàn tác đặt `persist: false` và hiện 5 giây.
+  - Mức vận động ghi theo số buổi tập, đúng với định nghĩa gốc của năm hệ số
+    TDEE nên con số tính ra không đổi: hầu như không tập (×1,2), 1–3
+    buổi/tuần (×1,375), 3–5 buổi/tuần (×1,55), 6–7 buổi/tuần (×1,725), 2
+    buổi/ngày hoặc làm việc nặng (×1,9). Có cả bản tiếng Anh.
+- Kiểm tra: test Nhật ký có thêm bước xoá món, đợi 6 giây thì nút "Hoàn
+  tác" phải biến mất. Test Hồ sơ đổi sang tên mức mới và mở danh sách ở
+  màn hình rộng 360 px, không bị tràn chữ. `flutter analyze` sạch; `flutter
+  test` 208/208 PASS. Build APK 121.
+
+### 2026-10-23 · Chỉnh giao diện: thẻ bớt chói, số không tách đơn vị, font tiếng Việt
+- Lý do: người dùng nhờ đánh giá giao diện. Các điểm cần sửa: thẻ nào cũng
+  viền sáng và phát sáng như nhau nên không có điểm nhấn; số bị tách khỏi
+  đơn vị khi xuống dòng ("6,0" một dòng, "g protein" dòng dưới); snack bar
+  màu xám sáng lạc giữa giao diện tối; màn Cài đặt dài và nhiều chữ; app
+  dùng font mặc định của Android.
+- Đã làm:
+  - `CyberCard` có thêm `highlight`. Chỉ thẻ chính của mỗi màn có viền màu
+    nhấn và phát sáng (Đã ăn ở Hôm nay và Nhật ký, Món ở kết quả quét, Thiết
+    lập buổi tập, Mục tiêu ở Thực đơn); các thẻ khác viền mờ, không phát sáng.
+  - Dấu cách không ngắt (U+00A0) giữa số và đơn vị (g, kg, kcal, ml, cm) trong
+    mọi chuỗi bản dịch và các chuỗi ghép trong code, kể cả "g protein".
+  - `snackBarTheme`: nền `surfaceAlt`, chữ và nút theo màu của giao diện,
+    dạng nổi bo góc.
+  - Cài đặt: bỏ câu phụ dưới tiêu đề; chọn ngôn ngữ bằng một hàng hai nút;
+    đoạn giải thích của 5 thẻ (nhắc bữa, nhắc nước, gom ảnh, sao lưu, dữ
+    liệu) chuyển vào nút ⓘ. Widget `InfoButton` dùng chung với màn Hồ sơ.
+  - Giao diện "Cyberpunk" đổi tên hiển thị thành "Neon", theo quy tắc không
+    dùng tên liên quan tới Cyberpunk: Edgerunners. Mã `AppStyle.cyberpunk`
+    giữ nguyên nên lựa chọn đã lưu không mất.
+  - Font Be Vietnam Pro (giấy phép SIL OFL 1.1, 6 độ đậm, 836 KB) đóng sẵn
+    trong app vì app chạy offline; giấy phép hiện ở trang giấy phép.
+  - Nút `NeonButton` (như "THÊM MÓN") trước đây tự đặt kiểu chữ riêng nên
+    mất font của theme; giờ lấy từ theme.
+  - Dòng trung bình 7 ngày viết lại để chữ "ghi" không rớt xuống dòng một
+    mình.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 208/208 PASS (các chuỗi trong
+    test đổi theo dấu cách không ngắt).
+  - Test của Flutter vẽ chữ bằng font giả nên không thấy lỗi font. Vì vậy
+    có thêm một lần chụp thử, không commit: nạp Be Vietnam Pro thật, vẽ Hôm
+    nay, Nhật ký, Hồ sơ, Cài đặt ở giao diện Neon và Minimal Light ra PNG rồi
+    xem từng ảnh. Lần chụp này tìm ra lỗi font của nút "THÊM MÓN"; không có
+    lỗi tràn chữ nào.
+  - Build APK 122.
+
+### 2026-10-23 · Skill chụp giao diện, agent rà giao diện, kết nối Dart MCP
+- Lý do: khi sửa giao diện, Claude chỉ thấy được ảnh người dùng tự chụp, vì
+  quy tắc dự án không cho tự chụp màn hình điện thoại. Lần chỉnh giao diện
+  trước cho thấy test thường không bắt được lỗi font (nút "THÊM MÓN" mất
+  font). Ngoài ra plugin Dart và Flutter MCP không kết nối được.
+- Đã làm:
+  - `tool/ui_screenshots/screenshots_test.dart`: vẽ Hôm nay, Nhật ký, Hồ
+    sơ, Cài đặt bằng font thật (Be Vietnam Pro, icon Material), mỗi màn ở 4
+    giao diện cộng một lần ở máy nhỏ 360 px với chữ ×1,3. Kết quả là 20 ảnh
+    PNG trong `tool/ui_screenshots/out/` (không commit). Dùng database giả
+    riêng nên không phụ thuộc các test khác. `flutter test` của CI chỉ quét
+    `test/` nên không chạy file này.
+  - Skill `ui-screenshots` (`.claude/skills/ui-screenshots/SKILL.md`): cách
+    chạy, đọc ảnh nào, kiểm tra những gì, thêm màn mới ra sao.
+  - Agent `ui-reviewer` (`.claude/agents/ui-reviewer.md`), chỉ đọc. Agent rà
+    10 quy tắc giao diện của app: màu theo theme, một thẻ nổi bật mỗi màn,
+    số liền đơn vị, chữ qua bản dịch, font theo theme, vừa màn nhỏ, tooltip
+    và vùng bấm, đoạn giải thích sau nút ⓘ, snack bar tự ẩn, không dùng tên
+    Cyberpunk.
+  - Thêm `D:\APPS\flutter\flutter\bin` vào PATH của tài khoản người dùng
+    để plugin dart-flutter chạy được `dart mcp-server`.
+- Kiểm tra:
+  - Chạy skill: 20/20 màn vẽ được trong khoảng 5 giây, không lỗi tràn bố
+    cục; đã xem ảnh máy nhỏ chữ lớn: font và icon đúng, dòng chỉ xuống ở dấu
+    "•".
+  - Mở `dart mcp-server` bằng PATH mới và gửi yêu cầu `initialize`: server
+    trả lời "dart and flutter tooling" 0.1.4, có danh sách tool. App Claude
+    cần mở lại thì mới nhận PATH mới.
+
+### 2026-10-23 · Gom món đã quét trong Nhật ký, sửa lỗi giao diện theo agent ui-reviewer
+- Lý do: người dùng muốn giao diện đẹp hơn. Đây là lần đầu dùng skill
+  `ui-screenshots` và agent `ui-reviewer` trên toàn app (sau khi mở lại app
+  Claude, MCP Dart và Flutter đã kết nối: thêm thư mục dự án, phân tích file
+  qua MCP đều chạy). Agent tìm ra 10 lỗi (2 nặng, 4 trung bình, 4 nhẹ) và 5
+  đề xuất.
+- Đã làm:
+  - Nhật ký: các dòng liền nhau dạng "<thành phần> (<món>)" (ghi từ một lần
+    quét) gộp thành một dòng "Cơm tấm · 2 thành phần · 478 kcal"; bấm vào thì
+    mở ra từng thành phần, mỗi dòng vẫn xoá và đánh dấu yêu thích được. Chỉ
+    đổi cách hiện, không đổi database.
+  - Thẻ bữa ăn bọc `Material` trong suốt cho `ListTile` (lỗi nặng 1), tương
+    tự ô chọn giao diện ở Cài đặt và mục "Có thể có" ở kết quả quét.
+  - Màu `warning` (hổ phách) thêm vào cả 4 bảng màu, thay `Colors.orange`
+    viết cứng. Ở Minimal Light, chữ cam trên nền trắng chỉ đạt độ tương phản
+    khoảng 2:1; màu mới `#B54708` đạt khoảng 5:1 (lỗi nặng 2).
+  - Snack bar và nhãn biểu đồ cân nặng dùng font Be Vietnam Pro; nhãn biểu
+    đồ lớn theo cỡ chữ hệ thống.
+  - Màn nhỏ, chữ lớn: hai nút ở thẻ Đã ăn xếp chồng khi không đủ chỗ; số
+    nước uống thu nhỏ cho vừa một dòng; ô Tuổi, Cao, Nặng chia 2 + 1 khi hẹp;
+    mức vận động đã chọn hiện tên ngắn không kèm hệ số.
+  - Bỏ `visualDensity.compact` ở nút ⓘ, nút sửa và xoá cân nặng, nút −/+ ở
+    kết quả quét, để vùng bấm đủ 48 dp.
+  - Nút "Quét" trong thẻ Đã ăn đổi thành nút viền, vì nút Quét trên thanh
+    dưới mới là nút chính.
+  - Nút xoá (xoá toàn bộ lịch sử, xoá ảnh đã gom, nút "Xoá" trong hộp xác
+    nhận) dùng màu `danger`. Thẻ "Mục tiêu mỗi ngày" là thẻ nổi bật của màn
+    Hồ sơ.
+  - Thực đơn gợi ý: "150 g Cơm" dùng dấu cách không ngắt.
+- Chưa làm (để sau): thẻ "7 ngày qua" ghi cân nặng −0,4 kg trong khi thẻ cân
+  nặng ghi thay đổi 7 ngày −0,8 kg, vì hai thẻ tính theo hai cách khác nhau,
+  cần thống nhất; bữa trống thu thành một dòng có nút "+"; màn Lịch sử chưa
+  dùng `CyberCard`; đoạn giải thích TDEE thật chưa chuyển vào nút ⓘ.
+- Kiểm tra: `flutter analyze` sạch; `flutter test` 210/210 PASS, có 2 test
+  mới cho phần gom món (hàm gom và thao tác trên màn hình); test thực đơn đổi
+  theo dấu cách không ngắt. Skill `ui-screenshots`: 20/20 màn vẽ được, không
+  tràn bố cục; đã xem ảnh Hôm nay và Hồ sơ ở máy 360 px chữ ×1,3, và Nhật ký
+  ở Neon. Build APK 123.
+
+### 2026-10-23 · Hai thẻ ở màn Hôm nay ghi cùng một mức thay đổi cân nặng
+- Lý do: agent `ui-reviewer` phát hiện, với cùng một dữ liệu, thẻ "7 ngày
+  qua" ghi "Cân nặng −0,4 kg" còn thẻ "Theo dõi cân nặng" ghi "Thay đổi 7
+  ngày: −0,8 kg". Hai thẻ tính theo hai cách khác nhau:
+  - thẻ tuần lấy lần cân đầu và cuối *trong* 7 ngày (70,0 cách 4 ngày →
+    69,6);
+  - thẻ cân nặng lấy lần mới nhất so với lần gần nhất *cách ít nhất* 7 ngày
+    (70,4 cách 9 ngày), nhưng vẫn ghi là "7 ngày".
+- Đã làm:
+  - Một hàm chung `weeklyWeightChange` (`lib/engine/daily_habits.dart`): lấy
+    lần cân mới nhất, so với lần cân trước đó gần mốc một tuần nhất (cách
+    đều thì lấy lần cũ hơn), và trả về cả ngày của lần cân đó.
+  - Cả hai thẻ dùng hàm này và ghi rõ ngày so sánh, ví dụ "Thay đổi so với
+    14/10: −0,8 kg" và "Cân nặng −0,8 kg so với 14/10". Có cả tiếng Anh.
+  - Thẻ tuần chỉ hiện cân nặng khi trong tuần có ít nhất một lần cân.
+  - Thêm `formatShortDate` (dd/mm).
+- Kiểm tra: test mới cho `weeklyWeightChange`: chọn 9 ngày thay vì 4 ngày;
+  hai lần cách mốc bằng nhau thì lấy lần cũ hơn; chỉ có lần cân gần đây thì
+  so với lần sớm nhất; chỉ một lần cân thì không có kết quả; tuần không cân
+  thì không hiện. Test màn Hôm nay kiểm tra hai thẻ hiện cùng số và cùng
+  ngày. `flutter analyze` sạch; `flutter test` 212/212 PASS; ảnh màn Hôm nay
+  hiện −0,8 kg so với 14/10 ở cả hai thẻ. Build APK 124.
+
+### 2026-10-23 · Thẻ "Đã ăn" mới: vòng cung calo, chip C/P/B, vạch macro, ly nước
+- Lý do: người dùng thấy các bộ đếm còn đơn giản (một thanh ngang và vài
+  dòng chữ). Họ gửi ảnh một app theo dõi ăn uống khác để tham khảo cách bố
+  trí: vòng cung lớn, phần trăm C/P/F, vạch riêng cho từng macro. Giữ màu
+  neon của MacroRunner, không chép màu hay nhân vật của app đó.
+- Đã làm (giai đoạn 1 và 2 của kế hoạch):
+  - `lib/widgets/intake_summary.dart`, dùng chung cho Hôm nay và Nhật ký:
+    - `CalorieGauge`: vòng cung 240° vẽ bằng `CustomPainter`, màu chuyển từ
+      màu chính sang màu phụ của giao diện. Giữa vòng là số kcal còn lại, vượt
+      mục tiêu thì là số kcal vượt, đổi sang màu `warning`; chưa có hồ sơ thì
+      là số kcal đã ăn. Vòng và số chạy lên trong 0,7 giây. Trình đọc màn hình
+      nghe cả câu "Đã ăn … trên … kcal. Còn …".
+    - `MacroChips`: phần trăm năng lượng đến từ carb, protein, chất béo
+      (4/4/9 kcal mỗi gam), tổng 100%.
+    - `MacroBars`: ba vạch "đã ăn / mục tiêu g".
+    - `StreakBadge`: chuỗi ngày ghi ăn thành viên "🔥 N ngày" trên tiêu đề
+      thẻ, mờ khi hôm nay chưa ghi.
+  - `lib/engine/macro_split.dart`: mục tiêu carb và chất béo **ước lượng**
+    từ mục tiêu calo và protein sẵn có. Chất béo = 30% calo ÷ 9; carb = phần
+    calo còn lại ÷ 4, không âm. 30% là giữa khoảng 20–35% năng lượng cho người
+    lớn (AMDR, Institute of Medicine, Dietary Reference Intakes, 2005). Nút ⓘ
+    của thẻ giải thích điều này và ghi nguồn.
+  - Nước uống: 8 ly (2.000 ml ÷ 250 ml). Bấm ly thứ n là đã uống n ly; bấm lại
+    ly đầy cuối cùng thì bớt một ly. Vượt mục tiêu thì hiện "+N". Mỗi ly rộng
+    ít nhất 48 dp: không đủ chỗ thì chia 2 hàng 4 ly (lỗi agent `ui-reviewer`
+    chỉ ra: 8 ly một hàng ở máy 360 px chỉ còn khoảng 36 dp mỗi ly). Vẫn giữ
+    nút −/+.
+  - Hai nút "Mở nhật ký" và "Quét" trong thẻ thành nút chữ nhỏ.
+- Kiểm tra:
+  - `flutter analyze` sạch; `flutter test` 216/216 PASS. Test mới gồm:
+    - cách tính mục tiêu carb, chất béo và phần trăm C/P/B, kể cả khi protein
+      quá cao và trước khi ăn gì;
+    - vòng cung ở trạng thái còn, vượt và không có mục tiêu;
+    - nhãn cho trình đọc màn hình;
+    - bấm ly nước để đặt và bớt.
+    Các test cũ tìm câu "Còn … kcal so với mục tiêu" chuyển sang kiểm tra số
+    giữa vòng và nhãn đọc màn hình.
+  - Skill `ui-screenshots`: 20/20 màn vẽ được, không tràn bố cục. Đã xem
+    Hôm nay ở Neon và ở máy nhỏ chữ ×1,3, Nhật ký ở Minimal Light.
+  - Agent `ui-reviewer`: 2 lỗi (ly nước quá hẹp; "9 kcal" trong đoạn giải
+    thích chưa dùng dấu cách không ngắt), đã sửa cả hai.
+  - Build APK 125.
+
+### 2026-10-23 · Sửa màu vòng cung calo khi gần đầy
+- Lý do: người dùng chụp màn Nhật ký lúc đã ăn 2.311 / 2.559 kcal. Đoạn cuối
+  vòng cung (phía dưới bên phải) bị đổi về màu xanh lơ, không chuyển tiếp sang
+  hồng như phần còn lại.
+- Nguyên nhân: dải màu khai báo từ 150° tới 390°, nhưng `SweepGradient` đo
+  góc trong khoảng 0–360°. Phần vòng từ 360° tới 390° bị tính là trước điểm bắt
+  đầu nên lấy màu đầu tiên. Ảnh chụp thử chỉ có 726 kcal (vòng ngắn) nên không
+  thấy lỗi.
+- Đã làm:
+  - Xoay dải màu tới điểm bắt đầu của vòng (`GradientRotation`), cho màu chạy
+    từ đầu tới cuối trong 240° của vòng, rồi quay lại màu đầu trong 120° còn
+    trống. Như vậy đầu tròn nhô ra trước điểm bắt đầu cũng có màu đầu, không
+    còn chấm hồng.
+  - Skill `ui-screenshots` vẽ thêm riêng vòng cung lúc gần đầy (91%) và lúc
+    vượt mục tiêu (`gauge_*.png`) ở cả 4 giao diện.
+- Kiểm tra: xem ảnh vòng gần đầy ở Neon (xanh lơ → hồng) và Minimal Light
+  (xanh → tím): cả hai đầu đúng màu. `flutter analyze` sạch; `flutter test`
+  216/216 PASS. Build APK 126.
+
+### 2026-10-23 · Thêm hình trong vòng cung calo theo tiến độ trong ngày
+- Lý do: người dùng thấy chỗ dưới "kcal còn lại" trống. Họ muốn thêm một
+  hình, không muốn thêm chữ, vì thẻ đã nhiều số.
+- Đã làm: `GaugeEmblem` (`lib/widgets/intake_summary.dart`) đổi hình theo
+  `gaugeStateFor`:
+  - chưa ăn: dao dĩa, màu mờ;
+  - đang ăn, dưới 90% mục tiêu: tô mì có đũa, tô theo dải màu của vòng cung;
+  - từ 90% tới 100%: dấu ✓ màu xanh chanh;
+  - vượt mục tiêu: biểu tượng "dừng ăn" màu `warning`.
+  Đổi trạng thái thì hình phóng to ra. Trạng thái tính theo số thật, không
+  theo số đang chạy, nên hình không nhấp nháy qua các trạng thái lúc số đếm
+  lên. Trình đọc màn hình bỏ qua hình vì đã có nhãn của vòng cung.
+  - Lần đầu dùng hình bát cơm (`rice_bowl`), nhưng ở cỡ này trông như một
+    khối sọc, nên đổi sang tô mì (`ramen_dining`).
+- Kiểm tra: test `gaugeStateFor` ở các mốc 0, 50%, đúng 90%, 100% và vượt,
+  cùng trường hợp không có mục tiêu; test widget tìm đúng hình lúc đang ăn và
+  lúc vượt. Skill `ui-screenshots` vẽ thêm vòng cung lúc chưa ăn và lúc 94%;
+  đã xem cả bốn trạng thái. `flutter analyze` sạch; `flutter test` 217/217
+  PASS. Build APK 127.
+
+### 2026-10-23 · Chọn phần, da và cách nấu cho thịt, cá, trứng, cơm
+- Lý do: app tính calo trước đây chia thịt gà theo từng phần và theo sống
+  hay chín. MacroRunner gom hết vào một dòng "Thịt gà" (đùi luộc, 190 kcal
+  mỗi 100 g). Cùng 100 g mà cánh gà nướng cả da là 254 kcal, ức sống 120
+  kcal, lệch hơn gấp đôi. Người dùng muốn làm cho cả các nhóm khác; cơm thì
+  chỉ cần cơm chín vì không ai cân gạo.
+- Đã làm:
+  - `assets/data/vn_food/food_variants.csv`: 74 dòng, 6 nhóm, mỗi số đều có
+    mã nguồn (USDA SR Legacy, FNDDS, hoặc Viện Dinh dưỡng khi có món kiểu
+    Việt).
+    - Gà: ức, má đùi, tỏi, cánh × bỏ da / cả da × sống, luộc/hầm,
+      nướng/áp chảo, chiên.
+    - Heo: thăn, cốt lết, nửa nạc nửa mỡ, ba chỉ, sườn non, thịt băm.
+    - Bò: thăn, bắp, gầu/nạm, bò băm 90% và 80% nạc.
+    - Trứng: cả quả (sống, luộc, ốp la, chiên/bác) và lòng trắng. Đơn vị
+      "quả" 50 g, lòng trắng 33 g, theo USDA.
+    - Cá: hồi, rô phi, basa (gần đúng theo cá da trơn), ngừ (cả đóng hộp),
+      thu, lóc.
+    - Cơm và tinh bột, đều tính khi đã chín: cơm trắng, cơm gạo lứt, xôi,
+      bún, bánh phở, mì Ý, mì gói (tính theo vắt khô), yến mạch nấu, khoai
+      lang, khoai tây, các loại bánh mì.
+    - Tổ hợp nào USDA không có (như ức cả da chiên) thì không đưa vào, không
+      tự bịa số.
+  - `tool/check_vn_food.py` kiểm tra bảng mới: có nguồn, số hợp lệ, calo
+    khớp 4P + 4C + 9F trong 25%, không trùng dòng, nhóm và loại da hợp lệ.
+  - Bảng chọn `VariantPickerSheet`: ba hàng nút Phần, Da, Cách nấu. Tổ hợp
+    không có trong dữ liệu thì tắt. Số kcal và protein mỗi 100 g đổi theo
+    từng lần bấm. App nhớ lần chọn trước của mỗi nhóm.
+  - Ghi món bằng tay (Nhật ký): hàng nút Gà, Heo, Bò, Trứng, Cá, Cơm & tinh
+    bột mở bảng chọn. Mọi biến thể cũng tìm được bằng ô tìm kiếm (ví dụ "uc
+    ga luoc").
+  - Kết quả quét: thành phần là gà, heo, bò, cá, trứng hoặc cơm có biểu
+    tượng chỉnh cạnh tên. Bấm vào tên thì đổi được phần và cách nấu; khối
+    lượng giữ nguyên. Tên trong nhật ký thành, ví dụ, "Cơm gạo lứt (Cơm
+    tấm)".
+  - Đổi tên món "Ức gà" thành "Ức gà chín, bỏ da". Món chỉ có một dòng nền
+    (ức gà, pizza…) khi ghi vào nhật ký chỉ có một tên, không còn "Ức gà (Ức
+    gà)".
+  - Thiếu file bảng biến thể thì app vẫn chạy, chỉ không có bảng chọn.
+- Kiểm tra:
+  - `python tool/check_vn_food.py`: OK, 74 dòng biến thể.
+  - `flutter analyze` sạch; `flutter test` 225/225 PASS. Test mới gồm:
+    - đọc bảng thật và mỗi thành phần quét được đều mở đúng một dòng có thật;
+    - đổi thành phần giữ số quả hoặc số gam;
+    - tên món chỉ có dòng nền;
+    - bảng chọn tắt tổ hợp không có (cánh cả da không có chiên) và nhớ lựa
+      chọn;
+    - ghi 200 g ức luộc ra 302 kcal;
+    - đổi cơm sang cơm gạo lứt ở kết quả quét, mở lại vẫn ở lựa chọn đó, và
+      ghi đúng 246 kcal.
+  - Agent `ui-reviewer` tìm ra 3 lỗi, đều đã sửa:
+    - mở lại bảng chọn bị quên lựa chọn cũ;
+    - tên lưu cho ngôn ngữ kia bị lẫn ("Chicken breast, bỏ da");
+    - vùng bấm tên thiếu `Material`.
+    Theo góp ý, thịt nướng giờ mở ở "cốt lết, nướng" thay vì "luộc", và chọn
+    biến thể không có đơn vị thì không xoá số gam đã gõ.
+  - Skill `ui-screenshots` có thêm ảnh bảng chọn, ở cả máy nhỏ chữ ×1,3.
+  - Build APK 128.
+
+### 2026-10-24 · Bắt đầu giai đoạn YOLO: model phát hiện từng món trên đĩa
+- Lý do: chụp thử một đĩa chỉ có cơm trắng và ức gà, app đoán "Cà ri gà"
+  49%, "Thịt kho trứng" 8%, "Cơm trắng" 6%. Model nhận diện chỉ trả lời "ảnh
+  là món gì" trong 91 món; một đĩa tự gắp không phải món nào cả. Cần model
+  tìm từng thứ trên đĩa, mỗi thứ một khung.
+- Đã làm:
+  - Contract lên **1.6**, viết lại mục 7:
+    - 21 lớp, mỗi lớp ứng với một thành phần hoặc nhóm biến thể của app
+      (cơm, thịt gà, trứng, heo, rau…). Dinh dưỡng lấy từ bảng có sẵn,
+      không thêm số mới. Canh nói chung tạm tính như canh chua, ghi rõ là
+      ước lượng.
+    - Định dạng: đầu vào ảnh 0–1, dạng `[1, 3, S, S]` hoặc `[1, S, S, 3]`;
+      đầu ra `[1, 4 + 21, A]`. NMS do app làm. Ngưỡng ghi trong
+      `DETECTOR_CARD.md`.
+    - Mục 5 thêm nhãn ảnh `plate` cho đĩa nhiều món.
+  - Notebook `tool/train/train_detector.ipynb` (YOLO11n, Ultralytics
+    8.4.185):
+    - lấy khung VietFood67, đổi về 21 lớp; bỏ ảnh có khung cả món (phở, cơm
+      tấm…) vì cơm, trứng bên trong thường không được khoanh riêng;
+    - mặt nạ MyFood đổi ra khung, mỗi vùng liền một khung (hai quả trứng là
+      hai khung);
+    - thu nhỏ ảnh một lần cho train nhanh; tự dừng trước giới hạn Colab và
+      train tiếp ở lần chạy sau;
+    - chọn ngưỡng theo F1 trên tập val, đo trên tập test, xuất TFLite (LiteRT), ONNX,
+      thẻ model; chạy lại model đã xuất theo đúng cách app đọc để so với
+      Ultralytics.
+  - App:
+    - `lib/models/plate_detection.dart`: đọc nhãn và ngưỡng, letterbox, giải
+      mã đầu ra cả hai dạng, NMS theo lớp.
+    - `lib/services/food_detector.dart`: chạy model trong isolate. Không có
+      model trong `assets/models` thì app chạy như cũ.
+    - `ScanPlate.detected`: mỗi lớp một dòng, khẩu phần thường gặp; trứng,
+      chả giò, bánh mì đếm theo số khung (tôm, chả lụa thường bị khoanh cả
+      đống trong một khung nên không đếm). Heo chưa có thành phần riêng nên lấy biến
+      thể "nửa nạc nửa mỡ, luộc". Dòng nào cũng bấm vào được để đổi phần và
+      cách nấu.
+    - Màn kết quả quét chạy cả hai model cùng lúc. Thấy từ 2 món trở lên
+      thì mở sẵn "Đĩa có N món" và vẽ khung, tên, điểm lên ảnh. Nếu model
+      nhận diện chắc chắn và mọi món thấy được đều thuộc món đó (cơm tấm có
+      cơm, trứng, thịt) thì giữ món, vì công thức có cả nước mắm, mỡ hành.
+  - Chưa làm: ước lượng số gam từ diện tích khung (cần biết cỡ đĩa thật).
+- Kiểm tra:
+  - `python tool/train/test/smoke_detector.py` trên ảnh giả: lần đầu tự
+    dừng sau epoch 1, lần sau train tiếp đến hết; ảnh có khung cả món bị bỏ
+    đúng 20 ảnh; cách app giải mã khớp Ultralytics 12/12 ảnh (trên Windows
+    kiểm bằng bản ONNX).
+  - Xuất thử một YOLO11n 21 lớp chưa train sang TFLite: đầu vào
+    `[1, 3, 640, 640]`, đầu ra `[1, 25, 8400]`, đúng contract.
+  - `flutter analyze` sạch; test mới: giải mã cả hai dạng đầu ra, khung về
+    đúng chỗ trên ảnh ngang, NMS, đếm trứng, heo từ biến thể, màn quét với
+    đĩa cơm + tôm + heo ghi đúng 3 dòng, cơm tấm chắc chắn vẫn giữ món.
+  - Skill `ui-screenshots` thêm màn kết quả quét. Lần vẽ đầu thấy nhãn trên
+    khung không có font tiếng Việt và chip "Đĩa có: Cơm + Thịt gà + Tr…" bị
+    cắt ở máy 360 px; đã sửa (dùng font app, chip ghi "Đĩa có 4 món").
+  - Agent `ui-reviewer` tìm ra 3 lỗi, đều đã sửa: nhãn có thể gây lỗi khi
+    vẽ nếu khung rộng gần hết ảnh; tên dài bị cắt thành "Trứn…" (giờ dùng
+    tên ngắn từng lớp: Trứng, Heo…, khung hẹp thì bỏ %); câu gợi ý dài 4
+    dòng (rút còn một câu). Bấm lại chip đang chọn không còn xoá phần đã
+    chỉnh.
+  - Agent `model-contract-reviewer`: contract, notebook, app và bảng dinh
+    dưỡng khớp nhau. Theo góp ý, chỉ đếm khung cho trứng, chả giò, bánh mì,
+    và ghi rõ phải đổi tên bản INT8 thành `detector.tflite`.
+  - `flutter test` 240/240 PASS; `check_vn_food.py` OK.
+
+### 2026-10-25 · Model phát hiện món: kết quả lần train đầu, train tiếp bằng tài khoản Colab khác
+- Kết quả lần train đầu trên Colab (YOLO11n, 640 px):
+  - 21.541 ảnh: train 17.778, val 2.454, test 1.309. Loại nào cũng có
+    trên 1.000 khung ở tập train.
+  - Dừng ở epoch 62/80 vì gần hết giờ Colab (khoảng 3,9 phút/epoch).
+  - Trên tập test: mAP50 0,830, mAP50-95 0,707, precision 0,834, recall
+    0,748; ngưỡng khung chọn theo F1 là 0,52.
+  - Tốt nhất: khoai tây chiên 0,958, cơm 0,935. Yếu nhất: chả 0,596, đậu hũ
+    0,700, gà 0,737.
+  - Bản TFLite đọc theo cách của app khớp Ultralytics 20/20 ảnh.
+- Lý do sửa: muốn chạy 18 epoch còn lại bằng tài khoản Google khác, nhưng
+  `last.pt` nằm trong Drive của tài khoản cũ, nên notebook sẽ train lại từ
+  đầu.
+- Đã làm: thêm `RESUME_FROM` vào `train_detector.py`. Đặt link chia sẻ
+  thư mục `train/weights` của tài khoản cũ, notebook tải `last.pt` và
+  `best.pt` về Drive của tài khoản mới bằng gdown rồi train tiếp.
+- Kiểm tra: chạy riêng đoạn sao chép với gdown giả: chép đúng 2 file; thư
+  mục thiếu file thì báo lỗi rõ ràng. `smoke_detector.py` vẫn chạy đúng.
+
+### 2026-10-25 · Đưa model phát hiện món đã train xong vào app, build APK 129
+- Lý do: lần train tiếp bằng tài khoản Colab thứ hai đã chạy hết 80/80
+  epoch (bắt đầu lại từ epoch 63 nhờ `RESUME_FROM`). Lúc này mới có model
+  thật để đưa vào app.
+- Kết quả trên tập test: 1.296 ảnh, mAP50 0,832, mAP50-95 0,708, precision
+  0,815, recall 0,759, ngưỡng khung 0,48.
+  - So với lúc dừng ở epoch 62: mAP50 chỉ tăng thêm 0,002, recall tăng
+    0,011, nên model đã gần hết sức ở cỡ YOLO11n với bộ dữ liệu này.
+  - Cơm 0,942, gà 0,742. Yếu nhất là chả 0,607 và đậu hũ 0,713.
+- Đã làm:
+  - đưa `detector.tflite` (10,7 MB, FP32), `detector_classes.txt` và
+    `DETECTOR_CARD.md` vào `assets/models`;
+  - `assets/models/README.md` ghi thêm 3 file này;
+  - thêm test đọc thẳng các file thật bằng `DetectorLabels.parse`: đủ 21
+    lớp đúng thứ tự, contract 1.6, không còn dòng "not finished".
+  - Build APK 129 (`MacroRunner-129-arm64.apk`): versionCode 2129, chứng
+    chỉ ký `e3b83ac4fe9118e4…`, APK có đủ 3 file trong
+    `assets/flutter_assets/assets/models/`.
+- Kiểm tra:
+  - TF Lite 2.18 trên máy tính đọc được model: đầu vào `[1, 3, 640, 640]`,
+    đầu ra `[1, 25, 8400]`, tọa độ khung trong khoảng 0–1, khoảng 28 ms một
+    lần chạy (CPU máy tính, 4 luồng).
+  - Agent `model-contract-reviewer` không thấy chỗ lệch nào với contract
+    1.6.
+  - `flutter analyze` sạch, `flutter test` qua 241 test,
+    `check_vn_food.py` OK.
+- Chưa kiểm tra được: tốc độ và kết quả nhận diện trên điện thoại. Lúc build
+  xong, adb không kết nối được với máy qua Wi-Fi.
+
+### 2026-10-26 · Giao diện bớt "trông như AI làm": bỏ số lặp, đổi tên giao diện, bớt icon và nút (i)
+- Lý do: vẽ lại các màn ra PNG và rà xem giao diện có giống mẫu do AI sinh
+  ra không. Thấy ba chỗ dễ nhận ra nhất:
+  - ở Nhật ký, mỗi bữa có một dòng tổng lặp lại đúng con số của dòng món
+    phía trên;
+  - tên giao diện bằng tiếng Anh, kèm mô tả kiểu quảng cáo ("mang cảm giác
+    tự nhiên");
+  - thẻ nào cũng có icon màu ở tiêu đề, nhiều thẻ có thêm nút (i).
+- Đã làm:
+  - Nhật ký: bỏ dòng tổng ở cuối thẻ bữa. Bữa có từ 2 dòng trở lên thì tổng
+    kcal hiện cạnh tên bữa; bữa 1 dòng thì không hiện, vì dòng món đã có số.
+  - Tên giao diện đặt theo màu nhấn và có bản dịch: Xanh lơ (trước là
+    Neon), Xanh dương (Minimal Light), Xanh lá (Forest), Cam (Sunset). Mô tả
+    chỉ còn "Nền tối" hoặc "Nền sáng", lấy từ bảng màu. Mã trong code giữ
+    nguyên nên cài đặt đã lưu không bị mất.
+  - Chỉ thẻ chính của mỗi màn (thẻ có viền sáng) còn icon ở tiêu đề. Riêng
+    thẻ so sánh thực đơn với mục tiêu vẫn giữ icon đạt/chưa đạt vì nó báo
+    trạng thái. Bỏ luôn các `accent` không còn hiện ở đâu.
+  - Cài đặt: bỏ nút (i) ở Nhắc ghi bữa và Dữ liệu, vì nội dung chỉ nhắc
+    lại nhãn nút hoặc hộp xác nhận. Vẫn giữ nút (i) ở Sao lưu (file JSON
+    gồm những gì), Nhắc uống nước, Gom ảnh, Hồ sơ và vòng calo, vì ở đó có
+    thông tin mới.
+  - Hàng tiêu đề thẻ luôn cao 48 dp, bằng nút (i), để thẻ có nút và thẻ
+    không có nút cách nội dung đều nhau.
+  - Dữ liệu vẽ ảnh có thêm một bữa trưa 2 món, để thấy tổng ở tiêu đề.
+  - Cập nhật quy tắc trong agent `ui-reviewer` cho khớp.
+- Kiểm tra: `flutter gen-l10n`, `flutter analyze` sạch, `flutter test` qua
+  242 test. Có 1 test mới: bữa 1 món không hiện tổng. Test món đã quét
+  kiểm tra thêm tổng kcal ở tiêu đề bữa. Vẽ lại 35
+  ảnh màn hình, xem Cài đặt, Nhật ký ở máy nhỏ chữ ×1,3 và Hôm nay ở nền
+  sáng. Agent `ui-reviewer` không thấy lỗi. Ba điểm nó nêu đã sửa: nút (i)
+  ở Sao lưu, khoảng cách dưới tiêu đề, và ảnh chưa có bữa 2 món.
+- Build APK 130 (`MacroRunner-130-arm64.apk`, 35,2 MB): versionCode 2130,
+  chứng chỉ ký `e3b83ac4fe9118e4…`, đã cài lên điện thoại qua adb Wi-Fi.
+
+### 2026-10-26 · Sửa lỗi model phát hiện món không chạy trên điện thoại
+- Lý do: quét một đĩa cơm với thịt heo trên APK 130, màn Kết quả quét không
+  hiện khung món nào. Chạy `detector.tflite` trên máy tính với chính ảnh đó
+  thì model thấy cơm (điểm 0,80), nên lỗi nằm ở app.
+- Tìm lỗi: lỗi của model phát hiện món bị màn Kết quả quét bỏ qua mà không
+  ghi log. Bản 131 ghi lỗi ra log và cho thấy:
+  `Illegal argument in isolate message: object is unsendable ...
+  IsolateInterpreter`.
+  - Bước đọc ảnh chạy trong một isolate khác bằng `Isolate.run`. Hàm gửi
+    sang được viết ngay trong `detect`, nên Dart gói theo cả biến `runner`
+    nằm cùng chỗ (trình chạy model và các cổng liên lạc của nó). Isolate
+    không nhận những thứ này.
+  - Vì vậy model phát hiện món chưa lần nào chạy được trên điện thoại. Test
+    không bắt được vì test dùng model giả.
+- Đã làm:
+  - tách bước đọc ảnh ra hàm riêng `prepareDetectorInputInBackground`, giống
+    cách model nhận diện món đang làm;
+  - màn Kết quả quét ghi lỗi của model phát hiện món ra log;
+  - thêm test chạy hàm đó qua isolate thật với một file ảnh.
+- Kiểm tra:
+  - `flutter analyze` sạch, `flutter test` qua 243 test;
+  - APK 132 (versionCode 2132, chứng chỉ `e3b83ac4fe9118e4…`) cài lên điện
+    thoại. Quét lại ảnh đó: `Detector timing: photo 184 ms, model 154 ms,
+    1 foods`, tổng 338 ms, dưới mục tiêu 400 ms.
+- Còn lại: model không nhận ra mấy miếng thịt heo thái mỏng trên cơm (điểm
+  cao nhất 0,005). Khi chỉ tìm được 1 món, app vẫn quay về đoán cả món.
+
+### 2026-10-26 · Màn Kết quả quét dùng cả khi model phát hiện món chỉ tìm được 1 món
+- Lý do: với đĩa cơm có thịt heo thái mỏng, model phát hiện món chỉ tìm được
+  cơm (90%). Trước đây app chỉ dựng đĩa từ khung khi tìm được từ 2 món trở
+  lên, nên lần này quay về đoán cả món ("Cà ri gà 31%"), sai hẳn. Người
+  dùng muốn thấy món đã tìm được, rồi tự thêm phần còn thiếu.
+- Đã làm (`scan_result_screen.dart`):
+  - Tìm được 1 món mà model món không chắc: dựng đĩa từ món đó, chip "Đĩa có
+    1 món" được chọn. Câu gợi ý bảo người dùng bấm Thêm thành phần cho món
+    còn thiếu.
+  - Model món chắc chắn thì vẫn mở món đó như cũ; chip "Đĩa có 1 món" chỉ
+    là một lựa chọn.
+  - Từ 2 món trở lên: giữ nguyên quy tắc cũ.
+  - Chuỗi tiếng Anh "{count} foods on the plate" đổi sang dạng số ít/số
+    nhiều.
+- Kiểm tra:
+  - test mới cho cả hai trường hợp; `flutter analyze` sạch, `flutter test`
+    qua 244 test.
+  - Agent `ui-reviewer` thấy câu gợi ý ban đầu ("Mới tìm được 1 món…") lặp
+    số 1 với chip ngay trên, nên rút còn "Món nào còn thiếu thì bấm Thêm
+    thành phần."
+  - APK 134 (versionCode 2134, chứng chỉ `e3b83ac4fe9118e4…`) cài lên điện
+    thoại.
+
+### 2026-10-26 · Model phát hiện món: thêm dữ liệu FoodInsSeg, train tiếp từ model đã có
+- Lý do: model phát hiện món thấy cơm nhưng không thấy mấy miếng thịt heo
+  thái mỏng trên cơm (điểm cao nhất 0,005). Các lớp yếu trên tập test là
+  chả 0,607, đậu hũ 0,713 và gà 0,742. Cần thêm ảnh có khung quanh từng
+  miếng thịt.
+- Tìm dữ liệu:
+  - FoodInsSeg (CC BY-NC-SA 4.0, giống VietFood67): 7.118 ảnh của
+    FoodSeg103, mỗi miếng thức ăn một mask kèm khung, định dạng COCO, zip
+    1,3 GB trên Google Drive của tác giả.
+  - Dataset "canteen food" kiểu cơm phần trên Roboflow có bước kiểm tra
+    chống bot, không đọc được. Chả gần như không có nguồn nào; đậu hũ chỉ
+    có 68 ảnh trong FoodSeg103.
+- Đã làm (`train_detector.py`, sinh lại `.ipynb`):
+  - Thêm FoodInsSeg vào dữ liệu: đổi 16 nhóm của nó sang lớp của app
+    (pork → heo, chicken duck → ga, rice → com, tofu → dau_hu…).
+  - Bỏ ảnh có món dễ nhầm mà nó không gắn nhãn theo lớp của mình (bánh mì,
+    mì, mì Ý, súp, xúc xích, hoành thánh…), để model không học rằng chúng
+    là nền.
+  - Tập test của FoodInsSeg chia đôi thành val và test.
+  - Kết quả trên dữ liệu thật: thêm 3.408 ảnh (train 2.387). Tập train có
+    thêm 1.461 khung heo, 2.483 khung gà, 1.359 khung cơm, 272 khung đậu
+    hũ. Bỏ 2.329 ảnh vì có món dễ nhầm.
+  - Thêm `FINETUNE_FROM`: link chia sẻ tới `detector_best.pt` của lần train
+    trước. Notebook bắt đầu từ trọng số đó, SGD lr0 0,002 (bằng 1/5 lúc
+    train mới), 30 epoch, lưu vào thư mục riêng `detector_yolo11n_finetune`.
+- Kiểm tra:
+  - `smoke_detector.py` chạy 3 lượt trên dữ liệu giả có thêm FoodInsSeg
+    giả: bị cắt giờ, train tiếp, rồi fine-tune từ model vừa tạo. Ảnh có
+    bánh mì bị bỏ đúng 2 ảnh; cách app đọc model khớp Ultralytics 15/15
+    ảnh.
+  - Tải thử `detector_best.pt` qua link bằng gdown 6.4.2: 5,5 MB, đủ 21
+    lớp.
+- Bản Colab đưa người dùng: `QUICK_TEST = False`, `FINETUNE_FROM` là link
+  `detector_best.pt` hiện có. Ước tính 3 giờ trong một phiên Colab:
+  khoảng 30 phút tải dữ liệu và dựng dataset, khoảng 4,5 phút mỗi epoch.
+- Sửa sau lần chạy đầu trên Colab: Ultralytics báo `finetune_from.pt is
+  not a loadable checkpoint (invalid load key, '<')`.
+  - Nguyên nhân: Colab cài sẵn gdown bản cũ. Gặp link dạng
+    `.../file/d/<id>/view`, bản này tải về trang web thay cho file. Trên
+    máy tính là gdown 6.4.2, tự đọc được link nên lúc thử không thấy lỗi.
+  - Đã sửa: notebook lấy id file từ link để tải, và kiểm tra file tải về
+    là checkpoint (file zip, bắt đầu bằng `PK`). File hỏng còn sót từ lần
+    trước sẽ được tải lại.
+  - Kiểm tra bằng gdown 5.2.0, có đặt sẵn một file HTML hỏng: tải lại ra
+    đúng 5,5 MB. `smoke_detector.py` vẫn OK.
+
+### 2026-10-27 · Đưa model phát hiện món đã fine-tune với FoodInsSeg vào app (APK 135)
+- Vì sao: lần chạy Colab đã train xong 30/30 epoch. Điểm trong card thấp
+  hơn bản cũ (mAP50 0,632 so với 0,832), nhưng bộ test giờ có thêm khoảng
+  500 ảnh FoodInsSeg khó hơn, nên hai số này không so trực tiếp được.
+- So trên cùng bộ ảnh: 459 ảnh test FoodInsSeg (nửa id lẻ, cùng cách gán
+  nhãn với notebook), chấm cả hai `detector_best.pt` trên máy tính:
+  - mAP50: 0,088 (cũ), 0,232 (mới).
+  - Theo kiểu app dùng (mỗi ảnh có báo đúng món có trong đĩa không, với
+    ngưỡng của từng card: 0,48 cũ, 0,35 mới): tìm ra 214/778 món (28%) so
+    với 376/778 (48%). Báo nhầm: 204 lần so với 161 lần.
+  - Heo vẫn yếu: 7/61 ảnh. Model hay gọi heo là bò hoặc gà.
+- Các lớp chỉ có trong VietFood67 gần như giữ nguyên (bún, mì, bánh mì,
+  canh lệch dưới 0,03 mAP50); riêng thịt nướng giảm từ 0,882 xuống 0,762.
+- Ảnh cơm + heo người dùng chụp: cả hai model chỉ ra cơm (0,87 cũ, 0,66
+  mới), chưa ra heo.
+- Đã làm: chép `detector.tflite` và `DETECTOR_CARD.md` mới vào
+  `assets/models` (`threshold_box` từ 0,48 xuống 0,35); danh sách lớp
+  không đổi, vẫn contract 1.6.
+- Kiểm tra: `flutter analyze` sạch, `flutter test` 244 test đều qua. Build
+  APK 135 (35,2 MB), chữ ký khớp chứng chỉ release, đã cài lên điện thoại.
+  Chưa quét thử trên điện thoại.
+
+### 2026-10-27 · Model phát hiện món: tự khoanh khung ảnh món Việt, thêm Open Images, chuyển sang YOLO11s 512 px
+- Vì sao: train thêm epoch trên dữ liệu cũ gần như không lên nữa (điểm dừng
+  ở khoảng 0,55). Nhóm không có thời gian tự chụp và vẽ khung vài trăm ảnh.
+  Tìm hiểu các app trên Google Play: họ mạnh nhờ model lớn chạy trên máy
+  chủ và hàng triệu ảnh, nên hướng phù hợp với app offline là cho một model
+  lớn khoanh khung lúc train ("model lớn dạy model nhỏ") và dùng model nhỏ
+  to hơn một bậc.
+- Notebook mới `tool/train/autolabel_detector.ipynb` (sinh từ
+  `autolabel_detector.py`):
+  - Lấy ảnh món Việt có sẵn (30VNFoods, VinaFood21, 20FoodVN), tối đa 700
+    ảnh mỗi món, bỏ ảnh trùng giữa các bộ.
+  - Grounding DINO (base) tìm các thứ món đó có; lớp của khung lấy theo tên
+    món. Ví dụ thịt trên đĩa cơm tấm là `thit_nuong`, thịt trên đĩa bún đậu
+    là `heo`.
+  - Model phát hiện hiện có (bản fine-tune APK 135) kiểm tra lại. Khung yếu
+    (điểm 0,3–0,45) chỉ giữ khi model cũng thấy đồ ăn ở đó. Món model chắc
+    (từ 0,6) mà Grounding DINO bỏ sót thì thêm vào, để không bị học thành
+    nền.
+  - Bỏ các món có sợi trong nước (phở, bún bò, hủ tiếu, mì Quảng, cao lầu).
+    Grounding DINO khoanh cả bát thành "sợi", còn VietFood67 khoanh cả bát
+    thành một món, nên hai cách sẽ dạy model ngược nhau.
+  - Open Images: khung khoai tây chiên, tôm trên đĩa hoặc bát. Cà chua, dưa
+    leo, bông cải, bắp cải thì phải có đĩa hoặc bát, vì có ảnh sạp chợ cũng
+    được gắn nhãn "đồ ăn". Bỏ lớp Egg vì phần lớn là trứng Phục Sinh. Bỏ ảnh
+    có hơn 8 khung, và ảnh có cơm, sợi hay thịt mà Open Images không
+    khoanh.
+  - Kết quả là `autolabel.zip`, cộng `preview.jpg` (24 ảnh đã khoanh để xem
+    bằng mắt) và `AUTOLABEL_CARD.md`.
+- `train_detector`:
+  - Mặc định YOLO11s ở 512 px, 60 epoch, train từ trọng số COCO. Trên COCO,
+    YOLO11s đạt 47,0 mAP50-95 so với 39,5 của YOLO11n (bảng của
+    Ultralytics).
+  - Tự tìm `autolabel.zip` trong Drive (hoặc dùng link `AUTOLABEL_FROM`) và
+    chỉ đưa vào tập train. Tập val và test giữ nguyên khung người vẽ, nên so
+    được với card của bản fine-tune.
+  - Kết quả lưu ở thư mục riêng `detector_yolo11s`. Bản fine-tune giờ lưu ở
+    `detector_finetune`, vì tên model mặc định không nói model được
+    fine-tune to cỡ nào.
+- Contract vẫn 1.6, vì danh sách lớp và định dạng không đổi (app đọc S từ
+  file). Mục 7.2 ghi thêm S = 512, A = 5376 và cỡ file YOLO11s (ước tính
+  theo số tham số). Mục 7.4 ghi nguồn dữ liệu và license mới. Mục 7.3 sửa
+  cho khớp code: thấy 1 lớp thì vẫn mở "Đĩa có 1 món" khi model món không
+  chắc.
+- Kiểm tra:
+  - Thử Grounding DINO trên 33 ảnh thật của 30VNFoods và 24 ảnh Open Images
+    (bộ val).
+    - Khung bún, chả giò, thịt nướng, heo luộc, bánh mì, tôm, cá kho khá
+      đúng.
+    - Còn sót món chưa được khoanh, và có vài nhãn sai: ớt bị gọi là đồ
+      chua, chén nước mắm là trứng. Lần chạy thứ hai, sau khi siết điều
+      kiện, giữ 16/18 ảnh món và 13/22 ảnh Open Images.
+  - Tốc độ trên CPU khoảng 10 giây mỗi ảnh. Trên T4 ước tính khoảng 0,3
+    giây, chưa đo.
+  - `smoke_autolabel.py` (mới) qua, kiểm tra:
+    - tên thư mục ra món, kể cả bỏ phở;
+    - bỏ ảnh trùng;
+    - lọc dòng Open Images;
+    - zip và card.
+  - `smoke_detector.py` qua, có thêm `autolabel.zip` giả: đọc được 3 ảnh món
+    và 2 ảnh Open Images, card ghi nguồn mới.
+- Chưa biết: khung tự động có nhiễu, nên chưa chắc nó giúp hay làm hại. Phải
+  xem điểm test sau khi train. Vì đổi cả model lẫn dữ liệu cùng lúc, nếu
+  điểm khác thì chưa tách được phần nào do model, phần nào do dữ liệu.
+
+### 2026-10-27 · Kết quả gán nhãn tự động; train YOLO11s 40 epoch trên Kaggle
+- Kết quả `autolabel_detector.ipynb` trên Colab (83 phút):
+  - Giữ 9.094 ảnh (9.037 ảnh món, 57 ảnh Open Images). Bỏ 1.686 ảnh món vì
+    không tìm thấy món nào, và 26 ảnh Open Images có cơm, sợi hay thịt chưa
+    được khoanh. `autolabel.zip` nặng 786 MB.
+  - Lớp nào cũng có khung. Ít nhất là mì (30), khoai tây chiên (41), mực
+    (48); heo có 960 khung, phần lớn từ bún đậu.
+  - Xem 24 ảnh trong `preview.jpg`: khoảng 2/3 khung đúng (cá kho, trứng
+    trong thịt kho, bánh mì, bún đậu, cơm với thịt nướng). Lỗi còn gặp:
+    sót món, gỏi gà bị khoanh cả đĩa thành rau, bánh mì chảo bị khoanh cả
+    chảo thành trứng.
+  - Open Images chỉ còn 57 ảnh vì điều kiện lọc chặt; gần như không ảnh
+    hưởng tới lần train.
+- Vì sao sửa: tính lại theo số ảnh thật (khoảng 29.300 ảnh train so với
+  20.171 lần fine-tune trước, và YOLO11s ở 512 px nặng gấp khoảng 2 lần
+  YOLO11n ở 640 px), mỗi epoch mất khoảng 12 phút (ước tính). 60 epoch là
+  khoảng 12 giờ, cần 4 phiên Colab. Người dùng muốn chạy trên Kaggle (11
+  giờ một lượt).
+- Đã làm trong `train_detector.py`:
+  - `EPOCHS` từ 60 xuống 40 (khoảng 8 giờ, vừa một lượt Kaggle). Không đặt
+    80 rồi dừng giữa chừng, vì tốc độ học giảm theo cosin trên tổng số
+    epoch và 10 epoch cuối tắt mosaic: dừng ở 40/80 thì tốc độ học còn
+    khoảng 50% và chưa qua đoạn tắt mosaic, kém hơn chạy hết 40/40.
+  - `RESUME_FROM` nhận thêm một thư mục trên máy, ví dụ `/kaggle/input`
+    sau khi thêm output của version trước. Notebook tìm đúng một thư mục có
+    cả `last.pt` và `best.pt` bên dưới; thấy 0 hoặc nhiều hơn 1 thì báo lỗi.
+  - Khi train tiếp, truyền `data`, `save_dir` và `workers` của máy hiện tại.
+    `last.pt` lưu đường dẫn của máy đã tạo ra nó, nên trước đây train tiếp
+    từ Colab sang Kaggle sẽ tìm ảnh ở `/content/...` và ghi kết quả ra đó.
+  - Phần hướng dẫn đầu notebook có thêm 4 bước cho Kaggle.
+- Kiểm tra:
+  - `smoke_detector.py`: lượt train tiếp giờ chép `last.pt` từ một thư mục
+    trong input sang thư mục output và work khác. Kiểm tra epoch 2 được
+    train ở thư mục mới, thư mục cũ vẫn chỉ có 1 epoch. Cả 3 lượt đều qua,
+    cách app đọc model khớp Ultralytics 15/15 ảnh.
+  - Link `autolabel.zip` tải được khi không đăng nhập: trả về file zip
+    823.965.780 byte.
+- Bản Kaggle đưa người dùng: `QUICK_TEST = False` và `AUTOLABEL_FROM` là
+  link `autolabel.zip`.
+
+### 2026-10-28 · Rà giao diện (UI/UX) và sửa 13 lỗi trên các màn chính
+
+- Vì sao: người dùng nhờ đánh giá giao diện. Vẽ 35 ảnh các màn Hôm nay,
+  Nhật ký, Hồ sơ, Cài đặt, Kết quả quét bằng `tool/ui_screenshots` (bốn
+  giao diện và máy nhỏ 360 px, chữ ×1,3), nhờ agent `ui-reviewer` rà code,
+  rồi đối chiếu với checklist của skill ui-ux-pro-max. Người dùng đồng ý
+  sửa 13 lỗi đầu danh sách.
+- Đã làm:
+  - Kết quả quét: thanh tỉ lệ năng lượng dùng chung `macroColor()` với Hôm
+    nay (trước đây màu protein và carb bị đảo). Dòng dưới tổng chỉ còn carb
+    và béo, vì protein đã có ở dòng trên (trước đây ghi hai lần: "52,8 g
+    protein" và "Đạm 53 g").
+  - Nút Quét: icon máy ảnh màu nền tối thay cho trắng ở ba giao diện tối.
+    Trắng trên cyan hay xanh lá chỉ đạt khoảng 1,4–1,8:1, dưới mức 3:1 cho
+    hình.
+  - Ô nhập protein, carb, béo khi ghi món tự nhập: máy hẹp hoặc chữ lớn thì
+    ô béo xuống dòng như ô tuổi, cao, nặng ở Hồ sơ; lỗi được hiện tới 3
+    dòng; nhãn Protein có thêm "(g)".
+  - Biểu đồ cân nặng: đo nhãn trước rồi mới đặt lề, nên chữ lớn không còn
+    đè nhãn kg lên ngày.
+  - Nhật ký: thay vòng cung calo bằng một dòng "đã ăn / mục tiêu" và một
+    thanh mảnh (`CalorieLine`), vì Hôm nay đã có vòng cung; các bữa ăn lên
+    cao hơn khoảng 200 px.
+  - Hồ sơ: thẻ TDEE chỉ ghi tiến độ ("Ghi ăn 0/10 ngày · cân 3/3 lần…"),
+    điều kiện đầy đủ chuyển vào nút (i); câu cảnh báo bỏ hai con số đã có ở
+    trên. Thẻ cân nặng bỏ dòng "Gần nhất" vì trùng dòng đầu danh sách. Nút
+    chọn giới tính và mục tiêu bỏ `VisualDensity.compact` để đủ cao 48 dp.
+  - Hôm nay: ghi chú 2 lít nước chuyển vào nút (i). Dòng "So với mục tiêu"
+    của 7 ngày qua chỉ hiện khi có từ 3 ngày ghi ăn.
+  - Đọc màn hình: ô tick thành phần có tên món, nút Giảm/Tăng đọc kèm tên
+    thành phần, nút bấm giờ nghỉ và ghi kết quả đọc kèm tên bài tập.
+  - Kết quả quét: gợi ý món thứ hai trở đi dưới 30% bị ẩn (vẫn chọn được ở
+    "Món khác"); thời gian chạy model chỉ hiện ở bản debug.
+  - Cài đặt: nút xuất và xóa ảnh đã gom bị tắt khi chưa có ảnh.
+  - Bộ vẽ ảnh: truyền hành động cho hai nút "Mở nhật ký" và "Quét" ở Hôm
+    nay. Trước đó ảnh vẽ chúng ở trạng thái tắt nên trông như bị mờ; trong
+    app thật chúng vẫn bật.
+- Kiểm tra: `flutter gen-l10n`, `flutter analyze` (không lỗi), `flutter
+  test` (244 test đạt; sửa 3 test theo giao diện mới), vẽ lại 35 ảnh và
+  xem lại các màn đã sửa ở máy nhỏ chữ lớn. Agent `ui-reviewer` rà lại phần
+  đã sửa: không có lỗi chặn; đã sửa thêm 3 lỗi nhẹ nó nêu (dòng thay đổi
+  cân nặng để chữ mờ, icon nút Quét ở giao diện sáng lấy màu từ bảng màu,
+  bỏ khai báo thừa trong `app_en.arb`). Build APK 137 (kèm model phát hiện
+  món YOLO11s INT8 đang thử) và cài lên điện thoại để người dùng duyệt.
+
+### 2026-10-28 · Màn quét bị treo với model phát hiện món YOLO11s INT8: chống treo và đổi sang bản float32
+
+- Vì sao: trên APK 137, quét món thì màn hình đứng mãi ở "Đang nhận diện".
+  Log điện thoại: `E/tflite: Input tensor 207 lacks data`, rồi
+  `Bad state: failed precondition` trong `IsolateInterpreter`. Model nhận
+  diện món vẫn chạy (124 ms); chỉ model phát hiện món hỏng.
+  - Bản INT8 (`quantize='w8a32'`, xuất bằng LiteRT) không chạy được với
+    runtime của `tflite_flutter` 0.12.1. Detector cũ (YOLO11n) chạy được vì
+    app dùng file float32 10,7 MB, nên bản INT8 chưa từng được thử trên máy.
+  - Lỗi xảy ra trong isolate của `tflite_flutter` nên lời gọi không bao giờ
+    trả về. App chờ mãi và không quay về đoán cả món.
+- Đã làm:
+  - `food_detector.dart`: thêm `detectorTimeout` 8 giây. Một lần chạy lỗi
+    hoặc quá giờ thì detector bị đánh dấu hỏng, các lần quét sau bỏ qua nó
+    ngay. `scan_result_screen.dart` cũng chờ detector tối đa 8 giây rồi
+    đoán cả món.
+  - Thêm test: detector không bao giờ trả lời thì sau 8 giây màn quét vẫn
+    hiện kết quả của model món.
+  - Thay `assets/models/detector.tflite` bằng bản float32 của cùng lần train
+    YOLO11s ngày 27/10 (`export/detector.tflite` trong `results.zip` của
+    Kaggle, 37,9 MB). Bản INT8 cất ở `build/models_backup/`.
+    `DETECTOR_CARD.md` ghi rõ app dùng bản float32 và vì sao.
+- Kiểm tra: `flutter analyze` sạch, `flutter test` 245 test đạt. APK 138
+  (versionCode 2138, 61,2 MB, chứng chỉ `e3b83ac4fe9118e4…`) đã cài lên
+  điện thoại. Quét đĩa cơm tấm: hết treo, log ghi `Detector timing: photo
+  157 ms, model 182 ms, 4 foods` (tổng 339 ms, ngang YOLO11n trước đây) và
+  model món 187 ms. Lần này khoanh được cả thịt nướng (89%), cơm (94%) và
+  dưa leo.
+
+### 2026-10-28 · Nhãn trên khung ở màn Kết quả quét không còn đè nhau
+
+- Vì sao: trên APK 138, quét đĩa cơm tấm, nhãn "Grilled pork 89%" bị nhãn
+  "Cucumber,…" che mất chữ "%", còn khung dưa leo thứ hai chỉ hiện
+  "Cucum…". Trước đây mọi nhãn đều đặt ở góc trên bên trái khung, rộng tối
+  đa bằng khung; khung vẽ sau đè lên nhãn vẽ trước.
+- Đã làm (`scan_result_screen.dart`):
+  - Hàm `placeBoxLabels` đặt nhãn theo thứ tự điểm cao trước. Mỗi nhãn lấy
+    chỗ trống đầu tiên: trong mép trên khung, trên khung, trong mép dưới,
+    góc trên bên phải, rồi dưới khung. Không còn chỗ trống thì lấy chỗ đè
+    ít nhất. Nhãn luôn nằm trong ảnh.
+  - Vẽ hết khung trước rồi mới vẽ nhãn, nên đường khung không cắt qua nhãn.
+  - Nhãn được rộng tới 120 px dù khung hẹp hơn, nên tên ngắn không bị cắt.
+- Kiểm tra: thêm `test/box_labels_test.dart` (3 test: một nhãn, ba khung
+  chồng nhau như đĩa cơm tấm, khung sát mép ảnh). `flutter analyze` sạch,
+  `flutter test` đạt hết. Vẽ lại màn quét: ở máy 360 px chữ ×1,3, nhãn
+  "Trứng 77%" chuyển xuống mép dưới khung thay vì đè lên "Trứng 81%".
+
+### 2026-10-28 · Xem chỗ yếu của YOLO11s; ngưỡng riêng từng lớp; detector float16 (APK 139)
+
+**Vì sao.** YOLO11s đã chạy được trên điện thoại (bản float32, 37.9 MB). Cần
+biết model còn cải thiện được ở đâu, và giảm dung lượng app khi bản INT8 không
+chạy được.
+
+**Train thêm có giúp không.** Không. Trong `results.csv` của lần train 40 epoch,
+mAP50 trên tập val là 0.657 ở epoch 20, 0.696 ở epoch 30 và 0.697 ở epoch 40.
+Từ epoch 30, `val/cls_loss` tăng (1.16 lên 1.19) trong khi `train/cls_loss`
+vẫn giảm, nghĩa là model bắt đầu học thuộc tập train. Sáu lớp `ga`, `heo`,
+`bo`, `rau`, `dua_leo_ca_chua`, `khoai_tay_chien` chiếm 68% số box test
+(3,487/5,090) nhưng chỉ đạt mAP50 0.32–0.39. Phần lớn nhãn của các lớp này
+lấy từ FoodInsSeg và MyFood, và mỗi bộ vẽ box một kiểu: có bộ vẽ một box cho
+từng lát, có bộ vẽ một box cho cả đĩa.
+
+**Gà, heo, bò bị nhầm với nhau.** Theo confusion matrix trên tập val (2,940
+ảnh), heo thật bị đoán là bò 16% và là gà 11%; bò thật bị đoán là heo 14%.
+Trên 459 ảnh cơm phần, ở ngưỡng 0.38, các nhầm lẫn nhiều nhất là tôm → gà
+(20), heo → bò (16), cá → gà (14), gà → cá (12), bò → heo (11).
+
+**Ngưỡng riêng từng lớp.** Tìm ngưỡng cho F1 cao nhất ở từng lớp. Chỉnh trên một
+nửa số ảnh cơm phần rồi đo trên nửa còn lại, sau đó đổi vai hai nửa.
+- Tính theo từng box: F1 tăng từ 0.32 lên 0.35, nhưng số box báo sai tăng gấp
+  4 (264 lên 1,023). Không đáng.
+- Tính theo "món có trên đĩa hay không", là thứ app hiển thị: số món tìm được
+  tăng từ 50% lên 64% và từ 55% lên 70%, F1 tăng từ 0.574 lên 0.612 và từ
+  0.613 lên 0.634. Đổi lại, số món báo sai gần gấp đôi (96 lên 178).
+- Ngưỡng tốt nhất đều thấp hơn 0.38. Với cơm, rau, dưa leo cà chua và khoai
+  tây chiên, ngưỡng 0.10–0.16 tìm thêm 9–19 ảnh mà chỉ báo sai thêm 3–18.
+  Với gà và heo, hạ ngưỡng thì báo sai tăng mạnh (gà 44 lên 114, heo 27 lên
+  64).
+- Ngưỡng không chữa được việc nhầm gà, heo, bò. Chưa đưa vào app, vì đọc
+  ngưỡng riêng từng lớp là thay đổi contract.
+
+**Detector float16.** Ultralytics không xuất được TFLite trên Windows, nên viết
+`tool/train/tflite_to_fp16.py`. Script đọc file float32 đang chạy được trên
+điện thoại, lưu 181 tensor trọng số dưới dạng float16, và thêm trước mỗi tensor
+một op `DEQUANTIZE` để giải nén về float32 khi nạp model. Graph, đầu vào và đầu
+ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
+- Kiểm tra trên 459 ảnh cơm phần, giải mã giống app (letterbox, ngưỡng 0.38,
+  NMS 0.5): cùng danh sách món ở 458/459 ảnh, cùng box (IoU > 0.9) ở 454/459
+  ảnh. Điểm số lệch nhau tối đa 0.033.
+- Trên PC cả hai bản đều mất 96 ms một ảnh.
+- Cập nhật `DETECTOR_CARD.md` và dòng "Lượng tử hoá" trong
+  `docs/MODEL_CONTRACT.md`. Không tăng phiên bản contract vì đầu vào, đầu ra
+  và các dòng trong card không đổi.
+- `flutter analyze` không báo lỗi, `flutter test` đạt 248/248. APK 139 (43.3
+  MB, chữ ký khớp) đã cài lên điện thoại.
+- Trên điện thoại (Xiaomi 8 nhân), detector mất 184 ms và 158 ms cho 2 ảnh
+  (bản float32 trước đó mất 339 ms). Mỗi ảnh nhận ra 1–2 món.
+
 ---
 
 ## 3. Việc còn tồn đọng

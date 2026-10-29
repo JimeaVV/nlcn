@@ -178,7 +178,7 @@ void main() {
     await fill(tester, 'profile-calories', '1000');
     await fill(tester, 'profile-protein', '300');
     await saveProfile(tester);
-    expect(find.textContaining('Năng lượng từ protein (4 kcal/g) không được'),
+    expect(find.textContaining('Năng lượng từ protein (4 kcal/g) không được'),
         findsOneWidget);
     expect(database.savedProfiles, isEmpty);
 
@@ -202,6 +202,31 @@ void main() {
     expect(find.text('tự đặt'), findsOneWidget);
     expect(changed, 2);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an emptied weight or height field does not break the screen',
+      (tester) async {
+    // Clearing the weight used to throw while building the preview, which a
+    // release build shows as a grey screen.
+    final database = _Database(profile: _profile());
+    await open(tester, database);
+    await toggle(tester, 'profile-custom-calories');
+    for (final key in ['profile-weight', 'profile-height']) {
+      await fill(tester, key, '');
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: '$key emptied');
+      expect(find.byKey(const ValueKey('save-profile')), findsOneWidget);
+      await fill(tester, key, key == 'profile-weight' ? '72' : '175');
+    }
+    await fill(tester, 'profile-weight', '');
+    await saveProfile(tester);
+    expect(tester.takeException(), isNull);
+    expect(database.savedProfiles, isEmpty,
+        reason: 'the form says what is missing');
+
+    await fill(tester, 'profile-weight', '72');
+    await saveProfile(tester);
+    expect(database.savedProfiles.single.weight, 72);
   });
 
   testWidgets(
@@ -235,7 +260,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(database.savedWeights.single.date, yesterday);
     expect(database.savedWeights.single.weight, 71.25);
-    expect(find.textContaining('Gần nhất: 70 kg'), findsOneWidget);
+    // The newest weigh-in is the list's first row; the header says the change.
+    expect(find.textContaining('Gần nhất'), findsNothing);
+    expect(find.textContaining('Thay đổi: '), findsOneWidget);
 
     final edit = find.byKey(const ValueKey('edit-weight-2'));
     await reveal(tester, edit);
@@ -301,7 +328,7 @@ void main() {
     await reveal(tester, find.byType(DropdownButtonFormField<double>));
     await tester.tap(find.byType(DropdownButtonFormField<double>));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Nhiều · ×1,725').last);
+    await tester.tap(find.text('Tập 6–7 buổi/tuần · ×1,725').last);
     await tester.pumpAndSettle();
     await reveal(tester, find.text('Tăng cân'));
     await tester.tap(find.text('Tăng cân'));
@@ -418,7 +445,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('profile-how')));
     await tester.pumpAndSettle();
     expect(find.textContaining('Mifflin'), findsOneWidget);
-    expect(find.textContaining('TDEE: 2.625 kcal'), findsOneWidget);
+    expect(find.textContaining('TDEE: 2.625 kcal'), findsOneWidget);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
 
@@ -449,8 +476,8 @@ void main() {
 
     final card = find.byKey(const ValueKey('profile-adaptive-tdee'));
     await reveal(tester, card);
-    expect(find.text('2.500 kcal/ngày'), findsOneWidget);
-    expect(find.textContaining('Mifflin-St Jeor ước tính 2.625 kcal'),
+    expect(find.text('2.500 kcal/ngày'), findsOneWidget);
+    expect(find.textContaining('Mifflin-St Jeor ước tính 2.625 kcal'),
         findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('adaptive-tdee-use')));
     await tester.pumpAndSettle();
@@ -467,7 +494,7 @@ void main() {
     ]);
     await open(tester, database);
     await reveal(tester, find.byKey(const ValueKey('profile-adaptive-tdee')));
-    expect(find.textContaining('Hiện có 0 ngày ghi ăn, 1 lần cân.'),
+    expect(find.textContaining('Ghi ăn 0/10 ngày · cân 1/3 lần'),
         findsOneWidget);
     expect(find.byKey(const ValueKey('adaptive-tdee-use')), findsNothing);
   });

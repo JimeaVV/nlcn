@@ -16,7 +16,7 @@ class MealResult extends StatelessWidget {
     final plan = recommendation.plan;
     final target = recommendation.targetCalories;
     final meetsTargets = plan.meetsTargets(target);
-    final accent = meetsTargets ? CyberColors.lime : Colors.orange;
+    final accent = meetsTargets ? CyberColors.lime : CyberColors.warning;
     final l10n = context.l10n;
     String format(double value, [int decimals = 0]) =>
         context.formatNumber(value, decimals: decimals);
@@ -24,7 +24,6 @@ class MealResult extends StatelessWidget {
       children: [
         CyberCard(
           title: l10n.mealTargetsTitle,
-          icon: Icons.speed_rounded,
           child: Row(children: [
             Expanded(
                 child: MetricTile(
@@ -48,6 +47,7 @@ class MealResult extends StatelessWidget {
         const SizedBox(height: 14),
         CyberCard(
           title: l10n.mealComparisonTitle,
+          // Says whether the plan meets the targets, so it stays.
           icon: meetsTargets
               ? Icons.check_circle_outline_rounded
               : Icons.info_outline_rounded,
@@ -83,8 +83,6 @@ class MealResult extends StatelessWidget {
         const SizedBox(height: 14),
         CyberCard(
           title: l10n.mealsTitle,
-          icon: Icons.ramen_dining_rounded,
-          accent: CyberColors.magenta,
           child: Column(
             children: recommendation.plan.meals.entries.map((entry) {
               final meal = entry.value;
@@ -150,7 +148,7 @@ class _Comparison extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('$label: ${format(actual)} / ${format(target)} $unit',
+        Text('$label: ${format(actual)} / ${format(target)}\u00A0$unit',
             style: TextStyle(
                 color: CyberColors.text, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),

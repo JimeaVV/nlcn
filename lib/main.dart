@@ -1,22 +1,38 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'core/cyber_theme.dart';
 import 'core/locale_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/home_screen.dart';
+import 'services/photo_collector.dart';
 import 'services/reminder_service.dart';
+import 'services/water_reminder_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The bundled font's licence, listed on the licences page.
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(['Be Vietnam Pro'],
+        await rootBundle.loadString('assets/fonts/BeVietnamPro/OFL.txt'));
+  });
   final themeController = ThemeController();
   final localeController = LocaleController();
   final reminders = ReminderController();
-  await Future.wait(
-      [themeController.load(), localeController.load(), reminders.load()]);
+  final waterReminders = WaterReminderController();
+  await Future.wait([
+    themeController.load(),
+    localeController.load(),
+    reminders.load(),
+    waterReminders.load(),
+    PhotoCollector.instance.load(),
+  ]);
   runApp(OptiFitApp(
     themeController: themeController,
     localeController: localeController,
     reminders: reminders,
+    waterReminders: waterReminders,
   ));
 }
 
@@ -26,11 +42,13 @@ class OptiFitApp extends StatelessWidget {
     required this.themeController,
     required this.localeController,
     this.reminders,
+    this.waterReminders,
   });
 
   final ThemeController themeController;
   final LocaleController localeController;
   final ReminderController? reminders;
+  final WaterReminderController? waterReminders;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +66,7 @@ class OptiFitApp extends StatelessWidget {
             themeController: themeController,
             localeController: localeController,
             reminders: reminders,
+            waterReminders: waterReminders,
           ),
         );
       },

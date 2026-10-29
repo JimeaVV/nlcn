@@ -184,6 +184,32 @@ Dòng đầu tiên phải khớp test top-1 của lần train (chạy thử trê
   do người khác chia sẻ. Rồi *Run all*.
 - Mỗi cách xem thêm vào là app phải chạy model thêm một lần.
 
+## Model phát hiện món trên đĩa (YOLO, contract 1.6)
+
+Notebook `train_detector.ipynb` (sinh từ `train_detector.py`) train YOLO11n
+tìm từng món trên đĩa: 21 lớp ở mục 7 của `docs/MODEL_CONTRACT.md`. Dữ liệu
+là khung có sẵn của VietFood67 và mặt nạ MyFood đổi thành khung.
+
+Trên Colab:
+1. *Runtime → Change runtime type → T4 GPU*; secret `KAGGLE_API_TOKEN`
+   như notebook nhận diện món.
+2. *Runtime → Run all*, cho phép Google Drive. Chạy `QUICK_TEST = True`
+   trước (khoảng 25 phút, phần lớn là tải VietFood67), rồi đặt
+   `QUICK_TEST = False` và chạy lại trong cùng phiên.
+3. Gần hết giờ (`TIME_LIMIT_HOURS`, 4,6 giờ trên Colab) notebook tự dừng
+   sau một epoch, vẫn test và xuất epoch tốt nhất. Chạy lại là train tiếp
+   từ `last.pt` trên Drive.
+4. Lấy 3 file trong Drive, thư mục `macrorunner_train/detector_yolo11n/export`:
+   `detector.tflite`, `detector_classes.txt`, `DETECTOR_CARD.md`. Bỏ vào
+   `assets/models/`. Dùng bản nhỏ `detector_int8.tflite` thì đổi tên nó
+   thành `detector.tflite`: app chỉ đọc tên đó.
+
+Thử trên máy trước khi gửi: `python tool/train/test/smoke_detector.py`, cần
+Python có `ultralytics==8.4.185` (torch CPU là đủ). Script chạy notebook hai
+lần trên ảnh giả: lần đầu bị cắt sau 1 epoch, lần sau train tiếp đến hết.
+Bản xuất LiteRT chỉ chạy trên Linux và macOS, nên trên Windows bước kiểm tra
+dùng bản ONNX.
+
 ## Ảnh tự chụp
 
 Tạo một dataset Kaggle riêng gồm `labels.csv` (định dạng ở contract mục 5)

@@ -40,7 +40,6 @@ class WorkoutResult extends StatelessWidget {
       children: [
         CyberCard(
           title: l10n.sessionSummary,
-          accent: CyberColors.lime,
           child: Column(
             children: [
               Row(
@@ -90,7 +89,6 @@ class WorkoutResult extends StatelessWidget {
         const SizedBox(height: 14),
         CyberCard(
           title: l10n.exerciseSequence,
-          accent: CyberColors.cyan,
           child: exercises.isEmpty
               ? Text(l10n.noExerciseData)
               : Column(
@@ -119,7 +117,7 @@ class WorkoutResult extends StatelessWidget {
                               if (onRest != null)
                                 IconButton(
                                   key: ValueKey('rest-$exerciseName'),
-                                  tooltip: l10n.restTimerStart,
+                                  tooltip: l10n.restTimerFor(exerciseName),
                                   onPressed: () => onRest!(exerciseName),
                                   icon: Icon(Icons.timer_outlined,
                                       color: CyberColors.cyan),
@@ -127,7 +125,7 @@ class WorkoutResult extends StatelessWidget {
                               IconButton(
                                 tooltip: logging
                                     ? l10n.savingResult
-                                    : l10n.logResult,
+                                    : l10n.logResultFor(exerciseName),
                                 onPressed: logging
                                     ? null
                                     : () => onLogExercise(exerciseName),

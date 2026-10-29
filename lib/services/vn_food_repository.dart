@@ -37,10 +37,18 @@ class VnFoodRepository {
         for (final name in ['components', 'dishes', 'dish_names'])
           _bundle.loadString('$_folder/$name.csv', cache: false),
       ]);
+      // Optional: without it the app still logs dishes, only without the
+      // part and cooking picker.
+      var variants = '';
+      try {
+        variants = await _bundle.loadString('$_folder/food_variants.csv',
+            cache: false);
+      } catch (_) {}
       return parseVnFoodData(
         componentsCsv: files[0],
         dishesCsv: files[1],
         dishNamesCsv: files[2],
+        variantsCsv: variants,
       );
     } catch (_) {
       _loaded = null;

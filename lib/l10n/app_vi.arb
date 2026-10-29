@@ -17,7 +17,7 @@
   "mealProfileRequiredTitle": "Thiết lập hồ sơ trước",
   "mealProfileRequiredBody": "Chọn mục tiêu và lưu thông tin cơ thể trong tab Hồ sơ.",
   "mealOpenProfile": "MỞ HỒ SƠ",
-  "mealProfileSummary": "{weight} kg • {height} cm • {age} tuổi",
+  "mealProfileSummary": "{weight} kg • {height} cm • {age} tuổi",
   "@mealProfileSummary": {
     "placeholders": {
       "weight": {
@@ -57,7 +57,7 @@
   "mealOutsideTarget": "Chưa đạt khoảng mục tiêu",
   "caloriesLabel": "Calo",
   "proteinLabel": "Protein",
-  "comparisonDifference": "Lệch {difference} {unit} ({percent}%)",
+  "comparisonDifference": "Lệch {difference} {unit} ({percent}%)",
   "@comparisonDifference": {
     "placeholders": {
       "difference": {
@@ -106,7 +106,7 @@
   "workoutSaveFailed": "Không lưu được buổi tập.",
   "exerciseLogSaveFailed": "Không lưu được kết quả bài tập.",
   "nextSessionTitle": "Gợi ý cho buổi sau",
-  "nextSessionSummary": "{weight} kg • 3 hiệp • mục tiêu {reps} lần",
+  "nextSessionSummary": "{weight} kg • 3 hiệp • mục tiêu {reps} lần",
   "@nextSessionSummary": {
     "placeholders": {
       "weight": {
@@ -117,9 +117,9 @@
       }
     }
   },
-  "overloadIncreaseWeight": "Bạn đã hoàn thành 3×12 với mức gắng sức vừa phải. Buổi sau tăng thêm 2,5 kg và bắt đầu lại trong khoảng 8–12 lần.",
+  "overloadIncreaseWeight": "Bạn đã hoàn thành 3×12 với mức gắng sức vừa phải. Buổi sau tăng thêm 2,5 kg và bắt đầu lại trong khoảng 8–12 lần.",
   "overloadMaintainWeight": "Bạn đã hoàn thành 3×12 nhưng thấy rất nặng. Giữ nguyên mức tạ thêm một buổi trước khi tăng.",
-  "overloadDecreaseWeight": "Số lần chưa đạt khoảng mục tiêu. Giảm 2,5 kg và ưu tiên kỹ thuật có kiểm soát.",
+  "overloadDecreaseWeight": "Số lần chưa đạt khoảng mục tiêu. Giảm 2,5 kg và ưu tiên kỹ thuật có kiểm soát.",
   "overloadIncreaseReps": "Giữ nguyên mức tạ và cố gắng tăng số lần cho đến khi cả ba hiệp đạt 12 lần.",
   "sessionSummary": "Tóm tắt buổi tập",
   "estimatedLabel": "Ước tính",
@@ -171,7 +171,7 @@
   },
   "progressionModel": "Mô hình tăng tiến: 3 hiệp, mỗi hiệp 8–12 lần.",
   "currentLoadKg": "Mức tạ hiện tại (kg)",
-  "currentLoadError": "Nhập mức tạ từ 0 đến 1000 kg.",
+  "currentLoadError": "Nhập mức tạ từ 0 đến 1000 kg.",
   "setLabel": "Hiệp {number}",
   "@setLabel": {
     "placeholders": {
@@ -217,7 +217,7 @@
   "deleteMealPlan": "Xóa thực đơn",
   "deleteWorkoutPlan": "Xóa buổi tập",
   "deleteExerciseLog": "Xóa nhật ký bài tập",
-  "mealHistoryTitle": "{calories} kcal • {protein} g protein",
+  "mealHistoryTitle": "{calories} kcal • {protein} g protein",
   "@mealHistoryTitle": {
     "placeholders": {
       "calories": {
@@ -239,7 +239,7 @@
       }
     }
   },
-  "exerciseLogSubtitle": "{weight} kg • {reps} lần\nBuổi sau: {nextWeight} kg • mục tiêu {nextReps} lần\n{date}",
+  "exerciseLogSubtitle": "{weight} kg • {reps} lần\nBuổi sau: {nextWeight} kg • mục tiêu {nextReps} lần\n{date}",
   "@exerciseLogSubtitle": {
     "placeholders": {
       "weight": {
@@ -268,7 +268,7 @@
   "heightName": "Chiều cao",
   "weightName": "Cân nặng",
   "activityLevel": "Mức vận động",
-  "activitySedentary": "Ít vận động · ×{factor}",
+  "activitySedentary": "Hầu như không tập, ngồi nhiều · ×{factor}",
   "@activitySedentary": {
     "placeholders": {
       "factor": {
@@ -276,7 +276,7 @@
       }
     }
   },
-  "activityLight": "Nhẹ · ×{factor}",
+  "activityLight": "Tập 1–3 buổi/tuần · ×{factor}",
   "@activityLight": {
     "placeholders": {
       "factor": {
@@ -284,7 +284,7 @@
       }
     }
   },
-  "activityModerate": "Vừa · ×{factor}",
+  "activityModerate": "Tập 3–5 buổi/tuần · ×{factor}",
   "@activityModerate": {
     "placeholders": {
       "factor": {
@@ -292,7 +292,7 @@
       }
     }
   },
-  "activityActive": "Nhiều · ×{factor}",
+  "activityActive": "Tập 6–7 buổi/tuần · ×{factor}",
   "@activityActive": {
     "placeholders": {
       "factor": {
@@ -300,7 +300,7 @@
       }
     }
   },
-  "activityVeryActive": "Rất nhiều · ×{factor}",
+  "activityVeryActive": "Tập 2 buổi/ngày, hoặc làm việc nặng · ×{factor}",
   "@activityVeryActive": {
     "placeholders": {
       "factor": {
@@ -312,7 +312,7 @@
   "goalLose": "Giảm mỡ",
   "goalMaintain": "Giữ cân",
   "goalGain": "Tăng cân",
-  "estimateFormula": "Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).",
+  "estimateFormula": "Ước tính: BMR theo Mifflin–St Jeor; TDEE = BMR × mức vận động. Calo giảm/giữ/tăng cân = 90%/100%/110% TDEE. Protein = 1,8 g × cân nặng (kg).",
   "manualCalories": "Calo tự đặt (kcal/ngày)",
   "manualProtein": "Protein tự đặt (g/ngày)",
   "numberInvalid": "Nhập {name} hợp lệ.",
@@ -348,20 +348,20 @@
       }
     }
   },
-  "targetsInvalidHint": "Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.",
+  "targetsInvalidHint": "Nhập thông tin và mục tiêu hợp lệ để xem ước tính. Năng lượng từ protein (4 kcal/g) không vượt tổng calo.",
   "estimatedCalories": "Calo ước tính",
   "estimatedProtein": "Protein ước tính",
   "saveProfile": "Lưu hồ sơ",
   "savingProfile": "Đang lưu...",
   "profileSaved": "Đã lưu hồ sơ và mục tiêu.",
   "profileSaveFailed": "Không thể lưu hồ sơ. Vui lòng thử lại.",
-  "targetErrorProteinEnergy": "Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. Hãy điều chỉnh mục tiêu calo hoặc protein.",
-  "targetErrorCalorieRange": "Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.",
-  "targetErrorProteinRange": "Mục tiêu protein phải lớn hơn 0 và không quá 500 g. Kiểm tra hồ sơ hoặc tự nhập mục tiêu.",
+  "targetErrorProteinEnergy": "Năng lượng từ protein (4 kcal/g) không được vượt tổng calo. Hãy điều chỉnh mục tiêu calo hoặc protein.",
+  "targetErrorCalorieRange": "Mục tiêu calo nằm ngoài khoảng ứng dụng hỗ trợ (1.000–10.000 kcal). Kiểm tra hồ sơ hoặc tự nhập mục tiêu phù hợp.",
+  "targetErrorProteinRange": "Mục tiêu protein phải lớn hơn 0 và không quá 500 g. Kiểm tra hồ sơ hoặc tự nhập mục tiêu.",
   "targetErrorGeneric": "Thông tin chưa cho ước tính hợp lệ. Kiểm tra tuổi, chiều cao, cân nặng và mục tiêu.",
   "weightTracking": "Theo dõi cân nặng",
   "noWeights": "Chưa có lần ghi cân nặng. Lưu hồ sơ để bắt đầu.",
-  "latestWeight": "Gần nhất: {weight} kg · {date}",
+  "latestWeight": "Gần nhất: {weight} kg · {date}",
   "@latestWeight": {
     "placeholders": {
       "weight": {
@@ -372,7 +372,7 @@
       }
     }
   },
-  "weightChange": "Thay đổi: {change} kg từ {from} đến {to}",
+  "weightChange": "Thay đổi: {change} kg từ {from} đến {to}",
   "@weightChange": {
     "placeholders": {
       "change": {
@@ -418,7 +418,7 @@
   "weightDeleteFailed": "Không thể xóa cân nặng. Vui lòng thử lại.",
   "editWeight": "Sửa cân nặng",
   "weightKg": "Cân nặng (kg)",
-  "weightValueError": "Nhập cân nặng lớn hơn 0 và không quá 500 kg.",
+  "weightValueError": "Nhập cân nặng lớn hơn 0 và không quá 500 kg.",
   "weighInDateField": "Ngày cân (ngày/tháng/năm)",
   "weighInDate": "Ngày cân",
   "chooseWeighInDate": "Chọn ngày cân",
@@ -427,7 +427,7 @@
   "dateFormatError": "Nhập ngày theo dạng ngày/tháng/năm.",
   "dateAfterToday": "Ngày cân không được sau hôm nay.",
   "saveWeight": "Lưu cân nặng",
-  "weightChartSemantics": "Biểu đồ {count} lần ghi cân nặng. Từ {firstDate}: {firstWeight} kg đến {lastDate}: {lastWeight} kg. Các giá trị được liệt kê bên dưới.",
+  "weightChartSemantics": "Biểu đồ {count} lần ghi cân nặng. Từ {firstDate}: {firstWeight} kg đến {lastDate}: {lastWeight} kg. Các giá trị được liệt kê bên dưới.",
   "@weightChartSemantics": {
     "placeholders": {
       "count": {
@@ -448,15 +448,14 @@
     }
   },
   "settingsTitle": "CÀI ĐẶT",
-  "settingsSubtitle": "Chọn ngôn ngữ và giao diện. Lựa chọn được lưu trên máy.",
-  "offlineModeTitle": "Chế độ offline",
-  "offlineModeBody": "Thực đơn, buổi tập và gợi ý cho buổi sau đều chạy trên máy. Hồ sơ và lịch sử được lưu cục bộ.",
   "languageTitle": "Ngôn ngữ",
   "interfaceStyle": "Giao diện",
-  "styleCyberpunkDescription": "Neon xanh lơ, hồng tím trên nền xanh đen.",
-  "styleMinimalLightDescription": "Sáng, gọn gàng và dễ đọc.",
-  "styleForestDescription": "Tông xanh lá dịu mắt, mang cảm giác tự nhiên.",
-  "styleSunsetDescription": "Điểm nhấn cam ấm và tím.",
+  "styleCyan": "Xanh lơ",
+  "styleBlue": "Xanh dương",
+  "styleGreen": "Xanh lá",
+  "styleOrange": "Cam",
+  "styleDarkBackground": "Nền tối",
+  "styleLightBackground": "Nền sáng",
   "errorDataUnavailable": "Không đọc được dữ liệu thực phẩm và bài tập đi kèm ứng dụng.",
   "errorMealNotFound": "Không tìm được thực đơn phù hợp với mục tiêu hiện tại. Hãy thử lại hoặc điều chỉnh mục tiêu.",
   "errorWorkoutNotFound": "Không có bài tập phù hợp với lựa chọn này. Hãy thử thời gian dài hơn hoặc nhóm bài khác.",
@@ -493,7 +492,7 @@
   "diaryPreviousDay": "Ngày trước",
   "diaryNextDay": "Ngày sau",
   "diaryEaten": "Đã ăn",
-  "diaryCaloriesProgress": "{eaten} / {target} kcal",
+  "diaryCaloriesProgress": "{eaten} / {target} kcal",
   "@diaryCaloriesProgress": {
     "placeholders": {
       "eaten": {
@@ -504,7 +503,7 @@
       }
     }
   },
-  "diaryProteinProgress": "{eaten} / {target} g protein",
+  "diaryProteinProgress": "{eaten} / {target} g protein",
   "@diaryProteinProgress": {
     "placeholders": {
       "eaten": {
@@ -515,7 +514,7 @@
       }
     }
   },
-  "diaryRemaining": "Còn {value} kcal so với mục tiêu",
+  "diaryRemaining": "Còn {value} kcal so với mục tiêu",
   "@diaryRemaining": {
     "placeholders": {
       "value": {
@@ -523,7 +522,7 @@
       }
     }
   },
-  "diaryOver": "Vượt mục tiêu {value} kcal",
+  "diaryOver": "Vượt mục tiêu {value} kcal",
   "@diaryOver": {
     "placeholders": {
       "value": {
@@ -532,7 +531,7 @@
     }
   },
   "diaryNoTarget": "Lưu hồ sơ để so với mục tiêu calo và protein.",
-  "diaryMacros": "Carb {carbs} g • Chất béo {fat} g",
+  "diaryMacros": "Carb {carbs} g • Chất béo {fat} g",
   "@diaryMacros": {
     "placeholders": {
       "carbs": {
@@ -552,16 +551,17 @@
   "diaryFoodSearch": "Tìm thực phẩm",
   "diaryFoodRequired": "Chọn một thực phẩm trong danh sách.",
   "diaryGrams": "Khối lượng (g)",
-  "diaryGramsError": "Nhập khối lượng lớn hơn 0 và không quá 5000 g.",
+  "diaryGramsError": "Nhập khối lượng lớn hơn 0 và không quá 5000 g.",
   "diaryOptionalGrams": "Khối lượng (g, không bắt buộc)",
   "diaryCustomName": "Tên món",
   "diaryCustomNameError": "Nhập tên món.",
   "diaryCustomCalories": "Calo (kcal)",
   "diaryCustomCaloriesError": "Nhập calo từ 0 đến 10000.",
+  "diaryProteinLabel": "Protein (g)",
   "diaryCarbsLabel": "Carb (g)",
   "diaryFatLabel": "Chất béo (g)",
-  "diaryMacroError": "Từ 0 đến 1000 g.",
-  "diaryPreview": "Ước tính: {calories} kcal • {protein} g protein",
+  "diaryMacroError": "Từ 0 đến 1000 g.",
+  "diaryPreview": "Ước tính: {calories} kcal • {protein} g protein",
   "@diaryPreview": {
     "placeholders": {
       "calories": {
@@ -573,7 +573,7 @@
     }
   },
   "diarySave": "Thêm vào nhật ký",
-  "diaryEntryDetails": "{grams} g • {calories} kcal • {protein} g protein",
+  "diaryEntryDetails": "{grams} g • {calories} kcal • {protein} g protein",
   "@diaryEntryDetails": {
     "placeholders": {
       "grams": {
@@ -587,7 +587,7 @@
       }
     }
   },
-  "diaryEntryDetailsNoGrams": "{calories} kcal • {protein} g protein",
+  "diaryEntryDetailsNoGrams": "{calories} kcal • {protein} g protein",
   "@diaryEntryDetailsNoGrams": {
     "placeholders": {
       "calories": {
@@ -616,10 +616,13 @@
   "todayTitle": "HÔM NAY",
   "todayLoadFailed": "Không tải được dữ liệu hôm nay. Kéo xuống để thử lại.",
   "todayOpenDiary": "Mở nhật ký",
-  "todayWeightWeek": "Thay đổi 7 ngày: {change} kg",
+  "todayWeightWeek": "Thay đổi so với {date}: {change} kg",
   "@todayWeightWeek": {
     "placeholders": {
       "change": {
+        "type": "String"
+      },
+      "date": {
         "type": "String"
       }
     }
@@ -664,8 +667,22 @@
   "scanAddComponent": "Thêm thành phần",
   "scanNoNutrition": "chưa có số liệu",
   "scanUnitFallback": "phần",
-  "scanDecrease": "Giảm",
-  "scanIncrease": "Tăng",
+  "scanDecrease": "Giảm {name}",
+  "@scanDecrease": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanIncrease": "Tăng {name}",
+  "@scanIncrease": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "scanMissingNutrition": "Chưa có số liệu dinh dưỡng cho: {names}. Bỏ chọn các phần này hoặc bổ sung số liệu để ghi vào nhật ký.",
   "@scanMissingNutrition": {
     "placeholders": {
@@ -674,7 +691,7 @@
       }
     }
   },
-  "scanTotal": "Tổng: {calories} kcal • {protein} g protein",
+  "scanTotal": "Tổng: {calories} kcal • {protein} g protein",
   "@scanTotal": {
     "placeholders": {
       "calories": {
@@ -718,7 +735,7 @@
   "goalGainShort": "Tăng cân",
   "processingButton": "ĐANG XỬ LÝ...",
   "planAlreadySaved": "ĐÃ LƯU",
-  "proteinGrams": "{value} g protein",
+  "proteinGrams": "{value} g protein",
   "@proteinGrams": {
     "placeholders": {
       "value": {
@@ -726,18 +743,15 @@
       }
     }
   },
-  "kcalProteinLine": "{kcal} kcal • protein {protein} g",
-  "@kcalProteinLine": {
+  "mealTotalKcal": "{kcal} kcal",
+  "@mealTotalKcal": {
     "placeholders": {
       "kcal": {
-        "type": "String"
-      },
-      "protein": {
         "type": "String"
       }
     }
   },
-  "mealMacroLine": "{kcal} kcal • protein {protein} g • tinh bột {carbs} g • béo {fat} g",
+  "mealMacroLine": "{kcal} kcal • protein {protein} g • tinh bột {carbs} g • béo {fat} g",
   "@mealMacroLine": {
     "placeholders": {
       "kcal": {
@@ -755,7 +769,7 @@
     }
   },
   "repsRange": "Nhập từ 0 đến 30",
-  "overloadConfirmIncrease": "Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.",
+  "overloadConfirmIncrease": "Lần đầu hoàn thành 3×12 nhẹ nhàng ở mức tạ này. Tập lại mức này thêm một buổi; nếu vẫn nhẹ nhàng thì tăng 2,5 kg.",
   "overloadBodyweightReps": "Bạn đã hoàn thành 3×12 không cần tạ. Buổi sau thêm 2 lần mỗi hiệp, hoặc chuyển sang biến thể khó hơn.",
   "overloadBodyweightDecrease": "Số lần chưa đạt khoảng mục tiêu. Nhắm 8 lần đúng kỹ thuật mỗi hiệp, hoặc dùng biến thể dễ hơn.",
   "scanNotInApp": "Có vẻ món này chưa có trong app. Hãy chọn món gần nhất, hoặc tự nhập ở Nhật ký.",
@@ -780,12 +794,9 @@
       }
     }
   },
-  "scanMacroGrams": "Đạm {protein} g · Tinh bột {carbs} g · Béo {fat} g",
+  "scanMacroGrams": "Carb {carbs} g · Béo {fat} g",
   "@scanMacroGrams": {
     "placeholders": {
-      "protein": {
-        "type": "String"
-      },
       "carbs": {
         "type": "String"
       },
@@ -811,7 +822,7 @@
   "diaryFavorites": "Yêu thích",
   "diaryRecent": "Gần đây",
   "diaryQuickHint": "Chạm một món để thêm ngay vào bữa đã chọn.",
-  "diaryQuickChip": "{name} · {calories} kcal",
+  "diaryQuickChip": "{name} · {calories} kcal",
   "@diaryQuickChip": {
     "placeholders": {
       "name": {
@@ -841,7 +852,7 @@
     }
   },
   "diaryCopyToToday": "Chép bữa này sang hôm nay",
-  "diaryRepeatYesterday": "Ăn giống hôm qua ({count} món · {calories} kcal)",
+  "diaryRepeatYesterday": "Ăn giống hôm qua ({count} món · {calories} kcal)",
   "@diaryRepeatYesterday": {
     "placeholders": {
       "count": {
@@ -860,7 +871,7 @@
       }
     }
   },
-  "lastSessionLine": "Lần trước ({date}): {weight} kg × {reps}",
+  "lastSessionLine": "Lần trước ({date}): {weight} kg × {reps}",
   "@lastSessionLine": {
     "placeholders": {
       "date": {
@@ -874,13 +885,29 @@
       }
     }
   },
-  "lastSessionSuggestion": "Gợi ý hôm nay: {weight} kg × {reps} lần",
+  "lastSessionSuggestion": "Gợi ý hôm nay: {weight} kg × {reps} lần",
   "@lastSessionSuggestion": {
     "placeholders": {
       "weight": {
         "type": "String"
       },
       "reps": {
+        "type": "String"
+      }
+    }
+  },
+  "restTimerFor": "Bấm giờ nghỉ: {name}",
+  "@restTimerFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "logResultFor": "Ghi kết quả: {name}",
+  "@logResultFor": {
+    "placeholders": {
+      "name": {
         "type": "String"
       }
     }
@@ -899,7 +926,7 @@
   "restTimerLess": "Bớt 15 giây",
   "restTimerStop": "Dừng bấm giờ",
   "adaptiveTdeeTitle": "TDEE theo dữ liệu thật",
-  "adaptiveTdeeValue": "{tdee} kcal/ngày",
+  "adaptiveTdeeValue": "{tdee} kcal/ngày",
   "@adaptiveTdeeValue": {
     "placeholders": {
       "tdee": {
@@ -907,7 +934,7 @@
       }
     }
   },
-  "adaptiveTdeeDetails": "Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.",
+  "adaptiveTdeeDetails": "Từ {days} ngày ghi ăn (trung bình {intake} kcal) và {weighIns} lần cân trong 4 tuần qua: cân nặng {trend} kg/tuần.",
   "@adaptiveTdeeDetails": {
     "placeholders": {
       "days": {
@@ -924,7 +951,7 @@
       }
     }
   },
-  "adaptiveTdeeCompare": "Công thức Mifflin-St Jeor ước tính {formula} kcal.",
+  "adaptiveTdeeCompare": "Công thức Mifflin-St Jeor ước tính {formula} kcal.",
   "@adaptiveTdeeCompare": {
     "placeholders": {
       "formula": {
@@ -932,7 +959,7 @@
       }
     }
   },
-  "adaptiveTdeeUse": "Dùng làm mục tiêu ({calories} kcal)",
+  "adaptiveTdeeUse": "Dùng làm mục tiêu ({calories} kcal)",
   "@adaptiveTdeeUse": {
     "placeholders": {
       "calories": {
@@ -940,10 +967,30 @@
       }
     }
   },
-  "adaptiveTdeeUsed": "Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.",
+  "adaptiveTdeeUsed": "Đã điền mục tiêu calo {calories} kcal. Bấm Lưu hồ sơ để áp dụng.",
   "@adaptiveTdeeUsed": {
     "placeholders": {
       "calories": {
+        "type": "String"
+      }
+    }
+  },
+  "adaptiveTdeeProgress": "Ghi ăn {haveDays}/{days} ngày · cân {haveWeighIns}/{weighIns} lần; lần cân đầu và cuối cần cách nhau từ {span} ngày.",
+  "@adaptiveTdeeProgress": {
+    "placeholders": {
+      "haveDays": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      },
+      "haveWeighIns": {
+        "type": "String"
+      },
+      "weighIns": {
+        "type": "String"
+      },
+      "span": {
         "type": "String"
       }
     }
@@ -968,20 +1015,10 @@
       }
     }
   },
-  "adaptiveTdeeUnsure": "Kết quả lệch xa công thức ({tdee} so với {formula} kcal), có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.",
-  "@adaptiveTdeeUnsure": {
-    "placeholders": {
-      "tdee": {
-        "type": "String"
-      },
-      "formula": {
-        "type": "String"
-      }
-    }
-  },
-  "adaptiveTdeeInfo": "TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.",
+  "adaptiveTdeeUnsure": "Kết quả lệch xa công thức, có thể do có ngày ghi ăn chưa đủ. Chưa nên dùng làm mục tiêu.",
+  "adaptiveTdeeInfo": "TDEE thật ≈ calo ăn trung bình − mức thay đổi cân nặng mỗi ngày × 7700 kcal/kg. Mức thay đổi lấy từ đường thẳng khớp nhất qua các lần cân trong 4 tuần. 7700 kcal cho 1 kg là con số xấp xỉ thường dùng, không đúng hẳn cho mọi người. Ngày ghi dưới 500 kcal bị coi là ghi thiếu và không tính. Đây là ước lượng, không phải chỉ định y tế.",
   "waterTitle": "Nước uống",
-  "waterProgress": "{drunk} / {target} ml",
+  "waterProgress": "{drunk} / {target} ml",
   "@waterProgress": {
     "placeholders": {
       "drunk": {
@@ -992,7 +1029,7 @@
       }
     }
   },
-  "waterGlasses": "{count} ly, mỗi ly {glass} ml",
+  "waterGlasses": "{count} ly, mỗi ly {glass} ml",
   "@waterGlasses": {
     "placeholders": {
       "count": {
@@ -1025,7 +1062,7 @@
       }
     }
   },
-  "weekAverage": "Trung bình {calories} kcal • {protein} g protein mỗi ngày ghi",
+  "weekAverage": "Mỗi ngày có ghi: trung bình {calories} kcal • {protein} g protein",
   "@weekAverage": {
     "placeholders": {
       "calories": {
@@ -1036,7 +1073,7 @@
       }
     }
   },
-  "weekVsTarget": "So với mục tiêu {target} kcal: {diff} kcal/ngày",
+  "weekVsTarget": "So với mục tiêu {target} kcal: {diff} kcal/ngày",
   "@weekVsTarget": {
     "placeholders": {
       "target": {
@@ -1055,17 +1092,19 @@
       }
     }
   },
-  "weekWeight": "Cân nặng {change} kg",
+  "weekWeight": "Cân nặng {change} kg so với {date}",
   "@weekWeight": {
     "placeholders": {
       "change": {
+        "type": "String"
+      },
+      "date": {
         "type": "String"
       }
     }
   },
   "weekEmpty": "Chưa có dữ liệu trong 7 ngày qua.",
   "remindersTitle": "Nhắc ghi bữa",
-  "remindersBody": "Thông báo từ chính điện thoại, không cần mạng. Có thể đến trễ vài phút.",
   "remindersSwitch": "Bật nhắc nhở",
   "remindersDenied": "Chưa được cấp quyền thông báo. Hãy bật trong Cài đặt của Android.",
   "remindersChangeTime": "Đổi giờ nhắc {meal}",
@@ -1097,7 +1136,7 @@
   "backupInvalid": "File này không phải bản sao lưu MacroRunner hợp lệ.",
   "backupFailed": "Không tạo được file sao lưu. Hãy thử lại.",
   "widgetTitle": "MacroRunner hôm nay",
-  "widgetWater": "Nước {drunk} / {target} L",
+  "widgetWater": "Nước {drunk} / {target} L",
   "@widgetWater": {
     "placeholders": {
       "drunk": {
@@ -1115,5 +1154,158 @@
         "type": "String"
       }
     }
-  }
+  },
+  "pickerSearch": "Tìm món hoặc thứ ăn riêng (gõ không dấu cũng được)",
+  "pickerSearchComponents": "Tìm thành phần",
+  "pickerClear": "Xóa ô tìm",
+  "pickerNoMatch": "Không tìm thấy. Thử từ khác, ví dụ \"ga\" hoặc \"com\".",
+  "pickerDishes": "Món",
+  "pickerSingle": "Ăn riêng một thứ",
+  "pickerPer100g": "{kcal} kcal / 100 g",
+  "@pickerPer100g": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "pickerNewFood": "Món chưa có trong danh sách…",
+  "pickerNewFoodHint": "Tự nhập tên và dinh dưỡng. Nếu đang gom ảnh, ảnh được giữ để sau này dạy model món này.",
+  "collectTitle": "Gom ảnh để dạy model",
+  "collectBody": "Khi bật, mỗi lần bạn ghi một món đã quét, app giữ lại ảnh (thu nhỏ) kèm tên món bạn xác nhận. Ảnh chỉ nằm trong máy; muốn dùng để train thì bấm Xuất rồi đưa file zip lên Drive.",
+  "collectSwitch": "Giữ ảnh khi ghi món đã quét",
+  "collectStats": "Đã gom {photos} ảnh · {size} MB",
+  "@collectStats": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "collectEmpty": "Chưa có ảnh nào.",
+  "collectExport": "Xuất ảnh đã gom (zip)",
+  "collectExportFailed": "Không xuất được ảnh. Hãy thử lại.",
+  "collectDelete": "Xóa ảnh đã gom",
+  "collectDeleteTitle": "Xóa toàn bộ ảnh đã gom?",
+  "collectDeleteBody": "Ảnh đã xóa không lấy lại được. Nhật ký ăn không bị ảnh hưởng.",
+  "collectDeleted": "Đã xóa ảnh đã gom.",
+  "waterRemindersTitle": "Nhắc uống nước",
+  "waterRemindersBody": "Mỗi lần nhắc là một câu ngẫu nhiên. Hôm nào đã uống đủ {goal} thì app thôi nhắc. Mở app ít nhất 7 ngày một lần để nhắc không bị ngắt.",
+  "@waterRemindersBody": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemindersSwitch": "Bật nhắc uống nước",
+  "waterRemindersEvery": "Nhắc mỗi",
+  "waterRemindersHours": "{hours} tiếng",
+  "@waterRemindersHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "waterRemindersFrom": "Từ",
+  "waterRemindersTo": "Đến",
+  "waterRemindersBadWindow": "Giờ kết thúc phải sau giờ bắt đầu.",
+  "waterReminderChannel": "Nhắc uống nước",
+  "waterReminder1Title": "Tới giờ uống nước 💧",
+  "waterReminder1Body": "Một ly nước bây giờ giúp bạn tỉnh táo hơn.",
+  "waterReminder2Title": "Hôm nay uống đủ nước chưa?",
+  "waterReminder2Body": "Mở MacroRunner để ghi lại ly vừa uống.",
+  "waterReminder3Title": "Nạp nước thôi",
+  "waterReminder3Body": "Tập luyện hiệu quả hơn khi cơ thể đủ nước.",
+  "waterReminder4Title": "Đừng đợi khát mới uống",
+  "waterReminder4Body": "Khát nghĩa là cơ thể đã hơi thiếu nước rồi.",
+  "waterReminder5Title": "Một ly nước nhé",
+  "waterReminder5Body": "Đứng dậy rót một ly, rồi quay lại việc đang làm.",
+  "infoTooltip": "Giải thích",
+  "diaryDishSummary": "{count} thành phần • {calories} kcal • {protein} g protein",
+  "@diaryDishSummary": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "calories": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "gaugeLeftLabel": "kcal còn lại",
+  "gaugeOverLabel": "kcal vượt mục tiêu",
+  "gaugeEatenLabel": "kcal đã ăn",
+  "macroCarbs": "Carb",
+  "macroProtein": "Protein",
+  "macroFat": "Béo",
+  "streakBadge": "{days} ngày",
+  "@streakBadge": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "macroInfoTitle": "Mục tiêu carb và chất béo",
+  "macroInfo": "Mục tiêu calo và protein lấy từ Hồ sơ. Mục tiêu carb và chất béo là ước lượng: chất béo chiếm 30% calo (9 kcal mỗi gam), carb là phần calo còn lại sau protein và chất béo (4 kcal mỗi gam). 30% nằm giữa khoảng khuyến nghị cho người lớn: chất béo 20–35%, carb 45–65% năng lượng (Institute of Medicine, Dietary Reference Intakes, 2005). Chip C/P/B cho biết phần năng lượng đã ăn đến từ mỗi loại.",
+  "waterGlassSemantics": "Ly {n} trên {total}",
+  "@waterGlassSemantics": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "variantGroupChicken": "Gà",
+  "variantGroupPork": "Heo",
+  "variantGroupBeef": "Bò",
+  "variantGroupEggs": "Trứng",
+  "variantGroupFish": "Cá",
+  "variantGroupStarch": "Cơm & tinh bột",
+  "variantSkinOff": "Bỏ da",
+  "variantSkinOn": "Cả da",
+  "variantPart": "Phần",
+  "variantSkin": "Da",
+  "variantStyle": "Cách nấu",
+  "variantChoose": "Chọn",
+  "variantTitle": "{group}: phần và cách nấu",
+  "@variantTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "variantPer100g": "{kcal} kcal • {protein} g protein mỗi 100 g",
+  "@variantPer100g": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      }
+    }
+  },
+  "variantPickHint": "Chọn theo phần và cách nấu",
+  "scanRefine": "Chọn phần và cách nấu",
+  "scanDetectedPlate": "Đĩa có {count} món",
+  "@scanDetectedPlate": {"description": "Chip for the plate built from the detector boxes; count is at least 1", "placeholders": {"count": {"type": "int"}}},
+  "scanDetectedHint": "Mỗi món trên đĩa một dòng bên dưới.",
+  "scanDetectedOneHint": "Món nào còn thiếu thì bấm Thêm thành phần.",
+  "scanBoxesLabel": "Ảnh có khung quanh các món tìm thấy: {foods}",
+  "@scanBoxesLabel": {"description": "Screen-reader label of the boxes drawn on the photo", "placeholders": {"foods": {"type": "String"}}},
+  "detectorClassName": "{code, select, com{Cơm} bun{Bún} mi{Mì} banh_mi_o{Bánh mì} ga{Gà} thit_kho{Thịt kho} thit_nuong{Thịt nướng} heo{Heo} bo{Bò} ca{Cá} tom{Tôm} muc{Mực} trung{Trứng} dau_hu{Đậu hũ} cha{Chả} cha_gio{Chả giò} rau{Rau} dua_leo_ca_chua{Dưa leo, cà chua} do_chua{Đồ chua} khoai_tay_chien{Khoai tây chiên} canh{Canh} other{Món}}",
+  "@detectorClassName": {"description": "Short name of a plate detector class, drawn on the photo", "placeholders": {"code": {"type": "String"}}}
 }

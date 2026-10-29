@@ -21,6 +21,11 @@ COMPONENT_HEADER = ['code', 'name_vi', 'name_en', 'kcal_per_100g', 'protein_g',
 DISH_HEADER = ['dish', 'component', 'default_grams', 'default_units']
 NAME_HEADER = ['code', 'name_vi', 'name_en']
 PLAN_HEADER = ['code', 'kind', 'slots', 'goals', 'note']
+VARIANT_HEADER = ['group', 'part', 'part_vi', 'part_en', 'skin', 'style',
+                  'style_vi', 'style_en', 'kcal_per_100g', 'protein_g',
+                  'carb_g', 'fat_g', 'unit_name_vi', 'unit_grams', 'source']
+VARIANT_GROUPS = {'ga', 'heo', 'bo', 'trung', 'ca', 'tinh_bot'}
+SKINS = {'', 'bo_da', 'ca_da'}
 DISH_KINDS = {'dish', 'combo', 'soup'}
 COMPONENT_KINDS = {'staple', 'main', 'side'}
 SLOTS = {'breakfast', 'lunch', 'dinner', 'snack'}
@@ -141,6 +146,47 @@ def main():
     for dish in dishes:
         if not any(row['dish'] == dish for row in rows):
             missing.append(f'{dish}: no components in dishes.csv')
+
+    # food_variants.csv: the same food by part, skin and cooking (logging by
+    # hand and refining a scanned item). Same rules as components.csv.
+    variants = read(DATA / 'food_variants.csv', VARIANT_HEADER)
+    seen_variants = set()
+    for row in variants:
+        key = (row['group'], row['part'], row['skin'], row['style'])
+        where = 'food_variants.csv ' + '/'.join(k or '-' for k in key)
+        if key in seen_variants:
+            errors.append(f'{where}: listed twice')
+        seen_variants.add(key)
+        if row['group'] not in VARIANT_GROUPS:
+            errors.append(f'{where}: group must be one of {sorted(VARIANT_GROUPS)}')
+        if row['skin'] not in SKINS:
+            errors.append(f'{where}: skin must be empty, bo_da or ca_da')
+        for name in ('part', 'part_vi', 'part_en', 'style', 'style_vi',
+                     'style_en'):
+            if not row[name].strip():
+                errors.append(f'{where}: {name} is required')
+        parsed = {key: number(row[key]) for key in NUTRIENTS}
+        if any(value is None for value in parsed.values()):
+            errors.append(f'{where}: nutrition must be numbers >= 0')
+            continue
+        if not row['source'].strip():
+            errors.append(f'{where}: source is required')
+        kcal = parsed['kcal_per_100g']
+        if kcal > 900:
+            errors.append(f'{where}: {kcal} kcal/100 g is above pure fat')
+        if parsed['protein_g'] + parsed['carb_g'] + parsed['fat_g'] > 100:
+            errors.append(f'{where}: protein + carb + fat exceed 100 g')
+        energy = (4 * parsed['protein_g'] + 4 * parsed['carb_g'] +
+                  9 * parsed['fat_g'])
+        if kcal >= 40 and abs(energy - kcal) > 0.25 * kcal:
+            errors.append(f'{where}: macros give {energy:.0f} kcal but the row '
+                          f'says {kcal:.0f} (check the source)')
+        if bool(row['unit_name_vi'].strip()) != bool(row['unit_grams'].strip()):
+            errors.append(f'{where}: unit_name_vi and unit_grams go together')
+        elif row['unit_grams'].strip() and number(row['unit_grams']) in (None, 0):
+            errors.append(f'{where}: unit_grams must be a positive number')
+    print(f'Food variants: {len(variants)} rows in '
+          f'{len({row["group"] for row in variants})} groups')
 
     # meal_plan.csv: what the meal planner may suggest, for which meal and goal.
     plan = read(DATA / 'meal_plan.csv', PLAN_HEADER)

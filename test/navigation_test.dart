@@ -246,28 +246,46 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('1.250 / 2.000 kcal'), findsOneWidget);
-    expect(find.text('Còn 750 kcal so với mục tiêu'), findsOneWidget);
-    expect(find.text('Thay đổi 7 ngày: -0,4 kg'), findsOneWidget);
+    expect(find.text('1.250 / 2.000 kcal'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Còn 750.kcal so với mục tiêu')),
+        findsOneWidget);
+    // Both cards compare with the same earlier weigh-in, 8 days back.
+    final since = now.subtract(const Duration(days: 8));
+    final date = '${since.day.toString().padLeft(2, '0')}/'
+        '${since.month.toString().padLeft(2, '0')}';
+    expect(find.text('Thay đổi so với $date: -0,4 kg'), findsOneWidget);
+    expect(
+        find.textContaining('Cân nặng -0,4 kg so với $date'), findsOneWidget);
     expect(find.text('Đã ghi 1 bài tập hôm nay'), findsOneWidget);
-    expect(find.text('1 ngày liên tục ghi ăn'), findsOneWidget);
+    // The streak is a badge in the card's title row.
+    expect(find.text('1 ngày'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('1 ngày liên tục ghi ăn')),
+        findsOneWidget);
     expect(find.text('Ghi ăn 1/7 ngày'), findsOneWidget);
-    expect(find.text('Trung bình 1.250 kcal • 58,0 g protein mỗi ngày ghi'),
+    expect(find.text('Mỗi ngày có ghi: trung bình 1.250 kcal • 58,0 g protein'),
         findsOneWidget);
-    expect(find.text('So với mục tiêu 2.000 kcal: -750 kcal/ngày'),
-        findsOneWidget);
-    expect(find.text('Tập 1 ngày'), findsOneWidget);
+    // One logged day is too few to compare the week with the target.
+    expect(find.textContaining('So với mục tiêu'), findsNothing);
+    // Training and the weight change share the week card's last line.
+    expect(find.textContaining('Tập 1 ngày • Cân nặng'), findsOneWidget);
 
-    expect(find.text('0 / 2.000 ml'), findsOneWidget);
+    expect(find.text('0 / 2.000 ml'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('water-add')));
     await tester.tap(find.byKey(const ValueKey('water-add')));
     await tester.pumpAndSettle();
-    expect(find.text('500 / 2.000 ml'), findsOneWidget);
-    expect(find.text('2 ly, mỗi ly 250 ml'), findsOneWidget);
+    expect(find.text('500 / 2.000 ml'), findsOneWidget);
+    expect(find.text('2 ly, mỗi ly 250 ml'), findsOneWidget);
     expect(database.water, 500);
     await tester.tap(find.byKey(const ValueKey('water-remove')));
     await tester.pumpAndSettle();
     expect(database.water, 250);
+    // A glass sets the count; the last full glass tapped again comes off.
+    await tester.tap(find.byKey(const ValueKey('water-glass-3')));
+    await tester.pumpAndSettle();
+    expect(database.water, 1000);
+    await tester.tap(find.byKey(const ValueKey('water-glass-3')));
+    await tester.pumpAndSettle();
+    expect(database.water, 750);
 
     await tester.tap(find.byKey(const ValueKey('today-open-diary')));
     await tester.tap(find.byKey(const ValueKey('today-scan')));
@@ -350,7 +368,8 @@ void main() {
   testWidgets('Settings clears saved history only after confirmation',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
-    _size(tester, 400, 1800);
+    // Tall enough for every Settings card down to the data card.
+    _size(tester, 400, 3200);
     final database = _Database();
     var notified = 0;
     await tester.pumpWidget(localizedApp(
@@ -364,7 +383,9 @@ void main() {
       ),
     ));
     final clear = find.byKey(const ValueKey('clear-history'));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(clear);
+    await tester.pumpAndSettle();
     await tester.tap(clear);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Hủy'));

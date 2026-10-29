@@ -163,7 +163,7 @@ void main() {
       await tester.enterText(find.byType(TextFormField).first, value);
       await tester.tap(find.text('Calculate'));
       await tester.pump();
-      expect(find.text('Use a weight from 0 to 1000 kg.'), findsOneWidget);
+      expect(find.text('Use a weight from 0 to 1000 kg.'), findsOneWidget);
     }
     expect(tester.takeException(), isNull);
   });

@@ -1,19 +1,27 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../core/cyber_theme.dart';
 import '../core/haptics.dart';
 import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
+import '../models/plate_detection.dart';
 import '../models/scan_plate.dart';
 import '../models/vn_food.dart';
 import '../services/database_service.dart';
+import '../services/food_detector.dart';
 import '../services/food_recognizer.dart';
+import '../services/photo_collector.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/variant_picker_sheet.dart';
 import '../widgets/error_box.dart';
+import '../widgets/food_picker_sheet.dart';
 import '../widgets/food_log_sheet.dart';
+import '../widgets/intake_summary.dart';
 import '../widgets/scan_sweep.dart';
 
 /// Confirms what is on a photographed plate and logs it to today's diary.
@@ -24,13 +32,21 @@ class ScanResultScreen extends StatefulWidget {
     required this.imagePath,
     required this.data,
     required this.recognizer,
+    this.detector = const NoFoodDetector(),
     this.database,
+    this.collector,
   });
 
   final String imagePath;
   final VnFoodData data;
   final FoodRecognizer recognizer;
+
+  /// Finds each food on the plate, when a detector is bundled.
+  final FoodDetector detector;
   final DatabaseService? database;
+
+  /// Where confirmed photos are kept; [PhotoCollector.instance] by default.
+  final PhotoCollector? collector;
 
   @override
   State<ScanResultScreen> createState() => _ScanResultScreenState();
@@ -38,6 +54,7 @@ class ScanResultScreen extends StatefulWidget {
 
 class _ScanResultScreenState extends State<ScanResultScreen> {
   FoodRecognition _recognition = FoodRecognition.empty;
+  PlateDetection _detection = PlateDetection.empty;
   bool _recognizing = true;
 
   // The model answers in a fraction of a second, which hid the scan sweep;
@@ -64,25 +81,59 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   }
 
   Future<void> _recognize() async {
+    // Both models at once; either may fail without stopping the other.
+    final detecting = widget.detector
+        .detect(widget.imagePath)
+        .timeout(detectorTimeout)
+        .then((found) => found, onError: (Object error, StackTrace stack) {
+      debugPrint('Plate detector failed: $error\n$stack');
+      return PlateDetection.empty;
+    });
     FoodRecognition result;
     try {
       result = await widget.recognizer.recognize(widget.imagePath);
     } catch (_) {
       result = FoodRecognition.empty;
     }
+    final found = await detecting;
     if (!mounted) return;
     setState(() {
       _recognition = result;
+      _detection = found;
       _recognizing = false;
       final top = result.topDishes(1);
-      // A confident guess opens directly; otherwise the user picks.
-      if (top.isNotEmpty &&
+      final confident = top.isNotEmpty &&
           !result.looksUnknown &&
-          top.first.value >= result.thresholds.confidentDish) {
+          top.first.value >= result.thresholds.confidentDish;
+      // Several foods on the plate: one row each, unless a confident dish
+      // already holds them all (cơm tấm with its egg and pork). A single food
+      // found (rice, the pork missed) still beats an unsure guess: the user
+      // adds the rest.
+      final dish = confident ? widget.data.dish(top.first.key) : null;
+      final detected = _detectedPlate;
+      _detectedCount = detected?.items.length;
+      final several = (detected?.items.length ?? 0) >= 2;
+      if (detected != null &&
+          (dish == null || (several && !dishShowsAll(dish, found)))) {
+        _plate = detected;
+        Haptics.found();
+      } else if (confident) {
+        // A confident guess opens directly; otherwise the user picks.
         _choose(top.first.key);
         Haptics.found();
       }
     });
+  }
+
+  /// How many foods the plate built from the detector's boxes has; null
+  /// when it found none.
+  int? _detectedCount;
+
+  /// A fresh plate from the detector's boxes.
+  ScanPlate? get _detectedPlate {
+    if (_detection.codes.isEmpty) return null;
+    final plate = ScanPlate.detected(widget.data, _detection);
+    return plate.items.isEmpty ? null : plate;
   }
 
   void _choose(String code) {
@@ -91,71 +142,100 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     _plate = ScanPlate.forDish(widget.data, dish, _recognition);
   }
 
-  Future<void> _pickDish() async {
-    final language = Localizations.localeOf(context).languageCode;
-    final code = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: CyberColors.surface,
-      builder: (context) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: .7,
-        builder: (context, controller) => ListView(
-          controller: controller,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(context.l10n.scanChooseDish,
-                  style: Theme.of(context).textTheme.titleLarge),
+  Future<FoodPick?> _showPicker(
+          String title, List<VnDish> dishes, List<VnComponent> components) =>
+      showModalBottomSheet<FoodPick>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: CyberColors.surface,
+        builder: (context) => Padding(
+          // The keyboard must not cover the search results.
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+          child: DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: .75,
+            maxChildSize: .95,
+            builder: (context, controller) => FoodPickerSheet(
+              title: title,
+              dishes: dishes,
+              components: components,
+              scrollController: controller,
             ),
-            for (final dish in widget.data.dishes)
-              ListTile(
-                key: ValueKey('dish-${dish.code}'),
-                title: Text(dish.name(language)),
-                onTap: () => Navigator.pop(context, dish.code),
-              ),
-          ],
+          ),
         ),
-      ),
-    );
-    if (code != null && mounted) setState(() => _choose(code));
+      );
+
+  Future<void> _pickDish() async {
+    final pick = await _showPicker(context.l10n.scanChooseDish,
+        widget.data.dishes, widget.data.addableComponents);
+    if (pick == null || !mounted) return;
+    if (pick is NewFoodPick) return _logNewFood();
+    setState(() => switch (pick) {
+          DishPick(:final code) => _choose(code),
+          ComponentPick(:final component) => _plate =
+              ScanPlate.single(widget.data, component),
+          NewFoodPick() => null,
+        });
   }
 
   Future<void> _addComponent() async {
     final plate = _plate;
     if (plate == null) return;
-    final language = Localizations.localeOf(context).languageCode;
     final present = {for (final item in plate.items) item.component.code};
     final options = [
       for (final component in widget.data.addableComponents)
         if (!present.contains(component.code)) component,
     ];
-    final picked = await showModalBottomSheet<VnComponent>(
+    final pick =
+        await _showPicker(context.l10n.scanAddComponent, const [], options);
+    if (pick is ComponentPick && mounted) {
+      setState(() => plate.add(pick.component));
+    }
+  }
+
+  PhotoCollector get _collector => widget.collector ?? PhotoCollector.instance;
+
+  /// Keeps the photo with what the user confirmed, when collecting is on.
+  /// It never stops the meal from being logged.
+  Future<void> _keepPhoto(String label, String name) async {
+    final top = _recognition.topDishes();
+    try {
+      await _collector.save(
+        widget.imagePath,
+        label: label,
+        name: name,
+        guess: top.isEmpty ? null : top.first.key,
+        confidence: top.isEmpty ? null : top.first.value,
+      );
+    } catch (error) {
+      debugPrint('Photo not kept: $error');
+    }
+  }
+
+  /// A food that is in no list: typed in by hand, and its photo kept under
+  /// its own name for a later model.
+  Future<void> _logNewFood() async {
+    final entry = await showModalBottomSheet<FoodLogEntry>(
       context: context,
       isScrollControlled: true,
       backgroundColor: CyberColors.surface,
-      builder: (context) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: .7,
-        builder: (context, controller) => ListView(
-          controller: controller,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(context.l10n.scanAddComponent,
-                  style: Theme.of(context).textTheme.titleLarge),
-            ),
-            for (final component in options)
-              ListTile(
-                key: ValueKey('add-${component.code}'),
-                title: Text(component.name(language)),
-                onTap: () => Navigator.pop(context, component),
-              ),
-          ],
-        ),
-      ),
+      builder: (_) => FoodLogSheet(foods: const [], date: DateTime.now()),
     );
-    if (picked != null && mounted) setState(() => plate.add(picked));
+    if (entry == null || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await (widget.database ?? DatabaseService.instance)
+          .addFoodLogEntries([entry.copyTo(entry.date, _meal)]);
+      await _keepPhoto(PhotoCollector.labelForNewFood(entry.name), entry.name);
+      Haptics.strong();
+      if (mounted) Navigator.pop(context, true);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.diarySaveFailed)));
+    }
   }
 
   Future<void> _save() async {
@@ -170,6 +250,13 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
           languageCode: Localizations.localeOf(context).languageCode,
         ),
       );
+      await _keepPhoto(
+          plate.isSingle
+              ? 'single_${plate.items.first.component.code}'
+              : plate.isDetected
+                  ? 'plate'
+                  : plate.dish.code,
+          plate.dish.nameVi);
       Haptics.strong();
       if (mounted) Navigator.pop(context, true);
     } catch (_) {
@@ -218,6 +305,8 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                             color: CyberColors.muted, size: 48),
                       ),
                     ),
+                    if (!_recognizing && _detection.foods.isNotEmpty)
+                      _DetectionBoxes(detection: _detection),
                     if (_recognizing || _sweepShown) const ScanSweep(),
                   ],
                 ),
@@ -237,9 +326,15 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   modelAvailable: widget.recognizer.isAvailable,
                   data: widget.data,
                   selected: plate?.dish.code,
+                  chosenName: plate?.dish.name(language),
+                  detectedCount: _detectedCount,
                   onChoose: (code) {
                     Haptics.tap();
                     setState(() => _choose(code));
+                  },
+                  onChooseDetected: () {
+                    Haptics.tap();
+                    setState(() => _plate = _detectedPlate);
                   },
                   onPickOther: _pickDish,
                 ),
@@ -264,6 +359,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                         // Another dish starts with its suggestions folded.
                         key: ValueKey('components-${plate.dish.code}'),
                         plate: plate,
+                        variants: widget.data.variants,
                         onChanged: () => setState(() {}),
                         onAdd: _addComponent,
                       ),
@@ -313,30 +409,52 @@ class _Appear extends StatelessWidget {
       );
 }
 
+/// Below this a dish guess other than the best one is left out.
+const _minRunnerUp = 0.3;
+
 class _DishCard extends StatelessWidget {
   const _DishCard({
     required this.recognition,
     required this.modelAvailable,
     required this.data,
     required this.selected,
+    required this.chosenName,
     required this.onChoose,
     required this.onPickOther,
+    this.detectedCount,
+    this.onChooseDetected,
   });
 
   final FoodRecognition recognition;
   final bool modelAvailable;
   final VnFoodData data;
   final String? selected;
+
+  /// The chosen dish or single component, shown when it is not a guess.
+  final String? chosenName;
   final ValueChanged<String> onChoose;
   final VoidCallback onPickOther;
+
+  /// How many foods the detector found, if any.
+  final int? detectedCount;
+  final VoidCallback? onChooseDetected;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final language = Localizations.localeOf(context).languageCode;
-    final top = recognition.topDishes();
-    final chosen = selected == null ? null : data.dish(selected!);
+    // The best guess always shows; the runners-up only when the model gives
+    // them a real chance, so a 20% guess does not read as an answer. "Other
+    // dish" still opens the full list.
+    final top = [
+      for (final (i, guess) in recognition.topDishes().indexed)
+        if (i == 0 || guess.value >= _minRunnerUp || guess.key == selected)
+          guess,
+    ];
+    final detected = selected == ScanPlate.detectedPlateCode;
+
     return CyberCard(
+      highlight: true,
       title: l10n.scanDishTitle,
       icon: Icons.restaurant_rounded,
       child: Column(
@@ -345,6 +463,12 @@ class _DishCard extends StatelessWidget {
           if (!modelAvailable)
             Text(l10n.scanModelPending,
                 style: TextStyle(color: CyberColors.muted))
+          else if (detected)
+            Text(
+                detectedCount == 1
+                    ? l10n.scanDetectedOneHint
+                    : l10n.scanDetectedHint,
+                style: TextStyle(color: CyberColors.muted))
           else if (recognition.looksUnknown)
             Text(l10n.scanNotInApp, style: TextStyle(color: CyberColors.muted))
           else if (top.isEmpty)
@@ -352,12 +476,24 @@ class _DishCard extends StatelessWidget {
           else if (top.first.value < recognition.thresholds.confidentDish)
             Text(l10n.scanLowConfidence,
                 style: TextStyle(color: CyberColors.muted)),
-          if (top.isNotEmpty) ...[
+          if (top.isNotEmpty || detectedCount != null) ...[
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
+                if (detectedCount case final count?)
+                  ChoiceChip(
+                    showCheckmark: false,
+                    key: const ValueKey('guess-detected'),
+                    avatar: Icon(Icons.center_focus_strong_rounded,
+                        size: 18, color: CyberColors.cyan),
+                    selected: detected,
+                    label: Text(l10n.scanDetectedPlate(count)),
+                    // Tapped again it keeps what the user changed.
+                    onSelected: (_) =>
+                        detected ? null : onChooseDetected?.call(),
+                  ),
                 for (final guess in top)
                   ChoiceChip(
                     // A checkmark would widen the chip and re-wrap the row.
@@ -372,20 +508,21 @@ class _DishCard extends StatelessWidget {
               ],
             ),
           ],
-          if (chosen != null &&
-              !top.any((guess) => guess.key == chosen.code)) ...[
+          if (chosenName != null &&
+              !detected &&
+              !top.any((guess) => guess.key == selected)) ...[
             const SizedBox(height: 10),
-            Text(chosen.name(language),
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(chosenName!, style: Theme.of(context).textTheme.titleLarge),
           ],
-          if (recognition.timing case final timing?) ...[
+          // How long the model took is for whoever builds the app.
+          if (kDebugMode && recognition.timing != null) ...[
             const SizedBox(height: 8),
             Text(
               key: const ValueKey('scan-timing'),
               l10n.scanTiming(
-                  _seconds(context, timing.total),
-                  _seconds(context, timing.prepare),
-                  _seconds(context, timing.model)),
+                  _seconds(context, recognition.timing!.total),
+                  _seconds(context, recognition.timing!.prepare),
+                  _seconds(context, recognition.timing!.model)),
               style: TextStyle(color: CyberColors.muted, fontSize: 12),
             ),
           ],
@@ -394,7 +531,7 @@ class _DishCard extends StatelessWidget {
             key: const ValueKey('scan-pick-dish'),
             onPressed: onPickOther,
             icon: const Icon(Icons.list_rounded),
-            label: Text(chosen == null && top.isEmpty
+            label: Text(selected == null && top.isEmpty
                 ? l10n.scanChooseDish
                 : l10n.scanOtherDish),
           ),
@@ -402,6 +539,176 @@ class _DishCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Where each box's label goes on a photo of [area], so labels do not cover
+/// each other. Boxes are taken in [order] (best score first) and each label
+/// gets the first free spot: inside the top edge, above the box, inside the
+/// bottom edge, top right, then below. With no free spot it takes the one
+/// it overlaps least.
+@visibleForTesting
+List<Rect> placeBoxLabels({
+  required List<Rect> boxes,
+  required List<Size> labels,
+  required Size area,
+  required List<int> order,
+}) {
+  Rect fit(Offset at, Size label) => Rect.fromLTWH(
+        at.dx.clamp(0, math.max(0, area.width - label.width)).toDouble(),
+        at.dy.clamp(0, math.max(0, area.height - label.height)).toDouble(),
+        label.width,
+        label.height,
+      );
+  final placed = List<Rect?>.filled(boxes.length, null);
+  final taken = <Rect>[];
+  double overlap(Rect spot) => taken.fold(0.0, (total, other) {
+        final both = spot.intersect(other.inflate(2));
+        return both.width > 0 && both.height > 0
+            ? total + both.width * both.height
+            : total;
+      });
+  for (final i in order) {
+    final box = boxes[i];
+    final label = labels[i];
+    final spots = [
+      fit(box.topLeft, label),
+      fit(Offset(box.left, box.top - label.height), label),
+      fit(Offset(box.left, box.bottom - label.height), label),
+      fit(Offset(box.right - label.width, box.top), label),
+      fit(box.bottomLeft, label),
+    ];
+    final spot = spots.firstWhere((spot) => overlap(spot) == 0,
+        orElse: () => spots.reduce((a, b) => overlap(b) < overlap(a) ? b : a));
+    placed[i] = spot;
+    taken.add(spot);
+  }
+  return [for (final spot in placed) spot!];
+}
+
+/// A box around each food the detector found, with its name. The photo is
+/// shown cropped to fill its frame, so the boxes are cropped the same way.
+class _DetectionBoxes extends StatelessWidget {
+  const _DetectionBoxes({required this.detection});
+
+  final PlateDetection detection;
+
+  @override
+  Widget build(BuildContext context) {
+    // Short names fit small boxes: "Trứng", not "Trứng kho / trứng luộc".
+    final name = context.l10n.detectorClassName;
+    return Semantics(
+      label: context.l10n.scanBoxesLabel(detection.codes.map(name).join(', ')),
+      child: ExcludeSemantics(
+        child: CustomPaint(
+          key: const ValueKey('scan-boxes'),
+          painter: _BoxesPainter(
+            detection: detection,
+            names: {for (final code in detection.codes) code: name(code)},
+            colour: CyberColors.cyan,
+            labelStyle: DefaultTextStyle.of(context).style.copyWith(
+                color: CyberColors.background,
+                fontSize: 12,
+                fontWeight: FontWeight.w700),
+            textScaler: MediaQuery.textScalerOf(context),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BoxesPainter extends CustomPainter {
+  _BoxesPainter({
+    required this.detection,
+    required this.names,
+    required this.colour,
+    required this.labelStyle,
+    required this.textScaler,
+  });
+
+  final PlateDetection detection;
+  final Map<String, String> names;
+  final Color colour;
+
+  /// The app's font, so Vietnamese names draw on the photo.
+  final TextStyle labelStyle;
+  final TextScaler textScaler;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (detection.width <= 0 || detection.height <= 0) return;
+    // BoxFit.cover: scaled to fill, centred, the overflow cut off.
+    final scale = size.width / detection.width > size.height / detection.height
+        ? size.width / detection.width
+        : size.height / detection.height;
+    final shown = Size(detection.width * scale, detection.height * scale);
+    final offset = Offset(
+        (size.width - shown.width) / 2, (size.height - shown.height) / 2);
+    final stroke = Paint()
+      ..color = colour
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+    final boxes = [
+      for (final food in detection.foods)
+        Rect.fromLTRB(
+          offset.dx + food.box.left * shown.width,
+          offset.dy + food.box.top * shown.height,
+          offset.dx + food.box.right * shown.width,
+          offset.dy + food.box.bottom * shown.height,
+        ),
+    ];
+    // Every box first, so no box line runs over a label drawn before it.
+    for (final box in boxes) {
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(box, const Radius.circular(8)), stroke);
+    }
+    final texts = [
+      for (final (i, food) in detection.foods.indexed)
+        _labelFor(food, boxes[i], size),
+    ];
+    final spots = placeBoxLabels(
+      boxes: boxes,
+      labels: [for (final text in texts) Size(text.width + 8, text.height + 4)],
+      area: size,
+      order: [
+        for (final (i, _) in detection.foods.indexed) i,
+      ]..sort((a, b) =>
+          detection.foods[b].score.compareTo(detection.foods[a].score)),
+    );
+    final fill = Paint()..color = colour;
+    for (final (i, text) in texts.indexed) {
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(spots[i], const Radius.circular(6)), fill);
+      text.paint(canvas, spots[i].topLeft + const Offset(4, 2));
+    }
+    canvas.restore();
+  }
+
+  /// "Cơm 94%", or the name alone when both do not fit. A label may be
+  /// wider than a narrow box, up to 120 px, so short names are not cut.
+  TextPainter _labelFor(DetectedFood food, Rect box, Size size) {
+    final room =
+        math.min(size.width - 8, math.max(120.0, box.width - 8)).toDouble();
+    TextPainter label(String text) => TextPainter(
+          text: TextSpan(text: text, style: labelStyle),
+          textDirection: TextDirection.ltr,
+          textScaler: textScaler,
+          maxLines: 1,
+          ellipsis: '…',
+        )..layout(maxWidth: room);
+    final name = names[food.code] ?? '';
+    final text = label('$name ${(food.score * 100).round()}%');
+    return text.didExceedMaxLines ? label(name) : text;
+  }
+
+  @override
+  bool shouldRepaint(_BoxesPainter old) =>
+      old.detection != detection ||
+      old.colour != colour ||
+      old.labelStyle != labelStyle ||
+      old.textScaler != textScaler;
 }
 
 /// Servings offered for the whole dish.
@@ -420,11 +727,13 @@ class _ComponentsCard extends StatefulWidget {
   const _ComponentsCard({
     super.key,
     required this.plate,
+    required this.variants,
     required this.onChanged,
     required this.onAdd,
   });
 
   final ScanPlate plate;
+  final FoodVariants variants;
   final VoidCallback onChanged;
   final VoidCallback onAdd;
 
@@ -434,6 +743,29 @@ class _ComponentsCard extends StatefulWidget {
 
 class _ComponentsCardState extends State<_ComponentsCard> {
   bool _showSuggestions = false;
+
+  bool _canRefine(PlateItem item) {
+    final match = componentVariants[item.component.code];
+    return match != null && widget.variants.inGroup(match.$1).isNotEmpty;
+  }
+
+  /// Chicken, pork, beef, fish, eggs and rice by part and cooking: the item
+  /// keeps its amount and takes the variant's nutrition and name.
+  Future<void> _refine(PlateItem item) async {
+    final (group, key) = componentVariants[item.component.code]!;
+    // Opens at the earlier pick, if there was one.
+    final variant = await pickFoodVariant(context,
+        variants: widget.variants,
+        group: group,
+        initialKey: item.variantKey ?? key);
+    if (variant == null || !mounted) return;
+    // Each name in its own language, "bỏ da" and "skinless" alike.
+    String name(String language) => variant.label(
+        language, skinNamer(lookupAppLocalizations(Locale(language))));
+    item.refine(variant.asComponent(item.component, name('vi'), name('en')),
+        variantKey: variant.key);
+    widget.onChanged();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -454,11 +786,10 @@ class _ComponentsCardState extends State<_ComponentsCard> {
           item: item,
           language: language,
           onChanged: widget.onChanged,
+          onRefine: _canRefine(item) ? () => _refine(item) : null,
         );
     return CyberCard(
       title: l10n.scanComponentsTitle,
-      icon: Icons.checklist_rounded,
-      accent: CyberColors.magenta,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -489,35 +820,39 @@ class _ComponentsCardState extends State<_ComponentsCard> {
           // sure about them, and they would push the dish off the screen.
           if (suggestions.isNotEmpty) ...[
             const Divider(height: 20),
-            InkWell(
-              key: const ValueKey('scan-suggestions'),
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => setState(() => _showSuggestions = !_showSuggestions),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.help_outline_rounded,
-                        size: 18, color: Colors.orange),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        chosen == 0
-                            ? l10n.scanSuggestions(suggestions.length)
-                            : l10n.scanSuggestionsChosen(
-                                suggestions.length, chosen),
-                        style: TextStyle(
-                            color: CyberColors.text,
-                            fontWeight: FontWeight.w700),
+            Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                key: const ValueKey('scan-suggestions'),
+                borderRadius: BorderRadius.circular(8),
+                onTap: () =>
+                    setState(() => _showSuggestions = !_showSuggestions),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.help_outline_rounded,
+                          size: 18, color: CyberColors.warning),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          chosen == 0
+                              ? l10n.scanSuggestions(suggestions.length)
+                              : l10n.scanSuggestionsChosen(
+                                  suggestions.length, chosen),
+                          style: TextStyle(
+                              color: CyberColors.text,
+                              fontWeight: FontWeight.w700),
+                        ),
                       ),
-                    ),
-                    AnimatedRotation(
-                      turns: _showSuggestions ? .5 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(Icons.expand_more_rounded,
-                          color: CyberColors.muted),
-                    ),
-                  ],
+                      AnimatedRotation(
+                        turns: _showSuggestions ? .5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(Icons.expand_more_rounded,
+                            color: CyberColors.muted),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -549,11 +884,15 @@ class _ComponentRow extends StatelessWidget {
     required this.item,
     required this.language,
     required this.onChanged,
+    this.onRefine,
   });
 
   final PlateItem item;
   final String language;
   final VoidCallback onChanged;
+
+  /// Opens the part and cooking picker; null for foods without variants.
+  final VoidCallback? onRefine;
 
   @override
   Widget build(BuildContext context) {
@@ -562,9 +901,9 @@ class _ComponentRow extends StatelessWidget {
         ? (language == 'vi' ? item.component.unitNameVi : null) ??
             l10n.scanUnitFallback
         : 'g';
-    final amount = '${context.formatMeasurement(item.amount)} $unit';
+    final amount = '${context.formatMeasurement(item.amount)}\u00A0$unit';
     final detail = item.hasNutrition
-        ? '$amount · ${context.formatNumber(item.calories)} kcal'
+        ? '$amount · ${context.formatNumber(item.calories)}\u00A0kcal'
         : '$amount · ${l10n.scanNoNutrition}';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -572,6 +911,7 @@ class _ComponentRow extends StatelessWidget {
         children: [
           Checkbox(
             value: item.included,
+            semanticLabel: item.component.name(language),
             onChanged: (value) {
               Haptics.tap();
               item.included = value ?? false;
@@ -580,31 +920,54 @@ class _ComponentRow extends StatelessWidget {
             },
           ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(item.component.name(language),
-                          style: TextStyle(
-                              color: CyberColors.text,
-                              fontWeight: FontWeight.w700)),
+            // The name opens the part and cooking picker where there is one,
+            // so the row needs no extra button.
+            child: Semantics(
+              button: onRefine != null,
+              hint: onRefine == null ? null : l10n.scanRefine,
+              // Ink needs a Material inside the card.
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: ValueKey('refine-${item.component.code}'),
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: onRefine,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(item.component.name(language),
+                                  style: TextStyle(
+                                      color: CyberColors.text,
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                            if (onRefine != null) ...[
+                              const SizedBox(width: 4),
+                              Icon(Icons.tune_rounded,
+                                  size: 16, color: CyberColors.cyan),
+                            ],
+                            if (item.uncertain) ...[
+                              const SizedBox(width: 6),
+                              _Badge(l10n.scanMaybe),
+                            ],
+                          ],
+                        ),
+                        Text(detail,
+                            style: TextStyle(
+                                color: CyberColors.muted, fontSize: 12)),
+                      ],
                     ),
-                    if (item.uncertain) ...[
-                      const SizedBox(width: 6),
-                      _Badge(l10n.scanMaybe),
-                    ],
-                  ],
+                  ),
                 ),
-                Text(detail,
-                    style: TextStyle(color: CyberColors.muted, fontSize: 12)),
-              ],
+              ),
             ),
           ),
           IconButton(
-            tooltip: l10n.scanDecrease,
-            visualDensity: VisualDensity.compact,
+            tooltip: l10n.scanDecrease(item.component.name(language)),
             onPressed: item.amount - item.step <= 0
                 ? null
                 : () {
@@ -614,8 +977,7 @@ class _ComponentRow extends StatelessWidget {
             icon: const Icon(Icons.remove_circle_outline),
           ),
           IconButton(
-            tooltip: l10n.scanIncrease,
-            visualDensity: VisualDensity.compact,
+            tooltip: l10n.scanIncrease(item.component.name(language)),
             onPressed: () {
               item.amount += item.step;
               onChanged();
@@ -637,12 +999,12 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: Colors.orange.withValues(alpha: 0.18),
+          color: CyberColors.warning.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(text,
-            style: const TextStyle(
-                color: Colors.orange,
+            style: TextStyle(
+                color: CyberColors.warning,
                 fontSize: 11,
                 fontWeight: FontWeight.w700)),
       );
@@ -706,7 +1068,6 @@ class _TotalBar extends StatelessWidget {
                             ),
                             Text(
                               l10n.scanMacroGrams(
-                                  context.formatNumber(totals.protein),
                                   context.formatNumber(totals.carbs),
                                   context.formatNumber(totals.fat)),
                               style: TextStyle(
@@ -784,10 +1145,11 @@ class _MacroSplit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Same order and colours as the Today and Diary cards.
     final parts = [
-      (totals.protein * 4, CyberColors.cyan),
-      (totals.carbs * 4, CyberColors.lime),
-      (totals.fat * 9, CyberColors.magenta),
+      (totals.carbs * 4, macroColor('carbs')),
+      (totals.protein * 4, macroColor('protein')),
+      (totals.fat * 9, macroColor('fat')),
     ];
     final sum = parts.fold<double>(0, (total, part) => total + part.$1);
     return ClipRRect(

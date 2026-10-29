@@ -280,6 +280,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         Text(l10n.workoutSubtitle, style: TextStyle(color: CyberColors.muted)),
         const SizedBox(height: 18),
         CyberCard(
+          highlight: true,
           title: l10n.trainingSetup,
           icon: Icons.tune_rounded,
           accent: CyberColors.magenta,

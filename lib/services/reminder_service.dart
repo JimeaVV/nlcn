@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../models/food_log_entry.dart';
+import 'local_notifications.dart';
 
 /// Meals that get a reminder, with their default times.
 const reminderDefaults = {
@@ -38,53 +37,35 @@ abstract class ReminderScheduler {
   Future<void> schedule(List<MealReminder> reminders,
       {required String channelName});
 
+  /// Cancels every meal reminder; water reminders stay.
   Future<void> cancelAll();
 }
+
+/// Notification ids of the meal reminders: 100 + the meal's index.
+const mealReminderIds = (first: 100, last: 199);
 
 /// Daily local notifications through flutter_local_notifications, scheduled
 /// inexactly: they may come a few minutes late, but need no exact-alarm
 /// permission and nothing is sent over the network.
 class LocalReminderScheduler implements ReminderScheduler {
-  final _plugin = FlutterLocalNotificationsPlugin();
-  Future<void>? _ready;
+  final _notifications = LocalNotifications.instance;
 
-  Future<void> _init() => _ready ??= () async {
-        tz_data.initializeTimeZones();
-        try {
-          final zone = await FlutterTimezone.getLocalTimezone();
-          tz.setLocalLocation(tz.getLocation(zone.identifier));
-        } catch (_) {
-          tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
-        }
-        await _plugin.initialize(
-          settings: const InitializationSettings(
-            android: AndroidInitializationSettings('ic_stat_notify'),
-          ),
-        );
-      }();
-
-  AndroidFlutterLocalNotificationsPlugin? get _android =>
-      _plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+  FlutterLocalNotificationsPlugin get _plugin => _notifications.plugin;
 
   @override
-  Future<bool> requestPermission() async {
-    await _init();
-    return await _android?.requestNotificationsPermission() ?? true;
-  }
+  Future<bool> requestPermission() => _notifications.requestPermission();
 
   @override
   Future<void> schedule(List<MealReminder> reminders,
       {required String channelName}) async {
-    await _init();
-    await _plugin.cancelAll();
+    await cancelAll();
     final now = tz.TZDateTime.now(tz.local);
     for (final reminder in reminders) {
       var when = tz.TZDateTime(tz.local, now.year, now.month, now.day,
           reminder.time.hour, reminder.time.minute);
       if (!when.isAfter(now)) when = when.add(const Duration(days: 1));
       await _plugin.zonedSchedule(
-        id: 100 + reminder.meal.index,
+        id: mealReminderIds.first + reminder.meal.index,
         scheduledDate: when,
         title: reminder.title,
         body: reminder.body,
@@ -98,10 +79,8 @@ class LocalReminderScheduler implements ReminderScheduler {
   }
 
   @override
-  Future<void> cancelAll() async {
-    await _init();
-    await _plugin.cancelAll();
-  }
+  Future<void> cancelAll() =>
+      _notifications.cancelRange(mealReminderIds.first, mealReminderIds.last);
 }
 
 /// Whether meal reminders are on and at what times, kept on the device.

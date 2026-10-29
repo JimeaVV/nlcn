@@ -10,6 +10,7 @@ import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
 import '../services/database_service.dart';
 import '../services/dataset_repository.dart';
+import '../services/food_detector.dart';
 import '../services/food_recognizer.dart';
 import '../services/scan_camera.dart';
 import '../services/vn_food_repository.dart';
@@ -45,6 +46,7 @@ class ScanScreen extends StatefulWidget {
     required this.datasets,
     this.vnFood,
     this.recognizer = const NoModelRecognizer(),
+    this.detector = const NoFoodDetector(),
     this.camera = _deviceCamera,
     this.pickFromGallery = _pickFromGallery,
     this.database,
@@ -53,6 +55,7 @@ class ScanScreen extends StatefulWidget {
   final DatasetRepository datasets;
   final VnFoodRepository? vnFood;
   final FoodRecognizer recognizer;
+  final FoodDetector detector;
   final ScanCameraFactory camera;
   final GalleryPicker pickFromGallery;
   final DatabaseService? database;
@@ -232,6 +235,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
             imagePath: path,
             data: data,
             recognizer: widget.recognizer,
+            detector: widget.detector,
             database: widget.database,
           ),
         ),

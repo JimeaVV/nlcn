@@ -60,3 +60,6 @@ app.*.map.json
 # Claude Code: settings and notes for one machine only
 CLAUDE.local.md
 .claude/settings.local.json
+
+# Screenshots rendered by the ui-screenshots skill
+tool/ui_screenshots/out/

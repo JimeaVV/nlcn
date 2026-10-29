@@ -35,7 +35,7 @@ class MetricTile extends StatelessWidget {
           const SizedBox(height: 5),
           FittedBox(
             child: Text(
-              '$value $unit'.trim(),
+              (unit.isEmpty ? value : '$value\u00A0$unit'),
               style: TextStyle(
                 color: CyberColors.cyan,
                 fontWeight: FontWeight.w900,

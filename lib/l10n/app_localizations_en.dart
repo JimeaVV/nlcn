@@ -63,7 +63,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String mealProfileSummary(String weight, String height, String age) {
-    return '$weight kg • $height cm • $age years old';
+    return '$weight kg • $height cm • $age years old';
   }
 
   @override
@@ -120,7 +120,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String comparisonDifference(String difference, String unit, String percent) {
-    return 'Difference $difference $unit ($percent%)';
+    return 'Difference $difference $unit ($percent%)';
   }
 
   @override
@@ -204,12 +204,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String nextSessionSummary(String weight, String reps) {
-    return '$weight kg • 3 sets • target $reps reps';
+    return '$weight kg • 3 sets • target $reps reps';
   }
 
   @override
   String get overloadIncreaseWeight =>
-      'Completed 3x12 with manageable difficulty. Increase the load by 2.5 kg next session and restart within the 8–12 rep range.';
+      'Completed 3x12 with manageable difficulty. Increase the load by 2.5 kg next session and restart within the 8–12 rep range.';
 
   @override
   String get overloadMaintainWeight =>
@@ -217,7 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overloadDecreaseWeight =>
-      'Performance fell below the target rep range. Reduce the load by 2.5 kg and prioritize controlled technique.';
+      'Performance fell below the target rep range. Reduce the load by 2.5 kg and prioritize controlled technique.';
 
   @override
   String get overloadIncreaseReps =>
@@ -272,7 +272,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentLoadKg => 'Current weight (kg)';
 
   @override
-  String get currentLoadError => 'Use a weight from 0 to 1000 kg.';
+  String get currentLoadError => 'Use a weight from 0 to 1000 kg.';
 
   @override
   String setLabel(String number) {
@@ -377,7 +377,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String mealHistoryTitle(String calories, String protein) {
-    return '$calories kcal • $protein g protein';
+    return '$calories kcal • $protein g protein';
   }
 
   @override
@@ -388,7 +388,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String exerciseLogSubtitle(String weight, String reps, String nextWeight,
       String nextReps, String date) {
-    return '$weight kg • $reps reps\nNext: $nextWeight kg • target $nextReps reps\n$date';
+    return '$weight kg • $reps reps\nNext: $nextWeight kg • target $nextReps reps\n$date';
   }
 
   @override
@@ -421,27 +421,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String activitySedentary(String factor) {
-    return 'Sedentary · ×$factor';
+    return 'Little or no exercise · ×$factor';
   }
 
   @override
   String activityLight(String factor) {
-    return 'Light · ×$factor';
+    return 'Exercise 1–3 times a week · ×$factor';
   }
 
   @override
   String activityModerate(String factor) {
-    return 'Moderate · ×$factor';
+    return 'Exercise 3–5 times a week · ×$factor';
   }
 
   @override
   String activityActive(String factor) {
-    return 'Active · ×$factor';
+    return 'Exercise 6–7 times a week · ×$factor';
   }
 
   @override
   String activityVeryActive(String factor) {
-    return 'Very active · ×$factor';
+    return 'Twice a day, or a physical job · ×$factor';
   }
 
   @override
@@ -458,7 +458,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get estimateFormula =>
-      'Estimate: BMR by Mifflin–St Jeor; TDEE = BMR × activity factor. Calories to lose/maintain/gain = 90%/100%/110% of TDEE. Protein = 1.8 g × body weight (kg).';
+      'Estimate: BMR by Mifflin–St Jeor; TDEE = BMR × activity factor. Calories to lose/maintain/gain = 90%/100%/110% of TDEE. Protein = 1.8 g × body weight (kg).';
 
   @override
   String get manualCalories => 'Manual calories (kcal/day)';
@@ -483,7 +483,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get targetsInvalidHint =>
-      'Enter valid details and goals to see the estimate. Protein energy (4 kcal/g) cannot exceed total calories.';
+      'Enter valid details and goals to see the estimate. Protein energy (4 kcal/g) cannot exceed total calories.';
 
   @override
   String get estimatedCalories => 'Estimated calories';
@@ -506,15 +506,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get targetErrorProteinEnergy =>
-      'Protein energy (4 kcal/g) cannot exceed total calories. Adjust the calorie or protein target.';
+      'Protein energy (4 kcal/g) cannot exceed total calories. Adjust the calorie or protein target.';
 
   @override
   String get targetErrorCalorieRange =>
-      'The calorie target is outside the supported range (1,000–10,000 kcal). Review your profile or enter a suitable manual target.';
+      'The calorie target is outside the supported range (1,000–10,000 kcal). Review your profile or enter a suitable manual target.';
 
   @override
   String get targetErrorProteinRange =>
-      'The protein target must be greater than 0 and at most 500 g. Review your profile or enter a manual target.';
+      'The protein target must be greater than 0 and at most 500 g. Review your profile or enter a manual target.';
 
   @override
   String get targetErrorGeneric =>
@@ -528,12 +528,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String latestWeight(String weight, String date) {
-    return 'Latest: $weight kg · $date';
+    return 'Latest: $weight kg · $date';
   }
 
   @override
   String weightChange(String change, String from, String to) {
-    return 'Change: $change kg from $from to $to';
+    return 'Change: $change kg from $from to $to';
   }
 
   @override
@@ -579,7 +579,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weightValueError =>
-      'Enter a weight greater than 0 and at most 500 kg.';
+      'Enter a weight greater than 0 and at most 500 kg.';
 
   @override
   String get weighInDateField => 'Weigh-in date (dd/mm/yyyy)';
@@ -608,22 +608,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String weightChartSemantics(String count, String firstDate,
       String firstWeight, String lastDate, String lastWeight) {
-    return 'Chart of $count weigh-ins. From $firstDate: $firstWeight kg to $lastDate: $lastWeight kg. The values are listed below.';
+    return 'Chart of $count weigh-ins. From $firstDate: $firstWeight kg to $lastDate: $lastWeight kg. The values are listed below.';
   }
 
   @override
   String get settingsTitle => 'SETTINGS';
-
-  @override
-  String get settingsSubtitle =>
-      'Choose a language and visual style. Your selection is saved on this device.';
-
-  @override
-  String get offlineModeTitle => 'Offline mode';
-
-  @override
-  String get offlineModeBody =>
-      'Meal plans, workouts and next-session suggestions run on this device. Your profile and history are saved locally.';
 
   @override
   String get languageTitle => 'Language';
@@ -632,17 +621,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interfaceStyle => 'Interface style';
 
   @override
-  String get styleCyberpunkDescription => 'Neon cyan, magenta and deep navy.';
+  String get styleCyan => 'Cyan';
 
   @override
-  String get styleMinimalLightDescription => 'Bright, clean and easy to read.';
+  String get styleBlue => 'Blue';
 
   @override
-  String get styleForestDescription =>
-      'Calm green palette for a natural fitness look.';
+  String get styleGreen => 'Green';
 
   @override
-  String get styleSunsetDescription => 'Warm orange and violet accents.';
+  String get styleOrange => 'Orange';
+
+  @override
+  String get styleDarkBackground => 'Dark background';
+
+  @override
+  String get styleLightBackground => 'Light background';
 
   @override
   String get errorDataUnavailable =>
@@ -760,22 +754,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String diaryCaloriesProgress(String eaten, String target) {
-    return '$eaten / $target kcal';
+    return '$eaten / $target kcal';
   }
 
   @override
   String diaryProteinProgress(String eaten, String target) {
-    return '$eaten / $target g protein';
+    return '$eaten / $target g protein';
   }
 
   @override
   String diaryRemaining(String value) {
-    return '$value kcal left for your target';
+    return '$value kcal left for your target';
   }
 
   @override
   String diaryOver(String value) {
-    return '$value kcal over your target';
+    return '$value kcal over your target';
   }
 
   @override
@@ -784,7 +778,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String diaryMacros(String carbs, String fat) {
-    return 'Carbs $carbs g • Fat $fat g';
+    return 'Carbs $carbs g • Fat $fat g';
   }
 
   @override
@@ -816,7 +810,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryGramsError =>
-      'Enter an amount greater than 0 and at most 5000 g.';
+      'Enter an amount greater than 0 and at most 5000 g.';
 
   @override
   String get diaryOptionalGrams => 'Amount (g, optional)';
@@ -834,17 +828,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryCustomCaloriesError => 'Enter calories from 0 to 10000.';
 
   @override
+  String get diaryProteinLabel => 'Protein (g)';
+
+  @override
   String get diaryCarbsLabel => 'Carbs (g)';
 
   @override
   String get diaryFatLabel => 'Fat (g)';
 
   @override
-  String get diaryMacroError => '0 to 1000 g.';
+  String get diaryMacroError => '0 to 1000 g.';
 
   @override
   String diaryPreview(String calories, String protein) {
-    return 'Estimate: $calories kcal • $protein g protein';
+    return 'Estimate: $calories kcal • $protein g protein';
   }
 
   @override
@@ -852,12 +849,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String diaryEntryDetails(String grams, String calories, String protein) {
-    return '$grams g • $calories kcal • $protein g protein';
+    return '$grams g • $calories kcal • $protein g protein';
   }
 
   @override
   String diaryEntryDetailsNoGrams(String calories, String protein) {
-    return '$calories kcal • $protein g protein';
+    return '$calories kcal • $protein g protein';
   }
 
   @override
@@ -916,8 +913,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayOpenDiary => 'Open diary';
 
   @override
-  String todayWeightWeek(String change) {
-    return '7-day change: $change kg';
+  String todayWeightWeek(String change, String date) {
+    return 'Change since $date: $change kg';
   }
 
   @override
@@ -997,10 +994,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanUnitFallback => 'pc';
 
   @override
-  String get scanDecrease => 'Decrease';
+  String scanDecrease(String name) {
+    return 'Decrease $name';
+  }
 
   @override
-  String get scanIncrease => 'Increase';
+  String scanIncrease(String name) {
+    return 'Increase $name';
+  }
 
   @override
   String scanMissingNutrition(String names) {
@@ -1009,7 +1010,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String scanTotal(String calories, String protein) {
-    return 'Total: $calories kcal • $protein g protein';
+    return 'Total: $calories kcal • $protein g protein';
   }
 
   @override
@@ -1096,17 +1097,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String proteinGrams(String value) {
-    return '$value g protein';
+    return '$value g protein';
   }
 
   @override
-  String kcalProteinLine(String kcal, String protein) {
-    return '$kcal kcal • P $protein g';
+  String mealTotalKcal(String kcal) {
+    return '$kcal kcal';
   }
 
   @override
   String mealMacroLine(String kcal, String protein, String carbs, String fat) {
-    return '$kcal kcal • P $protein g • C $carbs g • F $fat g';
+    return '$kcal kcal • P $protein g • C $carbs g • F $fat g';
   }
 
   @override
@@ -1114,7 +1115,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overloadConfirmIncrease =>
-      'First comfortable 3×12 at this load. Repeat it once more; if it is comfortable again, add 2.5 kg.';
+      'First comfortable 3×12 at this load. Repeat it once more; if it is comfortable again, add 2.5 kg.';
 
   @override
   String get overloadBodyweightReps =>
@@ -1145,8 +1146,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String scanMacroGrams(String protein, String carbs, String fat) {
-    return 'Protein $protein g · Carbs $carbs g · Fat $fat g';
+  String scanMacroGrams(String carbs, String fat) {
+    return 'Carbs $carbs g · Fat $fat g';
   }
 
   @override
@@ -1166,7 +1167,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String diaryQuickChip(String name, String calories) {
-    return '$name · $calories kcal';
+    return '$name · $calories kcal';
   }
 
   @override
@@ -1190,7 +1191,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String diaryRepeatYesterday(String count, String calories) {
-    return 'Same as yesterday ($count foods · $calories kcal)';
+    return 'Same as yesterday ($count foods · $calories kcal)';
   }
 
   @override
@@ -1200,12 +1201,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String lastSessionLine(String date, String weight, String reps) {
-    return 'Last time ($date): $weight kg × $reps';
+    return 'Last time ($date): $weight kg × $reps';
   }
 
   @override
   String lastSessionSuggestion(String weight, String reps) {
-    return 'Today\'s suggestion: $weight kg × $reps reps';
+    return 'Today\'s suggestion: $weight kg × $reps reps';
+  }
+
+  @override
+  String restTimerFor(String name) {
+    return 'Start rest timer: $name';
+  }
+
+  @override
+  String logResultFor(String name) {
+    return 'Log result: $name';
   }
 
   @override
@@ -1233,28 +1244,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String adaptiveTdeeValue(String tdee) {
-    return '$tdee kcal/day';
+    return '$tdee kcal/day';
   }
 
   @override
   String adaptiveTdeeDetails(
       String days, String intake, String weighIns, String trend) {
-    return 'From $days logged days (average $intake kcal) and $weighIns weigh-ins over the last 4 weeks: weight $trend kg/week.';
+    return 'From $days logged days (average $intake kcal) and $weighIns weigh-ins over the last 4 weeks: weight $trend kg/week.';
   }
 
   @override
   String adaptiveTdeeCompare(String formula) {
-    return 'The Mifflin-St Jeor formula estimates $formula kcal.';
+    return 'The Mifflin-St Jeor formula estimates $formula kcal.';
   }
 
   @override
   String adaptiveTdeeUse(String calories) {
-    return 'Use as target ($calories kcal)';
+    return 'Use as target ($calories kcal)';
   }
 
   @override
   String adaptiveTdeeUsed(String calories) {
-    return 'Calorie target set to $calories kcal. Save the profile to apply it.';
+    return 'Calorie target set to $calories kcal. Save the profile to apply it.';
+  }
+
+  @override
+  String adaptiveTdeeProgress(String haveDays, String days, String haveWeighIns,
+      String weighIns, String span) {
+    return 'Logged $haveDays/$days days · weighed $haveWeighIns/$weighIns times; the first and last weigh-in must be $span+ days apart.';
   }
 
   @override
@@ -1264,25 +1281,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String adaptiveTdeeUnsure(String tdee, String formula) {
-    return 'This is far from the formula ($tdee vs $formula kcal), maybe because some days were not logged in full. Better not use it as a target yet.';
-  }
+  String get adaptiveTdeeUnsure =>
+      'This is far from the formula, maybe because some days were not logged in full. Better not use it as a target yet.';
 
   @override
   String get adaptiveTdeeInfo =>
-      'Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.';
+      'Real TDEE ≈ average calories eaten − daily weight change × 7700 kcal/kg. The weight change is the best-fit straight line through the weigh-ins of the last 4 weeks. 7700 kcal per kg is a common approximation, not exact for everyone. Days logged under 500 kcal count as incomplete and are left out. This is an estimate, not medical advice.';
 
   @override
   String get waterTitle => 'Water';
 
   @override
   String waterProgress(String drunk, String target) {
-    return '$drunk / $target ml';
+    return '$drunk / $target ml';
   }
 
   @override
   String waterGlasses(String count, String glass) {
-    return '$count glasses of $glass ml';
+    return '$count glasses of $glass ml';
   }
 
   @override
@@ -1316,12 +1332,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String weekAverage(String calories, String protein) {
-    return 'Average $calories kcal • $protein g protein per logged day';
+    return 'Per logged day: $calories kcal • $protein g protein on average';
   }
 
   @override
   String weekVsTarget(String target, String diff) {
-    return 'Against the $target kcal target: $diff kcal/day';
+    return 'Against the $target kcal target: $diff kcal/day';
   }
 
   @override
@@ -1330,8 +1346,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String weekWeight(String change) {
-    return 'Weight $change kg';
+  String weekWeight(String change, String date) {
+    return 'Weight $change kg since $date';
   }
 
   @override
@@ -1339,10 +1355,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remindersTitle => 'Meal reminders';
-
-  @override
-  String get remindersBody =>
-      'Notifications from the phone itself, no internet needed. They may come a few minutes late.';
 
   @override
   String get remindersSwitch => 'Turn on reminders';
@@ -1405,11 +1417,294 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String widgetWater(String drunk, String target) {
-    return 'Water $drunk / $target L';
+    return 'Water $drunk / $target L';
   }
 
   @override
   String widgetStreak(String count) {
     return '$count-day streak';
+  }
+
+  @override
+  String get pickerSearch => 'Search dishes or single foods';
+
+  @override
+  String get pickerSearchComponents => 'Search components';
+
+  @override
+  String get pickerClear => 'Clear search';
+
+  @override
+  String get pickerNoMatch =>
+      'Nothing found. Try another word, such as \"chicken\" or \"rice\".';
+
+  @override
+  String get pickerDishes => 'Dishes';
+
+  @override
+  String get pickerSingle => 'A single food';
+
+  @override
+  String pickerPer100g(String kcal) {
+    return '$kcal kcal / 100 g';
+  }
+
+  @override
+  String get pickerNewFood => 'Food not in the list…';
+
+  @override
+  String get pickerNewFoodHint =>
+      'Type its name and nutrition. When photos are being kept, this one helps teach the model the new food later.';
+
+  @override
+  String get collectTitle => 'Keep photos to teach the model';
+
+  @override
+  String get collectBody =>
+      'When on, every scanned meal you log keeps its photo (shrunk) with the dish you confirmed. Photos stay on this phone; to train with them, export the zip and put it on Drive.';
+
+  @override
+  String get collectSwitch => 'Keep photos of logged scans';
+
+  @override
+  String collectStats(String photos, String size) {
+    return '$photos photos kept · $size MB';
+  }
+
+  @override
+  String get collectEmpty => 'No photos yet.';
+
+  @override
+  String get collectExport => 'Export photos (zip)';
+
+  @override
+  String get collectExportFailed => 'Could not export the photos. Try again.';
+
+  @override
+  String get collectDelete => 'Delete kept photos';
+
+  @override
+  String get collectDeleteTitle => 'Delete all kept photos?';
+
+  @override
+  String get collectDeleteBody =>
+      'Deleted photos cannot be recovered. The food diary is not affected.';
+
+  @override
+  String get collectDeleted => 'Kept photos deleted.';
+
+  @override
+  String get waterRemindersTitle => 'Water reminders';
+
+  @override
+  String waterRemindersBody(String goal) {
+    return 'Each reminder is one of five messages at random. Once you have drunk $goal in a day, the rest of that day stays quiet. Open the app at least once a week so the reminders keep coming.';
+  }
+
+  @override
+  String get waterRemindersSwitch => 'Remind me to drink water';
+
+  @override
+  String get waterRemindersEvery => 'Remind every';
+
+  @override
+  String waterRemindersHours(String hours) {
+    return '$hours h';
+  }
+
+  @override
+  String get waterRemindersFrom => 'From';
+
+  @override
+  String get waterRemindersTo => 'Until';
+
+  @override
+  String get waterRemindersBadWindow =>
+      'The end time must be after the start time.';
+
+  @override
+  String get waterReminderChannel => 'Water reminders';
+
+  @override
+  String get waterReminder1Title => 'Time for some water 💧';
+
+  @override
+  String get waterReminder1Body => 'A glass now helps you stay sharp.';
+
+  @override
+  String get waterReminder2Title => 'Had enough water today?';
+
+  @override
+  String get waterReminder2Body =>
+      'Open MacroRunner to log the glass you just drank.';
+
+  @override
+  String get waterReminder3Title => 'Top up';
+
+  @override
+  String get waterReminder3Body =>
+      'Training goes better when you are hydrated.';
+
+  @override
+  String get waterReminder4Title => 'Don\'t wait until you\'re thirsty';
+
+  @override
+  String get waterReminder4Body =>
+      'Thirst means your body is already a little short.';
+
+  @override
+  String get waterReminder5Title => 'One glass of water';
+
+  @override
+  String get waterReminder5Body =>
+      'Stand up, pour a glass, then get back to it.';
+
+  @override
+  String get infoTooltip => 'More info';
+
+  @override
+  String diaryDishSummary(String count, String calories, String protein) {
+    return '$count items • $calories kcal • $protein g protein';
+  }
+
+  @override
+  String get gaugeLeftLabel => 'kcal left';
+
+  @override
+  String get gaugeOverLabel => 'kcal over target';
+
+  @override
+  String get gaugeEatenLabel => 'kcal eaten';
+
+  @override
+  String get macroCarbs => 'Carbs';
+
+  @override
+  String get macroProtein => 'Protein';
+
+  @override
+  String get macroFat => 'Fat';
+
+  @override
+  String streakBadge(String days) {
+    return '$days days';
+  }
+
+  @override
+  String get macroInfoTitle => 'Carb and fat targets';
+
+  @override
+  String get macroInfo =>
+      'Calorie and protein targets come from your profile. Carb and fat targets are estimates: fat gets 30% of the calories (9 kcal per gram), carbs what is left after protein and fat (4 kcal per gram). 30% sits in the middle of the adult range of 20–35% fat and 45–65% carbs (Institute of Medicine, Dietary Reference Intakes, 2005). The C/P/F chips show where the eaten energy came from.';
+
+  @override
+  String waterGlassSemantics(String n, String total) {
+    return 'Glass $n of $total';
+  }
+
+  @override
+  String get variantGroupChicken => 'Chicken';
+
+  @override
+  String get variantGroupPork => 'Pork';
+
+  @override
+  String get variantGroupBeef => 'Beef';
+
+  @override
+  String get variantGroupEggs => 'Eggs';
+
+  @override
+  String get variantGroupFish => 'Fish';
+
+  @override
+  String get variantGroupStarch => 'Rice & starches';
+
+  @override
+  String get variantSkinOff => 'Skinless';
+
+  @override
+  String get variantSkinOn => 'With skin';
+
+  @override
+  String get variantPart => 'Part';
+
+  @override
+  String get variantSkin => 'Skin';
+
+  @override
+  String get variantStyle => 'Cooking';
+
+  @override
+  String get variantChoose => 'Choose';
+
+  @override
+  String variantTitle(String group) {
+    return '$group: part and cooking';
+  }
+
+  @override
+  String variantPer100g(String kcal, String protein) {
+    return '$kcal kcal • $protein g protein per 100 g';
+  }
+
+  @override
+  String get variantPickHint => 'Pick by part and cooking';
+
+  @override
+  String get scanRefine => 'Pick the part and cooking';
+
+  @override
+  String scanDetectedPlate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count foods on the plate',
+      one: '1 food on the plate',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanDetectedHint => 'One row below for each food on the plate.';
+
+  @override
+  String get scanDetectedOneHint => 'Add anything missing with Add component.';
+
+  @override
+  String scanBoxesLabel(String foods) {
+    return 'Photo with a box around each food found: $foods';
+  }
+
+  @override
+  String detectorClassName(String code) {
+    String _temp0 = intl.Intl.selectLogic(
+      code,
+      {
+        'com': 'Rice',
+        'bun': 'Vermicelli',
+        'mi': 'Noodles',
+        'banh_mi_o': 'Bread',
+        'ga': 'Chicken',
+        'thit_kho': 'Braised pork',
+        'thit_nuong': 'Grilled pork',
+        'heo': 'Pork',
+        'bo': 'Beef',
+        'ca': 'Fish',
+        'tom': 'Shrimp',
+        'muc': 'Squid',
+        'trung': 'Egg',
+        'dau_hu': 'Tofu',
+        'cha': 'Pork roll',
+        'cha_gio': 'Spring roll',
+        'rau': 'Greens',
+        'dua_leo_ca_chua': 'Cucumber, tomato',
+        'do_chua': 'Pickles',
+        'khoai_tay_chien': 'Fries',
+        'canh': 'Soup',
+        'other': 'Food',
+      },
+    );
+    return '$_temp0';
   }
 }

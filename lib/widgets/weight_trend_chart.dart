@@ -37,6 +37,9 @@ class WeightTrendChart extends StatelessWidget {
               lineColor: colors.primary,
               labelColor: colors.onSurfaceVariant,
               gridColor: colors.outlineVariant,
+              // The app's font, growing with the system text size.
+              labelStyle: Theme.of(context).textTheme.bodySmall,
+              textScaler: MediaQuery.textScalerOf(context),
             ),
           ),
         ),
@@ -52,6 +55,8 @@ class _WeightPainter extends CustomPainter {
     required this.lineColor,
     required this.labelColor,
     required this.gridColor,
+    this.labelStyle,
+    this.textScaler = TextScaler.noScaling,
   });
 
   final List<WeightEntry> entries;
@@ -59,25 +64,22 @@ class _WeightPainter extends CustomPainter {
   final Color lineColor;
   final Color labelColor;
   final Color gridColor;
+  final TextStyle? labelStyle;
+  final TextScaler textScaler;
 
-  void _label(Canvas canvas, String value, Offset position) {
-    final painter = TextPainter(
-      text: TextSpan(
-        text: value,
-        style: TextStyle(color: labelColor, fontSize: 11),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    painter.paint(canvas, position);
-  }
+  TextPainter _text(String value) => TextPainter(
+        text: TextSpan(
+          text: value,
+          style: (labelStyle ?? const TextStyle())
+              .copyWith(color: labelColor, fontSize: 11),
+        ),
+        textDirection: TextDirection.ltr,
+        textScaler: textScaler,
+      )..layout();
 
   @override
   void paint(Canvas canvas, Size size) {
     if (entries.isEmpty || size.width < 100) return;
-    const left = 48.0;
-    const top = 12.0;
-    final right = size.width - 12;
-    final bottom = size.height - 30;
     final lowest = entries.map((e) => e.weight).reduce(math.min);
     final highest = entries.map((e) => e.weight).reduce(math.max);
     final margin = math.max((highest - lowest) * .15, .5);
@@ -87,18 +89,27 @@ class _WeightPainter extends CustomPainter {
     final timeRange =
         entries.last.recordedAt.millisecondsSinceEpoch - firstTime;
 
+    // Labels are measured first, so large system text widens the left
+    // margin and lowers the dates instead of drawing over the chart.
+    final weightLabels = [
+      for (var index = 0; index < 3; index++)
+        _text('${formatWeight(upper - (upper - lower) * index / 2)}\u00A0kg'),
+    ];
+    final firstDate = _text(formatDate(entries.first.recordedAt));
+    final lastDate = _text(formatDate(entries.last.recordedAt));
+    final left = weightLabels.map((label) => label.width).reduce(math.max) + 8;
+    final top = weightLabels.first.height / 2;
+    final right = size.width - 4;
+    final bottom = size.height - firstDate.height - 8;
+
     final grid = Paint()
       ..color = gridColor
       ..strokeWidth = 1;
     for (var index = 0; index < 3; index++) {
-      final fraction = index / 2;
-      final y = top + (bottom - top) * fraction;
+      final y = top + (bottom - top) * index / 2;
       canvas.drawLine(Offset(left, y), Offset(right, y), grid);
-      _label(
-        canvas,
-        '${formatWeight(upper - (upper - lower) * fraction)} kg',
-        Offset(0, y - 6),
-      );
+      final label = weightLabels[index];
+      label.paint(canvas, Offset(0, y - label.height / 2));
     }
 
     final points = entries.map((entry) {
@@ -123,14 +134,11 @@ class _WeightPainter extends CustomPainter {
     for (final point in points) {
       canvas.drawCircle(point, 3.5, dot);
     }
-    _label(
-        canvas, formatDate(entries.first.recordedAt), Offset(left, bottom + 8));
-    if (timeRange != 0 && size.width >= 240) {
-      _label(
-        canvas,
-        formatDate(entries.last.recordedAt),
-        Offset(math.max(left + 80, right - 66), bottom + 8),
-      );
+    final dateTop = bottom + 6;
+    firstDate.paint(canvas, Offset(left, dateTop));
+    final lastLeft = right - lastDate.width;
+    if (timeRange != 0 && lastLeft >= left + firstDate.width + 12) {
+      lastDate.paint(canvas, Offset(lastLeft, dateTop));
     }
   }
 
@@ -139,5 +147,7 @@ class _WeightPainter extends CustomPainter {
       oldDelegate.entries != entries ||
       oldDelegate.lineColor != lineColor ||
       oldDelegate.labelColor != labelColor ||
-      oldDelegate.gridColor != gridColor;
+      oldDelegate.gridColor != gridColor ||
+      oldDelegate.labelStyle != labelStyle ||
+      oldDelegate.textScaler != textScaler;
 }

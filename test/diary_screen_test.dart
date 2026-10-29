@@ -162,7 +162,8 @@ void main() {
     final database = _Database();
     await _mount(tester, database);
     expect(find.text('Hôm nay'), findsOneWidget);
-    expect(find.text('0 kcal'), findsOneWidget);
+    // Without targets the gauge shows what was eaten.
+    expect(find.text('kcal đã ăn'), findsOneWidget);
     expect(find.text('Lưu hồ sơ để so với mục tiêu calo và protein.'),
         findsOneWidget);
     expect(find.text('Chưa ghi món nào.'), findsNWidgets(4));
@@ -181,7 +182,7 @@ void main() {
         proteinOverride: 120,
       ).toMap();
     await _mount(tester, database);
-    expect(find.text('0 / 2.000 kcal'), findsOneWidget);
+    expect(find.text('0 / 2.000 kcal'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('diary-add')));
     await tester.pumpAndSettle();
@@ -196,16 +197,20 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('diary-grams')), '40');
     await tester.pumpAndSettle();
-    expect(find.text('Ước tính: 156 kcal • 6,8 g protein'), findsOneWidget);
+    expect(find.text('Ước tính: 156 kcal • 6,8 g protein'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('diary-save')));
     await tester.pumpAndSettle();
 
     final saved = database.entries.single;
     expect(saved.meal, MealSlot.breakfast);
     expect(saved.source, FoodLogSource.manual);
-    expect(find.text('156 / 2.000 kcal'), findsOneWidget);
-    expect(find.text('Còn 1.844 kcal so với mục tiêu'), findsOneWidget);
-    expect(find.text('40 g • 156 kcal • 6,8 g protein'), findsOneWidget);
+    expect(find.text('156 / 2.000 kcal'), findsOneWidget);
+    // The gauge: calories left in the middle, the full line for readers.
+    expect(find.text('1.844'), findsOneWidget);
+    expect(find.text('kcal còn lại'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Còn 1.844.kcal so với mục tiêu')),
+        findsOneWidget);
+    expect(find.text('40 g • 156 kcal • 6,8 g protein'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -279,7 +284,7 @@ void main() {
 
     expect(database.entries.single.name, 'Phở bò');
     expect(database.entries.single.grams, isNull);
-    expect(find.text('450 kcal • 25,0 g protein'), findsOneWidget);
+    expect(find.text('450 kcal • 25,0 g protein'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Xóa món'));
     await tester.pumpAndSettle();
@@ -288,7 +293,68 @@ void main() {
     await tester.pumpAndSettle();
     expect(database.entries.single.name, 'Phở bò');
     expect(database.entries.single.meal, MealSlot.lunch);
+
+    // Untouched, the undo offer goes away by itself after a few seconds.
+    await tester.tap(find.byTooltip('Xóa món'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hoàn tác'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
+    expect(find.text('Hoàn tác'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  test('parts of one scanned dish group together, other foods stay alone', () {
+    final now = DateTime.now();
+    final groups = groupDiaryEntries([
+      _logged('Cơm (Cơm tấm)', now, MealSlot.lunch),
+      _logged('Sườn nướng (Cơm tấm)', now, MealSlot.lunch),
+      _logged('Ức gà', now, MealSlot.lunch),
+      _logged('Bánh phở (Phở bò)', now, MealSlot.lunch),
+    ]);
+    expect([for (final g in groups) g.dish], ['Cơm tấm', null, null]);
+    expect(groups.first.entries, hasLength(2));
+    expect(groups.first.partName(groups.first.entries.last), 'Sườn nướng');
+    // A dish with one part left reads as that one row.
+    expect(groups.last.entries.single.name, 'Bánh phở (Phở bò)');
+  });
+
+  testWidgets('a scanned dish shows as one row that opens into its parts',
+      (tester) async {
+    final database = _Database();
+    final now = DateTime.now();
+    await database.addFoodLogEntries([
+      _logged('Cơm (Cơm tấm)', now, MealSlot.lunch, calories: 290),
+      _logged('Sườn nướng (Cơm tấm)', now, MealSlot.lunch, calories: 188),
+      _logged('Ức gà', now, MealSlot.lunch, calories: 248),
+    ]);
+    await _mount(tester, database);
+
+    expect(find.text('Cơm tấm'), findsOneWidget);
+    expect(find.textContaining('2 thành phần • 478 kcal'), findsOneWidget);
+    expect(find.text('Sườn nướng'), findsNothing, reason: 'closed at first');
+    expect(find.text('Ức gà'), findsOneWidget);
+    // Two rows, so the meal shows its total next to its name.
+    expect(find.text('726 kcal'), findsOneWidget);
+
+    await tester.tap(find.text('Cơm tấm'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cơm'), findsOneWidget);
+    expect(find.text('Sườn nướng'), findsOneWidget);
+    await tester.tap(find.byTooltip('Xóa món').at(1));
+    await tester.pumpAndSettle();
+    expect(
+        [for (final e in database.entries) e.name], ['Cơm (Cơm tấm)', 'Ức gà']);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a meal of one food does not repeat its numbers as a total',
+      (tester) async {
+    final database = _Database();
+    await database.addFoodLogEntries(
+        [_logged('Ức gà', DateTime.now(), MealSlot.lunch, calories: 248)]);
+    await _mount(tester, database);
+    expect(find.textContaining('248 kcal'), findsOneWidget);
   });
 
   testWidgets('earlier days can be opened but not future ones', (tester) async {
@@ -358,7 +424,7 @@ void main() {
     ]);
     await _mount(tester, database);
 
-    expect(find.text('Ăn giống hôm qua (2 món · 570 kcal)'), findsOneWidget);
+    expect(find.text('Ăn giống hôm qua (2 món · 570 kcal)'), findsOneWidget);
     expect(find.byKey(const ValueKey('diary-copy-lunch')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('diary-copy-breakfast')));
     await tester.pumpAndSettle();

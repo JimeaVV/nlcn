@@ -3,40 +3,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppStyle { cyberpunk, minimalLight, forest, sunset }
 
-/// Style names are proper names; descriptions are localized in Settings.
+/// A style's name and background are localized in Settings.
 class AppStyleInfo {
-  const AppStyleInfo({
-    required this.style,
-    required this.name,
-    required this.icon,
-  });
+  const AppStyleInfo({required this.style, required this.icon});
 
   final AppStyle style;
-  final String name;
   final IconData icon;
 }
 
 const appStyleOptions = <AppStyleInfo>[
-  AppStyleInfo(
-    style: AppStyle.cyberpunk,
-    name: 'Cyberpunk',
-    icon: Icons.bolt_rounded,
-  ),
-  AppStyleInfo(
-    style: AppStyle.minimalLight,
-    name: 'Minimal Light',
-    icon: Icons.light_mode_rounded,
-  ),
-  AppStyleInfo(
-    style: AppStyle.forest,
-    name: 'Forest',
-    icon: Icons.forest_rounded,
-  ),
-  AppStyleInfo(
-    style: AppStyle.sunset,
-    name: 'Sunset',
-    icon: Icons.wb_twilight_rounded,
-  ),
+  // The enum keeps its old name, which saved settings still use.
+  AppStyleInfo(style: AppStyle.cyberpunk, icon: Icons.bolt_rounded),
+  AppStyleInfo(style: AppStyle.minimalLight, icon: Icons.light_mode_rounded),
+  AppStyleInfo(style: AppStyle.forest, icon: Icons.forest_rounded),
+  AppStyleInfo(style: AppStyle.sunset, icon: Icons.wb_twilight_rounded),
 ];
 
 class AppPalette {
@@ -50,6 +30,7 @@ class AppPalette {
     required this.text,
     required this.muted,
     required this.danger,
+    required this.warning,
     required this.border,
     required this.brightness,
   });
@@ -63,6 +44,10 @@ class AppPalette {
   final Color text;
   final Color muted;
   final Color danger;
+
+  /// Amber for "over the target" and "maybe": readable on the light style
+  /// too, where plain orange on white is about 2:1.
+  final Color warning;
   final Color border;
   final Brightness brightness;
 }
@@ -88,6 +73,7 @@ class CyberColors {
   static Color get text => _palette.text;
   static Color get muted => _palette.muted;
   static Color get danger => _palette.danger;
+  static Color get warning => _palette.warning;
   static Color get border => _palette.border;
 }
 
@@ -104,6 +90,7 @@ class AppTheme {
           text: Color(0xFFF3F7FF),
           muted: Color(0xFFA8B3C7),
           danger: Color(0xFFFF5370),
+          warning: Color(0xFFFFA62B),
           border: Color(0xFF273653),
           brightness: Brightness.dark,
         ),
@@ -117,6 +104,7 @@ class AppTheme {
           text: Color(0xFF172033),
           muted: Color(0xFF667085),
           danger: Color(0xFFD92D20),
+          warning: Color(0xFFB54708),
           border: Color(0xFFD5DCE8),
           brightness: Brightness.light,
         ),
@@ -130,6 +118,7 @@ class AppTheme {
           text: Color(0xFFF0FFF7),
           muted: Color(0xFFA7C5B5),
           danger: Color(0xFFFB7185),
+          warning: Color(0xFFFB923C),
           border: Color(0xFF315748),
           brightness: Brightness.dark,
         ),
@@ -143,6 +132,7 @@ class AppTheme {
           text: Color(0xFFFFF6F0),
           muted: Color(0xFFD4B7CF),
           danger: Color(0xFFFF5D73),
+          warning: Color(0xFFFFC14D),
           border: Color(0xFF654366),
           brightness: Brightness.dark,
         ),
@@ -167,6 +157,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'BeVietnamPro',
       brightness: p.brightness,
       scaffoldBackgroundColor: p.background,
       colorScheme: scheme,
@@ -220,6 +211,20 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(color: p.surface),
       dividerColor: p.border,
+      // Material's default snack bar is a light grey slab on the dark styles.
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: p.surfaceAlt,
+        // A snack bar replaces the text style outright, font included.
+        contentTextStyle:
+            TextStyle(fontFamily: 'BeVietnamPro', color: p.text, fontSize: 15),
+        actionTextColor: p.primary,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: p.border),
+        ),
+      ),
     );
   }
 }

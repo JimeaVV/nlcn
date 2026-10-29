@@ -65,8 +65,8 @@ void main() {
       MealResult(recommendation: _result(calories: 1800, protein: 100)),
     ]))));
     expect(find.text('Chưa đạt khoảng mục tiêu'), findsOneWidget);
-    expect(find.text('Calo: 1.800 / 2.000 kcal'), findsOneWidget);
-    expect(find.text('Lệch -200 kcal (-10,0%)'), findsOneWidget);
+    expect(find.text('Calo: 1.800 / 2.000 kcal'), findsOneWidget);
+    expect(find.text('Lệch -200 kcal (-10,0%)'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

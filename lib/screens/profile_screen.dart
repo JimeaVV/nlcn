@@ -8,6 +8,7 @@ import '../models/user_profile.dart';
 import '../models/weight_entry.dart';
 import '../services/database_service.dart';
 import '../widgets/cyber_card.dart';
+import '../widgets/info_button.dart';
 import '../widgets/weight_trend_chart.dart';
 import '../core/number_input.dart';
 
@@ -119,20 +120,26 @@ class ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// The profile as typed so far. Throws a FormatException while a field is
+  /// empty or not a number, so the preview shows nothing instead of the
+  /// screen failing to build.
   UserProfile _draft() => UserProfile(
         age: int.parse(_age.text.trim()),
         gender: _gender,
-        height: parseDecimal(_height.text)!,
-        weight: parseDecimal(_weight.text)!,
+        height: _decimal(_height.text),
+        weight: _decimal(_weight.text),
         activityLevel: _activity,
         goal: _goal,
         calorieOverride: !_customCalories || _calories.text.trim().isEmpty
             ? null
-            : parseDecimal(_calories.text)!,
+            : _decimal(_calories.text),
         proteinOverride: !_customProtein || _protein.text.trim().isEmpty
             ? null
-            : parseDecimal(_protein.text)!,
+            : _decimal(_protein.text),
       );
+
+  static double _decimal(String text) =>
+      parseDecimal(text) ?? (throw FormatException('Not a number', text));
 
   Map<String, dynamic>? get _preview {
     try {
@@ -257,7 +264,7 @@ class ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => AlertDialog(
         title: Text(context.l10n.deleteWeightTitle),
         content: Text(
-          '${context.formatMeasurement(entry.weight)} kg · '
+          '${context.formatMeasurement(entry.weight)}\u00A0kg · '
           '${_date(entry.recordedAt)}',
         ),
         actions: [
@@ -266,6 +273,9 @@ class ProfileScreenState extends State<ProfileScreen> {
             child: Text(context.l10n.cancel),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: CyberColors.danger,
+                foregroundColor: CyberColors.background),
             onPressed: () => Navigator.pop(context, true),
             child: Text(context.l10n.delete),
           ),
@@ -331,34 +341,12 @@ class ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  void _showInfo(String title, List<String> paragraphs) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: CyberColors.surface,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              for (final paragraph in paragraphs) ...[
-                const SizedBox(height: 12),
-                Text(paragraph),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  void _showInfo(String title, List<String> paragraphs) =>
+      InfoButton.show(context, title, paragraphs);
 
   Widget _infoButton(String key, VoidCallback onPressed) => IconButton(
         key: ValueKey(key),
         tooltip: context.l10n.howCalculated,
-        visualDensity: VisualDensity.compact,
         onPressed: onPressed,
         icon: Icon(Icons.info_outline_rounded, color: CyberColors.muted),
       );
@@ -368,6 +356,7 @@ class ProfileScreenState extends State<ProfileScreen> {
     final number = context.formatNumber;
     return CyberCard(
       key: const ValueKey('profile-targets'),
+      highlight: true,
       title: l10n.dailyTargetsTitle,
       icon: Icons.flag_outlined,
       trailing: _infoButton(
@@ -375,8 +364,8 @@ class ProfileScreenState extends State<ProfileScreen> {
         () => _showInfo(l10n.howCalculated, [
           l10n.estimateFormula,
           if (targets != null)
-            'BMR: ${number(targets['bmr'] as num)} kcal · '
-                'TDEE: ${number(targets['tdee'] as num)} kcal',
+            'BMR: ${number(targets['bmr'] as num)}\u00A0kcal · '
+                'TDEE: ${number(targets['tdee'] as num)}\u00A0kcal',
           l10n.profileDisclaimer,
         ]),
       ),
@@ -427,20 +416,30 @@ class ProfileScreenState extends State<ProfileScreen> {
     return CyberCard(
       key: const ValueKey('profile-adaptive-tdee'),
       title: l10n.adaptiveTdeeTitle,
-      icon: Icons.insights_rounded,
-      accent: CyberColors.lime,
+      // The full conditions live behind the info button; the card keeps
+      // only how far along the data is.
       trailing: _infoButton(
         'adaptive-tdee-info',
-        () => _showInfo(l10n.adaptiveTdeeTitle, [l10n.adaptiveTdeeInfo]),
+        () => _showInfo(l10n.adaptiveTdeeTitle, [
+          if (tdee == null)
+            l10n.adaptiveTdeeNeedMore(
+              '${rules.minLoggedDays}',
+              '${rules.minWeighIns}',
+              '${rules.minWeighInSpanDays}',
+              '${estimate.loggedDays}',
+              '${estimate.weighIns}',
+            ),
+          l10n.adaptiveTdeeInfo,
+        ]),
       ),
       child: tdee == null
           ? Text(
-              l10n.adaptiveTdeeNeedMore(
+              l10n.adaptiveTdeeProgress(
+                '${estimate.loggedDays}',
                 '${rules.minLoggedDays}',
+                '${estimate.weighIns}',
                 '${rules.minWeighIns}',
                 '${rules.minWeighInSpanDays}',
-                '${estimate.loggedDays}',
-                '${estimate.weighIns}',
               ),
               style: TextStyle(color: CyberColors.muted),
             )
@@ -462,8 +461,8 @@ class ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 10),
                 if (!estimate.plausible)
                   Text(
-                    l10n.adaptiveTdeeUnsure(number(tdee), number(formula)),
-                    style: const TextStyle(color: Colors.orange),
+                    l10n.adaptiveTdeeUnsure,
+                    style: TextStyle(color: CyberColors.warning),
                   )
                 else
                   OutlinedButton.icon(
@@ -492,7 +491,6 @@ class ProfileScreenState extends State<ProfileScreen> {
     final shown = _showAllWeights ? _weights : _weights.take(5).toList();
     return CyberCard(
       title: l10n.weightTracking,
-      icon: Icons.monitor_weight_outlined,
       trailing: _infoButton(
         'weight-info',
         () => _showInfo(l10n.weightTracking, [l10n.weightHistoryNote]),
@@ -503,13 +501,9 @@ class ProfileScreenState extends State<ProfileScreen> {
           if (_weights.isEmpty)
             Text(l10n.noWeights, style: TextStyle(color: CyberColors.muted))
           else ...[
-            Text(
-              l10n.latestWeight(weight(chronological.last.weight),
-                  _date(chronological.last.recordedAt)),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            // The latest weigh-in is the list's first row, so the header
+            // only says how much it changed.
             if (chronological.length > 1) ...[
-              const SizedBox(height: 4),
               Text(
                 l10n.weightChange(
                   context.formatSigned(
@@ -520,8 +514,8 @@ class ProfileScreenState extends State<ProfileScreen> {
                 ),
                 style: TextStyle(color: CyberColors.muted),
               ),
+              const SizedBox(height: 10),
             ],
-            const SizedBox(height: 10),
             WeightTrendChart(entries: chronological),
           ],
           const SizedBox(height: 12),
@@ -541,7 +535,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                 Expanded(
                   child: Text.rich(TextSpan(children: [
                     TextSpan(
-                      text: '${weight(entry.weight)} kg',
+                      text: '${weight(entry.weight)}\u00A0kg',
                       style: TextStyle(
                           color: CyberColors.text, fontWeight: FontWeight.w700),
                     ),
@@ -554,14 +548,12 @@ class ProfileScreenState extends State<ProfileScreen> {
                 IconButton(
                   key: ValueKey('edit-weight-${entry.id}'),
                   tooltip: l10n.editWeightTooltip(_date(entry.recordedAt)),
-                  visualDensity: VisualDensity.compact,
                   onPressed: _saving ? null : () => _editWeight(entry),
                   icon: const Icon(Icons.edit_outlined, size: 20),
                 ),
                 IconButton(
                   key: ValueKey('delete-weight-${entry.id}'),
                   tooltip: l10n.deleteWeightTooltip(_date(entry.recordedAt)),
-                  visualDensity: VisualDensity.compact,
                   onPressed: _saving ? null : () => _deleteWeight(entry),
                   icon: const Icon(Icons.delete_outline_rounded, size: 20),
                 ),
@@ -643,7 +635,6 @@ class ProfileScreenState extends State<ProfileScreen> {
     String factor(double value) => context.formatNumber(value,
         decimals: value.toString().split('.').last.length);
     final segmentStyle = SegmentedButton.styleFrom(
-      visualDensity: VisualDensity.compact,
       selectedForegroundColor: CyberColors.background,
       selectedBackgroundColor: CyberColors.cyan,
     );
@@ -659,15 +650,13 @@ class ProfileScreenState extends State<ProfileScreen> {
           ],
           CyberCard(
             title: l10n.personalInfo,
-            icon: Icons.person_outline_rounded,
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  LayoutBuilder(builder: (context, constraints) {
+                    final fields = [
                       Expanded(
                         child: _numberField(
                           keyName: 'profile-age',
@@ -682,7 +671,6 @@ class ProfileScreenState extends State<ProfileScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: _numberField(
                           keyName: 'profile-height',
@@ -692,7 +680,6 @@ class ProfileScreenState extends State<ProfileScreen> {
                               name: l10n.heightName, maximum: 300),
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: _numberField(
                           keyName: 'profile-weight',
@@ -702,8 +689,28 @@ class ProfileScreenState extends State<ProfileScreen> {
                               name: l10n.weightName, maximum: 500),
                         ),
                       ),
-                    ],
-                  ),
+                    ];
+                    Widget line(List<Widget> items) => Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final (i, item) in items.indexed) ...[
+                              if (i > 0) const SizedBox(width: 8),
+                              item,
+                            ],
+                          ],
+                        );
+                    final textScale = MediaQuery.textScalerOf(context).scale(1);
+                    // On a narrow phone or with large text, weight moves to
+                    // its own row instead of cutting the labels short.
+                    if (constraints.maxWidth / textScale < 330) {
+                      return Column(children: [
+                        line(fields.sublist(0, 2)),
+                        const SizedBox(height: 14),
+                        line(fields.sublist(2)),
+                      ]);
+                    }
+                    return line(fields);
+                  }),
                   const SizedBox(height: 14),
                   _Labeled(
                     label: l10n.genderShort,
@@ -728,6 +735,19 @@ class ProfileScreenState extends State<ProfileScreen> {
                     initialValue: _activity,
                     isExpanded: true,
                     decoration: InputDecoration(labelText: l10n.activityLevel),
+                    // Once chosen, the short name: the factor would be cut
+                    // off on a narrow screen.
+                    selectedItemBuilder: (context) => [
+                      for (final label in [
+                        l10n.activitySedentary(factor(1.2)),
+                        l10n.activityLight(factor(1.375)),
+                        l10n.activityModerate(factor(1.55)),
+                        l10n.activityActive(factor(1.725)),
+                        l10n.activityVeryActive(factor(1.9)),
+                      ])
+                        Text(label.split(' · ').first,
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
                     items: [
                       DropdownMenuItem(
                           value: 1.2,
@@ -838,7 +858,7 @@ class _TargetTile extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: ' $unit',
+                text: '\u00A0$unit',
                 style: TextStyle(
                   color: CyberColors.cyan,
                   fontSize: 14,

@@ -72,7 +72,35 @@ void main() {
     expect(week.averageCalories, 1800);
     expect(week.averageProtein, 90);
     expect(week.trainingDays, 2);
-    expect(week.weightChange, closeTo(-0.8, 1e-9));
+    // Against the weigh-in closest to a week before the latest: 6 days ago,
+    // not the one 20 days ago.
+    expect(week.weightChange!.kg, closeTo(-0.8, 1e-9));
+    expect(week.weightChange!.since, _ago(6));
+  });
+
+  test('the weekly change compares with the weigh-in nearest a week back', () {
+    WeightEntry w(int id, double kg, int daysAgo) =>
+        WeightEntry(id: id, weight: kg, recordedAt: _ago(daysAgo));
+    expect(weeklyWeightChange([w(1, 70, 0)]), isNull);
+    final nine =
+        weeklyWeightChange([w(1, 69.6, 0), w(2, 70, 4), w(3, 70.4, 9)])!;
+    expect(nine.kg, closeTo(-0.8, 1e-9), reason: '9 days is nearer 7 than 4');
+    expect(nine.since, _ago(9));
+    // 5 and 9 days are both 2 days off a week: the older one counts.
+    expect(weeklyWeightChange([w(1, 69, 0), w(2, 70, 5), w(3, 71, 9)])!.since,
+        _ago(9));
+    // Only recent weigh-ins: the change since the earliest of them.
+    expect(weeklyWeightChange([w(1, 69.8, 0), w(2, 70, 2)])!.kg,
+        closeTo(-0.2, 1e-9));
+  });
+
+  test('a week without a weigh-in has no weight change', () {
+    final week =
+        summarizeWeek(dailyTotals: const {}, workoutLogs: const [], weights: [
+      WeightEntry(id: 1, weight: 70, recordedAt: _ago(9)),
+      WeightEntry(id: 2, weight: 71, recordedAt: _ago(16)),
+    ], today: _today);
+    expect(week.weightChange, isNull);
   });
 
   test('an empty week has zero averages and no weight change', () {
