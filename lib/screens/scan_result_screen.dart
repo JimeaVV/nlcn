@@ -541,6 +541,50 @@ class _DishCard extends StatelessWidget {
   }
 }
 
+/// Where each box's label goes on a photo of [area], so labels do not cover
+/// each other. Boxes are taken in [order] (best score first) and each label
+/// gets the first free spot: inside the top edge, above the box, inside the
+/// bottom edge, top right, then below. With no free spot it takes the one
+/// it overlaps least.
+@visibleForTesting
+List<Rect> placeBoxLabels({
+  required List<Rect> boxes,
+  required List<Size> labels,
+  required Size area,
+  required List<int> order,
+}) {
+  Rect fit(Offset at, Size label) => Rect.fromLTWH(
+        at.dx.clamp(0, math.max(0, area.width - label.width)).toDouble(),
+        at.dy.clamp(0, math.max(0, area.height - label.height)).toDouble(),
+        label.width,
+        label.height,
+      );
+  final placed = List<Rect?>.filled(boxes.length, null);
+  final taken = <Rect>[];
+  double overlap(Rect spot) => taken.fold(0.0, (total, other) {
+        final both = spot.intersect(other.inflate(2));
+        return both.width > 0 && both.height > 0
+            ? total + both.width * both.height
+            : total;
+      });
+  for (final i in order) {
+    final box = boxes[i];
+    final label = labels[i];
+    final spots = [
+      fit(box.topLeft, label),
+      fit(Offset(box.left, box.top - label.height), label),
+      fit(Offset(box.left, box.bottom - label.height), label),
+      fit(Offset(box.right - label.width, box.top), label),
+      fit(box.bottomLeft, label),
+    ];
+    final spot = spots.firstWhere((spot) => overlap(spot) == 0,
+        orElse: () => spots.reduce((a, b) => overlap(b) < overlap(a) ? b : a));
+    placed[i] = spot;
+    taken.add(spot);
+  }
+  return [for (final spot in placed) spot!];
+}
+
 /// A box around each food the detector found, with its name. The photo is
 /// shown cropped to fill its frame, so the boxes are cropped the same way.
 class _DetectionBoxes extends StatelessWidget {
@@ -606,40 +650,57 @@ class _BoxesPainter extends CustomPainter {
       ..strokeWidth = 2.5;
     canvas.save();
     canvas.clipRect(Offset.zero & size);
-    for (final food in detection.foods) {
-      final box = Rect.fromLTRB(
-        offset.dx + food.box.left * shown.width,
-        offset.dy + food.box.top * shown.height,
-        offset.dx + food.box.right * shown.width,
-        offset.dy + food.box.bottom * shown.height,
-      );
+    final boxes = [
+      for (final food in detection.foods)
+        Rect.fromLTRB(
+          offset.dx + food.box.left * shown.width,
+          offset.dy + food.box.top * shown.height,
+          offset.dx + food.box.right * shown.width,
+          offset.dy + food.box.bottom * shown.height,
+        ),
+    ];
+    // Every box first, so no box line runs over a label drawn before it.
+    for (final box in boxes) {
       canvas.drawRRect(
           RRect.fromRectAndRadius(box, const Radius.circular(8)), stroke);
-      // At least 40 px wide, never wider than the photo.
-      final room = math.max(40.0, math.min(box.width, size.width) - 8);
-      TextPainter label(String text) => TextPainter(
-            text: TextSpan(text: text, style: labelStyle),
-            textDirection: TextDirection.ltr,
-            textScaler: textScaler,
-            maxLines: 1,
-            ellipsis: '…',
-          )..layout(maxWidth: room);
-      // The score goes first when the box is too narrow for both.
-      final name = names[food.code] ?? '';
-      var text = label('$name ${(food.score * 100).round()}%');
-      if (text.didExceedMaxLines) text = label(name);
-      // Inside the box's top edge, so it stays on the photo.
-      final at = Offset(
-          box.left.clamp(0, math.max(0, size.width - text.width - 8)),
-          box.top.clamp(0, math.max(0, size.height - text.height - 4)));
+    }
+    final texts = [
+      for (final (i, food) in detection.foods.indexed)
+        _labelFor(food, boxes[i], size),
+    ];
+    final spots = placeBoxLabels(
+      boxes: boxes,
+      labels: [for (final text in texts) Size(text.width + 8, text.height + 4)],
+      area: size,
+      order: [
+        for (final (i, _) in detection.foods.indexed) i,
+      ]..sort((a, b) =>
+          detection.foods[b].score.compareTo(detection.foods[a].score)),
+    );
+    final fill = Paint()..color = colour;
+    for (final (i, text) in texts.indexed) {
       canvas.drawRRect(
-          RRect.fromRectAndRadius(
-              Rect.fromLTWH(at.dx, at.dy, text.width + 8, text.height + 4),
-              const Radius.circular(6)),
-          Paint()..color = colour);
-      text.paint(canvas, at + const Offset(4, 2));
+          RRect.fromRectAndRadius(spots[i], const Radius.circular(6)), fill);
+      text.paint(canvas, spots[i].topLeft + const Offset(4, 2));
     }
     canvas.restore();
+  }
+
+  /// "Cơm 94%", or the name alone when both do not fit. A label may be
+  /// wider than a narrow box, up to 120 px, so short names are not cut.
+  TextPainter _labelFor(DetectedFood food, Rect box, Size size) {
+    final room =
+        math.min(size.width - 8, math.max(120.0, box.width - 8)).toDouble();
+    TextPainter label(String text) => TextPainter(
+          text: TextSpan(text: text, style: labelStyle),
+          textDirection: TextDirection.ltr,
+          textScaler: textScaler,
+          maxLines: 1,
+          ellipsis: '…',
+        )..layout(maxWidth: room);
+    final name = names[food.code] ?? '';
+    final text = label('$name ${(food.score * 100).round()}%');
+    return text.didExceedMaxLines ? label(name) : text;
   }
 
   @override

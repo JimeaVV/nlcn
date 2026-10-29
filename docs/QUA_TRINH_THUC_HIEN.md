@@ -2875,6 +2875,24 @@ Cả 4 thí nghiệm dùng cùng tập dữ liệu, cùng cách chia và cùng t
   model món 187 ms. Lần này khoanh được cả thịt nướng (89%), cơm (94%) và
   dưa leo.
 
+### 2026-10-28 · Nhãn trên khung ở màn Kết quả quét không còn đè nhau
+
+- Vì sao: trên APK 138, quét đĩa cơm tấm, nhãn "Grilled pork 89%" bị nhãn
+  "Cucumber,…" che mất chữ "%", còn khung dưa leo thứ hai chỉ hiện
+  "Cucum…". Trước đây mọi nhãn đều đặt ở góc trên bên trái khung, rộng tối
+  đa bằng khung; khung vẽ sau đè lên nhãn vẽ trước.
+- Đã làm (`scan_result_screen.dart`):
+  - Hàm `placeBoxLabels` đặt nhãn theo thứ tự điểm cao trước. Mỗi nhãn lấy
+    chỗ trống đầu tiên: trong mép trên khung, trên khung, trong mép dưới,
+    góc trên bên phải, rồi dưới khung. Không còn chỗ trống thì lấy chỗ đè
+    ít nhất. Nhãn luôn nằm trong ảnh.
+  - Vẽ hết khung trước rồi mới vẽ nhãn, nên đường khung không cắt qua nhãn.
+  - Nhãn được rộng tới 120 px dù khung hẹp hơn, nên tên ngắn không bị cắt.
+- Kiểm tra: thêm `test/box_labels_test.dart` (3 test: một nhãn, ba khung
+  chồng nhau như đĩa cơm tấm, khung sát mép ảnh). `flutter analyze` sạch,
+  `flutter test` đạt hết. Vẽ lại màn quét: ở máy 360 px chữ ×1,3, nhãn
+  "Trứng 77%" chuyển xuống mép dưới khung thay vì đè lên "Trứng 81%".
+
 ### 2026-10-28 · Xem chỗ yếu của YOLO11s; ngưỡng riêng từng lớp; detector float16 (APK 139)
 
 **Vì sao.** YOLO11s đã chạy được trên điện thoại (bản float32, 37.9 MB). Cần
