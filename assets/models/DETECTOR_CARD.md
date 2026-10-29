@@ -1,12 +1,18 @@
 # Detector card
 
-contract_version: 1.6
+contract_version: 1.7
 threshold_box: 0.38
+threshold_box_com: 0.14
+threshold_box_ca: 0.48
+threshold_box_rau: 0.12
+threshold_box_dua_leo_ca_chua: 0.12
+threshold_box_khoai_tay_chien: 0.56
 threshold_iou: 0.5
 
 - Trained: 2026-10-27, yolo11s.pt with Ultralytics 8.4.185, 512 px
 - Photos: {'test': 1819, 'train': 29284, 'val': 2940} (VietFood67 boxes, MyFood masks, FoodInsSeg boxes, Grounding DINO and Open Images boxes in train)
 - Test: mAP50 0.646, mAP50-95 0.556, precision 0.699, recall 0.601
+- Per-class thresholds (added 2026-10-29): the rule of train_detector.py run on the 459 FoodInsSeg test photos (cơm phần), as this run had none. Tuned on one half and checked on the other, foods found went from 50.1% to 53.5% and from 55.3% to 58.4%, wrong finds from 96 to 114 and from 97 to 111
 - Files: detector.tflite 37.9 MB, detector_int8.tflite 9.9 MB
 - In the app: detector.tflite with float16 weights, 19.1 MB, made from the float32 file by tool/train/tflite_to_fp16.py; input and output stay float32. On 459 cơm phần photos it finds the same foods as the float32 file on 458. The INT8 file (w8a32) fails on the phone with tflite_flutter 0.12.1 ("Input tensor 207 lacks data")
 

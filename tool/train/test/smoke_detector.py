@@ -76,7 +76,7 @@ def make(root):
             im.save(os.path.join(myfood, split, f'lunch_{i}.png'))
             mask.save(os.path.join(myfood, f'{split}_ann', f'lunch_{i}.png'))
     # FoodInsSeg: rice with two pork slices, and a photo with bread (left
-    # out).
+    # out). One photo also has two touching cucumber slices, to be joined.
     fis = os.path.join(root, 'work', 'extra', 'foodinsseg')
     os.makedirs(os.path.join(fis, 'annotations'), exist_ok=True)
     categories = [{'id': 66, 'name': 'rice'}, {'id': 47, 'name': 'pork'},
@@ -96,10 +96,13 @@ def make(root):
             boxes = [(66, [40, 60, 220, 260])]
             boxes += ([(58, [300, 100, 150, 120])] if i == 0 else
                       [(47, [300, 80, 90, 70]), (47, [320, 200, 100, 80])])
+            if i == 1:
+                boxes += [(207, [280, 300, 40, 40]), (207, [322, 300, 40, 40])]
             for category, (left, top, w, h) in boxes:
                 draw.rectangle((left, top, left + w, top + h),
                                fill={66: (245, 245, 235), 47: (190, 150, 130),
-                                     58: (210, 170, 110)}[category])
+                                     58: (210, 170, 110),
+                                     207: (120, 200, 90)}[category])
                 annotations.append({'id': len(annotations), 'image_id': i,
                                     'category_id': category,
                                     'bbox': [left, top, w, h]})
@@ -158,6 +161,10 @@ def main():
     assert "'vf67: whole-dish box': 20" in first, 'pho photos not left out'
     assert "'foodinsseg: unsure food': 2" in first, 'bread photos not left out'
     assert 'FoodInsSeg: 10 photos with boxes' in first, first[-2000:]
+    # MyFood's 36 boxes stay (its eggs are counted, not joined); FoodInsSeg's
+    # 34 lose one in each set, the touching cucumber slices.
+    assert 'Touching pieces joined: 70 boxes into 68' in first, first[-2000:]
+    assert 'used 3 times' in first and 'Per-class box thresholds on val' in first
     assert 'Autolabel: 3 dish photos, 2 Open Images photos' in first, first[-2000:]
     # Go on elsewhere, as on Kaggle from an earlier version's output: other
     # output and work folders, the weights found under RESUME_FROM.
@@ -186,11 +193,12 @@ def main():
     assert len(classes) == 21 and classes[0] == 'com', classes
     with open(os.path.join(export, 'DETECTOR_CARD.md'), encoding='utf-8') as f:
         card = f.read()
-    assert 'contract_version: 1.6' in card and 'threshold_box:' in card
+    assert 'contract_version: 1.7' in card and 'threshold_box:' in card
     assert 'Grounding DINO and Open Images boxes in train' in card, card
     with open(os.path.join(export, 'results.json')) as f:
         results = json.load(f)
     assert 'app_decoding_matches' in results, 'exported model not checked'
+    assert 'threshold_box_by_class' in results, results
     print(card)
     # Fine-tune the model just made, into its own folder.
     weights = os.path.join(work, 'detector_best.pt')

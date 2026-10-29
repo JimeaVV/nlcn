@@ -5,7 +5,7 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.6**
+- `contract_version`: **1.7**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
@@ -25,7 +25,11 @@ nào thì phải báo người kia, tăng `contract_version` và ghi vào
   - 1.6: thêm model thứ hai, **phát hiện từng món trên đĩa** bằng YOLO (mục
     7): 21 lớp, mỗi lớp ứng với một thành phần hoặc một nhóm biến thể của
     app. Model nhận diện món (mục 6) không đổi, vẫn là model 1.5.
-- Cập nhật: 2026-10-24
+  - 1.7: `DETECTOR_CARD.md` có thể ghi ngưỡng riêng cho từng lớp
+    (`threshold_box_<lớp>`, mục 7.2). Khi train, các miếng cùng một món nằm
+    sát nhau của FoodInsSeg và MyFood được gộp thành một khung (mục 7.4).
+    Danh sách lớp, đầu vào và đầu ra không đổi; card 1.6 vẫn dùng được.
+- Cập nhật: 2026-10-29
 
 ---
 
@@ -432,18 +436,23 @@ biến thể thì người dùng bấm vào tên để chọn phần và cách n
 | Đầu vào | `float32`, ảnh **RGB, giá trị 0–1** (khác model mục 6, vốn nhận 0–255). Dạng `[1, 3, S, S]` (bản xuất LiteRT của Ultralytics) hoặc `[1, S, S, 3]` (bản xuất cũ qua onnx2tf); app nhận cả hai, đọc S từ file. YOLO11n dùng S = 640, YOLO11s dùng S = 512 |
 | Tiền xử lý | App: thu nhỏ ảnh giữ tỉ lệ cho cạnh dài bằng S, đặt vào giữa, phần thừa tô xám (114, 114, 114) như lúc train ("letterbox") |
 | Đầu ra | Một tensor `float32 [1, 4 + số_lớp, A]` (A = 8400 khi S = 640, 5376 khi S = 512); app cũng nhận dạng chuyển vị `[1, A, 4 + số_lớp]`. Bốn dòng đầu là `cx, cy, w, h` của khung, chia cho S (0–1); nếu giá trị lớn hơn 2 thì app coi là pixel và tự chia. Các dòng sau là điểm của từng lớp, 0–1 |
-| NMS | Không nằm trong model. App bỏ khung dưới `threshold_box`, rồi với mỗi lớp bỏ khung trùng khung điểm cao hơn quá `threshold_iou` |
+| NMS | Không nằm trong model. App bỏ khung dưới ngưỡng của lớp đó (`threshold_box_<lớp>`, không có thì `threshold_box`), rồi với mỗi lớp bỏ khung trùng khung điểm cao hơn quá `threshold_iou` |
 | Lượng tử hoá | Trọng số FP32 hoặc FP16; đầu vào và đầu ra vẫn là float32. App đang dùng bản FP16, tạo từ file FP32 bằng `python tool/train/tflite_to_fp16.py detector.tflite detector_fp16.tflite`. Bản INT8 động (`w8a32`, file `detector_int8.tflite`) không chạy được với tflite_flutter 0.12.1 ("Input tensor 207 lacks data") nên không dùng |
 | Kích thước | YOLO11n: khoảng 10 MB (FP32), 3 MB (INT8). YOLO11s: khoảng 37 MB (FP32), 10 MB (INT8), ước tính theo số tham số |
 | Tốc độ | Mục tiêu ≤ 400 ms mỗi ảnh trên điện thoại tầm trung |
 
 **`DETECTOR_CARD.md`**, mỗi dòng `khoá: giá trị` như `MODEL_CARD.md`:
 ```
-contract_version: 1.6
+contract_version: 1.7
 threshold_box: 0.35
+threshold_box_com: 0.14
 threshold_iou: 0.5
 ```
-Thiếu dòng nào thì app dùng số mặc định ở trên. Thẻ cũng ghi mAP50 và
+Thiếu dòng nào thì app dùng số mặc định ở trên. Từ v1.7, lớp nào có dòng
+`threshold_box_<lớp>` thì dùng ngưỡng đó thay cho `threshold_box`. Notebook
+tự chọn ngưỡng này trên tập val, theo việc món có trên đĩa hay không: lớp phải
+có trong ít nhất 20 ảnh val, F1 phải tăng, và khi hạ dưới `threshold_box` thì
+ít nhất 3/4 số lần báo phải đúng. Thẻ cũng ghi mAP50 và
 mAP50-95 của từng lớp trên tập test.
 
 **App kiểm tra khi nạp model:** đầu vào float32 bốn chiều, có một chiều
@@ -474,6 +483,12 @@ chỉ dùng model mục 6.
   Người dùng tự chạy trên Colab (GPU T4).
 - Dữ liệu: khung có sẵn của VietFood67, mặt nạ MyFood đổi ra khung, và khung
   từng miếng của FoodInsSeg; giữ cách chia train/val/test của từng bộ.
+  - Từ v1.7: các khung cùng lớp chồng lên nhau hoặc cách nhau dưới 2% cạnh
+    ảnh (`JOIN_GAP`) được gộp thành một khung, ở cả train, val và test, như
+    VietFood67 khoanh cả phần món. Không gộp `trung`, `cha_gio`, `banh_mi_o`
+    vì app đếm số khung của chúng.
+  - Ảnh train của FoodInsSeg (đĩa cơm nhiều món, khoảng 3,400 ảnh) được dùng
+    3 lần mỗi epoch (`FIS_REPEAT`).
 - Thêm vào **train** (không vào val, test): `autolabel.zip` do notebook
   `tool/train/autolabel_detector.ipynb` làm.
   - Ảnh món Việt của 30VNFoods, VinaFood21, 20FoodVN được Grounding DINO
