@@ -2944,6 +2944,127 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
 - Trên điện thoại (Xiaomi 8 nhân), detector mất 184 ms và 158 ms cho 2 ảnh
   (bản float32 trước đó mất 339 ms). Mỗi ảnh nhận ra 1–2 món.
 
+### 2026-10-30 · Lần train detector 1.7 trên Kaggle: train xong nhưng hỏng ở bước chọn ngưỡng; sửa lỗi hết bộ nhớ GPU và đọc nhãn chậm
+
+**Chuyện gì xảy ra.**
+- Train chạy đủ 35 epoch trong 3 giờ, khoảng 5 phút mỗi epoch (ước tính
+  trước đó là 15 phút).
+- Sau khi train xong, đoạn chọn ngưỡng từng lớp mới thêm gọi
+  `model.predict(..., batch=32)`. Lúc khởi động, nó đòi 23 GB bộ nhớ GPU,
+  trong khi T4 chỉ có 14.6 GB và lúc đó đã dùng 9 GB → `CUDA out of memory`.
+- Vì vậy notebook không test, không xuất model. Chỉ còn `best.pt` và
+  `last.pt`.
+- Smoke test trên máy không bắt được lỗi này, vì máy chạy bằng CPU và dữ
+  liệu giả rất nhỏ.
+- Log cũng cho thấy bước đọc 171,619 file nhãn VietFood67 mất 158 phút.
+  Kaggle giờ chỉ tải từng file của dataset khi đọc tới lần đầu, nên đọc lần
+  lượt từng file rất chậm.
+
+**Model vừa train đo trên máy.** Dùng `best.pt`, so với bản ngày 27/10 trên
+459 ảnh cơm phần (ảnh test của FoodInsSeg, model chưa thấy khi train):
+- mAP50 trên nhãn đã gộp: 0.235 → **0.417**; mAP50-95: 0.185 → 0.323.
+- Món tìm được ở ngưỡng 0.38: 52.7% → **55.8%** (410 → 434 trên 778), báo
+  sai 193 → 189. Ở ngưỡng 0.30: 57.8% → 58.9%, báo sai 246 → 219.
+- Từng lớp ở ngưỡng 0.38:
+  - gà 55 → 74 trên 144 ảnh;
+  - bò 49 → 55 trên 97;
+  - cá 17 → 24 trên 45;
+  - khoai tây chiên 7 → 11 trên 23;
+  - rau 112 → 104 trên 148;
+  - heo vẫn 11 trên 61, báo sai 27 → 35.
+- mAP50 trên tập val của notebook là 0.781. Vì nhãn val cũng đã gộp nên
+  không so thẳng được với 0.697 của lần trước.
+
+**Đã sửa (`train_detector.py`).**
+- Bước chọn ngưỡng dự đoán từng ảnh một và gọi `torch.cuda.empty_cache()`
+  trước khi chạy.
+- File nhãn VietFood67 được đọc song song, 64 file một lúc.
+- Chạy lại đoạn chọn ngưỡng của notebook trên máy, với `best.pt` mới và 459
+  ảnh cơm phần đặt làm tập val, chạy được. Ra: `com` 0.24, `heo` 0.44, `ca`
+  0.42, `rau` 0.12, `dua_leo_ca_chua` 0.10.
+- `smoke_detector.py` đạt.
+- Lần chạy lại trên Kaggle lấy kết quả lần trước làm input, với `RESUME_FROM =
+  '/kaggle/input'`. Notebook thấy `best.pt` đã train xong nên bỏ qua bước
+  train, chỉ test và xuất model.
+
+### 2026-11-01 · Lần chạy lại trên Kaggle không tìm thấy weights; notebook tìm nhanh hơn và báo rõ input có gì
+
+**Vì sao.**
+- Lần chạy lại để test và xuất model dừng ở bước đầu, với lỗi `0 folders with
+  last.pt and best.pt`. Nghĩa là output của lần train (version có `best.pt`)
+  chưa nằm trong `/kaggle/input`.
+- Chỉ riêng việc dò thư mục đã mất 213 giây, vì đi qua cả 171k ảnh của
+  VietFood67.
+
+**Đã làm.**
+- `train_detector.py` không dò vào thư mục `images` và `labels` nữa. Khi
+  không tìm thấy, lỗi in ra các thư mục có trong input (hai cấp đầu), để
+  biết đã thêm nhầm gì.
+- Phần hướng dẫn Kaggle bước 4 thêm cách khác: nếu không thêm được output
+  của version bị lỗi, tải `last.pt` và `best.pt` lên thành một dataset
+  riêng tư rồi thêm dataset đó.
+- Kiểm tra: thông báo lỗi trên thư mục giả, và `smoke_detector.py` đạt.
+- Tải `best.pt` và `last.pt` lên dataset riêng tư
+  `macrorunner-detector-v17-weights`, rồi chạy version 13.
+  - Lần này notebook tìm thấy weights. Đọc nhãn VietFood67 chỉ mất 2.7 phút
+    (lần trước 158 phút), cả bước dựng dữ liệu mất 22 phút.
+  - Nhưng bước chọn ngưỡng lại hết bộ nhớ GPU, vẫn đòi đúng 22.97 GiB. Nguyên
+    nhân thật: khi nhận một danh sách ảnh, Ultralytics gom cả danh sách thành
+    một lô. 2,940 ảnh × 32 kênh × 256 × 256 × 4 byte = 22.97 GiB, nên bỏ
+    `batch=32` không giải quyết được.
+  - Sửa: mỗi lần gọi `model.predict` chỉ đưa vào 16 ảnh. Trên 459 ảnh cơm
+    phần chạy cho cùng các ngưỡng như trước, và `smoke_detector.py` đạt.
+    Version 14 chạy với bản sửa này.
+- Version 14 chạy thành công trong 45.7 phút.
+  - Card mới: test mAP50 0.748, mAP50-95 0.649 (nhãn test đã gộp, nên không
+    so thẳng với 0.646 của lần trước). `threshold_box` 0.52, và 15 lớp có
+    ngưỡng riêng; gà, heo, bò, rau, thịt nướng, khoai dùng ngưỡng chung.
+  - Trên 459 ảnh cơm phần, tính như app hiển thị:
+    - bản app hiện tại (model 27/10 + ngưỡng 1.7): tìm được 59.1%, báo sai
+      232. Ngưỡng này được chỉnh trên chính các ảnh đó; trên nửa ảnh không
+      dùng để chỉnh thì khoảng 56%;
+    - model mới với ngưỡng chọn trên val: tìm được 56.4% (439/778), báo sai
+      185 (0.40 món mỗi ảnh, bản hiện tại là 0.51);
+    - theo lớp, cá tìm được 16 → 24 trên 45 ảnh, gà 55 → 62 trên 144, rau
+      báo sai 37 → 14; heo vẫn yếu (9/61, báo sai 30).
+  - Trong 339 món bị bỏ sót, 182 món là thịt (gà 82, heo 52, bò 48). Có 87
+    món thịt mà model đã thấy nhưng gọi sai tên, vì trong cùng ảnh có một
+    loại thịt khác bị báo sai. Nếu gọi đúng tên hết 87 món đó thì tìm được
+    67.6%, và báo sai giảm từ 185 xuống 98. Đây là lý do nên làm tiếp model
+    phân loại thịt.
+- Đưa model mới vào app:
+  - Tải `detector.tflite` (37.9 MB) từ output version 14, đổi sang float16
+    bằng `tflite_to_fp16.py` (còn 19.1 MB).
+  - So với bản float32 trên 459 ảnh: cùng món và cùng box ở cả 459 ảnh.
+  - Giải mã như app với ngưỡng trong card: tìm được 56.2% (437/778), báo
+    sai 183.
+  - `DETECTOR_CARD.md` lấy từ notebook, ghi thêm dòng về bản float16;
+    `detector_classes.txt` không đổi.
+  - `flutter analyze` sạch, `flutter test` đạt 250/250. Build APK 142.
+
+### 2026-11-01 · Vì sao detector bỏ sót ức gà
+
+- **Vì sao:** người dùng quét một đĩa cơm có ức gà trên APK 142 và app không
+  nhận ra gà. Log của lần quét đó đã mất, nên phải thử lại trên máy tính.
+- **Đã làm:** chạy model mới trên 459 ảnh cơm phần (144 ảnh có gà) và đếm
+  điểm gà cao nhất ở mỗi ảnh:
+
+  | Ngưỡng gà | Tìm ra gà | Báo gà ở ảnh không có gà |
+  |---|---|---|
+  | 0.52 (card) | 62/144 (43%) | 43 |
+  | 0.38 | 74/144 (51%) | 52 |
+  | 0.20 | 82/144 (57%) | 69 |
+
+  - 50/144 ảnh có gà mà model không đưa ra khung gà nào, kể cả với điểm từ
+    0.05.
+  - Trong số gà bị sót ở ngưỡng 0.52: 48 ảnh không có món nào bị báo nhầm,
+    số còn lại bị gọi thành heo (9), cá (5) và bò (4).
+- **Kết luận:** hạ ngưỡng không giải quyết được. Lỗi nằm ở dữ liệu: ảnh gà
+  để train còn ít, nhất là ức gà thái lát. Hai việc tiếp theo được tách
+  thành hai phiên làm song song:
+  - thêm ảnh cho các lớp yếu (gà, heo, bò, rau);
+  - làm model phân loại thịt chạy trên từng khung.
+
 ---
 
 ## 3. Việc còn tồn đọng

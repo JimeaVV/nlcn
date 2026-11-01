@@ -62,11 +62,15 @@
 # 4. To go on from there: add that version's output to the notebook
 #    (*Add Input → Your Work*), set `RESUME_FROM = '/kaggle/input'` and save a
 #    new version. A Colab run's shared `train/weights` link works there too.
+#    If that output cannot be added (a version that ended in an error), put
+#    its `last.pt` and `best.pt` in a new private dataset (*Upload → New
+#    Dataset*) and add that instead.
 #
-# Time on a T4 (estimate): about 15 minutes an epoch with the boxed dish
-# photos and FoodInsSeg used three times, so the 35 epochs take about 9
-# hours: one Kaggle run, or two to three free Colab sessions (step 5). The
-# 40-epoch run of 2026-10-27 stopped getting better on val after epoch 30.
+# Time on Kaggle (run of 2026-10-29): about 5 minutes an epoch, so the 35
+# epochs took 3 hours. Reading the VietFood67 labels one file at a time
+# took 158 minutes before that; they are now read 64 at a time. On free
+# Colab, expect two sessions (step 5). The 40-epoch run of 2026-10-27
+# stopped getting better on val after epoch 30.
 #
 # Ultralytics is AGPL-3.0; VietFood67 and FoodInsSeg are CC BY-NC-SA 4.0;
 # MyFood is CC BY 4.0.
@@ -231,13 +235,21 @@ if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
     try:
         if os.path.exists(RESUME_FROM):
             # A folder here, e.g. /kaggle/input with the last version's
-            # output added: the one weights folder somewhere under it.
-            folders = sorted({folder for folder, _, files in
-                              os.walk(RESUME_FROM, followlinks=True)
-                              if 'last.pt' in files and 'best.pt' in files})
+            # output or a dataset of the weights added: the one weights
+            # folder somewhere under it. Photo and label folders are not
+            # searched: walking VietFood67's took 3.5 minutes.
+            folders = []
+            for folder, dirs, files in os.walk(RESUME_FROM, followlinks=True):
+                dirs[:] = [d for d in dirs if d not in ('images', 'labels')]
+                if 'last.pt' in files and 'best.pt' in files:
+                    folders.append(folder)
             if len(folders) != 1:
+                seen = sorted(os.path.join(top, d) for top in
+                              [RESUME_FROM] + [os.path.join(RESUME_FROM, d)
+                                               for d in os.listdir(RESUME_FROM)]
+                              if os.path.isdir(top) for d in os.listdir(top))
                 raise ValueError(f'{len(folders)} folders with last.pt and '
-                                 f'best.pt: {folders}')
+                                 f'best.pt: {folders}. In {RESUME_FROM}: {seen}')
             got = [os.path.join(folders[0], n) for n in ('last.pt', 'best.pt')]
         else:
             got = load_gdown().download_folder(
@@ -514,7 +526,7 @@ def vf67_items(root):
                                       os.path.join(root, 'images'))
                 images.setdefault(rel, os.path.join(folder, name))
     stage(f'VietFood67: {len(images)} images in {root}')
-    kept, background = [], []
+    labels = []
     for folder, _, names in os.walk(os.path.join(root, 'labels'),
                                     followlinks=True):
         for name in sorted(names):
@@ -523,32 +535,41 @@ def vf67_items(root):
             path = os.path.join(folder, name)
             rel = os.path.splitext(
                 os.path.relpath(path, os.path.join(root, 'labels')))[0]
-            image = images.get(rel)
-            if image is None:
+            if rel in images:
+                labels.append((path, rel))
+            else:
                 skipped['vf67: no image'] += 1
-                continue
-            boxes, names_seen = [], set()
-            with open(path) as f:
-                for line in f:
-                    parts = line.split()
-                    if len(parts) < 5 or not parts[0].isdigit():
-                        continue
-                    index = int(parts[0])
-                    if index >= len(VF_NAMES):
-                        continue
-                    try:
-                        cx, cy, w, h = (float(p) for p in parts[1:5])
-                    except ValueError:
-                        continue
-                    vf_name = VF_NAMES[index]
-                    names_seen.add(vf_name)
-                    if vf_name in VF_CLASS and w > 0 and h > 0:
-                        boxes.append((CLASS_INDEX[VF_CLASS[vf_name]], cx, cy,
-                                      w, h))
+
+    def read(path):
+        boxes, names_seen = [], set()
+        with open(path) as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) < 5 or not parts[0].isdigit():
+                    continue
+                index = int(parts[0])
+                if index >= len(VF_NAMES):
+                    continue
+                try:
+                    cx, cy, w, h = (float(p) for p in parts[1:5])
+                except ValueError:
+                    continue
+                vf_name = VF_NAMES[index]
+                names_seen.add(vf_name)
+                if vf_name in VF_CLASS and w > 0 and h > 0:
+                    boxes.append((CLASS_INDEX[VF_CLASS[vf_name]], cx, cy, w, h))
+        return boxes, names_seen
+
+    # Kaggle fetches each file of a dataset the first time it is read, so
+    # one after another the 171,619 label files took 158 minutes.
+    kept, background = [], []
+    with ThreadPoolExecutor(64) as pool:
+        for (path, rel), (boxes, names_seen) in zip(
+                labels, pool.map(read, (path for path, _ in labels))):
             if names_seen & VF_DISH_BOXES and not KEEP_DISH_PHOTOS:
                 skipped['vf67: whole-dish box'] += 1
                 continue
-            item = (image, split_of(rel), boxes)
+            item = (images[rel], split_of(rel), boxes)
             (kept if boxes else background).append(item)
     random.shuffle(background)
     background = background[:int(BACKGROUND_SHARE * len(kept))]
@@ -839,13 +860,22 @@ for path in val_images:
                          os.path.splitext(os.path.basename(path))[0] + '.txt')
     with open(label) as f:
         truth[path] = {int(line.split()[0]) for line in f if line.strip()}
-for path, result in zip(val_images, model.predict(
-        val_images, imgsz=IMGSZ, conf=0.05, iou=0.5, batch=BATCH, stream=True,
-        verbose=False)):
-    best = {}
-    for c, score in zip(result.boxes.cls.tolist(), result.boxes.conf.tolist()):
-        best[int(c)] = max(best.get(int(c), 0.0), score)
-    top[path] = best
+try:
+    import torch
+    torch.cuda.empty_cache()
+except Exception:
+    pass
+# 16 photos per call: given the whole list, Ultralytics makes it one batch,
+# and the 2,940 val photos asked a T4 for 23 GB.
+for start in range(0, len(val_images), 16):
+    chunk = val_images[start:start + 16]
+    for path, result in zip(chunk, model.predict(
+            chunk, imgsz=IMGSZ, conf=0.05, iou=0.5, verbose=False)):
+        best = {}
+        for c, score in zip(result.boxes.cls.tolist(),
+                            result.boxes.conf.tolist()):
+            best[int(c)] = max(best.get(int(c), 0.0), score)
+        top[path] = best
 
 
 def presence(c, threshold):
