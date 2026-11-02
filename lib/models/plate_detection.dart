@@ -8,6 +8,8 @@ class DetectedFood {
     required this.code,
     required this.score,
     required this.box,
+    this.tentative = false,
+    this.scores = const {},
   });
 
   /// A class of detector_classes.txt, e.g. 'com' or 'trung'.
@@ -16,6 +18,17 @@ class DetectedFood {
 
   /// Where it is, as shares (0–1) of the upright photo's width and height.
   final Rect box;
+
+  /// Below its class's threshold, kept only for the meat classifier to
+  /// vouch for (contract §9.3); never shown as it is.
+  final bool tentative;
+
+  /// The box's score for each class asked for in [decodeDetections]
+  /// (the meats), for the meat classifier's vote.
+  final Map<String, double> scores;
+
+  DetectedFood renamed(String to) =>
+      DetectedFood(code: to, score: score, box: box, scores: scores);
 }
 
 /// Every food found on one photo, best first, and the photo's upright size.
@@ -168,12 +181,19 @@ class Letterbox {
 /// [1, A, 4 + classes]): boxes above their class's threshold, then per class
 /// only the best of boxes that overlap more than
 /// [DetectorLabels.thresholdIou].
+///
+/// For the meat classifier (contract §9.3): boxes of a class in [floors]
+/// are kept from that score up, marked [DetectedFood.tentative] below the
+/// class's threshold, and boxes of a class in [scoresOf] carry their score
+/// for each class of it.
 List<DetectedFood> decodeDetections(
   Float32List output,
   List<int> shape,
   DetectorLabels labels,
-  Letterbox letterbox,
-) {
+  Letterbox letterbox, {
+  Map<String, double> floors = const {},
+  Set<String> scoresOf = const {},
+}) {
   final channels = 4 + labels.classes.length;
   if (shape.length != 3 || shape[0] != 1 || !shape.contains(channels)) {
     throw FormatException('Detector output must be [1, $channels, A], '
@@ -194,6 +214,14 @@ List<DetectedFood> decodeDetections(
   final unit = largest > 2 ? letterbox.size.toDouble() : 1.0;
 
   final thresholds = [for (final code in labels.classes) labels.thresholdFor(code)];
+  final lowest = [
+    for (final (i, code) in labels.classes.indexed)
+      math.min(thresholds[i], floors[code] ?? thresholds[i]),
+  ];
+  final scored = [
+    for (final (i, code) in labels.classes.indexed)
+      if (scoresOf.contains(code)) (i, code),
+  ];
   final found = <DetectedFood>[];
   for (var a = 0; a < anchors; a++) {
     var best = 0;
@@ -205,7 +233,7 @@ List<DetectedFood> decodeDetections(
         best = c;
       }
     }
-    if (score < thresholds[best]) continue;
+    if (score < lowest[best]) continue;
     final cx = at(0, a) / unit, cy = at(1, a) / unit;
     final w = at(2, a) / unit, h = at(3, a) / unit;
     final box = Rect.fromLTRB(
@@ -215,15 +243,29 @@ List<DetectedFood> decodeDetections(
       letterbox.photoY(cy + h / 2),
     );
     if (box.width <= 0 || box.height <= 0) continue;
+    final code = labels.classes[best];
     found.add(DetectedFood(
-        code: labels.classes[best], score: score.toDouble(), box: box));
+      code: code,
+      score: score.toDouble(),
+      box: box,
+      tentative: score < thresholds[best],
+      scores: scoresOf.contains(code)
+          ? {for (final (i, other) in scored) other: at(4 + i, a).toDouble()}
+          : const {},
+    ));
   }
-  found.sort((a, b) => b.score.compareTo(a.score));
+  return keepBestBoxes(found, labels.thresholdIou);
+}
+
+/// [foods] best first, and per class only the best of boxes that overlap
+/// more than [iouLimit].
+List<DetectedFood> keepBestBoxes(List<DetectedFood> foods, double iouLimit) {
+  final sorted = [...foods]..sort((a, b) => b.score.compareTo(a.score));
   final kept = <DetectedFood>[];
-  for (final food in found) {
+  for (final food in sorted) {
     if (kept.every((other) =>
         other.code != food.code ||
-        _overlap(other.box, food.box) <= labels.thresholdIou)) {
+        _overlap(other.box, food.box) <= iouLimit)) {
       kept.add(food);
     }
   }

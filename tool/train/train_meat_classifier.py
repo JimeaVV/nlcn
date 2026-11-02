@@ -543,7 +543,8 @@ def shrink(path):
         with Image.open(path) as im:
             im = ImageOps.exif_transpose(im).convert('RGB')
             scale = PHOTO_SIDE / max(im.size)
-            # As the app fits the photo into the detector's input.
+            # The size the app fits the photo into for the detector (it
+            # resizes without PIL's smoothing).
             size = (max(1, round(im.width * scale)), max(1, round(im.height * scale)))
             im.resize(size, Image.BILINEAR).save(target + '.part.jpg', quality=92)
         os.replace(target + '.part.jpg', target)

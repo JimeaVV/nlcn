@@ -559,28 +559,29 @@ MEAT_CARD.md             ngày train, dữ liệu, kết quả, ngưỡng
 | Đầu ra | Một tensor `float32 [1, số_lớp]`, softmax |
 | Lượng tử hoá | Trọng số FP16 (converter của TensorFlow); đầu vào, đầu ra float32. Không dùng INT8 `w8a32` (lỗi ở tflite_flutter 0.12.1, mục 7.2) |
 | Kích thước | MobileNetV3Large: 6 MB (FP16) |
-| Tốc độ | Mục tiêu ≤ 30 ms mỗi khung trên điện thoại tầm trung; 6,5 ms trên CPU máy tính |
+| Tốc độ | Mục tiêu ≤ 30 ms mỗi khung trên điện thoại tầm trung; 7,2 ms trên CPU của Kaggle |
 
-**`MEAT_CARD.md`**, mỗi dòng `khoá: giá trị` (ví dụ: ngưỡng chọn cho model
-thử train tại chỗ, nhật ký 2026-11-02):
+**`MEAT_CARD.md`**, mỗi dòng `khoá: giá trị` (đang dùng, nhật ký
+2026-11-02):
 ```
 contract_version: 1.8
 crop_pad: 0.10
 vote_power: 0.5
-box_floor: 0.15
-threshold_rescue: 0.70
+box_floor: 0.20
+threshold_rescue: 0.60
+threshold_drop: 0.80
 ```
-Có thêm `threshold_rename` (khi không có `vote_power`) và `threshold_drop`.
+Có thêm `threshold_rename`, dùng khi không có `vote_power`.
 `box_floor` chỉ có tác dụng khi có `threshold_rescue`, và không thấp hơn
-0.10.
-Chỉ `contract_version` và `crop_pad` bắt buộc. Dòng nào thiếu thì việc đó
+0.10. Thiếu `crop_pad` thì app dùng 0.10; thiếu dòng ngưỡng nào thì việc đó
 không làm (mục 9.3). Ngưỡng chọn bằng
 `tool/train/eval_meat_classifier.py` trên phần val của FoodInsSeg, chạy
 trên khung của chính detector app đang dùng; detector đổi thì chọn lại.
 
-**App kiểm tra khi nạp model:** đầu vào `float32 [1, N, N, 3]`; đầu ra có
-đúng số dòng của `meat_classes.txt`; mọi mã trừ `khac` phải là lớp của
-detector. Sai thì app bỏ qua model này.
+**App kiểm tra:** khi mở app, mọi mã trong `meat_classes.txt` trừ `khac`
+phải là lớp của detector, và phải có `khac`; ở khung đầu tiên (lúc mở
+model), đầu vào phải là `float32 [1, N, N, 3]` và đầu ra có đúng số dòng của
+`meat_classes.txt`. Sai thì app bỏ qua model này và giữ tên detector đặt.
 
 ### 9.3. App dùng kết quả thế nào
 Chạy sau detector, trên mỗi khung có lớp là một trong 7 lớp thịt:
@@ -599,11 +600,17 @@ Chạy sau detector, trên mỗi khung có lớp là một trong 7 lớp thịt:
   `box_floor` và `threshold_rescue`).
 - Sau khi đổi tên, app chạy lại NMS theo lớp như mục 7.2.
 - Để làm được hai việc trên, bước giải mã của detector
-  (`decodeDetections`) phải giữ thêm, cho mỗi khung thịt, điểm của cả 7
-  loại thịt, và giữ cả khung thịt từ `box_floor` dù dưới ngưỡng lớp.
-- Cả lần quét vẫn nằm trong giới hạn 8 giây của detector. Classifier lỗi
-  hoặc quá giờ thì app giữ kết quả của detector.
-- **Chưa làm trong app**: chờ model train trên Kaggle (mục 9.4).
+  (`decodeDetections`) giữ thêm, cho mỗi khung thịt, điểm của cả 7 loại
+  thịt, và giữ cả khung thịt từ `box_floor` dù dưới ngưỡng lớp (đánh dấu
+  "tạm"). Khung tạm không bao giờ hiện ra nếu classifier không xác nhận.
+- Cả lần quét vẫn nằm trong giới hạn 8 giây của detector: classifier được
+  tối đa 3 giây và phải xong trước giới hạn đó 1 giây. Classifier lỗi hoặc
+  quá giờ thì app giữ tên detector đặt, bỏ các khung dưới ngưỡng, và không
+  gọi classifier nữa cho đến khi mở lại app.
+- Code: `lib/models/meat_classification.dart` (đọc card, cắt khung, quy tắc
+  trên), `lib/services/meat_classifier.dart` (chạy TFLite), gọi trong
+  `TfliteFoodDetector.detect` (`lib/services/food_detector.dart`). Log
+  `Meat classifier timing` ghi số khung và thời gian mỗi khung.
 
 ### 9.4. Train
 - Notebook `tool/train/train_meat_classifier.ipynb`, sinh từ

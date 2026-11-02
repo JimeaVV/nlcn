@@ -3142,8 +3142,69 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
     hay bị nhầm thành bò (44/263) và gà (22/263).
   - Khi chắc từ 0,8 (83% số khung val), đúng 94,4%.
   - File 6,0 MB float16, 7,2 ms mỗi khung trên CPU của Kaggle.
-  - Chưa tải file về và chưa đo trên khung detector: chờ người dùng đồng ý
-    tải Output.
+  - Người dùng đồng ý tải 3 file trong Output về (6,0 MB).
+
+### 2026-11-02 · Đưa model phân loại thịt vào app
+
+- **Vì sao:** kiểm tra model Kaggle trên khung của detector thật trước, rồi
+  đưa vào app với ngưỡng chọn trên val.
+- **Đo trên khung detector** (`eval_meat_classifier.py`, ngưỡng chọn trên
+  470 ảnh val, báo trên 459 ảnh test):
+
+  | Cách dùng | Val: tìm ra / sai | Test: tìm ra / sai |
+  |---|---|---|
+  | Chỉ detector | 59,8% / 170 | 56,2% (437/778) / 183 |
+  | Hai model bỏ phiếu (điểm detector^0,5 × classifier) | 61,4% / 148 | 56,8% / 173 |
+  | Bỏ phiếu + giữ khung thịt từ 0,20 khi classifier chắc từ 0,60 + bỏ khung classifier chắc 0,80 là không phải thịt (**đang dùng**) | 65,1% / 170 | **59,5% (463/778) / 200** |
+
+  - Trên test: tìm ra thêm 26 món (+3,3 điểm) nhưng báo sai thêm 17 lần;
+    trên val thì không sai thêm lần nào. Gộp cả hai (929 ảnh), F1 theo ảnh
+    tăng từ 0,643 lên 0,671. Chỉ bỏ phiếu thì sai giảm ở cả hai tập nhưng
+    tìm ra gần như không tăng.
+  - Vì sao đổi tên được ít: trên 246 khung thịt detector báo ở ảnh test có
+    thịt thật bên dưới, classifier một mình gọi đúng 148, detector đúng
+    155, bỏ phiếu đúng 161. Classifier học từ đúng dữ liệu của detector (95%
+    crop là VietFood67, chỉ 5.879 crop FoodInsSeg), nên trên đĩa cơm
+    FoodInsSeg nó không biết hơn detector; hay gọi cá thành gà (20 lần) và
+    heo thành bò (17 lần). Phần lợi chính là giữ lại các khung thịt detector
+    chấm điểm hơi thấp.
+- **Đã làm trong app:**
+  - `lib/models/plate_detection.dart`: `decodeDetections` có thể giữ khung
+    thịt từ `box_floor` (đánh dấu tạm) và điểm của 7 loại thịt ở mỗi khung;
+    NMS tách thành `keepBestBoxes` để dùng lại sau khi đổi tên.
+  - `lib/models/meat_classification.dart` (mới): đọc `meat_classes.txt` và
+    `MEAT_CARD.md`, cắt khung từ ảnh vào của detector đúng như
+    `tf.image.crop_and_resize`, và quy tắc của contract mục 9.3.
+  - `lib/services/meat_classifier.dart` (mới): chạy TFLite trên isolate,
+    từng khung một.
+  - `TfliteFoodDetector.detect` gọi classifier sau khi giải mã. Classifier
+    được tối đa 3 giây và phải xong trước giới hạn 8 giây của detector 1
+    giây; lỗi hoặc quá giờ thì giữ tên detector đặt, bỏ khung tạm, và không
+    gọi lại cho đến khi mở lại app. Log `Meat classifier timing` và dòng
+    tên trước → sau.
+  - `assets/models/`: `meat_classifier.tflite`, `meat_classes.txt`,
+    `MEAT_CARD.md` (ngưỡng ở trên).
+  - Contract mục 9.2, 9.3 cập nhật theo code; `CLAUDE.md`,
+    `assets/models/README.md`.
+- **Đã kiểm tra:**
+  - `test/meat_classification_test.dart` (12 test): đọc card, cắt khung
+    khớp số của TensorFlow ở cả hai thứ tự kênh, bỏ phiếu, giữ/bỏ khung
+    tạm, bỏ khung không phải thịt, đổi tên khi không bỏ phiếu, gộp khung
+    trùng sau khi đổi tên, giải mã có floor.
+  - `flutter analyze` sạch, `flutter test` đạt 262/262.
+  - Card trong `assets/models` cho đúng số ở bảng (59,5%, sai 200).
+  - Agent `model-contract-reviewer` rà app với contract và script đánh
+    giá: khớp. Đã sửa các chỗ lệch nhỏ trong câu chữ contract.
+- **Chưa làm và rủi ro:**
+  - Chưa đo tốc độ trên điện thoại: lúc làm, điện thoại không nối adb và
+    người dùng vắng. Worktree này không có `android/key.properties` nên
+    không build bản release ký đúng ở đây.
+  - Lần quét đầu sau khi mở app: classifier phải mở model trong phần thời
+    gian còn lại. Nếu quá giờ, nó tắt đến khi mở lại app. Cần xem log
+    `Meat classifier timing` ở lần quét đầu.
+  - App thu ảnh về 512 px bằng nội suy không làm mịn, còn lúc train và đo
+    dùng PIL có làm mịn. Với ảnh chụp 4000 px, số đo trên máy tính có thể
+    khác trên điện thoại, cho cả detector lẫn classifier.
 
 ---
 

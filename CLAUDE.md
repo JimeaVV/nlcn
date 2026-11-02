@@ -24,7 +24,8 @@ thì Android coi là app khác, không cài đè được và mất dữ liệu.
 - `assets/models/`: model app đang dùng: `food_v1.tflite`, `dishes.txt`,
   `components.txt`, `MODEL_CARD.md`. Model phát hiện món trên đĩa (YOLO,
   không bắt buộc): `detector.tflite`, `detector_classes.txt`,
-  `DETECTOR_CARD.md`.
+  `DETECTOR_CARD.md`. Model phân loại thịt chạy trên khung của nó (không
+  bắt buộc): `meat_classifier.tflite`, `meat_classes.txt`, `MEAT_CARD.md`.
 - `assets/data/vn_food/`: CSV món Việt, thành phần và khẩu phần, có nguồn.
 - `tool/train/`: notebook train model.
   - Code gốc là `train_food_model.py`. File `.ipynb` được sinh từ đó.

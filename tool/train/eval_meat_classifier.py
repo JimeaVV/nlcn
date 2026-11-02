@@ -139,7 +139,8 @@ def collect(folder, models, classifier_path):
     card = open(os.path.join(models, 'DETECTOR_CARD.md'), encoding='utf-8').read()
     meat_classes = open(os.path.join(models, 'meat_classes.txt')).read().split()
     meat_card = open(os.path.join(models, 'MEAT_CARD.md'), encoding='utf-8').read()
-    pad = card_value(meat_card, 'crop_pad') or 0.1
+    pad = card_value(meat_card, 'crop_pad')
+    pad = 0.1 if pad is None else pad
     iou_limit = card_value(card, 'threshold_iou') or 0.5
     detector = tf.lite.Interpreter(os.path.join(models, 'detector.tflite'),
                                    num_threads=os.cpu_count())
