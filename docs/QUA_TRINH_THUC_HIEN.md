@@ -3156,6 +3156,34 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
     62/144.
   - Cả 459 câu trả lời của Gemini đều đọc được JSON.
 
+### 2026-11-02 · Thiết kế chế độ nhận diện online (Gemini, tùy chọn)
+
+- **Vì sao:** sau khi đo, Gemini 3.5 Flash-Lite tìm được nhiều món hơn
+  detector (76.5% so với 65.6% ở cùng mức báo sai). Người dùng muốn có chế
+  độ này trong app, nhưng app phải vẫn chạy offline và mọi số dinh dưỡng
+  phải có nguồn.
+- **Đã làm:** viết `docs/CHE_DO_ONLINE.md`, chưa sửa code app. Các điểm
+  chính:
+  - Offline vẫn là mặc định.
+  - Ảnh chỉ rời máy khi đủ ba điều kiện: công tắc đang bật, có key, người
+    dùng đã đồng ý.
+  - Lỗi mạng, quá 8 giây, hết lượt hoặc JSON hỏng thì dùng kết quả của
+    detector.
+  - Không có key trong APK. Người dùng tự nhập key của họ, key lưu trong
+    Android Keystore và không nằm trong file sao lưu.
+  - Gemini chỉ cho biết lớp và số gam. Kcal và macro vẫn lấy từ CSV qua
+    `detectorFoods`.
+  - Bản đầu chưa dùng số gam của Gemini, vì chưa so với số cân thật của
+    Nutrition5k.
+  - Ảnh gửi đi được thu về cạnh dài 1024 px và bỏ hết EXIF (có vị trí GPS).
+  - Bản release phải thêm quyền INTERNET; hiện nay app không có quyền này.
+  - Câu lệnh và mô tả lớp chuyển vào một file asset dùng chung cho app và
+    `gemini_compare.py`, để app hỏi đúng câu đã đo.
+  - Contract có thêm mục mới và tăng số phiên bản.
+- **Đã kiểm tra:** đọc lại luồng `ScanResultScreen._recognize()`,
+  `ScanPlate.detected`, `detectorFoods` và `AndroidManifest.xml` để thiết kế
+  khớp với code hiện có.
+
 ---
 
 ## 3. Việc còn tồn đọng
