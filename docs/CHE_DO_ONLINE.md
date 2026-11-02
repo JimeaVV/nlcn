@@ -162,8 +162,16 @@ Chỉ phải đổi chỗ lấy key và địa chỉ gửi (mục 6); phần cò
   đặt trong header `x-goog-api-key`.
 - Dùng `dart:io` `HttpClient`, nên không cần thêm package `http`. Trong test
   thì thay bằng client giả.
-- Model `gemini-3.5-flash-lite` là model đã đo. Tên model ghi trong
-  `assets/models/online_classes.json`, không viết cứng trong code.
+- Model `gemini-3.5-flash-lite` là model đã đo và là mặc định. Tên model
+  ghi trong `assets/models/online_classes.json`.
+- Trong Cài đặt có thể đổi sang `gemini-3.8-flash` (`OnlineModel.flash`).
+  - Người dùng muốn thử model này vì nó mạnh hơn, dù chưa được đo.
+  - Model này suy nghĩ trước khi trả lời, nên app gửi
+    `thinking_level: low` và chờ tối đa 20 giây thay cho 8 giây.
+  - Gói miễn phí của model này chỉ có 5 lần gọi một phút và 20 lần một
+    ngày.
+  - Muốn đo thì chạy `gemini_compare.py --model gemini-3.8-flash --thinking
+    low`.
 - Không gửi lại khi gặp 429 hay 503, mà chuyển ngay sang kết quả offline.
   - Gặp 429 thì báo "Hết lượt Gemini hôm nay".
   - Chưa làm phần tạm ngừng gọi tới nửa đêm giờ Thái Bình Dương (lúc Google

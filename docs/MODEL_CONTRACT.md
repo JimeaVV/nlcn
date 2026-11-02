@@ -552,6 +552,13 @@ Thiết kế và lý do nằm ở `docs/CHE_DO_ONLINE.md`. Số đo nằm trong
   `{"foods": [{"class", "name", "grams"}]}`.
   - `class` là một lớp của detector hoặc `other`.
   - Gọi qua Interactions API với `store: false`.
+- **Model:** người dùng chọn trong Cài đặt.
+  - Mặc định `gemini-3.5-flash-lite`, model đã đo và ghi trong
+    `online_classes.json`. Chờ tối đa 8 giây.
+  - Có thể chọn `gemini-3.8-flash`, model mạnh hơn nhưng **chưa đo**. Model
+    này chạy với `thinking_level: low` và chờ tối đa 20 giây. Gói miễn phí
+    chỉ cho 20 ảnh mỗi ngày.
+  - Câu lệnh và schema của hai model giống nhau.
 - **App dùng câu trả lời thế nào:**
   - Mỗi lớp xuất hiện một lần, đổi sang thành phần bằng bảng ở mục 7.1,
     giống detector.

@@ -1333,5 +1333,11 @@
   "onlineConsentBody": "Mỗi lần quét, ảnh món ăn được gửi tới Gemini của Google để nhận món. Ảnh đã được thu nhỏ và bỏ vị trí, thông tin máy chụp; app không gửi gì khác. Bản dev test dùng gói miễn phí, nên Google có thể dùng ảnh để cải thiện sản phẩm của họ. Tắt lúc nào cũng được trong Cài đặt.",
   "@onlineConsentBody": {"description": "Consent dialog before online recognition is first turned on"},
   "onlineConsentAccept": "Đồng ý gửi",
-  "@onlineConsentAccept": {"description": "Consent dialog: agree"}
+  "@onlineConsentAccept": {"description": "Consent dialog: agree"},
+  "onlineModelLabel": "Model",
+  "@onlineModelLabel": {"description": "Label above the Gemini model choice"},
+  "onlineModelName": "{model, select, flashLite{Lite 3.5} flash{Flash 3.8} other{Gemini}}",
+  "@onlineModelName": {"description": "Gemini model name on its segment; model is the OnlineModel name", "placeholders": {"model": {"type": "String"}}},
+  "onlineModelNote": "{model, select, flashLite{Đã đo: nhận ra 76,5% món, khoảng 2,4 giây một ảnh, 500 ảnh mỗi ngày.} flash{Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày.} other{}}",
+  "@onlineModelNote": {"description": "What the chosen Gemini model is like; model is the OnlineModel name", "placeholders": {"model": {"type": "String"}}}
 }

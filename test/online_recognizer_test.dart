@@ -126,6 +126,33 @@ void main() {
     expect(input.last['data'], base64Encode([1, 2, 3]));
   });
 
+  test('Flash-Lite, the measured model, is used until the user picks Flash',
+      () async {
+    expect(OnlineModel.values.first.id, _spec().model);
+    final calls = _Calls();
+    final online = _recognizer(calls);
+    await online.load();
+    await online.setEnabled(true, consent: true);
+    expect(online.model, OnlineModel.flashLite);
+    await online.recognize('plate.jpg');
+    expect(calls.bodies.last['model'], 'gemini-3.5-flash-lite');
+    expect(calls.bodies.last['generation_config'], {'seed': 0});
+
+    await online.setModel(OnlineModel.flash);
+    await online.recognize('plate.jpg');
+    expect(calls.bodies.last['model'], 'gemini-3.8-flash');
+    expect(calls.bodies.last['generation_config'],
+        {'seed': 0, 'thinking_level': 'low'});
+
+    final again = OnlineRecognizer(apiKey: 'test-key');
+    await again.load();
+    expect(again.model, OnlineModel.flash, reason: 'the choice is remembered');
+    expect(again.timeout, const Duration(seconds: 20),
+        reason: 'Flash thinks first, so it gets longer');
+    await again.setModel(OnlineModel.flashLite);
+    expect(again.timeout, onlineTimeout);
+  });
+
   test('a missing network, a slow answer, the quota and errors are told apart',
       () async {
     Future<OnlineFailure> failure(OnlineRecognizer online) async {

@@ -823,5 +823,11 @@
   "onlineConsentBody": "Each scan sends the food photo to Google's Gemini to name the foods. The photo is shrunk and stripped of location and camera data; nothing else is sent. This dev test uses the free tier, so Google may use the photos to improve its products. You can turn it off any time in Settings.",
   "@onlineConsentBody": {"description": "Consent dialog before online recognition is first turned on"},
   "onlineConsentAccept": "Send photos",
-  "@onlineConsentAccept": {"description": "Consent dialog: agree"}
+  "@onlineConsentAccept": {"description": "Consent dialog: agree"},
+  "onlineModelLabel": "Model",
+  "@onlineModelLabel": {"description": "Label above the Gemini model choice"},
+  "onlineModelName": "{model, select, flashLite{Lite 3.5} flash{Flash 3.8} other{Gemini}}",
+  "@onlineModelName": {"description": "Gemini model name on its segment; model is the OnlineModel name", "placeholders": {"model": {"type": "String"}}},
+  "onlineModelNote": "{model, select, flashLite{Measured: found 76.5% of the foods, about 2.4 seconds a photo, 500 photos a day.} flash{Stronger but not measured yet, slower, only 20 photos a day.} other{}}",
+  "@onlineModelNote": {"description": "What the chosen Gemini model is like; model is the OnlineModel name", "placeholders": {"model": {"type": "String"}}}
 }

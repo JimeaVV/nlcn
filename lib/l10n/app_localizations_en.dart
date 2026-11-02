@@ -1771,4 +1771,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onlineConsentAccept => 'Send photos';
+
+  @override
+  String get onlineModelLabel => 'Model';
+
+  @override
+  String onlineModelName(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flashLite': 'Lite 3.5',
+        'flash': 'Flash 3.8',
+        'other': 'Gemini',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onlineModelNote(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flashLite':
+            'Measured: found 76.5% of the foods, about 2.4 seconds a photo, 500 photos a day.',
+        'flash': 'Stronger but not measured yet, slower, only 20 photos a day.',
+        'other': '',
+      },
+    );
+    return '$_temp0';
+  }
 }

@@ -3245,6 +3245,33 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
     chỗ lệch trong tài liệu mà agent chỉ ra.
   - Chưa thử với key thật trên điện thoại.
 
+### 2026-11-02 · Cho chọn model Gemini trong bản dev test
+
+- **Vì sao:** người dùng muốn thử `gemini-3.8-flash` trên điện thoại, vì
+  model này mạnh hơn Flash-Lite. Lần đo hôm nay không đo được model này:
+  gói miễn phí chỉ có 20 lần gọi một ngày, mà hôm đó model còn quá tải.
+- **Đã làm:**
+  - Thẻ "Gemini (dev test)" trong Cài đặt có thêm lựa chọn model:
+    "Lite 3.5" (mặc định) và "Flash 3.8".
+    - Bên dưới có một dòng nói rõ: Lite đã đo, nhận ra 76,5% món, khoảng
+      2,4 giây một ảnh, 500 ảnh một ngày. Flash chưa đo, chậm hơn, chỉ 20 ảnh
+      một ngày.
+    - Lựa chọn được lưu lại.
+  - Flash 3.8 chạy với `thinking_level: low` và được chờ tối đa 20 giây,
+    thay cho 8 giây của Lite.
+  - Hai model dùng chung câu lệnh và schema.
+  - Hết 20 lượt trong ngày thì app báo "Hết lượt Gemini hôm nay" và dùng
+    nhận diện trên máy.
+  - Contract mục 10 và `docs/CHE_DO_ONLINE.md` ghi thêm phần chọn model.
+- **Đã kiểm tra:**
+  - Test mới:
+    - mặc định là model đã đo;
+    - chọn Flash thì request gửi đúng tên model và `thinking_level`;
+    - lựa chọn được nhớ lại;
+    - thời gian chờ đổi theo model.
+  - `flutter analyze` sạch, `flutter test` đạt 260/260.
+  - Ảnh `settings_online` ở bốn giao diện và màn nhỏ 360 px không tràn.
+
 ---
 
 ## 3. Việc còn tồn đọng

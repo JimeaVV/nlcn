@@ -1747,4 +1747,34 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get onlineConsentAccept => 'Đồng ý gửi';
+
+  @override
+  String get onlineModelLabel => 'Model';
+
+  @override
+  String onlineModelName(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flashLite': 'Lite 3.5',
+        'flash': 'Flash 3.8',
+        'other': 'Gemini',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onlineModelNote(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flashLite':
+            'Đã đo: nhận ra 76,5% món, khoảng 2,4 giây một ảnh, 500 ảnh mỗi ngày.',
+        'flash': 'Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày.',
+        'other': '',
+      },
+    );
+    return '$_temp0';
+  }
 }

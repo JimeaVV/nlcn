@@ -19,9 +19,28 @@ const geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
 /// tool/eval/gemini_compare.py so the app asks what was measured.
 const onlineSpecAsset = '$modelFolder/online_classes.json';
 
-/// Gemini answered in 2.4 s (median) on the test photos; past this the
-/// detector's plate is used.
+/// Gemini Flash-Lite answered in 2.4 s (median) on the test photos; past
+/// this the detector's plate is used.
 const onlineTimeout = Duration(seconds: 8);
+
+/// The Gemini models a dev test build can use. Only [flashLite] was
+/// measured on the test photos (docs/QUA_TRINH_THUC_HIEN.md, 2026-11-02);
+/// [flash] is stronger but slower, and its free tier allows 20 photos a day.
+enum OnlineModel {
+  flashLite('gemini-3.5-flash-lite', onlineTimeout),
+  // It thinks before answering; low thinking keeps a scan to seconds.
+  flash('gemini-3.8-flash', Duration(seconds: 20), thinkingLevel: 'low');
+
+  const OnlineModel(this.id, this.timeout, {this.thinkingLevel});
+
+  final String id;
+  final Duration timeout;
+  final String? thinkingLevel;
+
+  static OnlineModel byId(String? id) => values.firstWhere(
+      (model) => model.id == id,
+      orElse: () => values.first);
+}
 
 /// The long side of the photo that is sent.
 const onlineMaxSide = 1024;
@@ -238,8 +257,9 @@ class OnlineRecognizer extends ChangeNotifier {
     AssetBundle? bundle,
     OnlineSpec? spec,
     Future<Uint8List> Function(String imagePath)? readPhoto,
-    this.timeout = onlineTimeout,
-  })  : _post = post ?? _httpPost,
+    Duration? timeout,
+  })  : _timeout = timeout,
+        _post = post ?? _httpPost,
         _bundle = bundle,
         _spec = spec == null ? null : Future.value(spec),
         _readPhoto = readPhoto ?? _preparedPhoto;
@@ -251,14 +271,17 @@ class OnlineRecognizer extends ChangeNotifier {
 
   static const _enabledKey = 'online_recognition';
   static const _consentKey = 'online_consent';
+  static const _modelKey = 'online_model';
 
   /// Raised when the consent text changes, so it is asked again.
   static const consentVersion = 1;
 
   final String apiKey;
 
-  /// How long an answer may take before the detector's plate is used.
-  final Duration timeout;
+  /// How long an answer may take before the detector's plate is used;
+  /// the model's own time unless set.
+  Duration get timeout => _timeout ?? _model.timeout;
+  final Duration? _timeout;
   final OnlinePost _post;
   final AssetBundle? _bundle;
   final Future<Uint8List> Function(String) _readPhoto;
@@ -266,6 +289,10 @@ class OnlineRecognizer extends ChangeNotifier {
   bool _enabled = false;
   bool _consented = false;
   bool _loaded = false;
+  OnlineModel _model = OnlineModel.values.first;
+
+  /// The model scans are sent to; the measured one until the user picks.
+  OnlineModel get model => _model;
 
   /// False in builds without a key: the settings card is hidden.
   bool get available => apiKey.isNotEmpty;
@@ -282,6 +309,7 @@ class OnlineRecognizer extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       _enabled = prefs.getBool(_enabledKey) ?? false;
       _consented = (prefs.getInt(_consentKey) ?? 0) >= consentVersion;
+      _model = OnlineModel.byId(prefs.getString(_modelKey));
     } catch (error) {
       debugPrint('Online settings not read: $error');
     }
@@ -304,6 +332,18 @@ class OnlineRecognizer extends ChangeNotifier {
     }
   }
 
+  Future<void> setModel(OnlineModel model) async {
+    if (model == _model) return;
+    _model = model;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_modelKey, model.id);
+    } catch (error) {
+      debugPrint('Online settings not saved: $error');
+    }
+  }
+
   /// What Gemini sees on the photo. Throws [OnlineScanException]; never
   /// called unless [enabled].
   Future<OnlineScan> recognize(String imagePath) async {
@@ -317,8 +357,9 @@ class OnlineRecognizer extends ChangeNotifier {
       _spec = null;
       throw OnlineScanException(OnlineFailure.failed, '$error');
     }
+    final model = _model;
     final body = utf8.encode(jsonEncode({
-      'model': spec.model,
+      'model': model.id,
       'input': [
         {'type': 'text', 'text': spec.prompt},
         {'type': 'image', 'data': base64Encode(photo), 'mime_type': 'image/jpeg'},
@@ -328,7 +369,10 @@ class OnlineRecognizer extends ChangeNotifier {
         'mime_type': 'application/json',
         'schema': spec.schema,
       },
-      'generation_config': {'seed': 0},
+      'generation_config': {
+        'seed': 0,
+        if (model.thinkingLevel case final level?) 'thinking_level': level,
+      },
       'store': false,
     }));
     final ({int status, String body}) response;

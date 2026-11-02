@@ -452,6 +452,30 @@ extension on SettingsScreen {
               onChanged: (value) => _toggleOnline(context, value),
             ),
             Text(l10n.onlineNote, style: TextStyle(color: CyberColors.muted)),
+            const SizedBox(height: 14),
+            Text(l10n.onlineModelLabel,
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<OnlineModel>(
+                showSelectedIcon: false,
+                segments: [
+                  for (final model in OnlineModel.values)
+                    ButtonSegment(
+                      value: model,
+                      label: Text(l10n.onlineModelName(model.name),
+                          key: ValueKey('online-model-${model.name}')),
+                    ),
+                ],
+                selected: {_online.model},
+                onSelectionChanged: (value) => _online.setModel(value.single),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(l10n.onlineModelNote(_online.model.name),
+                key: const ValueKey('online-model-note'),
+                style: TextStyle(color: CyberColors.muted)),
           ],
         ),
       ),

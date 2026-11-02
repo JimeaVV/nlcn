@@ -3012,6 +3012,24 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đồng ý gửi'**
   String get onlineConsentAccept;
+
+  /// Label above the Gemini model choice
+  ///
+  /// In vi, this message translates to:
+  /// **'Model'**
+  String get onlineModelLabel;
+
+  /// Gemini model name on its segment; model is the OnlineModel name
+  ///
+  /// In vi, this message translates to:
+  /// **'{model, select, flashLite{Lite 3.5} flash{Flash 3.8} other{Gemini}}'**
+  String onlineModelName(String model);
+
+  /// What the chosen Gemini model is like; model is the OnlineModel name
+  ///
+  /// In vi, this message translates to:
+  /// **'{model, select, flashLite{Đã đo: nhận ra 76,5% món, khoảng 2,4 giây một ảnh, 500 ảnh mỗi ngày.} flash{Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày.} other{}}'**
+  String onlineModelNote(String model);
 }
 
 class _AppLocalizationsDelegate
