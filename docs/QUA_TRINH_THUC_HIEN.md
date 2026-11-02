@@ -3173,7 +3173,14 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - Input: VietFood67, Food Recognition 2022, `macrorunner-detector-plates`,
     `macrorunner-detector-v17-weights`. GPU T4 x2, Internet bật.
   - Version 1 "plates fine-tune from v17", Save & Run All lúc khoảng 11:55
-    ngày 02/11. Ước tính xong sau khoảng 4 giờ.
+    ngày 02/11. Ước tính xong khoảng 16:00 (khoảng 40 phút dựng dữ liệu,
+    30 epoch khoảng 5,6 phút mỗi epoch, 20 phút test và xuất). Kaggle tự
+    dừng ở 11 giờ.
+  - Kiểm tra lúc 12:33: vẫn "Running" (2.300 giây), GPU T4 x2. Log trên
+    trang chưa hiện các dòng của bước dựng dữ liệu, vì log Kaggle hiện trễ.
+- Còn lại: khi chạy xong, hỏi người dùng trước khi tải output. Sau đó đo
+  lại trên 459 ảnh cơm phần và so với v17 (56,4% món, 185 món báo sai, gà
+  62/144).
 
 ---
 
