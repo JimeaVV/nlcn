@@ -3121,6 +3121,30 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   detector" khớp `DETECTOR_CARD.md` (56,2%, sai 183); `check_vn_food.py`
   đạt. Không đổi code app nên không chạy `flutter test`.
 
+### 2026-11-02 · Chạy train model phân loại thịt trên Kaggle
+
+- **Vì sao:** người dùng nhờ Claude tự đặt và chạy lần train này qua Chrome
+  (tài khoản Kaggle đã đăng nhập sẵn), trong khi phiên khác chạy detector.
+- **Đã làm:** import notebook với `QUICK_TEST = False` (bản sinh từ commit
+  `9dbf828`), thêm dataset `thomasnguyen6868/vietfood68`, Internet bật
+  (FoodInsSeg tải từ Google Drive, MyFood từ Zenodo), GPU T4 x2. Notebook
+  `jimeav/macrorunner-meat-classifier`, *Save & Run All* bản 1, bắt đầu
+  khoảng 11:50 ngày 02/11. Ước tính xong sau 1–1,5 giờ. Không chạy bản
+  quick test trước; smoke test trên máy đã chạy đủ các bước.
+- **Kết quả:** chạy hết 62 phút: đọc nhãn VietFood67 5 phút, thu nhỏ
+  95.246 ảnh 16 phút (Kaggle đọc từng file chậm), train 37 phút (2 epoch đầu
+  ra, 12 epoch fine-tune, khoảng 132 giây mỗi epoch).
+  - Crop: 160.458 train (88.326 sau cân bằng), 3.057 val, 1.969 test.
+    157.845 crop là từ VietFood67.
+  - Đúng trên crop test: **80,2%** (val 87,1%), so với 56% của model thử chỉ
+    có FoodInsSeg. Theo lớp: `thit_kho` 100%, `thit_nuong` 94,5%, `tom` 90%,
+    `khac` 84,1%, `ca` 81,1%, `bo` 78,9%, `ga` 76,1%, `heo` 63,9%. Heo vẫn
+    hay bị nhầm thành bò (44/263) và gà (22/263).
+  - Khi chắc từ 0,8 (83% số khung val), đúng 94,4%.
+  - File 6,0 MB float16, 7,2 ms mỗi khung trên CPU của Kaggle.
+  - Chưa tải file về và chưa đo trên khung detector: chờ người dùng đồng ý
+    tải Output.
+
 ---
 
 ## 3. Việc còn tồn đọng
