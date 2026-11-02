@@ -3065,6 +3065,89 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - thêm ảnh cho các lớp yếu (gà, heo, bò, rau);
   - làm model phân loại thịt chạy trên từng khung.
 
+### 2026-11-02 · Thêm ảnh đĩa có gà, heo, bò, rau cho model phát hiện món
+- **Vì sao:** trên 459 ảnh cơm phần, model v17 tìm ra 56,4% món mỗi ảnh và
+  báo sai 185 món. Lớp bị sót nhiều nhất: gà (82), heo (52), bò (48), rau
+  (47). 50/144 ảnh có gà mà model không đưa ra khung gà nào, kể cả với
+  điểm 0,05, nên phải thêm dữ liệu chứ hạ ngưỡng không đủ.
+- **Tìm nguồn ảnh** (đều cho phép dùng lại, có ghi nguồn):
+  - FoodSeg103 (Hugging Face): không dùng, vì chính là FoodInsSeg (cùng
+    4.983 ảnh train, 2.135 ảnh test, cùng tên file).
+  - **MyFoodRepo** (Food Recognition 2022 của AIcrowd, bản trên Kaggle
+    `awsaf49/food-recognition-2022-dataset`, CC BY 4.0): khoảng 40.000 ảnh
+    bữa ăn chụp bằng điện thoại, có viền người vẽ quanh từng món. Ô `bbox`
+    trong file nhãn bị sai (bản xử lý sẵn trên Hugging Face cũng sai theo,
+    nhiều khung có x = y), nên khung được tính lại từ viền.
+  - **Nutrition5k** (Google, bản trên Hugging Face
+    `ai5labsOfficial/nutrition5k`, CC BY 4.0): khoảng 3.500 đĩa căng-tin
+    chụp thẳng từ trên xuống, giống ảnh cơm phần. Có cân từng nguyên liệu
+    nhưng không có khung.
+  - Không tìm thấy bộ ảnh cơm phần Việt Nam nào có khung từng món và
+    license rõ ràng.
+- **Đã làm:**
+  - Script mới `tool/train/make_plates_data.py` làm `plates.zip`:
+    - Chỉ giữ ảnh có gà, heo, bò hoặc rau. Bỏ ảnh có món dễ nhầm với lớp
+      của app mà không được gán lớp đó: bánh mì lát (giống `banh_mi_o`),
+      mì Ý (giống `mi`), xúc xích, giăm bông (giống `cha`), thịt xông khói,
+      thịt băm, đồ chiên tẩm bột, súp. Ảnh chỉ có rau của MyFoodRepo giữ
+      tối đa 800, để không lấn ảnh có thịt.
+    - MyFoodRepo: khung tính từ viền. Detector v17 kiểm tra lại: ảnh nào
+      detector chắc (từ 0,6) có thịt ở chỗ không có viền thì bỏ (48 ảnh),
+      vì bộ này đôi khi không vẽ viền cho miếng thịt.
+    - Nutrition5k: Grounding DINO tìm các nguyên liệu nặng từ 10 g, lớp
+      của khung lấy theo nguyên liệu. Bỏ đĩa có hai loại thịt, vì Grounding
+      DINO không phân biệt được gà với heo trên cùng một đĩa.
+    - Xem thử cho thấy ức gà thái hạt lựu chỉ được Grounding DINO cho
+      0,2–0,37 điểm, còn detector v17 gọi nó là `cha` (0,95) hoặc `dau_hu`.
+      Đây đúng là loại ảnh còn thiếu. Vì vậy khung thịt từ 0,2 được giữ
+      nếu detector thấy bất kỳ món nào ở đúng chỗ đó. Nếu vẫn chưa có khung
+      thịt mà cân nói đĩa có thịt từ 20 g, thì lấy khung thịt tốt nhất của
+      Grounding DINO, với điều kiện rộng 3–50% ảnh và tâm cách mép ít nhất
+      15% (có lần nó khoanh một chiếc giày ở mép ảnh là gà).
+    - Bỏ ảnh không có khung, ảnh có thịt hoặc rau từ 20 g mà không được
+      khoanh, và khung to chứa tâm của từ 2 khung khác (khoanh cả đĩa).
+  - `train_detector.py`:
+    - Nguồn mới `plates.zip`, chỉ vào train, mỗi ảnh dùng 2 lần mỗi epoch
+      (`PLATES_REPEAT`). Các miếng cùng lớp nằm sát nhau được gộp thành
+      một khung như FoodInsSeg.
+    - Tìm `plates.zip` trong input. Nếu Kaggle đã tự giải nén dataset thì
+      nhận thư mục có `PLATES_CARD.md`. Thư mục đó không bị đọc nhầm thành
+      VietFood67 (cũng có `images/` và `labels/`). Lúc tìm zip, notebook
+      không đi vào thư mục `images`, `labels`.
+    - `FINETUNE_FROM` nhận cả một thư mục và tự tìm đúng một `best.pt`
+      hoặc `detector_best.pt` bên dưới, ví dụ `/kaggle/input` khi đã thêm
+      dataset trọng số v17.
+  - Contract vẫn 1.7, vì lớp và định dạng không đổi. Mục 7.4 ghi thêm nguồn
+    và license.
+- **Kết quả `plates.zip`** (143 MB, 2.203 ảnh): MyFoodRepo 1.463 ảnh,
+  Nutrition5k 740 ảnh. Số khung:
+
+  | Lớp | MyFoodRepo | Nutrition5k |
+  |---|---|---|
+  | ga | 402 | 97 |
+  | heo | 102 | 90 |
+  | bo | 208 | 78 |
+  | rau | 1.004 | 800 |
+  | com | 158 | 76 |
+  | dua_leo_ca_chua | 280 | 76 |
+
+- **Kiểm tra:**
+  - Xem bằng mắt 24 ảnh mỗi nguồn. MyFoodRepo gần như đúng hết (khung người
+    vẽ). Nutrition5k khoảng 4/5 khung đúng. Lỗi còn gặp: `com` trên miếng
+    cá, `ga` trên miếng pizza, `trung` trên trái cây, khung thịt chỉ trùm
+    một phần.
+  - Không trùng ảnh test: so dHash 2.203 ảnh mới với 459 ảnh cơm phần, cặp
+    gần nhất vẫn khác 66/256 bit.
+  - Nhãn trong zip hợp lệ: 3.548 khung, lớp 0–20, tọa độ trong 0–1, không
+    ảnh nào rỗng.
+  - `smoke_detector.py` qua cả 3 lượt (bị cắt giờ, train tiếp, fine-tune),
+    có thêm `plates.zip` giả: đọc đúng 2 ảnh MyFoodRepo và 1 ảnh
+    Nutrition5k, hai miếng rau sát nhau gộp thành một khung. Ở lượt
+    fine-tune, `plates.zip` được giải nén sẵn như trên Kaggle và trọng số
+    nằm trong một thư mục.
+  - Chưa train: người dùng chạy trên Kaggle. Ước tính khoảng 4 giờ (30
+    epoch, khoảng 5,6 phút mỗi epoch với khoảng 38.500 ảnh train).
+
 ---
 
 ## 3. Việc còn tồn đọng

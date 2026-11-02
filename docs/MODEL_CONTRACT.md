@@ -501,12 +501,23 @@ chỉ dùng model mục 6.
     đĩa hay bát của Open Images.
   - Khung do máy làm nên chỉ dùng để train; điểm test vẫn đo trên khung do
     người vẽ, so được với các lần train trước.
+- Thêm vào **train** (từ 02/11/2026): `plates.zip` do
+  `tool/train/make_plates_data.py` làm, đĩa có gà, heo, bò, rau, các lớp
+  model bỏ sót nhiều nhất trên ảnh cơm phần. Mỗi ảnh dùng 2 lần mỗi epoch
+  (`PLATES_REPEAT`).
+  - MyFoodRepo (Food Recognition 2022): khung tính từ viền người vẽ quanh
+    từng món.
+  - Nutrition5k: đĩa căng-tin chụp từ trên xuống, Grounding DINO khoanh theo
+    danh sách nguyên liệu (có cân từng thứ), lớp lấy theo nguyên liệu.
+  - Bỏ ảnh có món dễ nhầm với lớp của app mà không được gán lớp đó (bánh
+    mì lát, mì Ý, xúc xích, giăm bông, thịt xông khói, thịt băm…).
 - Model: YOLO11s của Ultralytics ở 512 px, bắt đầu từ trọng số COCO. Bản
   YOLO11n 640 px (train từ đầu, rồi fine-tune với FoodInsSeg) là bản trước,
   và vẫn là bản trong `assets/models` cho đến khi bản YOLO11s train xong.
 - License Ultralytics: **AGPL-3.0**, phải ghi rõ trong báo cáo. MyFood: CC
   BY 4.0. FoodInsSeg: CC BY-NC-SA 4.0. Open Images: khung CC BY 4.0, ảnh
   theo license từng ảnh (phần lớn CC BY 2.0). Grounding DINO: Apache-2.0.
+  MyFoodRepo (Food Recognition 2022) và Nutrition5k: CC BY 4.0.
 
 ## 8. Ghi vào nhật ký ăn uống
 Mỗi thành phần người dùng xác nhận được ghi thành **một dòng `food_log`**:

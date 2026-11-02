@@ -16,6 +16,10 @@
 # `autolabel.zip` from `autolabel_detector.ipynb`: Vietnamese dish photos
 # boxed by Grounding DINO, and Open Images boxes. Those are machine-made, so
 # they go to train only, and val and test stay comparable between runs.
+# `plates.zip` from `make_plates_data.py` goes to train only too: plates
+# with chicken, pork, beef and greens from MyFoodRepo (boxes from its hand-drawn
+# outlines) and Nutrition5k (boxed by Grounding DINO), the classes the
+# detector missed most on the cơm phần photos.
 #
 # **On Google Colab**
 # 1. *Runtime → Change runtime type → T4 GPU*.
@@ -52,7 +56,8 @@
 # **On Kaggle**
 # 1. Add the dataset `thomasnguyen6868/vietfood68`. For the boxed dish
 #    photos, put a share link to `autolabel.zip` in `AUTOLABEL_FROM`, or add
-#    a dataset that holds it.
+#    a dataset that holds it. Add the private dataset that holds
+#    `plates.zip` too (or a link in `PLATES_FROM`).
 # 2. *Accelerator*: GPU T4 x2 (training uses one) or P100. Turn Internet on:
 #    MyFood downloads from Zenodo, FoodInsSeg and `autolabel.zip` from Google
 #    Drive.
@@ -73,7 +78,7 @@
 # stopped getting better on val after epoch 30.
 #
 # Ultralytics is AGPL-3.0; VietFood67 and FoodInsSeg are CC BY-NC-SA 4.0;
-# MyFood is CC BY 4.0.
+# MyFood, MyFoodRepo (Food Recognition 2022) and Nutrition5k are CC BY 4.0.
 
 # %%
 import os
@@ -125,12 +130,19 @@ ULTRALYTICS_VERSION = '8.4.185'
 # step 4). Empty: start or go on in this Drive.
 RESUME_FROM = os.environ.get('RESUME_FROM', '')
 # A shared link to a finished run's `export/detector_best.pt` (or a path to
-# it), to fine-tune from (step 7 above). Empty: start from the COCO weights.
+# it, or a folder here with one best.pt or detector_best.pt under it, such as
+# an added Kaggle dataset of the weights), to fine-tune from (step 7 above).
+# Empty: start from the COCO weights.
 FINETUNE_FROM = os.environ.get('FINETUNE_FROM', '')
 FINETUNE_EPOCHS = 30
 # `autolabel.zip` from autolabel_detector.ipynb: a path or a shared link.
 # Empty: look for it in this Drive (Colab) or the inputs (Kaggle).
 AUTOLABEL_FROM = os.environ.get('AUTOLABEL_FROM', '')
+# `plates.zip` from make_plates_data.py, found the same way.
+PLATES_FROM = os.environ.get('PLATES_FROM', '')
+# Its photos are used this many times in train: about 4,000 plates against
+# 34,000 photos, and chicken on cơm phần was the detector's worst miss.
+PLATES_REPEAT = 2
 # lr0 for fine-tuning, a fifth of the 0.01 that SGD starts a fresh run with,
 # so it learns the new photos without forgetting the old ones.
 FINETUNE_LR = 0.002
@@ -274,6 +286,16 @@ def is_checkpoint(path):
         return f.read(2) == b'PK'
 
 
+if FINETUNE_FROM and os.path.isdir(FINETUNE_FROM):
+    found = []
+    for folder, dirs, files in os.walk(FINETUNE_FROM, followlinks=True):
+        dirs[:] = [d for d in dirs if d not in ('images', 'labels')]
+        found += [os.path.join(folder, n) for n in ('best.pt', 'detector_best.pt')
+                  if n in files]
+    if len(found) != 1:
+        raise RuntimeError(f'FINETUNE_FROM: {len(found)} best.pt or '
+                           f'detector_best.pt under {FINETUNE_FROM}: {found}')
+    FINETUNE_FROM = found[0]
 if FINETUNE_FROM:
     if os.path.exists(FINETUNE_FROM):
         MODEL = FINETUNE_FROM
@@ -329,32 +351,60 @@ if DOWNLOAD_FOODINSSEG and not os.path.isdir(foodinsseg_dir):
             f'Could not download FoodInsSeg: {error!r}. Try again later, or set '
             'DOWNLOAD_FOODINSSEG to 0 to train without it.') from error
 
-autolabel_dir = os.path.join(EXTRA_ROOT, 'autolabel')
-autolabel_zip = AUTOLABEL_FROM
-if not autolabel_zip:
-    places = [os.path.join(folder, 'autolabel.zip')
-              for folder, _, files in os.walk(INPUT_ROOT, followlinks=True)
-              if 'autolabel.zip' in files]
-    if ON_COLAB:
-        places.insert(0, os.path.join(COLAB_ROOT, 'drive', 'MyDrive',
-                                      'macrorunner_train', 'detector_autolabel',
-                                      'autolabel.zip'))
-    autolabel_zip = next((p for p in places if os.path.exists(p)), '')
-if autolabel_zip and not os.path.isdir(autolabel_dir):
+zips_in_input = {}
+plates_unzipped = ''   # Kaggle unzips a zip uploaded as a dataset
+if not (AUTOLABEL_FROM and PLATES_FROM):
+    # Photo and label folders are not searched: walking VietFood67's took
+    # 3.5 minutes on Kaggle.
+    for folder, dirs, files in os.walk(INPUT_ROOT, followlinks=True):
+        if 'PLATES_CARD.md' in files and 'labels' in dirs:
+            plates_unzipped = plates_unzipped or folder
+        dirs[:] = [d for d in dirs if d not in ('images', 'labels')]
+        for name in ('autolabel.zip', 'plates.zip'):
+            if name in files:
+                zips_in_input.setdefault(name, os.path.join(folder, name))
+
+
+def unzip_extra(name, given, drive_folder):
+    """Unzips `name` into EXTRA_ROOT: [given] (a path or a shared link), else
+    the one in this Drive's [drive_folder] (Colab) or in the inputs."""
+    target = os.path.join(EXTRA_ROOT, os.path.splitext(name)[0])
+    if os.path.isdir(target):
+        return
+    path = given
+    if not path:
+        places = [zips_in_input.get(name, '')]
+        if ON_COLAB:
+            places.insert(0, os.path.join(COLAB_ROOT, 'drive', 'MyDrive',
+                                          'macrorunner_train', drive_folder,
+                                          name))
+        path = next((p for p in places if p and os.path.exists(p)), '')
+    if not path:
+        return
     import zipfile
-    if not os.path.exists(autolabel_zip):
-        stage(f'Copying autolabel.zip from {autolabel_zip} ...')
-        match = re.search(r'/d/([\w-]{20,})|[?&]id=([\w-]{20,})', autolabel_zip)
-        file_id = next(g for g in match.groups() if g) if match else autolabel_zip
-        autolabel_zip = os.path.join(WORK_DIR, 'autolabel.zip')
-        load_gdown().download(id=file_id, output=autolabel_zip, quiet=True)
-    stage(f'Unzipping {autolabel_zip} ...')
-    with zipfile.ZipFile(autolabel_zip) as z:
-        z.extractall(autolabel_dir + '.part')
-    os.replace(autolabel_dir + '.part', autolabel_dir)
-if not os.path.isdir(autolabel_dir):
+    if not os.path.exists(path):
+        stage(f'Copying {name} from {path} ...')
+        match = re.search(r'/d/([\w-]{20,})|[?&]id=([\w-]{20,})', path)
+        file_id = next(g for g in match.groups() if g) if match else path
+        path = os.path.join(WORK_DIR, name)
+        load_gdown().download(id=file_id, output=path, quiet=True)
+    stage(f'Unzipping {path} ...')
+    with zipfile.ZipFile(path) as z:
+        z.extractall(target + '.part')
+    os.replace(target + '.part', target)
+
+
+unzip_extra('autolabel.zip', AUTOLABEL_FROM, 'detector_autolabel')
+if not os.path.isdir(os.path.join(EXTRA_ROOT, 'autolabel')):
     print('No autolabel.zip: training without the boxed dish photos. Run '
           'autolabel_detector.ipynb first, or set AUTOLABEL_FROM.', flush=True)
+unzip_extra('plates.zip', PLATES_FROM, 'detector_plates')
+PLATES_DIR = os.path.join(EXTRA_ROOT, 'plates')
+if not os.path.isdir(PLATES_DIR) and plates_unzipped:
+    PLATES_DIR = plates_unzipped
+if not os.path.isdir(PLATES_DIR):
+    print('No plates.zip: training without the extra chicken, pork, beef and '
+          'greens plates. Add its dataset, or set PLATES_FROM.', flush=True)
 stage(f'Photos from {INPUT_ROOT} and {EXTRA_ROOT} | results to {OUTPUT_DIR}')
 
 # %% [markdown]
@@ -673,6 +723,26 @@ def autolabel_items(root):
     return items
 
 
+def plates_items(root):
+    """make_plates_data.py's boxes, for train only, named after their source
+    (fr22_…, n5k_…). MyFoodRepo outlines one heap of greens in pieces, so
+    touching pieces are joined as for FoodInsSeg."""
+    items = []
+    labels = os.path.join(root, 'labels', 'train')
+    for name in sorted(os.listdir(labels)):
+        stem = os.path.splitext(name)[0]
+        boxes = []
+        with open(os.path.join(labels, name)) as f:
+            for line in f:
+                c, cx, cy, w, h = line.split()
+                boxes.append((int(c), float(cx), float(cy), float(w), float(h)))
+        items.append((stem.split('_')[0], os.path.join(
+            root, 'images', 'train', stem + '.jpg'), 'train', join_pieces(boxes)))
+    stage('Plates: ' + ', '.join(f'{n} {s}' for s, n in sorted(
+        Counter(i[0] for i in items).items())) + ' photos')
+    return items
+
+
 def write(index_item):
     index, (source, image, split, boxes) = index_item
     name = f'{source}_{index:06d}'
@@ -697,7 +767,8 @@ def write(index_item):
 
 
 items = []
-for root in find_roots(INPUT_ROOT, lambda folder, _: is_detection_root(folder)):
+for root in find_roots(INPUT_ROOT, lambda folder, files:
+                       is_detection_root(folder) and 'PLATES_CARD.md' not in files):
     items += [('vf67', *item) for item in vf67_items(root)]
 for root in find_roots(EXTRA_ROOT, lambda folder, files:
                        os.path.isdir(os.path.join(folder, 'train_ann'))):
@@ -710,6 +781,9 @@ stage(f'Touching pieces joined: {joined["before"]} boxes into '
       f'{joined["after"]} | FoodInsSeg train photos used {FIS_REPEAT} times')
 if os.path.isdir(os.path.join(EXTRA_ROOT, 'autolabel', 'labels')):
     items += autolabel_items(os.path.join(EXTRA_ROOT, 'autolabel'))
+if os.path.isdir(os.path.join(PLATES_DIR, 'labels')):
+    items += [item for item in plates_items(PLATES_DIR)
+              for _ in range(PLATES_REPEAT)]
 if QUICK_TEST:
     random.shuffle(items)
     items = items[:300]
@@ -1068,7 +1142,10 @@ lines = [
     f'pieces of one food joined, {joined["before"]} boxes into '
     f'{joined["after"]}'
     + (', Grounding DINO and Open Images boxes in train'
-       if any(item[0] in ('auto', 'oi') for item in items) else '') + ')',
+       if any(item[0] in ('auto', 'oi') for item in items) else '')
+    + (f', MyFoodRepo and Nutrition5k plates in train, used {PLATES_REPEAT} '
+       'times' if any(item[0] in ('fr22', 'n5k') for item in items) else '')
+    + ')',
     f"- Test: mAP50 {results['map50']:.3f}, mAP50-95 {results['map50_95']:.3f}, "
     f"precision {results['precision']:.3f}, recall {results['recall']:.3f}",
     f'- Files: ' + ', '.join(f'{k} {v / 1e6:.1f} MB' for k, v in exported.items()),

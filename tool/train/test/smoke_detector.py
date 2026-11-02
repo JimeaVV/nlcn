@@ -14,6 +14,7 @@ minutes. The logs stay in the work folder it prints.
 """
 import json
 import os
+import re
 import shutil
 import random
 import subprocess
@@ -131,6 +132,25 @@ def make(root):
             z.write(os.path.join(root, 'photo.jpg'), f'images/train/{name}.jpg')
             z.writestr(f'labels/train/{name}.txt', ''.join(l + '\n' for l in lines))
         z.writestr('sources.csv', 'name,source,dish,photo\n')
+    # plates.zip as make_plates_data.py writes it: two MyFoodRepo plates
+    # (chicken 4 and greens 16, the greens in two touching pieces on one)
+    # and a Nutrition5k one (beef 8, rice 0), in a dataset of its own.
+    folder = os.path.join(root, 'input', 'macrorunner-detector-plates')
+    os.makedirs(folder, exist_ok=True)
+    with zipfile.ZipFile(os.path.join(folder, 'plates.zip'), 'w') as z:
+        for name, lines in (('fr22_000000', ['4 0.3 0.5 0.3 0.3',
+                                             '16 0.62 0.5 0.1 0.2',
+                                             '16 0.73 0.5 0.1 0.2']),
+                            ('fr22_000001', ['4 0.5 0.5 0.4 0.4']),
+                            ('n5k_000002', ['8 0.3 0.4 0.3 0.3',
+                                            '0 0.7 0.6 0.3 0.3'])):
+            im = Image.new('RGB', (320, 240), (90, 80, 70))
+            ImageDraw.Draw(im).rectangle((50, 80, 150, 160), fill=(220, 190, 150))
+            im.save(os.path.join(root, 'photo.jpg'))
+            z.write(os.path.join(root, 'photo.jpg'), f'images/train/{name}.jpg')
+            z.writestr(f'labels/train/{name}.txt', ''.join(l + '\n' for l in lines))
+        z.writestr('sources.csv', 'name,source,photo\n')
+        z.writestr('PLATES_CARD.md', '# Plates card\n')
 
 
 def run(work, name, **env):
@@ -166,6 +186,10 @@ def main():
     assert 'Touching pieces joined: 70 boxes into 68' in first, first[-2000:]
     assert 'used 3 times' in first and 'Per-class box thresholds on val' in first
     assert 'Autolabel: 3 dish photos, 2 Open Images photos' in first, first[-2000:]
+    assert 'Plates: 2 fr22, 1 n5k photos' in first, first[-2000:]
+    # Greens in train: VietFood67's 12, and the plate's two touching pieces
+    # as one box, used twice (PLATES_REPEAT).
+    assert re.search(r'^rau +14 ', first, re.M), first[-2000:]
     # Go on elsewhere, as on Kaggle from an earlier version's output: other
     # output and work folders, the weights found under RESUME_FROM.
     earlier = os.path.join(work, 'input', 'earlier-version')
@@ -195,18 +219,34 @@ def main():
         card = f.read()
     assert 'contract_version: 1.7' in card and 'threshold_box:' in card
     assert 'Grounding DINO and Open Images boxes in train' in card, card
+    assert 'MyFoodRepo and Nutrition5k plates in train, used 2 times' in card, card
     with open(os.path.join(export, 'results.json')) as f:
         results = json.load(f)
     assert 'app_decoding_matches' in results, 'exported model not checked'
     assert 'threshold_box_by_class' in results, results
     print(card)
-    # Fine-tune the model just made, into its own folder.
-    weights = os.path.join(work, 'detector_best.pt')
-    shutil.copy(os.path.join(export, 'detector_best.pt'), weights)
+    # Fine-tune the model just made, into its own folder, from a folder
+    # that holds it as a Kaggle dataset of the weights would.
+    weights = os.path.join(work, 'weights-dataset')
+    os.makedirs(os.path.join(weights, 'v17'))
+    shutil.copy(os.path.join(export, 'detector_best.pt'),
+                os.path.join(weights, 'v17', 'best.pt'))
+    # And with plates.zip unzipped in the inputs, as Kaggle does with an
+    # uploaded zip.
+    plates = os.path.join(work, 'input', 'macrorunner-detector-plates')
+    with zipfile.ZipFile(os.path.join(plates, 'plates.zip')) as z:
+        z.extractall(plates)
+    os.remove(os.path.join(plates, 'plates.zip'))
+    shutil.copytree(os.path.join(work, 'work', 'extra'),
+                    os.path.join(work, 'work3', 'extra'),
+                    ignore=shutil.ignore_patterns('plates'))
     tuned = run(work, 'finetune', TIME_LIMIT_HOURS='0', **{
         **env, 'OUTPUT_DIR': os.path.join(work, 'output_finetune'),
-        'FINETUNE_FROM': weights})
+        'WORK_DIR': os.path.join(work, 'work3'), 'FINETUNE_FROM': weights})
     assert 'Fine-tuning from' in tuned and 'Training done' in tuned, tuned[-2000:]
+    assert 'Plates: 2 fr22, 1 n5k photos' in tuned, tuned[-2000:]
+    # Its images and labels folders are not taken for VietFood67's.
+    assert not re.search(r'VietFood67: .*macrorunner-detector-plates', tuned)
     with open(os.path.join(work, 'output_finetune', 'export',
                            'DETECTOR_CARD.md'), encoding='utf-8') as f:
         assert 'fine-tuned from' in f.read()
