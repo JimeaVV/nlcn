@@ -559,7 +559,7 @@ MEAT_CARD.md             ngày train, dữ liệu, kết quả, ngưỡng
 | Đầu ra | Một tensor `float32 [1, số_lớp]`, softmax |
 | Lượng tử hoá | Trọng số FP16 (converter của TensorFlow); đầu vào, đầu ra float32. Không dùng INT8 `w8a32` (lỗi ở tflite_flutter 0.12.1, mục 7.2) |
 | Kích thước | MobileNetV3Large: 6 MB (FP16) |
-| Tốc độ | Mục tiêu ≤ 30 ms mỗi khung trên điện thoại tầm trung; 7,2 ms trên CPU của Kaggle |
+| Tốc độ | Mục tiêu ≤ 30 ms mỗi khung trên điện thoại tầm trung. Đo được 31 ms cho một khung trên Xiaomi 8 nhân (kể cả lần đầu mở model, build 143); 7,2 ms trên CPU của Kaggle |
 
 **`MEAT_CARD.md`**, mỗi dòng `khoá: giá trị` (đang dùng, nhật ký
 2026-11-02):

@@ -3195,16 +3195,20 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - Card trong `assets/models` cho đúng số ở bảng (59,5%, sai 200).
   - Agent `model-contract-reviewer` rà app với contract và script đánh
     giá: khớp. Đã sửa các chỗ lệch nhỏ trong câu chữ contract.
-- **Chưa làm và rủi ro:**
-  - Chưa đo tốc độ trên điện thoại: lúc làm, điện thoại không nối adb và
-    người dùng vắng. Worktree này không có `android/key.properties` nên
-    không build bản release ký đúng ở đây.
-  - Lần quét đầu sau khi mở app: classifier phải mở model trong phần thời
-    gian còn lại. Nếu quá giờ, nó tắt đến khi mở lại app. Cần xem log
-    `Meat classifier timing` ở lần quét đầu.
-  - App thu ảnh về 512 px bằng nội suy không làm mịn, còn lúc train và đo
-    dùng PIL có làm mịn. Với ảnh chụp 4000 px, số đo trên máy tính có thể
-    khác trên điện thoại, cho cả detector lẫn classifier.
+- **Rủi ro:** app thu ảnh về 512 px bằng nội suy không làm mịn, còn lúc
+  train và đo dùng PIL có làm mịn. Với ảnh chụp 4000 px, số đo trên máy tính
+  có thể khác trên điện thoại, cho cả detector lẫn classifier.
+- **Đo trên điện thoại** (build 143, Xiaomi 8 nhân; người dùng quét 3 ảnh,
+  log qua adb): detector chuẩn bị ảnh 95–190 ms, chạy model 149–177 ms.
+  Ảnh có thịt (cơm, dưa leo cà chua, thịt nướng): classifier chạy 1 khung
+  trong **31 ms**, kể cả lần đầu mở model, và giữ tên `thit_nuong`. Hai ảnh
+  kia không có khung thịt nên classifier không chạy. Cả lần quét vẫn dưới
+  0,5 giây, rất xa giới hạn 8 giây. Mới đo một khung; đĩa nhiều miếng
+  thịt chưa đo.
+- **Build 143:** chép `android/key.properties` từ thư mục chính sang worktree
+  (không mở file, người dùng đồng ý), build arm64 release, chữ ký SHA-256
+  `e3b83ac4…` khớp, rồi xoá file đó khỏi worktree. APK 49 MB
+  (`MacroRunner-efficientnetb3-meat-arm64.apk`), đã cài lên điện thoại.
 
 ---
 
