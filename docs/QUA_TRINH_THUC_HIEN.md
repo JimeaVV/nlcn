@@ -3182,6 +3182,37 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   lại trên 459 ảnh cơm phần và so với v17 (56,4% món, 185 món báo sai, gà
   62/144).
 
+### 2026-11-02 · Đo detector v18 trên ảnh cơm phần: không hơn v17, giữ v17
+- **Vì sao:** lượt Kaggle v18 (fine-tune từ v17, thêm 2.203 ảnh đĩa
+  MyFoodRepo và Nutrition5k) chạy xong 30 epoch trong 3 giờ 2 phút. Cần đo
+  trên ảnh cơm phần trước khi thay model trong app.
+- **Trên tập test chung (1.819 ảnh, thẻ của notebook):** mAP50 0,753 (v17
+  0,748), recall 0,703 (0,676), precision 0,776 (0,780). Theo từng lớp: gà
+  0,557 (0,537), bò 0,614 (0,586), heo 0,521 (0,535), rau 0,619 (0,630).
+- **Trên 459 ảnh cơm phần FoodInsSeg** (người dùng đồng ý tải
+  `detector_best.pt` về; mỗi món tính có hoặc không trên mỗi ảnh):
+  - Mỗi model với ngưỡng trong thẻ của nó: v17 tìm ra 56,4% món (439/778)
+    và báo sai 185 món; v18 tìm ra 55,8% (434/778) và báo sai 182.
+  - Nâng hoặc hạ cùng lúc mọi ngưỡng để so ở cùng số món báo sai: hai model
+    gần như bằng nhau, chênh dưới 1 điểm (195 món báo sai: v17 khoảng
+    57,2%, v18 56,9%; 142 món báo sai: v17 khoảng 51,1%, v18 51,7%). Với một ngưỡng chung cho
+    mọi món, v17 hơn khoảng 1,5 điểm.
+  - Gà, khi chỉnh ngưỡng để số ảnh tìm ra gà bằng nhau: v17 ở 0,45 tìm ra
+    68/144 và báo sai 48; v18 ở 0,40 tìm ra 68 và báo sai 49. Bò tăng nhẹ:
+    ở 0,52 v18 tìm ra 53/97, v17 49/97, nhưng v18 cũng báo sai nhiều hơn
+    (29 so với 26). Heo không khá hơn: dưới 12/61 ở mọi ngưỡng. Rau gần như
+    bằng nhau.
+- **Kết luận:** ảnh đĩa mới không giúp detector tìm món trên cơm phần. Có
+  lẽ vì ảnh MyFoodRepo và Nutrition5k là món kiểu Âu: gà, heo, bò trông khác
+  hẳn trong cơm phần. Lỗi chính vẫn là nhầm loại thịt (gà bị gọi là chả,
+  heo bị gọi là bò), việc này để model phân loại thịt lo. **Giữ v17 trong
+  `assets/models`**, không đổi `detector.tflite` và `DETECTOR_CARD.md`.
+  Code trong `train_detector.py` (`PLATES_FROM`, `PLATES_REPEAT`) vẫn giữ;
+  dùng lại được nếu sau này có ảnh cơm phần Việt có nhãn.
+- **Lưu lại:** trọng số v18 nằm trong output của notebook Kaggle
+  `jimeav/macrorunner-detector-v18-train` (Version 1). Script đo nằm ngoài
+  repo (`compare_v18.py` trong thư mục nháp đo detector).
+
 ---
 
 ## 3. Việc còn tồn đọng
