@@ -3065,6 +3065,97 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - thêm ảnh cho các lớp yếu (gà, heo, bò, rau);
   - làm model phân loại thịt chạy trên từng khung.
 
+### 2026-11-02 · So detector với Gemini trên cùng 459 ảnh cơm phần
+
+- **Vì sao:** người dùng hỏi gửi ảnh lên Gemini (Google) có nhận món tốt
+  hơn model tự train không. Cần đo trên cùng bộ ảnh, chấm cùng cách, thay vì
+  đoán.
+- **Đã làm:**
+  - Viết `tool/eval/gemini_compare.py`:
+    - Gửi từng ảnh trong 459 ảnh FoodInsSeg test (cơm phần) lên Gemini API
+      (Interactions API, `store: false`).
+    - Bắt Gemini trả JSON, mỗi món chỉ được chọn một trong 21 lớp của
+      detector (mỗi lớp có mô tả ngắn tiếng Việt và tiếng Anh) hoặc
+      `other`, kèm số gam ước lượng.
+    - Chấm theo ảnh, giống hệt detector. Tìm được là các lớp có thật trên ảnh
+      mà Gemini có nêu. Báo sai là các lớp Gemini nêu mà ảnh không có.
+    - Mọi câu trả lời lưu trên ổ D (`D:\Temp\macrorunner_gemini_cache`), chạy
+      lại không tốn lần gọi nào. Script giãn nhịp gửi theo giới hạn và dừng
+      khi hết hạn mức ngày.
+    - Key đọc từ biến môi trường `GEMINI_API_KEY`, không in, không ghi ra
+      file.
+    - Cùng script chấm luôn detector `.pt` với ngưỡng trong
+      `DETECTOR_CARD.md`. Có thêm một dòng detector đã hạ mọi ngưỡng cho tới
+      khi số báo sai bằng Gemini, để so ở cùng mức báo sai.
+  - Câu lệnh hỏi Gemini viết một lần trước khi chạy, không sửa theo kết quả
+    test.
+  - Giá và tên model đọc trong tài liệu Google ngày 2026-11-02. Hai model
+    Flash mới nhất có gói miễn phí:
+    - `gemini-3.8-flash`: 0.75 / 3.75 USD cho 1 triệu token vào / ra.
+    - `gemini-3.5-flash-lite`: 0.30 / 2.50 USD cho 1 triệu token vào / ra.
+  - Gói miễn phí của tài khoản người dùng (xem trong AI Studio):
+    - `gemini-3.8-flash` chỉ 5 lần gọi một phút, 20 lần một ngày. Hôm đó
+      model này còn quá tải (lỗi 503, có ảnh mất 159 s), nên hết 20 lần mà
+      chỉ được 1 ảnh. Không đo được.
+    - `gemini-3.5-flash-lite`: 15 lần gọi một phút, 500 lần một ngày. Đủ cho
+      459 ảnh, chạy khoảng 35 phút.
+- **Kết quả** (459 ảnh, 778 món):
+
+  | | Tìm được | Báo sai (mỗi ảnh) | Gà | Gộp các loại heo | Thời gian mỗi ảnh |
+  |---|---|---|---|---|---|
+  | Detector `.pt`, ngưỡng card | 439/778 = 56.4% | 185 (0.40) | 62/144 | 56.4%, sai 185 | 0.13 s CPU máy tính, khoảng 0.2 s trên điện thoại |
+  | Detector, mọi ngưỡng × 0.45 (báo sai bằng Gemini) | 510/778 = 65.6% | 285 (0.62) | 81/144 | 65.6%, sai 284 | như trên |
+  | `gemini-3.5-flash-lite` | 595/778 = 76.5% | 282 (0.61) | 116/144 | 77.9%, sai 271 | 2.4 s (trung vị), 2.7 s (trung bình), cần mạng |
+
+  Theo lớp, tìm được / số ảnh có món (báo sai):
+
+  | Lớp | Detector | Detector × 0.45 | Gemini lite |
+  |---|---|---|---|
+  | com | 76/93 (15) | 80/93 (25) | 76/93 (6) |
+  | ga | 62/144 (43) | 81/144 (64) | 116/144 (28) |
+  | heo | 9/61 (30) | 13/61 (40) | 19/61 (18) |
+  | bo | 49/97 (26) | 63/97 (38) | 61/97 (20) |
+  | ca | 24/45 (12) | 27/45 (26) | 36/45 (20) |
+  | tom | 8/19 (2) | 9/19 (2) | 16/19 (2) |
+  | trung | 6/18 (5) | 7/18 (8) | 11/18 (8) |
+  | dau_hu | 1/5 (0) | 1/5 (1) | 3/5 (0) |
+  | rau | 101/148 (14) | 116/148 (26) | 144/148 (120) |
+  | dua_leo_ca_chua | 94/125 (25) | 102/125 (32) | 99/125 (3) |
+  | khoai_tay_chien | 9/23 (3) | 11/23 (5) | 14/23 (7) |
+  | thit_nuong (không có trong ảnh) | – (4) | – (6) | – (35) |
+  | lớp khác (không có trong ảnh) | – (6) | – (12) | – (15) |
+
+  - Chi phí: 459 lần gọi, 777 168 token vào và 58 384 token ra. Gói miễn
+    phí không mất tiền. Nếu trả tiền thì khoảng 0.38 USD, tức chưa tới 0.001
+    USD một ảnh.
+  - Trong 120 lần Gemini báo `rau` sai, phần lớn là rau thật mà nhãn
+    FoodInsSeg của bộ test không tính là `rau`, ít nhất: đậu que 25, măng
+    tây 16, rau mùi trang trí 11, cần tây 6, súp lơ trắng 6. Bỏ lớp `rau` ra thì
+    Gemini báo sai 162, detector 171.
+  - Trong 35 lần báo `thit_nuong` sai, 11 lần là heo nướng mà FoodInsSeg ghi
+    là `pork` (thành `heo`). Số còn lại là bò hoặc gà nướng bị gọi thành
+    sườn heo nướng.
+  - Gemini xếp vào `other` đúng những món ngoài 21 lớp: khoai tây nghiền
+    52, cà rốt (nhiều kiểu) khoảng 80, bắp 35, chanh 23.
+- **Kết luận:**
+  - Ở cùng mức báo sai, Gemini lite tìm được 76.5% món, detector 65.6%.
+    Gemini hơn khoảng 11 điểm, hơn rõ nhất ở gà (116 so với 81 trên 144
+    ảnh), cá và tôm.
+  - Detector vẫn có lợi thế:
+    - chạy offline;
+    - nhanh hơn khoảng 12 lần (0.2 s so với 2.4 s, chưa tính lúc mạng
+      chậm);
+    - không gửi ảnh đi đâu.
+  - Gói miễn phí giới hạn 500 ảnh một ngày cho cả project, mà gói này lại
+    dùng ảnh gửi lên để cải thiện sản phẩm của Google. Vì vậy Gemini chỉ hợp
+    làm chế độ online tùy chọn, không thay được detector.
+  - Bộ test là ảnh cơm phần FoodInsSeg. Detector đã học từ phần train của
+    chính bộ này, còn Gemini chưa từng thấy bộ này mà vẫn hơn.
+- **Đã kiểm tra:**
+  - Dòng detector của script ra đúng các mốc cũ: 56.4%, 185 báo sai, gà
+    62/144.
+  - Cả 459 câu trả lời của Gemini đều đọc được JSON.
+
 ---
 
 ## 3. Việc còn tồn đọng
