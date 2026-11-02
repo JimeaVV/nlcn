@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:optifit/core/cyber_theme.dart';
 import 'package:optifit/core/locale_controller.dart';
+import 'package:optifit/l10n/app_localizations.dart';
 import 'package:optifit/models/food_log_entry.dart';
 import 'package:optifit/screens/settings_screen.dart';
 import 'package:optifit/services/backup_service.dart';
 import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/reminder_service.dart';
+import 'package:optifit/services/water_reminder_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/localized_app.dart';
@@ -31,6 +33,24 @@ class _Scheduler implements ReminderScheduler {
   }
 }
 
+class _WaterScheduler implements WaterReminderScheduler {
+  List<WaterReminder>? scheduled;
+  String? channelName;
+
+  @override
+  Future<bool> requestPermission() async => true;
+
+  @override
+  Future<void> schedule(List<WaterReminder> reminders,
+      {required String channelName}) async {
+    scheduled = reminders;
+    this.channelName = channelName;
+  }
+
+  @override
+  Future<void> cancelAll() async => scheduled = null;
+}
+
 class _Database extends Fake implements DatabaseService {
   Map<String, dynamic>? restored;
 
@@ -52,6 +72,8 @@ class _Backup extends BackupService {
 
 Future<void> _mount(WidgetTester tester,
     {ReminderController? reminders,
+    WaterReminderController? waterReminders,
+    LocaleController? localeController,
     DatabaseService? database,
     BackupService backup = const BackupService(),
     VoidCallback? onRestored}) async {
@@ -63,8 +85,9 @@ Future<void> _mount(WidgetTester tester,
     home: Scaffold(
       body: SettingsScreen(
         themeController: ThemeController(),
-        localeController: LocaleController(),
+        localeController: localeController ?? LocaleController(),
         reminders: reminders,
+        waterReminders: waterReminders,
         database: database,
         backup: backup,
         onDataRestored: onRestored,
@@ -129,6 +152,40 @@ void main() {
     expect(
         scheduler.scheduled!.singleWhere((r) => r.meal == MealSlot.dinner).time,
         const TimeOfDay(hour: 20, minute: 15));
+  });
+
+  testWidgets('switching the language schedules the reminders in it',
+      (tester) async {
+    final scheduler = _Scheduler();
+    final reminders = ReminderController(scheduler: scheduler);
+    final waterScheduler = _WaterScheduler();
+    final water = WaterReminderController(
+        scheduler: waterScheduler, clock: () => DateTime(2026, 11, 2, 7));
+    final locale = LocaleController();
+    await _mount(tester,
+        reminders: reminders,
+        waterReminders: water,
+        localeController: locale,
+        database: _Database());
+
+    await tester.tap(find.byKey(const ValueKey('reminders-switch')));
+    await tester.pumpAndSettle();
+    final vi =
+        WaterReminderTexts.of(lookupAppLocalizations(const Locale('vi')));
+    await water.setEnabled(true, texts: vi, goalReachedToday: false);
+    expect(scheduler.scheduled![1].title, 'Bữa trưa: bạn đã ghi chưa?');
+
+    await tester.tap(find.byKey(const ValueKey('language-en')));
+    await tester.pumpAndSettle();
+    expect(locale.language, AppLanguage.en);
+    expect(scheduler.scheduled![1].title, 'Lunch: logged it yet?');
+    final en =
+        WaterReminderTexts.of(lookupAppLocalizations(const Locale('en')));
+    final english = {for (final m in en.messages) m.title};
+    expect(waterScheduler.scheduled, isNotEmpty);
+    expect(waterScheduler.scheduled!.every((r) => english.contains(r.title)),
+        isTrue);
+    expect(waterScheduler.channelName, 'Water reminders');
   });
 
   testWidgets('restoring asks first, then replaces the data', (tester) async {

@@ -3065,6 +3065,20 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - thêm ảnh cho các lớp yếu (gà, heo, bò, rau);
   - làm model phân loại thịt chạy trên từng khung.
 
+### 2026-11-02 · Đổi ngôn ngữ thì lên lịch lại thông báo nhắc
+
+- **Vì sao:** trên điện thoại, nhắc bữa hiện tiếng Việt nhưng nhắc uống nước
+  lại hiện tiếng Anh. App ghi sẵn nội dung thông báo lúc lên lịch, Android
+  giữ nguyên chữ đó tới lúc hiện. Đổi ngôn ngữ trong Cài đặt không lên lịch
+  lại, nên các nhắc đã xếp từ trước (nhắc nước xếp trước 7 ngày) vẫn mang
+  ngôn ngữ cũ.
+- **Đã làm:** chọn ngôn ngữ trong Cài đặt giờ lên lịch lại cả nhắc bữa lẫn
+  nhắc nước bằng ngôn ngữ mới, kể cả tên kênh thông báo.
+  `ReminderController` có thêm hàm `refresh` để làm việc này.
+- **Kiểm tra:** thêm test `switching the language schedules the reminders
+  in it`. Test bật cả hai loại nhắc bằng tiếng Việt, rồi đổi sang tiếng Anh
+  và kiểm tra nội dung đã xếp lịch phải là tiếng Anh. `flutter analyze`
+  không báo lỗi, `flutter test` qua hết 251 test.
 ---
 
 ## 3. Việc còn tồn đọng

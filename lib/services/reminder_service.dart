@@ -141,6 +141,13 @@ class ReminderController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Schedules the reminders again with [texts], for example after the
+  /// app's language changed: Android keeps the text given when scheduling.
+  Future<void> refresh(
+          {required ({String title, String body}) Function(MealSlot) texts,
+          required String channelName}) =>
+      _apply(texts, channelName);
+
   Future<void> _apply(({String title, String body}) Function(MealSlot) texts,
       String channelName) async {
     if (!_enabled) {
