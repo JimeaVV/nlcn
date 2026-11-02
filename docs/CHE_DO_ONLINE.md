@@ -1,6 +1,8 @@
 # Chế độ nhận diện online (tùy chọn): thiết kế
 
-Trạng thái: **thiết kế, chưa làm**. Số liệu dẫn tới thiết kế này nằm trong
+Trạng thái: **đã làm cho bản dev test** (2026-11-02). Bản làm khác thiết kế
+ban đầu ở chỗ key: dùng key của nhóm đưa vào lúc build, không bắt người dùng
+nhập (mục 4). Số liệu dẫn tới thiết kế này nằm trong
 `docs/QUA_TRINH_THUC_HIEN.md`, mục "2026-11-02 · So detector với Gemini trên
 cùng 459 ảnh cơm phần".
 
@@ -25,7 +27,8 @@ như cũ.
 3. **Không có kết quả online thì dùng kết quả offline.** Áp dụng khi mất
    mạng, quá 8 giây, lỗi, hết lượt gọi hoặc JSON hỏng. Lúc đó app dùng kết
    quả của detector và báo một dòng ngắn cho người dùng.
-4. **APK không chứa key.** Người dùng tự nhập key Gemini của mình (mục 4).
+4. **Repo không chứa key.** Key chỉ có trong bản dev test, đưa vào lúc build
+   (mục 4). Bản build không có key (CI, release) không có chế độ online.
 5. **Gemini chỉ cho biết tên món, không cho số dinh dưỡng.**
    - Gemini trả lớp (một trong 21 lớp của detector) và số gam.
    - Kcal và macro vẫn tính từ CSV trong `assets/data/vn_food`, qua
@@ -65,11 +68,12 @@ chụp ảnh ─┬─ detector (≈0.2 s) ────────────�
 
 ## 3. Từ câu trả lời của Gemini tới đĩa
 
-Câu trả lời có dạng `{"foods": [{"class", "name", "grams"}]}` (schema trong
-`gemini_compare.py`). Thêm một trường `count` cho `trung`, `cha_gio`,
-`banh_mi_o`, vì app đếm các món này theo cái (contract §7.3).
+Câu trả lời có dạng `{"foods": [{"class", "name", "grams"}]}`, đúng schema
+đã đo. Không thêm trường nào, để câu hỏi giữ nguyên như lúc đo.
 
-`ScanPlate.online(data, foods)` làm giống `ScanPlate.detected`:
+`ScanPlate.online(data, codes, detection)` làm giống `ScanPlate.detected`.
+`codes` là các lớp Gemini nêu, mỗi lớp một lần. `detection` là kết quả của
+detector chạy cùng lúc.
 
 - `class` được đổi sang thành phần bằng `detectedComponent()`, vẫn qua
   `detectorFoods` và `detectorVariantFoods`. Món trùng chỉ giữ một dòng.
@@ -80,40 +84,52 @@ Câu trả lời có dạng `{"foods": [{"class", "name", "grams"}]}` (schema tr
     sai số nhỏ hơn `typicalPortion`, thì mới dùng số gam Gemini, giới hạn
     trong khoảng 0.25–3 lần khẩu phần thường. Lúc đó số này vẫn ghi là "ước
     lượng" và người dùng sửa được.
-  - Món đếm theo cái thì dùng `count`.
+  - Món đếm theo cái (`trung`, `cha_gio`, `banh_mi_o`, contract §7.3)
+    lấy số khung của detector nếu detector cũng thấy món đó, không thì lấy
+    khẩu phần thường.
+  - Nếu sau này muốn Gemini đếm, phải thêm trường `count` vào schema, đo lại
+    và tăng phiên bản contract.
 - `confidence`: Gemini không trả điểm tin cậy, nên để `null`. Không tự đặt ra
   một điểm số.
-- Món loại `other` vào một danh sách riêng tên "Gemini thấy thêm":
-  - mỗi món chỉ có tên và nút "Thêm thủ công" (mở ô tìm món sẵn có);
-  - không có số kcal nào.
+- Món loại `other` hiện thành một dòng "Gemini còn thấy: …", chỉ có tên,
+  không có số kcal nào. Muốn ghi thì người dùng thêm bằng tay như mọi món.
+- Gemini trả lời nhưng không nêu lớp nào của detector (chỉ có `other`, hoặc
+  danh sách rỗng): app dùng đĩa của detector như khi không có câu trả lời,
+  nhưng không báo lỗi.
+- Khung vẽ trên ảnh vẫn là khung của detector, nhưng chỉ vẽ cho các lớp
+  Gemini cũng nêu.
 
 ## 4. Key Gemini
 
-**Chọn: người dùng tự nhập key của họ.**
+**Ban đầu chọn để người dùng tự nhập key. Bản đã làm dùng key của nhóm**,
+vì người dùng thường không biết API key là gì (người dùng quyết định ngày
+2026-11-02).
 
-- Người dùng tạo key miễn phí trong Google AI Studio.
-- Mỗi người có hạn mức riêng: Flash-Lite 15 lần gọi một phút, 500 lần một
-  ngày. Như vậy đủ cho một người, nhóm không phải trả tiền và không phải
-  chạy máy chủ.
-- Key lưu bằng `flutter_secure_storage` (Android Keystore), là dependency
-  mới:
-  - không lưu trong SharedPreferences hay SQLite;
-  - không nằm trong file sao lưu của `backup_service.dart`;
-  - không in ra log;
-  - ô nhập key luôn che ký tự.
-- Nút "Kiểm tra key" gửi một câu hỏi chỉ có chữ, không kèm ảnh, rồi báo key
-  dùng được hay không.
+- Key đưa vào lúc build:
 
-Cách thay thế là proxy nhỏ (ví dụ Cloudflare Worker) giữ key của nhóm. Chưa
-làm, vì:
+  ```
+  flutter build apk --dart-define=GEMINI_API_KEY=<key>
+  ```
 
-- key miễn phí của nhóm chỉ có 500 lần gọi một ngày, chia cho mọi người
-  dùng;
-- proxy phải chặn người lạ gọi, nên cần thêm việc xác thực;
-- nhóm phải giữ một máy chủ chạy trong lúc chấm đồ án.
+  Code đọc bằng `String.fromEnvironment`. Key không nằm trong repo, CI hay
+  bất kỳ file nào được commit. Trên máy Người A, key lấy từ biến môi trường
+  `GEMINI_API_KEY` của tài khoản người dùng.
+- Build không có key thì mục Cài đặt bị ẩn và app không gọi mạng.
+- **Rủi ro, và vì sao vẫn chấp nhận:**
+  - Ai có file APK cũng lấy được key ra, vì key nằm trong mã đã biên dịch.
+  - Key thuộc project miễn phí, chưa gắn thẻ thanh toán, nên tệ nhất là hết
+    500 lần gọi trong ngày, không mất tiền.
+  - Chỉ gửi APK cho người thử, không đăng công khai.
+  - Bị lộ thì xoá key trong AI Studio, tạo key mới rồi build lại.
+- Hạn mức Flash-Lite là 15 lần gọi một phút và 500 lần một ngày, tính
+  chung cho mọi máy dùng bản dev test.
 
-Nếu sau này cần proxy, chỉ phải đổi địa chỉ gửi (mục 6). Phần còn lại giữ
-nguyên.
+Nếu sau này phát hành rộng hơn, có hai cách để APK không chứa key:
+
+- người dùng tự nhập key, lưu bằng `flutter_secure_storage`;
+- một proxy nhỏ giữ key.
+
+Chỉ phải đổi chỗ lấy key và địa chỉ gửi (mục 6); phần còn lại giữ nguyên.
 
 ## 5. Quyền riêng tư
 
@@ -124,7 +140,8 @@ nguyên.
   - app không gửi vị trí hay thông tin cá nhân nào;
   - có thể tắt bất cứ lúc nào trong Cài đặt.
 
-  Bấm "Không" thì công tắc tắt lại.
+  Bấm "Hủy" thì công tắc vẫn tắt. Đã đồng ý rồi thì tắt, bật lại không hỏi
+  nữa; đổi `OnlineRecognizer.consentVersion` thì hỏi lại.
 - **Ảnh gửi đi đã được xử lý lại.**
   - Ảnh được xoay đúng chiều (`bakeOrientation`), thu về cạnh dài tối đa
     1024 px, rồi lưu lại thành JPEG mới bằng package `image`.
@@ -132,11 +149,11 @@ nguyên.
   - Ảnh gốc không rời máy.
 - Request gửi kèm `store: false`, để Google không giữ cuộc hội thoại.
 - **Quyền INTERNET:**
-  - `android/app/src/main/AndroidManifest.xml` hiện không xin quyền này, nên
-    bản release hoàn toàn offline.
-  - Chế độ online bắt buộc phải thêm quyền này.
-  - Báo cáo cần ghi rõ: app có quyền mạng, nhưng chỉ dùng khi người dùng bật
-    chế độ online.
+  - Trước đây `android/app/src/main/AndroidManifest.xml` không xin quyền này,
+    nên bản release hoàn toàn offline.
+  - Nay đã thêm, vì chế độ online cần.
+  - Báo cáo cần ghi rõ: app có quyền mạng, nhưng chỉ dùng khi bản build có
+    key và người dùng bật chế độ online.
 
 ## 6. Gọi API
 
@@ -145,22 +162,20 @@ nguyên.
   đặt trong header `x-goog-api-key`.
 - Dùng `dart:io` `HttpClient`, nên không cần thêm package `http`. Trong test
   thì thay bằng client giả.
-- Model `gemini-3.5-flash-lite` là model đã đo. Model ghi trong file cấu
-  hình, không viết cứng trong code.
+- Model `gemini-3.5-flash-lite` là model đã đo. Tên model ghi trong
+  `assets/models/online_classes.json`, không viết cứng trong code.
 - Không gửi lại khi gặp 429 hay 503, mà chuyển ngay sang kết quả offline.
-  - Hết lượt trong ngày thì báo "Đã hết lượt Gemini hôm nay".
-  - Khi đó app tạm không gọi Gemini tới nửa đêm giờ Thái Bình Dương (lúc
-    Google đặt lại hạn mức).
+  - Gặp 429 thì báo "Hết lượt Gemini hôm nay".
+  - Chưa làm phần tạm ngừng gọi tới nửa đêm giờ Thái Bình Dương (lúc Google
+    đặt lại hạn mức). Mỗi lần quét vẫn thử gọi một lần, rồi chuyển sang
+    offline ngay.
 - Gemini trả lời chậm nhất 8 giây (trung vị đo được là 2.4 s). Ảnh đã nén
   còn khoảng 100–300 KB.
 
 ## 7. Contract và file chung
 
-- **Contract:** thêm mục "Nhận diện online" vào `docs/MODEL_CONTRACT.md`,
-  ghi model, câu lệnh, schema, cách đổi lớp sang thành phần và cách chọn
-  lượng ăn ở trên, rồi tăng số phiên bản.
-  - Nhánh model phân loại thịt đã dùng số 1.8, nên nhánh nào merge sau thì
-    lấy số tiếp theo.
+- **Contract:** đã thêm mục 10 vào `docs/MODEL_CONTRACT.md` và tăng lên
+  1.9, vì số 1.8 đã dành cho nhánh model phân loại thịt.
 - **Một nguồn cho mô tả lớp:** chuyển `DESCRIPTIONS` từ
   `gemini_compare.py` sang file asset mới
   `assets/models/online_classes.json`.
@@ -168,8 +183,10 @@ nguyên.
     hướng dẫn trong câu lệnh.
   - Cả app lẫn script đều đọc file này, nên câu lệnh trong app luôn trùng
     câu lệnh đã đo.
-  - Thêm một test kiểm tra file này có đủ các lớp trong
-    `detector_classes.txt`.
+  - `python tool/eval/gemini_compare.py --print-request
+    test/fixtures/gemini_request.json` xuất câu lệnh và schema.
+    `test/online_recognizer_test.dart` kiểm tra app dựng ra đúng như vậy.
+  - App báo lỗi nếu file thiếu một lớp nào trong `detector_classes.txt`.
 - Agent `model-contract-reviewer` rà phần này trước khi commit.
 
 ## 8. Đo thêm trước khi tin số gam
@@ -184,29 +201,36 @@ phần về ổ D.
 - Cách nào sai ít hơn thì dùng cách đó (mục 3). Có hạn mức 500 lần một ngày
   nên đo được khoảng 400 đĩa trong một ngày.
 
-## 9. Việc phải làm khi code
+## 9. Đã làm
 
 | Phần | File |
 |---|---|
-| Dịch vụ gọi Gemini, nén ảnh, đọc JSON | `lib/services/online_food_recognizer.dart` (mới) |
-| Lưu công tắc, đồng ý, key | `lib/services/online_settings.dart` (mới), `flutter_secure_storage` |
+| Gọi Gemini, nén ảnh, đọc JSON, lưu công tắc và đồng ý | `lib/services/online_recognizer.dart` |
 | Đĩa từ câu trả lời Gemini | `lib/models/scan_plate.dart` (`ScanPlate.online`) |
 | Chạy song song, chuyển sang offline, nút bỏ chờ, nhãn nguồn | `lib/screens/scan_result_screen.dart` |
-| Mục "Nhận diện online (tùy chọn)" | `lib/screens/settings_screen.dart` |
-| Chữ tiếng Việt và tiếng Anh | `lib/l10n/*.arb`, chạy `flutter gen-l10n` |
+| Mục "Nhận diện online (dev test)" và hộp thoại đồng ý | `lib/screens/settings_screen.dart` |
+| Chữ tiếng Việt và tiếng Anh | `lib/l10n/*.arb` |
 | Quyền mạng | `android/app/src/main/AndroidManifest.xml` |
 | Mô tả lớp dùng chung | `assets/models/online_classes.json`, `tool/eval/gemini_compare.py` |
-| Contract | `docs/MODEL_CONTRACT.md` |
+| Contract | `docs/MODEL_CONTRACT.md` mục 10 |
 
-Test cần có:
+Test đã có:
 
-- đọc JSON đúng, JSON hỏng, lớp lạ, món `other`;
-- chưa đồng ý hoặc chưa có key thì không có request nào (client giả đếm số
-  lần gọi);
-- lỗi, quá giờ hoặc 429 thì ra đĩa của detector;
-- ảnh gửi đi không còn EXIF và cạnh dài không quá 1024 px;
-- key không có trong file sao lưu.
+- `test/online_recognizer_test.dart`:
+  - câu lệnh trùng câu đã đo;
+  - không có key hoặc chưa đồng ý thì không có request nào;
+  - đọc đúng câu trả lời, kể cả lớp lạ và món `other`;
+  - phân biệt mất mạng, quá giờ, hết lượt và lỗi khác;
+  - ảnh gửi đi không còn EXIF và cạnh dài không quá 1024 px.
+- `test/scan_online_test.dart`:
+  - đĩa dựng theo các món Gemini nêu, dinh dưỡng lấy từ CSV, khẩu phần
+    thường;
+  - hết lượt thì dùng đĩa của detector và báo cho người dùng;
+  - bấm "Dùng kết quả offline" thì thôi chờ Gemini;
+  - chưa đồng ý thì không gửi ảnh.
+- Golden `scan_online` và `settings_online` trong `tool/ui_screenshots`.
 
-Giao diện thì chạy skill `ui-screenshots`, rồi nhờ agent `ui-reviewer` rà.
+Chưa làm:
 
-Ước lượng: khoảng 1–1.5 ngày code và test, cộng nửa ngày đo số gam.
+- đo số gam của Gemini (mục 8);
+- tạm ngừng gọi sau khi hết lượt trong ngày (mục 6).

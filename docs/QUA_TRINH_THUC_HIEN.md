@@ -3184,6 +3184,67 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   `ScanPlate.detected`, `detectorFoods` và `AndroidManifest.xml` để thiết kế
   khớp với code hiện có.
 
+### 2026-11-02 · Làm chế độ nhận diện online bằng Gemini (bản dev test)
+
+- **Vì sao:** người dùng muốn có chế độ online ngay trong app. Họ chọn dùng
+  key của nhóm, đưa vào lúc build, thay vì bắt người dùng tự nhập key, vì
+  người dùng thường không biết API key là gì. Chế độ này ghi rõ là "dev
+  test".
+- **Đã làm:**
+  - Key đưa vào lúc build bằng `--dart-define=GEMINI_API_KEY=...`, không
+    nằm trong repo.
+    - Build không có key (CI, release) thì không có chế độ này.
+    - Đã thêm hướng dẫn vào skill `build-apk`.
+  - `lib/services/online_recognizer.dart`:
+    - thu ảnh về cạnh dài 1024 px, bỏ EXIF;
+    - gọi `gemini-3.5-flash-lite` qua Interactions API với `store: false`,
+      chờ tối đa 8 giây;
+    - đọc JSON trả về, phân biệt mất mạng, quá giờ, hết lượt và lỗi khác;
+    - lưu công tắc và việc người dùng đã đồng ý.
+  - Câu lệnh và mô tả lớp chuyển vào `assets/models/online_classes.json`.
+    - `gemini_compare.py` đọc file này và ra đúng câu lệnh đã đo (mã
+      `4a0587f5` không đổi, các câu trả lời đã lưu vẫn dùng được).
+    - Lệnh `--print-request` của script xuất câu lệnh ra
+      `test/fixtures/gemini_request.json`; test so câu lệnh của app với file
+      đó.
+  - Màn kết quả quét:
+    - Gemini chạy cùng lúc với detector. Trong lúc chờ có nút "Dùng kết quả
+      trên máy".
+    - Đĩa dựng theo các lớp Gemini nêu (`ScanPlate.online`), qua
+      `detectorFoods`. Lượng ăn là khẩu phần thường, chưa dùng số gam của
+      Gemini. Kcal lấy từ CSV, `confidence` để trống.
+    - Món ngoài 21 lớp chỉ hiện tên trong một dòng, không có số.
+    - Không có câu trả lời thì dùng đĩa của detector và báo lý do bằng
+      snackbar.
+  - Cài đặt có thẻ "Gemini (dev test)", chỉ hiện ở bản có key. Lần đầu bật
+    sẽ có hộp thoại xin đồng ý gửi ảnh lên Google.
+  - Thêm quyền INTERNET vào `AndroidManifest.xml`. Đây là lần đầu bản release
+    xin quyền mạng.
+  - Contract lên 1.9 với mục 10 (số 1.8 và mục 9 để dành cho nhánh model
+    phân loại thịt). `docs/CHE_DO_ONLINE.md` cập nhật theo bản đã làm.
+- **Rủi ro:**
+  - Ai có file APK dev test cũng lấy được key ra.
+  - Key thuộc project miễn phí, chưa gắn thanh toán, nên tệ nhất là hết 500
+    lần gọi trong ngày. Bị lộ thì xoá key và tạo key mới.
+  - Chỉ gửi APK này cho người thử.
+- **Đã kiểm tra:**
+  - 9 test mới trong `test/online_recognizer_test.dart` và
+    `test/scan_online_test.dart`:
+    - câu lệnh trùng câu đã đo;
+    - không có key hoặc chưa đồng ý thì không gửi ảnh;
+    - ảnh gửi đi không còn EXIF;
+    - ra đúng đĩa, dinh dưỡng lấy từ CSV;
+    - hết lượt hoặc bỏ chờ thì dùng đĩa của detector.
+  - `flutter analyze` sạch, `flutter test` đạt 259/259, `check_vn_food.py`
+    OK.
+  - Ảnh `scan_online` và `settings_online` vẽ đủ bốn giao diện và màn nhỏ
+    360 px, không tràn.
+  - Agent `ui-reviewer` báo chữ dài và cách viết số. Đã sửa: rút gọn gợi ý,
+    viết "76,5%", dùng "trên máy" thay cho "offline".
+  - Agent `model-contract-reviewer` xác nhận code khớp contract. Đã sửa các
+    chỗ lệch trong tài liệu mà agent chỉ ra.
+  - Chưa thử với key thật trên điện thoại.
+
 ---
 
 ## 3. Việc còn tồn đọng

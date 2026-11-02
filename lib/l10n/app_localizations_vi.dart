@@ -1690,4 +1690,61 @@ class AppLocalizationsVi extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get scanAskingOnline => 'Đang hỏi Gemini (dev test)…';
+
+  @override
+  String get scanUseOffline => 'Dùng kết quả trên máy';
+
+  @override
+  String scanOnlineFailed(String reason) {
+    String _temp0 = intl.Intl.selectLogic(
+      reason,
+      {
+        'offline': 'Không có mạng, đã dùng nhận diện trên máy.',
+        'timeout': 'Gemini trả lời quá lâu, đã dùng nhận diện trên máy.',
+        'quota': 'Hết lượt Gemini hôm nay, đã dùng nhận diện trên máy.',
+        'other': 'Gemini bị lỗi, đã dùng nhận diện trên máy.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scanOnlinePlate(int count) {
+    return 'Gemini thấy $count món';
+  }
+
+  @override
+  String get scanOnlineHint => 'Gemini (dev test) nhận ra các món này.';
+
+  @override
+  String scanOnlineOthers(String names) {
+    return 'Gemini còn thấy (app chưa có dữ liệu): $names';
+  }
+
+  @override
+  String get onlineTitle => 'Gemini (dev test)';
+
+  @override
+  String get onlineSwitch => 'Gửi ảnh cho Gemini khi quét';
+
+  @override
+  String get onlineNote =>
+      'Mất mạng hay Gemini lỗi thì app dùng nhận diện trên máy.';
+
+  @override
+  String get onlineBody =>
+      'Bản thử nghiệm, dùng khoá API của nhóm. Khi bật, mỗi lần quét app gửi ảnh món ăn tới Gemini của Google. Gemini chỉ cho biết trên đĩa có món gì; số gam lấy theo khẩu phần thường, kcal và macro vẫn lấy từ dữ liệu có nguồn của app. Trên bộ ảnh thử, Gemini nhận ra 76,5% món, nhận diện trên máy 56,4%.';
+
+  @override
+  String get onlineConsentTitle => 'Gửi ảnh lên Google?';
+
+  @override
+  String get onlineConsentBody =>
+      'Mỗi lần quét, ảnh món ăn được gửi tới Gemini của Google để nhận món. Ảnh đã được thu nhỏ và bỏ vị trí, thông tin máy chụp; app không gửi gì khác. Bản dev test dùng gói miễn phí, nên Google có thể dùng ảnh để cải thiện sản phẩm của họ. Tắt lúc nào cũng được trong Cài đặt.';
+
+  @override
+  String get onlineConsentAccept => 'Đồng ý gửi';
 }

@@ -5,7 +5,7 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.7**
+- `contract_version`: **1.9**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
@@ -29,7 +29,14 @@ nào thì phải báo người kia, tăng `contract_version` và ghi vào
     (`threshold_box_<lớp>`, mục 7.2). Khi train, các miếng cùng một món nằm
     sát nhau của FoodInsSeg và MyFood được gộp thành một khung (mục 7.4).
     Danh sách lớp, đầu vào và đầu ra không đổi; card 1.6 vẫn dùng được.
-- Cập nhật: 2026-10-29
+  - 1.8: dành cho model phân loại thịt (nhánh
+    `claude/meat-crop-classifier-a296a9`, chưa merge). Mục 9 cũng để dành
+    cho nó.
+  - 1.9: thêm **nhận diện online bằng Gemini** cho bản dev test (mục 10).
+    Gemini dùng đúng 21 lớp của detector. Câu lệnh và mô tả lớp nằm trong
+    `assets/models/online_classes.json`. Model, lớp và thành phần khác
+    không đổi.
+- Cập nhật: 2026-11-02
 
 ---
 
@@ -511,7 +518,56 @@ chỉ dùng model mục 6.
 ## 8. Ghi vào nhật ký ăn uống
 Mỗi thành phần người dùng xác nhận được ghi thành **một dòng `food_log`**:
 - `source = camera`;
-- `confidence` = xác suất model đưa ra cho thành phần đó;
+- `confidence` = xác suất model đưa ra cho thành phần đó (đĩa do Gemini nêu
+  thì để trống, mục 10);
 - `name` là tên thành phần, kèm tên món, ví dụ "Sườn nướng (cơm tấm)".
 
 Bảng `food_log` đã có sẵn từ commit `d4806b1`, không cần đổi database.
+
+## 10. Nhận diện online bằng Gemini (tùy chọn, bản dev test, từ v1.9)
+Thiết kế và lý do nằm ở `docs/CHE_DO_ONLINE.md`. Số đo nằm trong
+`docs/QUA_TRINH_THUC_HIEN.md` (2026-11-02), trên 459 ảnh cơm phần:
+
+- `gemini-3.5-flash-lite` tìm được 76.5% món, báo sai 282 lần;
+- detector ở ngưỡng trong card tìm được 56.4%, báo sai 185 lần;
+- detector hạ ngưỡng cho số báo sai bằng Gemini thì tìm được 65.6%.
+
+- **Khi nào chạy:**
+  - Chỉ trong bản build có key, tức build bằng
+    `--dart-define=GEMINI_API_KEY=...`. Key không nằm trong repo.
+  - Người dùng phải bật công tắc trong Cài đặt, sau khi đã đồng ý gửi ảnh.
+  - Bản không có key (CI, release) không có chế độ này và không gọi mạng.
+- **Đầu vào:**
+  - Ảnh chụp, xoay đúng chiều, thu về cạnh dài tối đa 1024 px, lưu lại
+    thành JPEG không có EXIF.
+  - Câu lệnh dựng từ `assets/models/online_classes.json` cùng
+    `detector_classes.txt`: câu hướng dẫn, mỗi lớp một dòng
+    `- <lớp>: <mô tả tiếng Việt> / <mô tả tiếng Anh>`, rồi lớp `other`.
+  - App và `tool/eval/gemini_compare.py` dựng cùng một câu lệnh. Test
+    `test/online_recognizer_test.dart` so câu lệnh của app với
+    `test/fixtures/gemini_request.json`, file do script xuất ra.
+  - Đổi file JSON thì phải chạy lại phép đo, xuất lại fixture và tăng
+    `contract_version`.
+- **Đầu ra:** JSON theo schema
+  `{"foods": [{"class", "name", "grams"}]}`.
+  - `class` là một lớp của detector hoặc `other`.
+  - Gọi qua Interactions API với `store: false`.
+- **App dùng câu trả lời thế nào:**
+  - Mỗi lớp xuất hiện một lần, đổi sang thành phần bằng bảng ở mục 7.1,
+    giống detector.
+  - Lượng ăn là khẩu phần thường (mục 7.3). Món đếm theo cái lấy số khung
+    của detector nếu detector cũng thấy món đó.
+  - **Chưa dùng `grams`**: số gam Gemini đoán chưa được so với khối lượng
+    cân thật.
+  - Kcal và macro chỉ lấy từ CSV ở mục 4.
+  - Món `other` và lớp lạ chỉ hiện tên, không có số dinh dưỡng.
+  - Gemini không trả xác suất, nên dòng `food_log` có `confidence` trống
+    (khác mục 8).
+  - Khung trên ảnh là khung của detector, chỉ vẽ cho các lớp Gemini cũng
+    nêu.
+  - Gemini trả lời mà không nêu lớp nào trong 21 lớp (chỉ `other`, hoặc
+    rỗng) thì app dùng đĩa của detector, không báo gì.
+  - Model phân loại thịt (mục 9, nếu có) không chạy trên đĩa do Gemini nêu.
+- **Khi không có câu trả lời:** mất mạng, quá 8 giây, hết lượt (HTTP 429),
+  lỗi, hoặc JSON hỏng. App dùng đĩa của detector và báo lý do bằng một
+  dòng.

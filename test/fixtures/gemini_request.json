@@ -1,0 +1,59 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "prompt": "You see one photo of a meal. List every food that is visible on it.\nFor each food pick the one class below that fits it best. If no class fits (for example carrot, corn, potato that is not fried, sauce, fruit), use \"other\".\nList a class once per food item; two separate pieces of the same food are one item.\nOnly list foods you can actually see; do not guess hidden ingredients.\nAlso estimate the grams of each item as served.\n\nClasses (id: Vietnamese / English):\n- com: cơm (cơm trắng, cơm tấm, cơm chiên) / cooked rice of any kind\n- bun: bún (sợi bún gạo tròn, trắng) / Vietnamese round rice vermicelli\n- mi: mì, phở, hủ tiếu, miến / noodles: wheat, flat rice or glass noodles\n- banh_mi_o: ổ bánh mì / Vietnamese baguette or bread roll\n- ga: thịt gà hoặc vịt (luộc, chiên, nướng, ức gà) / chicken or duck meat, any cooking, including chicken breast\n- thit_kho: thịt heo kho (kho tàu, nước kho màu nâu) / Vietnamese braised caramelised pork\n- thit_nuong: thịt heo nướng, sườn nướng / grilled pork or grilled pork chop\n- heo: thịt heo khác (luộc, quay, xào, chiên, ba chỉ) / other pork: boiled, roast, stir-fried, fried, belly\n- bo: thịt bò (bít tết, xào, nướng) / beef: steak, stir-fried, grilled\n- ca: cá (chiên, kho, hấp, nướng) / fish, any cooking\n- tom: tôm / shrimp or prawn\n- muc: mực / squid\n- trung: trứng (luộc, chiên, ốp la, trứng cuộn) / egg: boiled, fried, omelette, rolled\n- dau_hu: đậu hũ / tofu\n- cha: chả lụa, giò, chả / Vietnamese pork roll or pork loaf (chả lụa)\n- cha_gio: chả giò, nem rán / fried spring roll\n- rau: rau: rau lá, rau cải, xà lách, bông cải, bắp cải, giá / vegetables: leafy greens, bok choy, lettuce, broccoli, cabbage, bean sprouts\n- dua_leo_ca_chua: dưa leo, cà chua / cucumber or tomato\n- do_chua: đồ chua (cà rốt, củ cải ngâm chua) / pickled carrot and daikon\n- khoai_tay_chien: khoai tây chiên / french fries\n- canh: canh, súp (bát nước) / soup in a bowl\n- other: món khác / any other food",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "foods": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "class": {
+              "type": "string",
+              "enum": [
+                "com",
+                "bun",
+                "mi",
+                "banh_mi_o",
+                "ga",
+                "thit_kho",
+                "thit_nuong",
+                "heo",
+                "bo",
+                "ca",
+                "tom",
+                "muc",
+                "trung",
+                "dau_hu",
+                "cha",
+                "cha_gio",
+                "rau",
+                "dua_leo_ca_chua",
+                "do_chua",
+                "khoai_tay_chien",
+                "canh",
+                "other"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "description": "what the food is, in a few words"
+            },
+            "grams": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "class",
+            "name",
+            "grams"
+          ]
+        }
+      }
+    },
+    "required": [
+      "foods"
+    ]
+  }
+}

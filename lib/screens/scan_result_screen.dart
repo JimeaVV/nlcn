@@ -15,6 +15,7 @@ import '../models/vn_food.dart';
 import '../services/database_service.dart';
 import '../services/food_detector.dart';
 import '../services/food_recognizer.dart';
+import '../services/online_recognizer.dart';
 import '../services/photo_collector.dart';
 import '../widgets/cyber_card.dart';
 import '../widgets/variant_picker_sheet.dart';
@@ -35,6 +36,7 @@ class ScanResultScreen extends StatefulWidget {
     this.detector = const NoFoodDetector(),
     this.database,
     this.collector,
+    this.online,
   });
 
   final String imagePath;
@@ -48,6 +50,10 @@ class ScanResultScreen extends StatefulWidget {
   /// Where confirmed photos are kept; [PhotoCollector.instance] by default.
   final PhotoCollector? collector;
 
+  /// Online recognition for test builds; [OnlineRecognizer.instance] by
+  /// default, which is off unless the build has a key and the user agreed.
+  final OnlineRecognizer? online;
+
   @override
   State<ScanResultScreen> createState() => _ScanResultScreenState();
 }
@@ -56,6 +62,39 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   FoodRecognition _recognition = FoodRecognition.empty;
   PlateDetection _detection = PlateDetection.empty;
   bool _recognizing = true;
+
+  /// What Gemini named, when online recognition answered in time.
+  OnlineScan? _onlineScan;
+
+  /// True while only Gemini's answer is still awaited.
+  bool _waitingOnline = false;
+  final _skipOnline = Completer<void>();
+
+  OnlineRecognizer get _online => widget.online ?? OnlineRecognizer.instance;
+
+  /// The detector classes the plate is built from: Gemini's when it named
+  /// some, otherwise the detector's.
+  List<String> get _foundCodes {
+    final online = _onlineScan?.codes ?? const [];
+    return online.isNotEmpty ? online : _detection.codes;
+  }
+
+  bool get _fromOnline => _onlineScan?.codes.isNotEmpty ?? false;
+
+  /// The detector's boxes; with Gemini's answer, only for the foods it
+  /// named too.
+  PlateDetection get _shownBoxes {
+    if (!_fromOnline) return _detection;
+    final codes = _onlineScan!.codes;
+    return PlateDetection(
+      foods: [
+        for (final food in _detection.foods)
+          if (codes.contains(food.code)) food,
+      ],
+      width: _detection.width,
+      height: _detection.height,
+    );
+  }
 
   // The model answers in a fraction of a second, which hid the scan sweep;
   // it now plays at least one full pass over the photo.
@@ -81,7 +120,19 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   }
 
   Future<void> _recognize() async {
-    // Both models at once; either may fail without stopping the other.
+    // Both models (and Gemini, when on) at once; any may fail without
+    // stopping the others.
+    OnlineFailure? failure;
+    final asking = _online.enabled
+        ? _online.recognize(widget.imagePath).then<OnlineScan?>((scan) => scan,
+            onError: (Object error) {
+            debugPrint('Online recognition failed: $error');
+            failure = error is OnlineScanException
+                ? error.kind
+                : OnlineFailure.failed;
+            return null;
+          })
+        : null;
     final detecting = widget.detector
         .detect(widget.imagePath)
         .timeout(detectorTimeout)
@@ -96,10 +147,23 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
       result = FoodRecognition.empty;
     }
     final found = await detecting;
+    OnlineScan? online;
+    if (asking != null) {
+      if (mounted) setState(() => _waitingOnline = true);
+      online = await Future.any([asking, _skipOnline.future.then((_) => null)]);
+      // Skipped by the user: no need to say why there is no answer.
+      if (_skipOnline.isCompleted) failure = null;
+    }
     if (!mounted) return;
+    if (failure case final kind?) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.scanOnlineFailed(kind.name))));
+    }
     setState(() {
       _recognition = result;
       _detection = found;
+      _onlineScan = online;
+      _waitingOnline = false;
       _recognizing = false;
       final top = result.topDishes(1);
       final confident = top.isNotEmpty &&
@@ -114,7 +178,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
       _detectedCount = detected?.items.length;
       final several = (detected?.items.length ?? 0) >= 2;
       if (detected != null &&
-          (dish == null || (several && !dishShowsAll(dish, found)))) {
+          (dish == null || (several && !dishShowsAll(dish, _foundCodes)))) {
         _plate = detected;
         Haptics.found();
       } else if (confident) {
@@ -129,10 +193,12 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   /// when it found none.
   int? _detectedCount;
 
-  /// A fresh plate from the detector's boxes.
+  /// A fresh plate from the detector's boxes, or from Gemini's answer.
   ScanPlate? get _detectedPlate {
-    if (_detection.codes.isEmpty) return null;
-    final plate = ScanPlate.detected(widget.data, _detection);
+    if (_foundCodes.isEmpty) return null;
+    final plate = _fromOnline
+        ? ScanPlate.online(widget.data, _foundCodes, _detection)
+        : ScanPlate.detected(widget.data, _detection);
     return plate.items.isEmpty ? null : plate;
   }
 
@@ -305,21 +371,35 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                             color: CyberColors.muted, size: 48),
                       ),
                     ),
-                    if (!_recognizing && _detection.foods.isNotEmpty)
-                      _DetectionBoxes(detection: _detection),
+                    if (!_recognizing && _shownBoxes.foods.isNotEmpty)
+                      _DetectionBoxes(detection: _shownBoxes),
                     if (_recognizing || _sweepShown) const ScanSweep(),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 14),
-            if (_recognizing)
+            if (_recognizing) ...[
               Center(
-                child: Text(l10n.scanRecognizing,
+                child: Text(
+                    _waitingOnline
+                        ? l10n.scanAskingOnline
+                        : l10n.scanRecognizing,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                         color: CyberColors.cyan, fontWeight: FontWeight.w700)),
-              )
-            else ...[
+              ),
+              if (_waitingOnline)
+                Center(
+                  child: TextButton(
+                    key: const ValueKey('scan-use-offline'),
+                    onPressed: () {
+                      if (!_skipOnline.isCompleted) _skipOnline.complete();
+                    },
+                    child: Text(l10n.scanUseOffline),
+                  ),
+                ),
+            ] else ...[
               _Appear(
                 child: _DishCard(
                   recognition: _recognition,
@@ -328,6 +408,8 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   selected: plate?.dish.code,
                   chosenName: plate?.dish.name(language),
                   detectedCount: _detectedCount,
+                  online: _fromOnline,
+                  onlineOthers: _onlineScan?.otherNames ?? const [],
                   onChoose: (code) {
                     Haptics.tap();
                     setState(() => _choose(code));
@@ -423,6 +505,8 @@ class _DishCard extends StatelessWidget {
     required this.onPickOther,
     this.detectedCount,
     this.onChooseDetected,
+    this.online = false,
+    this.onlineOthers = const [],
   });
 
   final FoodRecognition recognition;
@@ -438,6 +522,12 @@ class _DishCard extends StatelessWidget {
   /// How many foods the detector found, if any.
   final int? detectedCount;
   final VoidCallback? onChooseDetected;
+
+  /// True when Gemini named the foods instead of the detector.
+  final bool online;
+
+  /// Foods Gemini saw that the app has no data for, by name.
+  final List<String> onlineOthers;
 
   @override
   Widget build(BuildContext context) {
@@ -465,9 +555,11 @@ class _DishCard extends StatelessWidget {
                 style: TextStyle(color: CyberColors.muted))
           else if (detected)
             Text(
-                detectedCount == 1
-                    ? l10n.scanDetectedOneHint
-                    : l10n.scanDetectedHint,
+                online
+                    ? l10n.scanOnlineHint
+                    : detectedCount == 1
+                        ? l10n.scanDetectedOneHint
+                        : l10n.scanDetectedHint,
                 style: TextStyle(color: CyberColors.muted))
           else if (recognition.looksUnknown)
             Text(l10n.scanNotInApp, style: TextStyle(color: CyberColors.muted))
@@ -486,10 +578,16 @@ class _DishCard extends StatelessWidget {
                   ChoiceChip(
                     showCheckmark: false,
                     key: const ValueKey('guess-detected'),
-                    avatar: Icon(Icons.center_focus_strong_rounded,
-                        size: 18, color: CyberColors.cyan),
+                    avatar: Icon(
+                        online
+                            ? Icons.cloud_outlined
+                            : Icons.center_focus_strong_rounded,
+                        size: 18,
+                        color: CyberColors.cyan),
                     selected: detected,
-                    label: Text(l10n.scanDetectedPlate(count)),
+                    label: Text(online
+                        ? l10n.scanOnlinePlate(count)
+                        : l10n.scanDetectedPlate(count)),
                     // Tapped again it keeps what the user changed.
                     onSelected: (_) =>
                         detected ? null : onChooseDetected?.call(),
@@ -506,6 +604,14 @@ class _DishCard extends StatelessWidget {
                     onSelected: (_) => onChoose(guess.key),
                   ),
               ],
+            ),
+          ],
+          if (onlineOthers.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              key: const ValueKey('scan-online-others'),
+              l10n.scanOnlineOthers(onlineOthers.join(', ')),
+              style: TextStyle(color: CyberColors.muted),
             ),
           ],
           if (chosenName != null &&

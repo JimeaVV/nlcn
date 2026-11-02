@@ -1707,4 +1707,68 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get scanAskingOnline => 'Asking Gemini (dev test)…';
+
+  @override
+  String get scanUseOffline => 'Use the on-device result';
+
+  @override
+  String scanOnlineFailed(String reason) {
+    String _temp0 = intl.Intl.selectLogic(
+      reason,
+      {
+        'offline': 'No network, so on-device recognition is used.',
+        'timeout': 'Gemini took too long, so on-device recognition is used.',
+        'quota':
+            'No Gemini requests left today, so on-device recognition is used.',
+        'other': 'Gemini failed, so on-device recognition is used.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scanOnlinePlate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Gemini: $count foods',
+      one: 'Gemini: 1 food',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanOnlineHint => 'Named by Gemini (dev test).';
+
+  @override
+  String scanOnlineOthers(String names) {
+    return 'Gemini also saw (no data in the app): $names';
+  }
+
+  @override
+  String get onlineTitle => 'Gemini (dev test)';
+
+  @override
+  String get onlineSwitch => 'Send scans to Gemini';
+
+  @override
+  String get onlineNote =>
+      'Without network, or if Gemini fails, the app uses on-device recognition.';
+
+  @override
+  String get onlineBody =>
+      'A test build with the team\'s API key. When on, each scan sends the food photo to Google\'s Gemini. Gemini only says which foods are on the plate; grams follow the usual portion, and kcal and macros still come from the app\'s sourced data. On the test photos Gemini found 76.5% of the foods, on-device recognition 56.4%.';
+
+  @override
+  String get onlineConsentTitle => 'Send photos to Google?';
+
+  @override
+  String get onlineConsentBody =>
+      'Each scan sends the food photo to Google\'s Gemini to name the foods. The photo is shrunk and stripped of location and camera data; nothing else is sent. This dev test uses the free tier, so Google may use the photos to improve its products. You can turn it off any time in Settings.';
+
+  @override
+  String get onlineConsentAccept => 'Send photos';
 }

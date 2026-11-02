@@ -4,6 +4,7 @@ the same way: for each photo, which of the 21 detector classes are on it.
     python tool/eval/gemini_compare.py --images <yolo dir> --model gemini-3.8-flash
     python tool/eval/gemini_compare.py --images <yolo dir> --model gemini-3.8-flash \\
         --detector <best.pt> --out report.md
+    python tool/eval/gemini_compare.py --print-request test/fixtures/gemini_request.json
 
 `--images` is a YOLO folder (`images/*.jpg`, `labels/*.txt`) whose class ids
 follow `assets/models/detector_classes.txt`. Every Gemini answer is cached
@@ -37,52 +38,20 @@ from concurrent.futures import ThreadPoolExecutor
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CLASSES = open(os.path.join(REPO, 'assets', 'models', 'detector_classes.txt'),
                encoding='utf-8').read().split()
-OTHER = 'other'
+ONLINE = json.load(open(os.path.join(REPO, 'assets', 'models', 'online_classes.json'), encoding='utf-8'))
+OTHER = ONLINE['other']['id']
 ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/interactions'
 
 # What each class means, in the words the detector was trained on
 # (docs/MODEL_CONTRACT.md §7 and FIS_CLASS in tool/train/train_detector.py).
-DESCRIPTIONS = {
-    'com': ('cơm (cơm trắng, cơm tấm, cơm chiên)', 'cooked rice of any kind'),
-    'bun': ('bún (sợi bún gạo tròn, trắng)', 'Vietnamese round rice vermicelli'),
-    'mi': ('mì, phở, hủ tiếu, miến', 'noodles: wheat, flat rice or glass noodles'),
-    'banh_mi_o': ('ổ bánh mì', 'Vietnamese baguette or bread roll'),
-    'ga': ('thịt gà hoặc vịt (luộc, chiên, nướng, ức gà)',
-           'chicken or duck meat, any cooking, including chicken breast'),
-    'thit_kho': ('thịt heo kho (kho tàu, nước kho màu nâu)',
-                 'Vietnamese braised caramelised pork'),
-    'thit_nuong': ('thịt heo nướng, sườn nướng', 'grilled pork or grilled pork chop'),
-    'heo': ('thịt heo khác (luộc, quay, xào, chiên, ba chỉ)',
-            'other pork: boiled, roast, stir-fried, fried, belly'),
-    'bo': ('thịt bò (bít tết, xào, nướng)', 'beef: steak, stir-fried, grilled'),
-    'ca': ('cá (chiên, kho, hấp, nướng)', 'fish, any cooking'),
-    'tom': ('tôm', 'shrimp or prawn'),
-    'muc': ('mực', 'squid'),
-    'trung': ('trứng (luộc, chiên, ốp la, trứng cuộn)',
-              'egg: boiled, fried, omelette, rolled'),
-    'dau_hu': ('đậu hũ', 'tofu'),
-    'cha': ('chả lụa, giò, chả', 'Vietnamese pork roll or pork loaf (chả lụa)'),
-    'cha_gio': ('chả giò, nem rán', 'fried spring roll'),
-    'rau': ('rau: rau lá, rau cải, xà lách, bông cải, bắp cải, giá',
-            'vegetables: leafy greens, bok choy, lettuce, broccoli, cabbage, bean sprouts'),
-    'dua_leo_ca_chua': ('dưa leo, cà chua', 'cucumber or tomato'),
-    'do_chua': ('đồ chua (cà rốt, củ cải ngâm chua)', 'pickled carrot and daikon'),
-    'khoai_tay_chien': ('khoai tây chiên', 'french fries'),
-    'canh': ('canh, súp (bát nước)', 'soup in a bowl'),
-}
-assert sorted(DESCRIPTIONS) == sorted(CLASSES), 'DESCRIPTIONS must cover detector_classes.txt'
+# The app builds the same prompt from the same file (lib/services/online_recognizer.dart).
+DESCRIPTIONS = {c: (v['vi'], v['en']) for c, v in ONLINE['classes'].items()}
+assert sorted(DESCRIPTIONS) == sorted(CLASSES), 'online_classes.json must cover detector_classes.txt'
 
 PROMPT = '\n'.join([
-    'You see one photo of a meal. List every food that is visible on it.',
-    'For each food pick the one class below that fits it best. If no class fits'
-    f' (for example carrot, corn, potato that is not fried, sauce, fruit), use "{OTHER}".',
-    'List a class once per food item; two separate pieces of the same food are one item.',
-    'Only list foods you can actually see; do not guess hidden ingredients.',
-    'Also estimate the grams of each item as served.',
-    '',
-    'Classes (id: Vietnamese / English):',
+    *[line.replace('{other}', OTHER) for line in ONLINE['instructions']],
     *[f'- {c}: {DESCRIPTIONS[c][0]} / {DESCRIPTIONS[c][1]}' for c in CLASSES],
-    f'- {OTHER}: món khác / any other food',
+    f'- {OTHER}: {ONLINE["other"]["vi"]} / {ONLINE["other"]["en"]}',
 ])
 SCHEMA = {
     'type': 'object',
@@ -382,7 +351,7 @@ def summary_line(name, found, truth, extra=''):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--images', required=True)
+    ap.add_argument('--images')
     ap.add_argument('--model', action='append', default=[], help='Gemini model id; repeat for several')
     ap.add_argument('--thinking', help='thinking_level (minimal, low, medium, high); default: the model\'s own')
     ap.add_argument('--detector', help='YOLO .pt to score with DETECTOR_CARD.md thresholds')
@@ -392,7 +361,16 @@ def main():
     ap.add_argument('--limit', type=int, help='ask for at most this many new photos')
     ap.add_argument('--offline', action='store_true', help='only score cached answers')
     ap.add_argument('--out', help='also write the report (markdown) here')
+    ap.add_argument('--print-request', metavar='JSON',
+                    help='write the prompt and schema here (the app tests its own against it) and stop')
     args = ap.parse_args()
+    if args.print_request:
+        with open(args.print_request, 'w', encoding='utf-8', newline='\n') as f:
+            json.dump({'model': ONLINE['model'], 'prompt': PROMPT, 'schema': SCHEMA}, f, ensure_ascii=False, indent=2)
+            f.write('\n')
+        return
+    if not args.images:
+        ap.error('--images is required')
 
     images, truth = load_truth(args.images)
     os.makedirs(args.cache, exist_ok=True)

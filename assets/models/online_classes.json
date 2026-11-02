@@ -1,0 +1,104 @@
+{
+  "_comment": "Online recognition with Gemini (docs/CHE_DO_ONLINE.md): the model, the instructions and a short description of each detector class. The app and tool/eval/gemini_compare.py build the same prompt from this file, so the app asks what was measured.",
+  "model": "gemini-3.5-flash-lite",
+  "other": {
+    "id": "other",
+    "vi": "món khác",
+    "en": "any other food"
+  },
+  "instructions": [
+    "You see one photo of a meal. List every food that is visible on it.",
+    "For each food pick the one class below that fits it best. If no class fits (for example carrot, corn, potato that is not fried, sauce, fruit), use \"{other}\".",
+    "List a class once per food item; two separate pieces of the same food are one item.",
+    "Only list foods you can actually see; do not guess hidden ingredients.",
+    "Also estimate the grams of each item as served.",
+    "",
+    "Classes (id: Vietnamese / English):"
+  ],
+  "classes": {
+    "com": {
+      "vi": "cơm (cơm trắng, cơm tấm, cơm chiên)",
+      "en": "cooked rice of any kind"
+    },
+    "bun": {
+      "vi": "bún (sợi bún gạo tròn, trắng)",
+      "en": "Vietnamese round rice vermicelli"
+    },
+    "mi": {
+      "vi": "mì, phở, hủ tiếu, miến",
+      "en": "noodles: wheat, flat rice or glass noodles"
+    },
+    "banh_mi_o": {
+      "vi": "ổ bánh mì",
+      "en": "Vietnamese baguette or bread roll"
+    },
+    "ga": {
+      "vi": "thịt gà hoặc vịt (luộc, chiên, nướng, ức gà)",
+      "en": "chicken or duck meat, any cooking, including chicken breast"
+    },
+    "thit_kho": {
+      "vi": "thịt heo kho (kho tàu, nước kho màu nâu)",
+      "en": "Vietnamese braised caramelised pork"
+    },
+    "thit_nuong": {
+      "vi": "thịt heo nướng, sườn nướng",
+      "en": "grilled pork or grilled pork chop"
+    },
+    "heo": {
+      "vi": "thịt heo khác (luộc, quay, xào, chiên, ba chỉ)",
+      "en": "other pork: boiled, roast, stir-fried, fried, belly"
+    },
+    "bo": {
+      "vi": "thịt bò (bít tết, xào, nướng)",
+      "en": "beef: steak, stir-fried, grilled"
+    },
+    "ca": {
+      "vi": "cá (chiên, kho, hấp, nướng)",
+      "en": "fish, any cooking"
+    },
+    "tom": {
+      "vi": "tôm",
+      "en": "shrimp or prawn"
+    },
+    "muc": {
+      "vi": "mực",
+      "en": "squid"
+    },
+    "trung": {
+      "vi": "trứng (luộc, chiên, ốp la, trứng cuộn)",
+      "en": "egg: boiled, fried, omelette, rolled"
+    },
+    "dau_hu": {
+      "vi": "đậu hũ",
+      "en": "tofu"
+    },
+    "cha": {
+      "vi": "chả lụa, giò, chả",
+      "en": "Vietnamese pork roll or pork loaf (chả lụa)"
+    },
+    "cha_gio": {
+      "vi": "chả giò, nem rán",
+      "en": "fried spring roll"
+    },
+    "rau": {
+      "vi": "rau: rau lá, rau cải, xà lách, bông cải, bắp cải, giá",
+      "en": "vegetables: leafy greens, bok choy, lettuce, broccoli, cabbage, bean sprouts"
+    },
+    "dua_leo_ca_chua": {
+      "vi": "dưa leo, cà chua",
+      "en": "cucumber or tomato"
+    },
+    "do_chua": {
+      "vi": "đồ chua (cà rốt, củ cải ngâm chua)",
+      "en": "pickled carrot and daikon"
+    },
+    "khoai_tay_chien": {
+      "vi": "khoai tây chiên",
+      "en": "french fries"
+    },
+    "canh": {
+      "vi": "canh, súp (bát nước)",
+      "en": "soup in a bowl"
+    }
+  }
+}

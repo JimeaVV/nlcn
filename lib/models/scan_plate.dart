@@ -166,9 +166,22 @@ class ScanPlate {
   /// The foods the plate detector found (contract §7.3), each at its usual
   /// portion; eggs, spring rolls and bread get one unit per box
   /// ([countedDetectorClasses]). The stand-in dish is named after them: "Cơm + Thịt gà".
-  factory ScanPlate.detected(VnFoodData data, PlateDetection detection) {
+  factory ScanPlate.detected(VnFoodData data, PlateDetection detection) =>
+      ScanPlate._found(data, detection.codes, detection, scored: true);
+
+  /// The detector classes Gemini named ([codes], online recognition,
+  /// docs/CHE_DO_ONLINE.md), built like [ScanPlate.detected]: each at its
+  /// usual portion, eggs, spring rolls and bread one unit per detector box
+  /// when the detector boxed them too. Gemini gives no score, so the items
+  /// carry none.
+  factory ScanPlate.online(
+          VnFoodData data, List<String> codes, PlateDetection detection) =>
+      ScanPlate._found(data, codes, detection, scored: false);
+
+  factory ScanPlate._found(VnFoodData data, List<String> codes,
+      PlateDetection detection, {required bool scored}) {
     final items = <PlateItem>[];
-    for (final code in detection.codes) {
+    for (final code in codes) {
       final component = detectedComponent(data, code);
       if (component == null ||
           items.any((item) => item.component.code == component.code)) {
@@ -179,10 +192,12 @@ class ScanPlate {
         component: component,
         included: true,
         inUnits: typical.inUnits,
-        amount: typical.inUnits && countedDetectorClasses.contains(code)
+        amount: typical.inUnits &&
+                countedDetectorClasses.contains(code) &&
+                detection.count(code) > 0
             ? detection.count(code).toDouble()
             : typical.amount,
-        confidence: detection.score(code),
+        confidence: scored ? detection.score(code) : null,
       ));
     }
     String names(String language) =>
@@ -314,11 +329,11 @@ const _detectorAlso = <String, Set<String>>{
   'mi': {'_base_mi_y'},
 };
 
-/// True when every food in [detection] is a part of [dish], so the dish's
-/// recipe already describes the plate (contract §7.3).
-bool dishShowsAll(VnDish dish, PlateDetection detection) {
+/// True when every food found ([codes], detector classes) is a part of
+/// [dish], so the dish's recipe already describes the plate (contract §7.3).
+bool dishShowsAll(VnDish dish, Iterable<String> codes) {
   final parts = {for (final part in dish.parts) part.component};
-  return detection.codes.every((code) =>
+  return codes.every((code) =>
       parts.contains(detectorFoods[code]) ||
       (_detectorAlso[code] ?? const {}).any(parts.contains));
 }
