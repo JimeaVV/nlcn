@@ -20,6 +20,7 @@ import random
 import subprocess
 import sys
 import tempfile
+import urllib.request
 import zipfile
 
 from PIL import Image, ImageDraw
@@ -33,6 +34,9 @@ PLATES = {
     'lime': [24],          # nothing of ours: background
     'pho': [46, 56],       # a whole-dish box: left out
 }
+# The plates' original photos, as in make_plates_data.py's sources.csv.
+PLATE_PHOTOS = {'fr22_000000': '131181.jpg', 'fr22_000001': '131367.jpg',
+                'n5k_000002': 'dish_1556573514'}
 COLOURS = {25: (240, 240, 230), 51: (200, 150, 90), 56: (250, 200, 40),
            48: (40, 160, 60), 24: (120, 220, 60), 46: (180, 120, 60)}
 
@@ -149,7 +153,9 @@ def make(root):
             im.save(os.path.join(root, 'photo.jpg'))
             z.write(os.path.join(root, 'photo.jpg'), f'images/train/{name}.jpg')
             z.writestr(f'labels/train/{name}.txt', ''.join(l + '\n' for l in lines))
-        z.writestr('sources.csv', 'name,source,photo\n')
+        z.writestr('sources.csv', 'name,source,photo\n' + ''.join(
+            f'{name},{name.split("_")[0]},{photo}\n'
+            for name, photo in PLATE_PHOTOS.items()))
         z.writestr('PLATES_CARD.md', '# Plates card\n')
 
 
@@ -232,17 +238,31 @@ def main():
     shutil.copy(os.path.join(export, 'detector_best.pt'),
                 os.path.join(weights, 'v17', 'best.pt'))
     # And with plates.zip unzipped in the inputs, as Kaggle does with an
-    # uploaded zip.
+    # uploaded zip, and without its photos (plates_labels.zip): MyFoodRepo's
+    # come from its dataset among the inputs, Nutrition5k's are downloaded.
     plates = os.path.join(work, 'input', 'macrorunner-detector-plates')
     with zipfile.ZipFile(os.path.join(plates, 'plates.zip')) as z:
         z.extractall(plates)
     os.remove(os.path.join(plates, 'plates.zip'))
+    fr22 = os.path.join(work, 'input', 'food-recognition-2022-dataset',
+                        'public_training_set_release_2.0', 'images')
+    n5k = os.path.join(work, 'n5k-web')
+    os.makedirs(fr22)
+    os.makedirs(n5k)
+    for name, photo in PLATE_PHOTOS.items():
+        shutil.move(os.path.join(plates, 'images', 'train', name + '.jpg'),
+                    os.path.join(n5k, photo + '.png') if name.startswith('n5k')
+                    else os.path.join(fr22, photo))
+    shutil.rmtree(os.path.join(plates, 'images'))
     shutil.copytree(os.path.join(work, 'work', 'extra'),
                     os.path.join(work, 'work3', 'extra'),
                     ignore=shutil.ignore_patterns('plates'))
     tuned = run(work, 'finetune', TIME_LIMIT_HOURS='0', **{
         **env, 'OUTPUT_DIR': os.path.join(work, 'output_finetune'),
-        'WORK_DIR': os.path.join(work, 'work3'), 'FINETUNE_FROM': weights})
+        'WORK_DIR': os.path.join(work, 'work3'), 'FINETUNE_FROM': weights,
+        'N5K_PHOTO': 'file:' + urllib.request.pathname2url(
+            os.path.join(n5k, '{}.png')).replace('%7B%7D', '{}')})
+    assert 'Downloading 1 Nutrition5k photos' in tuned, tuned[-2000:]
     assert 'Fine-tuning from' in tuned and 'Training done' in tuned, tuned[-2000:]
     assert 'Plates: 2 fr22, 1 n5k photos' in tuned, tuned[-2000:]
     # Its images and labels folders are not taken for VietFood67's.

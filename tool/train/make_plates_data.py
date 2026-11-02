@@ -25,7 +25,9 @@ classes. Everything goes to the train split.
 --n5k: the folder with metadata.csv and images/{dish_id}.png.
 Either may be left out. Nutrition5k needs torch, transformers 4.56 and
 ultralytics 8.4.185; on a GPU it takes about 0.3 s a photo. Writes
-plates.zip, PLATES_CARD.md and preview.jpg to --out.
+plates.zip, PLATES_CARD.md and preview.jpg to --out, and plates_labels.zip:
+the same without the photos (under 1 MB), which train_detector.ipynb fills
+from the original datasets.
 """
 import argparse
 import csv
@@ -489,6 +491,17 @@ def main():
                 z.write(full, os.path.relpath(full, writer.dir))
     os.replace(path + '.part', path)
     print(f'{path}: {os.path.getsize(path) / 1e6:.0f} MB')
+    # The same without the photos, small enough to upload from a browser:
+    # train_detector.ipynb then takes them from the original datasets.
+    path = os.path.join(args.out, 'plates_labels.zip')
+    with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as z:
+        for folder, _, files in os.walk(writer.dir):
+            for name in sorted(files):
+                full = os.path.join(folder, name)
+                rel = os.path.relpath(full, writer.dir)
+                if not rel.startswith('images'):
+                    z.write(full, rel)
+    print(f'{path}: {os.path.getsize(path) / 1e6:.1f} MB')
 
     rng = random.Random(SEED)
     tiles = []

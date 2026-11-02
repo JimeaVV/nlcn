@@ -140,9 +140,16 @@ FINETUNE_EPOCHS = 30
 AUTOLABEL_FROM = os.environ.get('AUTOLABEL_FROM', '')
 # `plates.zip` from make_plates_data.py, found the same way.
 PLATES_FROM = os.environ.get('PLATES_FROM', '')
-# Its photos are used this many times in train: about 4,000 plates against
+# Its photos are used this many times in train: about 2,200 plates against
 # 34,000 photos, and chicken on cơm phần was the detector's worst miss.
 PLATES_REPEAT = 2
+# Where a plates.zip of labels only finds its photos: the MyFoodRepo folder
+# of the Kaggle dataset awsaf49/food-recognition-2022-dataset, and
+# Nutrition5k on Hugging Face.
+FR22_FOLDER = 'public_training_set_release_2.0'
+N5K_PHOTO = os.environ.get(
+    'N5K_PHOTO', 'https://huggingface.co/datasets/ai5labsOfficial/nutrition5k/'
+    'resolve/main/images/{}.png')
 # lr0 for fine-tuning, a fifth of the 0.01 that SGD starts a fresh run with,
 # so it learns the new photos without forgetting the old ones.
 FINETUNE_LR = 0.002
@@ -723,21 +730,81 @@ def autolabel_items(root):
     return items
 
 
+def plates_photos(root):
+    """{name: photo path} for a plates.zip of labels only (photos are too big
+    to upload from a browser): MyFoodRepo's from the Kaggle dataset
+    awsaf49/food-recognition-2022-dataset among the inputs, Nutrition5k's
+    downloaded from Hugging Face. The boxes fit the photos as stored."""
+    import csv
+    import urllib.request
+    with open(os.path.join(root, 'sources.csv'), newline='',
+              encoding='utf-8') as f:
+        rows = [r for r in csv.DictReader(f)
+                if not os.path.exists(os.path.join(root, 'images', 'train',
+                                                   r['name'] + '.jpg'))]
+    photos = {}
+    if any(r['source'] == 'fr22' for r in rows):
+        fr22 = None
+        for folder, dirs, _ in os.walk(INPUT_ROOT, followlinks=True):
+            if os.path.basename(folder) == FR22_FOLDER:
+                fr22 = os.path.join(folder, 'images')
+                break
+            dirs[:] = [d for d in dirs if d not in ('images', 'labels')]
+        if not fr22:
+            raise RuntimeError(f'plates.zip holds MyFoodRepo boxes but no '
+                               f'{FR22_FOLDER} folder is in the inputs: add '
+                               'awsaf49/food-recognition-2022-dataset.')
+        photos.update((r['name'], os.path.join(fr22, r['photo']))
+                      for r in rows if r['source'] == 'fr22')
+    n5k = os.path.join(EXTRA_ROOT, 'nutrition5k')
+    os.makedirs(n5k, exist_ok=True)
+
+    def fetch(row):
+        path = os.path.join(n5k, row['photo'] + '.png')
+        for _ in range(3):
+            if os.path.exists(path):
+                return row['name'], path
+            try:
+                urllib.request.urlretrieve(N5K_PHOTO.format(row['photo']),
+                                           path + '.part')
+                os.replace(path + '.part', path)
+            except Exception:
+                time.sleep(2)
+        return row['name'], None
+
+    wanted = [r for r in rows if r['source'] == 'n5k']
+    if wanted:
+        stage(f'Downloading {len(wanted)} Nutrition5k photos ...')
+        with ThreadPoolExecutor(32) as pool:
+            got = dict(pool.map(fetch, wanted))
+        missing = [n for n, p in got.items() if not p]
+        if missing:
+            print(f'  {len(missing)} Nutrition5k photos could not be '
+                  'downloaded: left out.', flush=True)
+        photos.update((n, p) for n, p in got.items() if p)
+    return photos
+
+
 def plates_items(root):
     """make_plates_data.py's boxes, for train only, named after their source
     (fr22_…, n5k_…). MyFoodRepo outlines one heap of greens in pieces, so
     touching pieces are joined as for FoodInsSeg."""
     items = []
     labels = os.path.join(root, 'labels', 'train')
+    photos = plates_photos(root)
     for name in sorted(os.listdir(labels)):
         stem = os.path.splitext(name)[0]
+        image = photos.get(stem, os.path.join(root, 'images', 'train',
+                                              stem + '.jpg'))
+        if not os.path.exists(image):
+            skipped['plates: no photo'] += 1
+            continue
         boxes = []
         with open(os.path.join(labels, name)) as f:
             for line in f:
                 c, cx, cy, w, h = line.split()
                 boxes.append((int(c), float(cx), float(cy), float(w), float(h)))
-        items.append((stem.split('_')[0], os.path.join(
-            root, 'images', 'train', stem + '.jpg'), 'train', join_pieces(boxes)))
+        items.append((stem.split('_')[0], image, 'train', join_pieces(boxes)))
     stage('Plates: ' + ', '.join(f'{n} {s}' for s, n in sorted(
         Counter(i[0] for i in items).items())) + ' photos')
     return items
