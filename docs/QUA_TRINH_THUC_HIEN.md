@@ -3148,6 +3148,33 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - Chưa train: người dùng chạy trên Kaggle. Ước tính khoảng 4 giờ (30
     epoch, khoảng 5,6 phút mỗi epoch với khoảng 38.500 ảnh train).
 
+### 2026-11-02 · Chạy train detector có ảnh đĩa mới trên Kaggle (v18)
+- **Vì sao:** người dùng nhờ Claude tự dựng và chạy lượt train trên Kaggle
+  qua Chrome của họ, thay vì tự làm như thường lệ.
+- **Đổi cách đưa dữ liệu lên:** trình duyệt chỉ upload được file dưới
+  10 MB, mà `plates.zip` nặng 143 MB. Vì vậy `make_plates_data.py` làm thêm
+  `plates_labels.zip` (410 KB): nhãn và `sources.csv`, không kèm ảnh. Trên
+  Kaggle, `train_detector` tự lấy ảnh:
+  - ảnh MyFoodRepo từ dataset `awsaf49/food-recognition-2022-dataset` (thêm
+    làm input);
+  - ảnh Nutrition5k tải từ Hugging Face (Internet bật).
+
+  Không ảnh MyFoodRepo nào đã chọn bị xoay theo EXIF, nên khung khớp với ảnh
+  gốc khi notebook đọc. `smoke_detector.py` thử thêm chế độ chỉ nhãn này và
+  qua.
+- **Trên Kaggle:**
+  - Tạo dataset riêng tư `jimeav/macrorunner-detector-plates` từ
+    `plates_labels.zip`. Kaggle tự giải nén, và notebook đọc được thư mục
+    đó.
+  - Notebook `jimeav/macrorunner-detector-v18-train` (nhập từ
+    `build/kaggle_plates/MacroRunner_detector_plates_KAGGLE.ipynb`), với
+    `QUICK_TEST = False`, `FINETUNE_FROM = '/kaggle/input'` và
+    `AUTOLABEL_FROM` là link Drive cũ.
+  - Input: VietFood67, Food Recognition 2022, `macrorunner-detector-plates`,
+    `macrorunner-detector-v17-weights`. GPU T4 x2, Internet bật.
+  - Version 1 "plates fine-tune from v17", Save & Run All lúc khoảng 11:55
+    ngày 02/11. Ước tính xong sau khoảng 4 giờ.
+
 ---
 
 ## 3. Việc còn tồn đọng
