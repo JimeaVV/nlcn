@@ -3065,6 +3065,62 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - thêm ảnh cho các lớp yếu (gà, heo, bò, rau);
   - làm model phân loại thịt chạy trên từng khung.
 
+### 2026-11-02 · Notebook train model phân loại thịt, contract 1.8
+
+- **Vì sao:** trên 459 ảnh cơm phần FoodInsSeg (phần test), detector
+  `d3370a3` tìm ra 56,4% số món và báo sai 185 lần. Ở mức từng khung, nếu
+  mọi khung thịt bị gọi nhầm tên được đổi đúng thì tìm ra 67,0%, sai 95;
+  nếu giữ thêm cả các khung thịt điểm từ 0,2 (hiện bị bỏ) khi đoán đúng loại
+  thịt thì lên 74,3%. Đây là giới hạn trên, tính bằng nhãn thật.
+- **Đã làm:**
+  - `tool/train/train_meat_classifier.py` (sinh ra `.ipynb`): MobileNetV3Large
+    224×224, 8 lớp gồm 7 loại thịt của detector và `khac`. Crop lấy từ chính
+    các khung detector train trên (VietFood67, FoodInsSeg, MyFood), cắt từ
+    ảnh đã thu cạnh dài về 512 px như ảnh vào của detector, nới 10% mỗi bên.
+    Giữ cách chia train/val/test của từng bộ. Xuất TFLite float16.
+  - `tool/train/eval_meat_classifier.py`: chạy `detector.tflite` như app
+    (letterbox, ngưỡng từng lớp, NMS), cắt khung như app, cho classifier
+    đoán, rồi đếm món tìm ra / báo sai theo ảnh. Có lưới ngưỡng chọn trên
+    val và in sẵn các dòng cho `MEAT_CARD.md`.
+  - Contract 1.8, mục 9: lớp, cách cắt, định dạng, các dòng của card, cách
+    app sẽ dùng. Phần app **chưa làm**, chờ model train trên Kaggle.
+  - `tool/train/test/smoke_meat_classifier.py`: chạy notebook trên dữ liệu
+    giả, kiểm tra file xuất ra, và kiểm tra cách cắt của script đánh giá
+    trùng `tf.image.crop_and_resize` mà notebook dùng khi train.
+- **Thử trên máy (chỉ FoodInsSeg, không có VietFood67 và MyFood):** 3.479
+  crop train, 6 epoch fine-tune trên CPU trong 35 phút. Trên crop test, đoán
+  đúng 56% (gà 72%, tôm 80%, bò 51%, cá 45%, heo 23%). File 6,0 MB, 6,5 ms
+  mỗi khung trên CPU máy tính. Đo trên khung của detector, 459 ảnh test:
+
+  | Cách dùng | Tìm ra | Báo sai |
+  |---|---|---|
+  | Chỉ detector (bản float16 app đang dùng) | 437/778 = 56,2% | 183 |
+  | Đổi tên khi classifier chắc từ 0,7 | 56,7% | 179 |
+  | Hai model bỏ phiếu (điểm detector^0,5 × classifier) | 56,2% | 179 |
+  | Bỏ phiếu, giữ thêm khung thịt từ 0,15 khi classifier chắc từ 0,7 (ngưỡng chọn trên 470 ảnh val) | 459/778 = 59,0% | 190 |
+
+  - Trên val, cách cuối cùng tìm ra 63,1% (detector một mình 59,8%) với số
+    lần sai không tăng (168 so với 170). Trên test được +2,8 điểm nhưng sai
+    thêm 7 lần.
+  - Chỉ đổi tên thì gần như không được gì: model này còn yếu (heo chỉ đúng
+    23%), nên khi nó chắc, detector thường cũng đã đúng.
+  - Đây là ước lượng từ một model nhỏ train tại chỗ, thấp hơn mục tiêu
+    +3–6 điểm. Bản train trên Kaggle có thêm VietFood67 và MyFood, gồm cả
+    `thit_kho` và `thit_nuong`; phải đo lại bằng `eval_meat_classifier.py`
+    trước khi đưa vào app.
+- **Rà soát contract** (agent `model-contract-reviewer`), đã sửa:
+  - Các món không phải thịt của FoodInsSeg từng bị gộp chung thành một
+    khung `khac` (cơm sát rau thành một khung lớn). Nay gộp theo từng loại
+    món như detector, và không gộp trứng.
+  - Ảnh detector bỏ ra (có bánh mì, mì, xúc xích…) nay chỉ cho crop thịt.
+    Bỏ xôi khỏi `khac` (xôi mặn có thịt).
+  - Script đánh giá áp từng dòng của card độc lập, đúng như contract.
+  - Model thử ở trên train **trước** khi sửa hai điểm đầu, nên số `khac`
+    của nó hơi khác bản notebook hiện tại.
+- **Đã kiểm tra:** smoke test đạt sau khi sửa; script đánh giá cho số "chỉ
+  detector" khớp `DETECTOR_CARD.md` (56,2%, sai 183); `check_vn_food.py`
+  đạt. Không đổi code app nên không chạy `flutter test`.
+
 ---
 
 ## 3. Việc còn tồn đọng
