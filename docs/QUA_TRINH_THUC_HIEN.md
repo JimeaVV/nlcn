@@ -3065,6 +3065,34 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - thêm ảnh cho các lớp yếu (gà, heo, bò, rau);
   - làm model phân loại thịt chạy trên từng khung.
 
+### 2026-11-02 · Tổng hợp thay đổi từ NLCSN đến MacroRunner để báo cáo giảng viên
+
+- **Vì sao:** ngày 03/11 báo cáo tiến độ với giảng viên. Cần một tài liệu
+  liệt kê mọi thứ đã đổi so với sản phẩm NLCSN, có số cụ thể, để nói và để
+  dùng lại khi viết báo cáo NLCN.
+- **Đã làm:** viết `docs/THAY_DOI_TU_NLCSN.md`, nhóm theo hạng mục: kiến
+  trúc offline, nhận diện món (model 2 đầu, detector YOLO, hạ tầng train),
+  dữ liệu dinh dưỡng có nguồn, thuật toán gợi ý, giao diện, thông báo và
+  widget, đổi tên và applicationId, CI và build. Mỗi mục ghi trước và sau.
+  Mục 9 ghi riêng 3 nhánh chưa gộp (model phân loại thịt, chế độ Gemini,
+  detector v18) là "đang làm, chưa vào app"; cuối tài liệu có mục việc còn
+  tồn đọng.
+- **Nguồn số liệu:** nhật ký này, `MODEL_CONTRACT.md`, `MODEL_CARD.md`,
+  `DETECTOR_CARD.md`, `git log` của `feature/contract-1.5` và 3 nhánh trên
+  (đọc bằng `git log`/`git diff`, không checkout). Mốc "trước" lấy từ báo
+  cáo NLCSN (`baocao_final.docx`, tiếng Anh, 08/2026): FastAPI, 160 nguyên
+  liệu, 96 bài tập, SQLite v2, 18 test backend và 6 test Flutter.
+- **Bổ sung theo yêu cầu:** mỗi mục có thêm phần "Cách làm" (transfer
+  learning hai pha, masked loss, Grounding DINO tự khoanh khung, cận calo
+  của Branch & Bound, cách tính dinh dưỡng theo công thức, CI và ký app…),
+  để trả lời khi giảng viên hỏi đã làm thế nào. Xuất bản Word
+  `docs/THAY_DOI_TU_NLCSN.docx` (A4, Times New Roman 13, 12 trang) từ file
+  `.md` bằng một script docx-js nằm ngoài repo.
+- **Kiểm tra:** đối chiếu lại từng con số trong tài liệu với mục nhật ký
+  hoặc file nguồn tương ứng. File Word qua bước kiểm tra XML của skill docx;
+  mở bằng Word, xuất PDF và xem lại các trang 1, 3, 5, 12. Chỉ sửa tài liệu,
+  không đổi code nên không chạy `flutter test`.
+
 ### 2026-11-02 · Đổi ngôn ngữ thì lên lịch lại thông báo nhắc
 
 - **Vì sao:** trên điện thoại, nhắc bữa hiện tiếng Việt nhưng nhắc uống nước
