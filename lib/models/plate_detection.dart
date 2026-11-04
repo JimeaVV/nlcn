@@ -93,6 +93,7 @@ class DetectorLabels {
     required this.classes,
     this.thresholdBox = 0.35,
     this.thresholdIou = 0.5,
+    this.classThresholds = const {},
   });
 
   /// Throws [FormatException] when a class is not one the app knows.
@@ -119,12 +120,23 @@ class DetectorLabels {
       classes: classes,
       thresholdBox: value('threshold_box') ?? 0.35,
       thresholdIou: value('threshold_iou') ?? 0.5,
+      classThresholds: {
+        for (final code in classes)
+          if (value('threshold_box_$code') case final number?) code: number,
+      },
     );
   }
 
   final List<String> classes;
   final double thresholdBox;
   final double thresholdIou;
+
+  /// `threshold_box_<class>` lines of the card (contract 1.7), for classes
+  /// whose own threshold differs from [thresholdBox].
+  final Map<String, double> classThresholds;
+
+  /// The lowest score a box of [code] needs to count.
+  double thresholdFor(String code) => classThresholds[code] ?? thresholdBox;
 }
 
 /// How a photo was fitted into the model's square input: shrunk by [scale]
@@ -153,8 +165,9 @@ class Letterbox {
 }
 
 /// The foods in one raw detector output of [shape] ([1, 4 + classes, A] or
-/// [1, A, 4 + classes]): boxes above the threshold, then per class only the
-/// best of boxes that overlap more than [DetectorLabels.thresholdIou].
+/// [1, A, 4 + classes]): boxes above their class's threshold, then per class
+/// only the best of boxes that overlap more than
+/// [DetectorLabels.thresholdIou].
 List<DetectedFood> decodeDetections(
   Float32List output,
   List<int> shape,
@@ -180,6 +193,7 @@ List<DetectedFood> decodeDetections(
   }
   final unit = largest > 2 ? letterbox.size.toDouble() : 1.0;
 
+  final thresholds = [for (final code in labels.classes) labels.thresholdFor(code)];
   final found = <DetectedFood>[];
   for (var a = 0; a < anchors; a++) {
     var best = 0;
@@ -191,7 +205,7 @@ List<DetectedFood> decodeDetections(
         best = c;
       }
     }
-    if (score < labels.thresholdBox) continue;
+    if (score < thresholds[best]) continue;
     final cx = at(0, a) / unit, cy = at(1, a) / unit;
     final w = at(2, a) / unit, h = at(3, a) / unit;
     final box = Rect.fromLTRB(

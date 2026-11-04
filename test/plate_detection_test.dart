@@ -71,6 +71,18 @@ void main() {
       expect(labels.thresholdIou, 0.5);
     });
 
+    test('a class may have its own threshold (contract 1.7)', () {
+      final labels = DetectorLabels.parse(
+          classesTxt: 'com\nga\nrau',
+          card: 'threshold_box: 0.38\nthreshold_box_com: 0.16\n'
+              'threshold_box_rau: 2\nthreshold_box_pizza: 0.1\n');
+      expect(labels.thresholdBox, 0.38);
+      expect(labels.classThresholds, {'com': 0.16});
+      expect(labels.thresholdFor('com'), 0.16);
+      expect(labels.thresholdFor('ga'), 0.38);
+      expect(labels.thresholdFor('rau'), 0.38);
+    });
+
     test('the detector in assets/models, if any, is one the app reads', () {
       final classes = File('assets/models/detector_classes.txt');
       final card = File('assets/models/DETECTOR_CARD.md');
@@ -79,7 +91,7 @@ void main() {
           classesTxt: classes.readAsStringSync(),
           card: card.readAsStringSync());
       expect(labels.classes, _classes);
-      expect(card.readAsStringSync(), contains('contract_version: 1.6'));
+      expect(card.readAsStringSync(), contains('contract_version: 1.7'));
       expect(card.readAsStringSync(), isNot(contains('not finished')));
       expect(RegExp('^threshold_box:', multiLine: true)
           .hasMatch(card.readAsStringSync()), isTrue);
@@ -140,6 +152,18 @@ void main() {
       expect(plate.codes, ['trung', 'com']);
       expect(plate.count('trung'), 2);
       expect(plate.score('com'), closeTo(0.6, 1e-6));
+    });
+
+    test("each box needs its own class's threshold", () {
+      final box = Letterbox(width: 640, height: 640, size: 640);
+      final (out, shape) = _output([
+        ('com', 0.2, 0.3, 0.5, 0.2, 0.2), // kept: rice needs 0.16
+        ('ga', 0.3, 0.7, 0.5, 0.2, 0.2), // dropped: chicken needs 0.38
+      ]);
+      const labels = DetectorLabels(
+          classes: _classes, thresholdBox: 0.38, classThresholds: {'com': 0.16});
+      expect([for (final f in decodeDetections(out, shape, labels, box)) f.code],
+          ['com']);
     });
 
     test('an output of the wrong width is refused', () {

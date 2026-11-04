@@ -129,6 +129,19 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
+  /// Switches the language and schedules the reminders again in it: a
+  /// scheduled notification keeps the text it was given, so without this
+  /// the old language would keep showing up.
+  Future<void> _setLanguage(AppLanguage language) async {
+    await localeController.setLanguage(language);
+    final l10n = lookupAppLocalizations(language.locale);
+    await reminders?.refresh(
+        texts: _reminderTexts(l10n), channelName: l10n.reminderChannel);
+    await waterReminders?.refresh(
+        texts: WaterReminderTexts.of(l10n),
+        goalReachedToday: await _waterGoalReached());
+  }
+
   Future<void> _exportPhotos(BuildContext context) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -300,8 +313,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                     ],
                     selected: {localeController.language},
-                    onSelectionChanged: (value) =>
-                        localeController.setLanguage(value.single),
+                    onSelectionChanged: (value) => _setLanguage(value.single),
                   ),
                 ),
               ),

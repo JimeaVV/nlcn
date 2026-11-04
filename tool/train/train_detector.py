@@ -1,7 +1,7 @@
 # %% [markdown]
 # # MacroRunner – train the plate detector (YOLO)
 #
-# Trains the second model of `docs/MODEL_CONTRACT.md` (contract 1.6, §7): a
+# Trains the second model of `docs/MODEL_CONTRACT.md` (contract 1.7, §7): a
 # YOLO11s at 512 px that finds each food on a plate with a box, so a plate of plain
 # rice and chicken breast comes out as "com" and "ga" instead of the dish
 # the classifier knows best. 21 classes, each one an app component or a
@@ -11,7 +11,8 @@
 #
 # Data: the boxes VietFood67 already has, MyFood's masks turned into boxes,
 # and FoodInsSeg's boxes around each piece of food (sliced pork, chicken,
-# tofu on rice). Each keeps its own train/val/test split. Also, if found,
+# tofu on rice), with touching pieces of one food joined into one box
+# (`JOIN_GAP`). Each keeps its own train/val/test split. Also, if found,
 # `autolabel.zip` from `autolabel_detector.ipynb`: Vietnamese dish photos
 # boxed by Grounding DINO, and Open Images boxes. Those are machine-made, so
 # they go to train only, and val and test stay comparable between runs.
@@ -61,10 +62,15 @@
 # 4. To go on from there: add that version's output to the notebook
 #    (*Add Input → Your Work*), set `RESUME_FROM = '/kaggle/input'` and save a
 #    new version. A Colab run's shared `train/weights` link works there too.
+#    If that output cannot be added (a version that ended in an error), put
+#    its `last.pt` and `best.pt` in a new private dataset (*Upload → New
+#    Dataset*) and add that instead.
 #
-# Time on a T4 (estimate): about 12 minutes an epoch with the boxed dish
-# photos, so the 40 epochs take about 8 hours: one Kaggle run, or two to
-# three free Colab sessions (step 5).
+# Time on Kaggle (run of 2026-10-29): about 5 minutes an epoch, so the 35
+# epochs took 3 hours. Reading the VietFood67 labels one file at a time
+# took 158 minutes before that; they are now read 64 at a time. On free
+# Colab, expect two sessions (step 5). The 40-epoch run of 2026-10-27
+# stopped getting better on val after epoch 30.
 #
 # Ultralytics is AGPL-3.0; VietFood67 and FoodInsSeg are CC BY-NC-SA 4.0;
 # MyFood is CC BY 4.0.
@@ -92,7 +98,7 @@ IMGSZ = 320 if QUICK_TEST else 512
 # The learning rate falls to its lowest over all EPOCHS and the last 10 go
 # without mosaic, so a run cut off halfway ends worse than a shorter one
 # run to the end: set this to what there is time for.
-EPOCHS = 2 if QUICK_TEST else 40
+EPOCHS = 2 if QUICK_TEST else 35
 BATCH = 16 if QUICK_TEST else 32
 PATIENCE = 20            # epochs without a better val mAP before stopping
 SEED = 0
@@ -103,6 +109,15 @@ KEEP_DISH_PHOTOS = False
 # Photos with none of the 21 foods, kept as background, as a share of the
 # photos that have some.
 BACKGROUND_SHARE = 0.1
+# FoodInsSeg and MyFood box every slice of cucumber and every chip, where
+# VietFood67 boxes the whole heap, and the app only shows which foods are
+# there. Boxes of one class that overlap or are closer than this share of
+# the photo are joined into one, except foods the app counts by their boxes.
+JOIN_GAP = 0.02
+# FoodInsSeg is the only set of rice plates with several foods, the photo
+# the app sees most, but 3,374 of 29,284 train photos: each is used this
+# many times in train.
+FIS_REPEAT = 3
 LONG_SIDE = 640          # photos are shrunk to this once, for fast loading
 ULTRALYTICS_VERSION = '8.4.185'
 # A shared link to another Colab account's `train/weights` folder, to train
@@ -220,13 +235,21 @@ if RESUME_FROM and not os.path.exists(os.path.join(weights_dir, 'last.pt')):
     try:
         if os.path.exists(RESUME_FROM):
             # A folder here, e.g. /kaggle/input with the last version's
-            # output added: the one weights folder somewhere under it.
-            folders = sorted({folder for folder, _, files in
-                              os.walk(RESUME_FROM, followlinks=True)
-                              if 'last.pt' in files and 'best.pt' in files})
+            # output or a dataset of the weights added: the one weights
+            # folder somewhere under it. Photo and label folders are not
+            # searched: walking VietFood67's took 3.5 minutes.
+            folders = []
+            for folder, dirs, files in os.walk(RESUME_FROM, followlinks=True):
+                dirs[:] = [d for d in dirs if d not in ('images', 'labels')]
+                if 'last.pt' in files and 'best.pt' in files:
+                    folders.append(folder)
             if len(folders) != 1:
+                seen = sorted(os.path.join(top, d) for top in
+                              [RESUME_FROM] + [os.path.join(RESUME_FROM, d)
+                                               for d in os.listdir(RESUME_FROM)]
+                              if os.path.isdir(top) for d in os.listdir(top))
                 raise ValueError(f'{len(folders)} folders with last.pt and '
-                                 f'best.pt: {folders}')
+                                 f'best.pt: {folders}. In {RESUME_FROM}: {seen}')
             got = [os.path.join(folders[0], n) for n in ('last.pt', 'best.pt')]
         else:
             got = load_gdown().download_folder(
@@ -336,11 +359,11 @@ stage(f'Photos from {INPUT_ROOT} and {EXTRA_ROOT} | results to {OUTPUT_DIR}')
 
 # %% [markdown]
 # ## Contract
-# Class codes in output order (contract 1.6, §7.1). They must match
+# Class codes in output order (contract 1.7, §7.1). They must match
 # `detector_classes.txt`, which this notebook writes at the end.
 
 # %%
-CONTRACT_VERSION = '1.6'
+CONTRACT_VERSION = '1.7'
 CLASSES = [
     'com', 'bun', 'mi', 'banh_mi_o', 'ga', 'thit_kho', 'thit_nuong', 'heo',
     'bo', 'ca', 'tom', 'muc', 'trung', 'dau_hu', 'cha', 'cha_gio', 'rau',
@@ -429,6 +452,47 @@ random.seed(SEED)
 skipped = Counter()
 
 
+# The app counts eggs, spring rolls and bánh mì by their boxes (contract
+# §7.3), so those are never joined.
+COUNTED_CLASSES = {CLASS_INDEX[c] for c in ('trung', 'cha_gio', 'banh_mi_o')}
+joined = Counter()
+
+
+def join_pieces(boxes):
+    """Boxes (class, cx, cy, w, h) with those of one class that overlap or
+    lie within JOIN_GAP of each other replaced by one box around them."""
+    corners = [(c, cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
+               for c, cx, cy, w, h in boxes]
+    group = list(range(len(corners)))
+
+    def root(i):
+        while group[i] != i:
+            group[i] = group[group[i]]
+            i = group[i]
+        return i
+
+    for i, a in enumerate(corners):
+        for j in range(i + 1, len(corners)):
+            b = corners[j]
+            if (a[0] == b[0] and a[0] not in COUNTED_CLASSES and
+                    a[1] - JOIN_GAP <= b[3] and b[1] - JOIN_GAP <= a[3] and
+                    a[2] - JOIN_GAP <= b[4] and b[2] - JOIN_GAP <= a[4]):
+                group[root(i)] = root(j)
+    out = {}
+    for i, (c, left, top, right, bottom) in enumerate(corners):
+        r = root(i)
+        if r in out:
+            _, l0, t0, r0, b0 = out[r]
+            out[r] = (c, min(l0, left), min(t0, top), max(r0, right),
+                      max(b0, bottom))
+        else:
+            out[r] = (c, left, top, right, bottom)
+    joined['before'] += len(boxes)
+    joined['after'] += len(out)
+    return [(c, (l + r) / 2, (t + b) / 2, r - l, b - t)
+            for c, l, t, r, b in out.values()]
+
+
 def split_of(path):
     for part in reversed(path.replace('\\', '/').split('/')):
         if part.lower() in SPLITS:
@@ -462,7 +526,7 @@ def vf67_items(root):
                                       os.path.join(root, 'images'))
                 images.setdefault(rel, os.path.join(folder, name))
     stage(f'VietFood67: {len(images)} images in {root}')
-    kept, background = [], []
+    labels = []
     for folder, _, names in os.walk(os.path.join(root, 'labels'),
                                     followlinks=True):
         for name in sorted(names):
@@ -471,32 +535,41 @@ def vf67_items(root):
             path = os.path.join(folder, name)
             rel = os.path.splitext(
                 os.path.relpath(path, os.path.join(root, 'labels')))[0]
-            image = images.get(rel)
-            if image is None:
+            if rel in images:
+                labels.append((path, rel))
+            else:
                 skipped['vf67: no image'] += 1
-                continue
-            boxes, names_seen = [], set()
-            with open(path) as f:
-                for line in f:
-                    parts = line.split()
-                    if len(parts) < 5 or not parts[0].isdigit():
-                        continue
-                    index = int(parts[0])
-                    if index >= len(VF_NAMES):
-                        continue
-                    try:
-                        cx, cy, w, h = (float(p) for p in parts[1:5])
-                    except ValueError:
-                        continue
-                    vf_name = VF_NAMES[index]
-                    names_seen.add(vf_name)
-                    if vf_name in VF_CLASS and w > 0 and h > 0:
-                        boxes.append((CLASS_INDEX[VF_CLASS[vf_name]], cx, cy,
-                                      w, h))
+
+    def read(path):
+        boxes, names_seen = [], set()
+        with open(path) as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) < 5 or not parts[0].isdigit():
+                    continue
+                index = int(parts[0])
+                if index >= len(VF_NAMES):
+                    continue
+                try:
+                    cx, cy, w, h = (float(p) for p in parts[1:5])
+                except ValueError:
+                    continue
+                vf_name = VF_NAMES[index]
+                names_seen.add(vf_name)
+                if vf_name in VF_CLASS and w > 0 and h > 0:
+                    boxes.append((CLASS_INDEX[VF_CLASS[vf_name]], cx, cy, w, h))
+        return boxes, names_seen
+
+    # Kaggle fetches each file of a dataset the first time it is read, so
+    # one after another the 171,619 label files took 158 minutes.
+    kept, background = [], []
+    with ThreadPoolExecutor(64) as pool:
+        for (path, rel), (boxes, names_seen) in zip(
+                labels, pool.map(read, (path for path, _ in labels))):
             if names_seen & VF_DISH_BOXES and not KEEP_DISH_PHOTOS:
                 skipped['vf67: whole-dish box'] += 1
                 continue
-            item = (image, split_of(rel), boxes)
+            item = (images[rel], split_of(rel), boxes)
             (kept if boxes else background).append(item)
     random.shuffle(background)
     background = background[:int(BACKGROUND_SHARE * len(kept))]
@@ -535,7 +608,8 @@ def myfood_items(root):
                                   (top + h / 2) / height, w / width,
                                   h / height))
             if boxes:
-                items.append((os.path.join(folder, name), split, boxes))
+                items.append((os.path.join(folder, name), split,
+                              join_pieces(boxes)))
     stage(f'MyFood: {len(items)} photos with boxes')
     return items
 
@@ -570,7 +644,7 @@ def foodinsseg_items(root):
             split = ('train' if folder == 'train' else
                      'val' if image['id'] % 2 == 0 else 'test')
             item = (os.path.join(root, 'images', folder, image['file_name']),
-                    split, boxes)
+                    split, join_pieces(boxes))
             (kept if boxes else background).append(item)
     random.shuffle(background)
     background = background[:int(BACKGROUND_SHARE * len(kept))]
@@ -630,7 +704,10 @@ for root in find_roots(EXTRA_ROOT, lambda folder, files:
     items += [('myfood', *item) for item in myfood_items(root)]
 for root in find_roots(EXTRA_ROOT, lambda folder, files: os.path.exists(
         os.path.join(folder, 'annotations', 'Train.json'))):
-    items += [('fis', *item) for item in foodinsseg_items(root)]
+    items += [('fis', *item) for item in foodinsseg_items(root)
+              for _ in range(FIS_REPEAT if item[1] == 'train' else 1)]
+stage(f'Touching pieces joined: {joined["before"]} boxes into '
+      f'{joined["after"]} | FoodInsSeg train photos used {FIS_REPEAT} times')
 if os.path.isdir(os.path.join(EXTRA_ROOT, 'autolabel', 'labels')):
     items += autolabel_items(os.path.join(EXTRA_ROOT, 'autolabel'))
 if QUICK_TEST:
@@ -766,6 +843,71 @@ threshold_box = 0.35
 if f1.size:
     confidence = np.linspace(0, 1, f1.shape[-1])
     threshold_box = float(np.clip(confidence[int(f1.mean(0).argmax())], 0.2, 0.6))
+
+# A threshold of its own for each class, on what the app shows: whether a
+# food is on the plate at all. One that F1 prefers is kept only for a class
+# in at least 20 val photos, and below threshold_box only while 3 of 4 of
+# its finds stay right: misses are cheaper to fix in the app than foods
+# that are not there. On the cơm phần photos this lowered rice, greens and
+# cucumber, and left the meats, where a lower one doubles the wrong finds.
+MIN_CLASS_PHOTOS = 20
+MIN_PRECISION_BELOW = 0.75
+val_images = sorted(os.path.join(YOLO_DIR, 'images', 'val', n)
+                    for n in os.listdir(os.path.join(YOLO_DIR, 'images', 'val')))
+truth, top = {}, {}
+for path in val_images:
+    label = os.path.join(YOLO_DIR, 'labels', 'val',
+                         os.path.splitext(os.path.basename(path))[0] + '.txt')
+    with open(label) as f:
+        truth[path] = {int(line.split()[0]) for line in f if line.strip()}
+try:
+    import torch
+    torch.cuda.empty_cache()
+except Exception:
+    pass
+# 16 photos per call: given the whole list, Ultralytics makes it one batch,
+# and the 2,940 val photos asked a T4 for 23 GB.
+for start in range(0, len(val_images), 16):
+    chunk = val_images[start:start + 16]
+    for path, result in zip(chunk, model.predict(
+            chunk, imgsz=IMGSZ, conf=0.05, iou=0.5, verbose=False)):
+        best = {}
+        for c, score in zip(result.boxes.cls.tolist(),
+                            result.boxes.conf.tolist()):
+            best[int(c)] = max(best.get(int(c), 0.0), score)
+        top[path] = best
+
+
+def presence(c, threshold):
+    """Photos where class c is found and there, missed, found but not there."""
+    hit = miss = wrong = 0
+    for path, there in truth.items():
+        found = top.get(path, {}).get(c, 0.0) >= threshold
+        hit += found and c in there
+        miss += not found and c in there
+        wrong += found and c not in there
+    return hit, miss, wrong
+
+
+threshold_by_class = {}
+for c, code in enumerate(CLASSES):
+    if sum(c in there for there in truth.values()) < MIN_CLASS_PHOTOS:
+        continue
+    def score(threshold):
+        hit, miss, wrong = presence(c, threshold)
+        return 2 * hit / (2 * hit + miss + wrong) if hit else 0.0
+    best = threshold_box
+    for threshold in np.arange(0.10, 0.81, 0.02):
+        hit, _, wrong = presence(c, threshold)
+        right_enough = (threshold >= threshold_box or
+                        hit / max(1, hit + wrong) >= MIN_PRECISION_BELOW)
+        if right_enough and score(threshold) > score(best) + 0.005:
+            best = float(threshold)
+    if abs(best - threshold_box) >= 0.04:
+        threshold_by_class[code] = round(best, 2)
+stage('Per-class box thresholds on val: '
+      + (', '.join(f'{k} {v:.2f}' for k, v in threshold_by_class.items())
+         or f'none, all {threshold_box:.2f}'))
 test = model.val(data=DATA_YAML, split='test', imgsz=IMGSZ, batch=BATCH,
                  plots=False, project=OUTPUT_DIR, name='test', exist_ok=True)
 names = model.names
@@ -775,7 +917,8 @@ for i, c in enumerate(test.box.ap_class_index):
                                 'map50_95': float(test.box.ap[i])}
 results = {'map50': float(test.box.map50), 'map50_95': float(test.box.map),
            'precision': float(test.box.mp), 'recall': float(test.box.mr),
-           'threshold_box': threshold_box, 'per_class': per_class,
+           'threshold_box': threshold_box,
+           'threshold_box_by_class': threshold_by_class, 'per_class': per_class,
            'finished': finished, 'photos': dict(photos_per_split)}
 stage(f"Test: mAP50 {results['map50']:.3f}, mAP50-95 {results['map50_95']:.3f}, "
       f'box threshold {threshold_box:.2f}')
@@ -910,6 +1053,8 @@ lines = [
     '',
     f'contract_version: {CONTRACT_VERSION}',
     f'threshold_box: {threshold_box:.2f}',
+    *(f'threshold_box_{code}: {value:.2f}'
+      for code, value in threshold_by_class.items()),
     'threshold_iou: 0.5',
     '',
     f'- Trained: {date.today().isoformat()}, '
@@ -919,7 +1064,9 @@ lines = [
     + ('' if finished else ' (training not finished: best epoch so far)')
     + (', QUICK TEST' if QUICK_TEST else ''),
     f"- Photos: {dict(photos_per_split)} (VietFood67 boxes, MyFood masks, "
-    'FoodInsSeg boxes'
+    f'FoodInsSeg boxes, its train photos used {FIS_REPEAT} times; touching '
+    f'pieces of one food joined, {joined["before"]} boxes into '
+    f'{joined["after"]}'
     + (', Grounding DINO and Open Images boxes in train'
        if any(item[0] in ('auto', 'oi') for item in items) else '') + ')',
     f"- Test: mAP50 {results['map50']:.3f}, mAP50-95 {results['map50_95']:.3f}, "
