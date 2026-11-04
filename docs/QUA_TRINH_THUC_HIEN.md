@@ -3312,6 +3312,67 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - Đã cài lên điện thoại bản dev test build 160. Chưa quét thử bằng key thật
     trên điện thoại.
 
+### 2026-11-02 · Tổng hợp thay đổi từ NLCSN đến MacroRunner để báo cáo giảng viên
+
+- **Vì sao:** ngày 03/11 báo cáo tiến độ với giảng viên. Cần một tài liệu
+  liệt kê mọi thứ đã đổi so với sản phẩm NLCSN, có số cụ thể, để nói và để
+  dùng lại khi viết báo cáo NLCN.
+- **Đã làm:** viết `docs/THAY_DOI_TU_NLCSN.md`, nhóm theo hạng mục: kiến
+  trúc offline, nhận diện món (model 2 đầu, detector YOLO, hạ tầng train),
+  dữ liệu dinh dưỡng có nguồn, thuật toán gợi ý, giao diện, thông báo và
+  widget, đổi tên và applicationId, CI và build. Mỗi mục ghi trước và sau.
+  Mục 9 ghi riêng 3 nhánh chưa gộp (model phân loại thịt, chế độ Gemini,
+  detector v18) là "đang làm, chưa vào app"; cuối tài liệu có mục việc còn
+  tồn đọng.
+- **Nguồn số liệu:** nhật ký này, `MODEL_CONTRACT.md`, `MODEL_CARD.md`,
+  `DETECTOR_CARD.md`, `git log` của `feature/contract-1.5` và 3 nhánh trên
+  (đọc bằng `git log`/`git diff`, không checkout). Mốc "trước" lấy từ báo
+  cáo NLCSN (`baocao_final.docx`, tiếng Anh, 08/2026): FastAPI, 160 nguyên
+  liệu, 96 bài tập, SQLite v2, 18 test backend và 6 test Flutter.
+- **Bổ sung theo yêu cầu:** mỗi mục có thêm phần "Cách làm" (transfer
+  learning hai pha, masked loss, Grounding DINO tự khoanh khung, cận calo
+  của Branch & Bound, cách tính dinh dưỡng theo công thức, CI và ký app…),
+  để trả lời khi giảng viên hỏi đã làm thế nào. Xuất bản Word
+  `docs/THAY_DOI_TU_NLCSN.docx` (A4, Times New Roman 13, 12 trang) từ file
+  `.md` bằng một script docx-js nằm ngoài repo.
+- **Kiểm tra:** đối chiếu lại từng con số trong tài liệu với mục nhật ký
+  hoặc file nguồn tương ứng. File Word qua bước kiểm tra XML của skill docx;
+  mở bằng Word, xuất PDF và xem lại các trang 1, 3, 5, 12. Chỉ sửa tài liệu,
+  không đổi code nên không chạy `flutter test`.
+
+### 2026-11-02 · Đổi ngôn ngữ thì lên lịch lại thông báo nhắc
+
+- **Vì sao:** trên điện thoại, nhắc bữa hiện tiếng Việt nhưng nhắc uống nước
+  lại hiện tiếng Anh. App ghi sẵn nội dung thông báo lúc lên lịch, Android
+  giữ nguyên chữ đó tới lúc hiện. Đổi ngôn ngữ trong Cài đặt không lên lịch
+  lại, nên các nhắc đã xếp từ trước (nhắc nước xếp trước 7 ngày) vẫn mang
+  ngôn ngữ cũ.
+- **Đã làm:** chọn ngôn ngữ trong Cài đặt giờ lên lịch lại cả nhắc bữa lẫn
+  nhắc nước bằng ngôn ngữ mới, kể cả tên kênh thông báo.
+  `ReminderController` có thêm hàm `refresh` để làm việc này.
+- **Kiểm tra:** thêm test `switching the language schedules the reminders
+  in it`. Test bật cả hai loại nhắc bằng tiếng Việt, rồi đổi sang tiếng Anh
+  và kiểm tra nội dung đã xếp lịch phải là tiếng Anh. `flutter analyze`
+  không báo lỗi, `flutter test` qua hết 251 test.
+
+### 2026-11-04 · Gộp sửa thông báo vào nhánh Gemini để cài chung một bản
+
+- **Vì sao:** build 160 trên điện thoại có phần sửa Flash 3.8 nhưng chưa có
+  phần sửa thông báo lẫn ngôn ngữ (`f666e65`). Người dùng muốn gộp và cài lại.
+- **Đã làm:**
+  - Merge `origin/feature/contract-1.5` (tới `5bbc774`) vào nhánh
+    `claude/gemini-compare-89d8c2`. Chưa merge vào `main` hay
+    `feature/contract-1.5`, chưa push.
+  - Nhật ký bị conflict: giữ đủ các mục của cả hai nhánh.
+  - `lib/screens/settings_screen.dart` tự gộp được, còn cả `_setLanguage` và
+    thẻ Gemini.
+- **Đã kiểm tra:**
+  - `flutter gen-l10n` không đổi file nào. `flutter analyze` sạch, `flutter
+    test` đạt 274/274, `check_vn_food.py` OK.
+  - Build dev test 161 để cài lên điện thoại.
+- **Lưu ý khi cài:** các nhắc đã xếp lịch từ trước vẫn giữ ngôn ngữ cũ. Phải đổi
+  ngôn ngữ rồi đổi lại một lần thì app mới xếp lại.
+
 ---
 
 ## 3. Việc còn tồn đọng
