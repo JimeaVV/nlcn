@@ -124,8 +124,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     // stopping the others.
     OnlineFailure? failure;
     final asking = _online.enabled
-        ? _online.recognize(widget.imagePath).then<OnlineScan?>((scan) => scan,
-            onError: (Object error) {
+        ? _online
+            .recognize(widget.imagePath,
+                cancelled: () => _skipOnline.isCompleted || !mounted)
+            .then<OnlineScan?>((scan) => scan, onError: (Object error) {
             debugPrint('Online recognition failed: $error');
             failure = error is OnlineScanException
                 ? error.kind
@@ -408,7 +410,8 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   selected: plate?.dish.code,
                   chosenName: plate?.dish.name(language),
                   detectedCount: _detectedCount,
-                  online: _fromOnline,
+                  onlineModel: _fromOnline ? _onlineScan!.model : null,
+                  onlineFellBack: _fromOnline && _onlineScan!.fellBack,
                   onlineOthers: _onlineScan?.otherNames ?? const [],
                   onChoose: (code) {
                     Haptics.tap();
@@ -505,7 +508,8 @@ class _DishCard extends StatelessWidget {
     required this.onPickOther,
     this.detectedCount,
     this.onChooseDetected,
-    this.online = false,
+    this.onlineModel,
+    this.onlineFellBack = false,
     this.onlineOthers = const [],
   });
 
@@ -523,8 +527,11 @@ class _DishCard extends StatelessWidget {
   final int? detectedCount;
   final VoidCallback? onChooseDetected;
 
-  /// True when Gemini named the foods instead of the detector.
-  final bool online;
+  /// The Gemini model that named the foods, when the detector did not.
+  final OnlineModel? onlineModel;
+
+  /// True when [onlineModel] answered because the chosen model could not.
+  final bool onlineFellBack;
 
   /// Foods Gemini saw that the app has no data for, by name.
   final List<String> onlineOthers;
@@ -542,6 +549,7 @@ class _DishCard extends StatelessWidget {
           guess,
     ];
     final detected = selected == ScanPlate.detectedPlateCode;
+    final online = onlineModel;
 
     return CyberCard(
       highlight: true,
@@ -555,8 +563,10 @@ class _DishCard extends StatelessWidget {
                 style: TextStyle(color: CyberColors.muted))
           else if (detected)
             Text(
-                online
-                    ? l10n.scanOnlineHint
+                online != null
+                    ? onlineFellBack
+                        ? l10n.scanOnlineFellBack
+                        : l10n.scanOnlineHint(online.name)
                     : detectedCount == 1
                         ? l10n.scanDetectedOneHint
                         : l10n.scanDetectedHint,
@@ -579,14 +589,15 @@ class _DishCard extends StatelessWidget {
                     showCheckmark: false,
                     key: const ValueKey('guess-detected'),
                     avatar: Icon(
-                        online
+                        online != null
                             ? Icons.cloud_outlined
                             : Icons.center_focus_strong_rounded,
                         size: 18,
                         color: CyberColors.cyan),
                     selected: detected,
-                    label: Text(online
-                        ? l10n.scanOnlinePlate(count)
+                    label: Text(online != null
+                        ? l10n.scanOnlinePlate(
+                            count, l10n.onlineModelName(online.name))
                         : l10n.scanDetectedPlate(count)),
                     // Tapped again it keeps what the user changed.
                     onSelected: (_) =>

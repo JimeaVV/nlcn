@@ -2947,23 +2947,29 @@ abstract class AppLocalizations {
   /// **'Dùng kết quả trên máy'**
   String get scanUseOffline;
 
-  /// Snackbar when online recognition gave no answer; reason is offline, timeout, quota or failed
+  /// Snackbar when online recognition gave no answer; reason is offline, timeout, busy, quota or failed
   ///
   /// In vi, this message translates to:
-  /// **'{reason, select, offline{Không có mạng, đã dùng nhận diện trên máy.} timeout{Gemini trả lời quá lâu, đã dùng nhận diện trên máy.} quota{Hết lượt Gemini hôm nay, đã dùng nhận diện trên máy.} other{Gemini bị lỗi, đã dùng nhận diện trên máy.}}'**
+  /// **'{reason, select, offline{Không có mạng, đã dùng nhận diện trên máy.} timeout{Gemini trả lời quá lâu, đã dùng nhận diện trên máy.} busy{Gemini đang quá tải, đã dùng nhận diện trên máy.} quota{Hết lượt Gemini hôm nay, đã dùng nhận diện trên máy.} other{Gemini bị lỗi, đã dùng nhận diện trên máy.}}'**
   String scanOnlineFailed(String reason);
 
-  /// Chip for the plate built from what Gemini named; count is at least 1
+  /// Chip for the plate built from what Gemini named; count is at least 1, model is the name that answered, from onlineModelName
   ///
   /// In vi, this message translates to:
-  /// **'Gemini thấy {count} món'**
-  String scanOnlinePlate(int count);
+  /// **'{model} thấy {count} món'**
+  String scanOnlinePlate(int count, String model);
 
-  /// Hint above the plate Gemini named
+  /// Hint above the plate Gemini named; model is the OnlineModel name that answered
   ///
   /// In vi, this message translates to:
-  /// **'Gemini (dev test) nhận ra các món này.'**
-  String get scanOnlineHint;
+  /// **'{model, select, flash{Gemini Flash 3.8 (dev test, chưa đo) nhận ra các món này.} other{Gemini Lite 3.5 (dev test) nhận ra các món này.}}'**
+  String scanOnlineHint(String model);
+
+  /// Hint above the plate when the chosen Flash model was overloaded and Flash-Lite answered instead
+  ///
+  /// In vi, this message translates to:
+  /// **'Flash 3.8 không trả lời được, nên Gemini Lite 3.5 (dev test) nhận ra các món này.'**
+  String get scanOnlineFellBack;
 
   /// Foods Gemini saw outside the app data, by the English names it gave
   ///
@@ -3028,7 +3034,7 @@ abstract class AppLocalizations {
   /// What the chosen Gemini model is like; model is the OnlineModel name
   ///
   /// In vi, this message translates to:
-  /// **'{model, select, flashLite{Đã đo: nhận ra 76,5% món, khoảng 2,4 giây một ảnh, 500 ảnh mỗi ngày.} flash{Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày.} other{}}'**
+  /// **'{model, select, flashLite{Đã đo: nhận ra 76,5% món, khoảng 2,4 giây một ảnh, 500 ảnh mỗi ngày.} flash{Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày. Khi quá tải, app tự dùng Lite 3.5.} other{}}'**
   String onlineModelNote(String model);
 }
 

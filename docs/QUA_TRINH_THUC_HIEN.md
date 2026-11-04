@@ -3272,6 +3272,44 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - `flutter analyze` sạch, `flutter test` đạt 260/260.
   - Ảnh `settings_online` ở bốn giao diện và màn nhỏ 360 px không tràn.
 
+### 2026-11-04 · Flash 3.8 quá tải thì thử lại rồi tự chuyển sang Lite
+
+- **Vì sao:** người dùng chọn Flash 3.8 mà không gọi được.
+- **Nguyên nhân đo được (04/11, khoảng 15:40–16:00):**
+  - Gửi đúng request của app với một ảnh test: `gemini-3.8-flash` trả 503
+    `service_unavailable` "high demand" cả 12/12 lần, mỗi lần khoảng 0,9 giây,
+    trong 10 phút liền. Không có lần nào 429.
+  - Tham số của app không sai. Gửi `thinking_level: bogus` thì nhận 400 ngay,
+    còn `low` thì tới bước 503, nghĩa là request hợp lệ. Lỗi là do phía Google
+    quá tải.
+  - Cùng lúc đó `gemini-3.5-flash-lite` trả lời được, nhưng có một lần mất
+    8,6 giây, lâu hơn mức chờ 8 giây của app.
+  - Flash 3.8 chưa trả lời lần nào với `thinking_level: low`, nên chưa biết
+    nó mất bao lâu. Độ chính xác của Flash 3.8 vẫn chưa đo.
+- **Đã làm:**
+  - Gặp 503 hoặc quá thời gian chờ thì hỏi lại cùng model, tối đa 2 lần, cách
+    1 giây rồi 3 giây, nếu còn đủ ít nhất 4 giây.
+  - Đang dùng Flash mà vẫn lỗi thì tự chuyển sang Lite, cũng được hỏi lại như
+    vậy. Lựa chọn trong Cài đặt không đổi.
+  - Tổng thời gian chờ một ảnh: 20 giây với Lite, 30 giây với Flash. Flash dùng
+    tối đa 22 giây, còn ít nhất 8 giây dành cho Lite.
+  - HTTP 429, lỗi khác và mất mạng không thử lại, không đổi model.
+  - Bấm "Dùng kết quả trên máy" thì app ngừng thử lại, đỡ tốn lượt.
+  - Màn kết quả ghi model thật sự đã trả lời: "Flash 3.8 thấy 2 món" hoặc "Lite
+    3.5 thấy 2 món". Flash thì ghi thêm "chưa đo". Đã chuyển sang Lite thì ghi
+    rõ là Flash không trả lời được, không ghi nhãn Flash.
+  - Có thông báo riêng khi quá tải: "Gemini đang quá tải, đã dùng nhận diện
+    trên máy".
+  - Contract mục 10 và `docs/CHE_DO_ONLINE.md` mục 6 ghi lại quy tắc này.
+- **Đã kiểm tra:**
+  - Test mới: 503 rồi trả lời, 503 hết lượt thử rồi chuyển Lite, quá thời gian
+    chờ, 429 không thử lại, 400 và mất mạng không thử lại, hết thời gian thì
+    không thử nữa, bấm bỏ qua thì ngừng gửi, nhãn trên màn kết quả.
+  - `flutter analyze` sạch, `flutter test` đạt 273/273,
+    `check_vn_food.py` OK.
+  - Ảnh `scan_online` và `settings_online` ở màn nhỏ 360 px, chữ lớn: không
+    tràn.
+
 ---
 
 ## 3. Việc còn tồn đọng

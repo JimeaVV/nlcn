@@ -1704,6 +1704,7 @@ class AppLocalizationsVi extends AppLocalizations {
       {
         'offline': 'Không có mạng, đã dùng nhận diện trên máy.',
         'timeout': 'Gemini trả lời quá lâu, đã dùng nhận diện trên máy.',
+        'busy': 'Gemini đang quá tải, đã dùng nhận diện trên máy.',
         'quota': 'Hết lượt Gemini hôm nay, đã dùng nhận diện trên máy.',
         'other': 'Gemini bị lỗi, đã dùng nhận diện trên máy.',
       },
@@ -1712,12 +1713,25 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String scanOnlinePlate(int count) {
-    return 'Gemini thấy $count món';
+  String scanOnlinePlate(int count, String model) {
+    return '$model thấy $count món';
   }
 
   @override
-  String get scanOnlineHint => 'Gemini (dev test) nhận ra các món này.';
+  String scanOnlineHint(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flash': 'Gemini Flash 3.8 (dev test, chưa đo) nhận ra các món này.',
+        'other': 'Gemini Lite 3.5 (dev test) nhận ra các món này.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanOnlineFellBack =>
+      'Flash 3.8 không trả lời được, nên Gemini Lite 3.5 (dev test) nhận ra các món này.';
 
   @override
   String scanOnlineOthers(String names) {
@@ -1771,7 +1785,8 @@ class AppLocalizationsVi extends AppLocalizations {
       {
         'flashLite':
             'Đã đo: nhận ra 76,5% món, khoảng 2,4 giây một ảnh, 500 ảnh mỗi ngày.',
-        'flash': 'Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày.',
+        'flash':
+            'Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày. Khi quá tải, app tự dùng Lite 3.5.',
         'other': '',
       },
     );

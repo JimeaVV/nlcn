@@ -25,8 +25,8 @@ như cũ.
    công tắc đang bật, có key, và người dùng đã bấm đồng ý trong hộp thoại ở
    mục 5.
 3. **Không có kết quả online thì dùng kết quả offline.** Áp dụng khi mất
-   mạng, quá 8 giây, lỗi, hết lượt gọi hoặc JSON hỏng. Lúc đó app dùng kết
-   quả của detector và báo một dòng ngắn cho người dùng.
+   mạng, quá thời gian chờ, lỗi, hết lượt gọi hoặc JSON hỏng. Lúc đó app
+   dùng kết quả của detector và báo một dòng ngắn cho người dùng.
 4. **Repo không chứa key.** Key chỉ có trong bản dev test, đưa vào lúc build
    (mục 4). Bản build không có key (CI, release) không có chế độ online.
 5. **Gemini chỉ cho biết tên món, không cho số dinh dưỡng.**
@@ -55,15 +55,17 @@ chụp ảnh ─┬─ detector (≈0.2 s) ────────────�
   - Khung của detector vẫn vẽ trên ảnh, nhưng chỉ cho những lớp mà Gemini
     cũng thấy.
   - Món chỉ Gemini thấy thì vẫn có dòng trong danh sách, chỉ không có khung.
-- **Gemini lỗi hoặc quá 8 giây:** dựng đĩa như hiện nay, từ detector. Hiện
-  một snackbar, ví dụ "Không kết nối được Gemini, đã dùng nhận diện
-  offline".
+- **Gemini lỗi hoặc quá thời gian chờ (mục 6):** dựng đĩa như hiện nay, từ
+  detector. Hiện một snackbar, ví dụ "Gemini đang quá tải, đã dùng nhận diện
+  trên máy".
 - **Trong lúc chờ:** hiệu ứng quét vẫn chạy và có nút "Dùng kết quả
-  offline", để người dùng không phải chờ đủ 8 giây khi mạng chậm.
+  trên máy", để người dùng không phải chờ hết thời gian khi mạng chậm. Bấm
+  nút thì app cũng ngừng thử lại.
 - Không hiện kết quả offline trước rồi mới thay bằng kết quả online, vì
   người dùng có thể đang sửa đĩa thì bị thay mất.
-- Kết quả có một nhãn nhỏ "Online · Gemini" hoặc "Offline", để người dùng
-  biết món do đâu nhận ra.
+- Kết quả ghi rõ model đã trả lời ("Lite 3.5 thấy 2 món", "Flash 3.8 thấy
+  2 món"), vì 76,5% là số của Lite, còn Flash 3.8 chưa đo. Nếu Flash không
+  trả lời được thì ghi là Lite đã nhận.
 - Ghi nhật ký ăn vẫn dùng `FoodLogSource.camera`, không cần sửa database.
 
 ## 3. Từ câu trả lời của Gemini tới đĩa
@@ -172,12 +174,20 @@ Chỉ phải đổi chỗ lấy key và địa chỉ gửi (mục 6); phần cò
     ngày.
   - Muốn đo thì chạy `gemini_compare.py --model gemini-3.8-flash --thinking
     low`.
-- Không gửi lại khi gặp 429 hay 503, mà chuyển ngay sang kết quả offline.
-  - Gặp 429 thì báo "Hết lượt Gemini hôm nay".
+- **Quá tải (503 hoặc quá thời gian chờ):** Flash 3.8 hay gặp, đo ở
+  `docs/QUA_TRINH_THUC_HIEN.md` (2026-11-04).
+  - App hỏi lại cùng model, tối đa 2 lần, cách 1 giây rồi 3 giây, nếu còn
+    đủ ít nhất 4 giây.
+  - Đang dùng Flash mà vẫn lỗi thì chuyển sang Lite, cũng được hỏi lại như
+    vậy trong thời gian còn lại. Lựa chọn trong Cài đặt không đổi.
+  - Tổng thời gian chờ: 20 giây với Lite, 30 giây với Flash. Flash dùng tối
+    đa 22 giây, còn 8 giây dành cho Lite.
+- **Không gửi lại khi gặp 429:** báo "Hết lượt Gemini hôm nay" và chuyển ngay
+  sang kết quả offline, kể cả khi đang dùng Flash mà Lite còn lượt.
   - Chưa làm phần tạm ngừng gọi tới nửa đêm giờ Thái Bình Dương (lúc Google
     đặt lại hạn mức). Mỗi lần quét vẫn thử gọi một lần, rồi chuyển sang
     offline ngay.
-- Gemini trả lời chậm nhất 8 giây (trung vị đo được là 2.4 s). Ảnh đã nén
+- Mỗi lần gọi Lite chờ tối đa 8 giây (trung vị đo được là 2.4 s). Ảnh đã nén
   còn khoảng 100–300 KB.
 
 ## 7. Contract và file chung

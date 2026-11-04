@@ -575,6 +575,16 @@ Thiết kế và lý do nằm ở `docs/CHE_DO_ONLINE.md`. Số đo nằm trong
   - Gemini trả lời mà không nêu lớp nào trong 21 lớp (chỉ `other`, hoặc
     rỗng) thì app dùng đĩa của detector, không báo gì.
   - Model phân loại thịt (mục 9, nếu có) không chạy trên đĩa do Gemini nêu.
-- **Khi không có câu trả lời:** mất mạng, quá 8 giây, hết lượt (HTTP 429),
-  lỗi, hoặc JSON hỏng. App dùng đĩa của detector và báo lý do bằng một
-  dòng.
+- **Khi model quá tải** (HTTP 503 hoặc quá thời gian chờ):
+  - App hỏi lại cùng model, tối đa 2 lần, cách 1 giây rồi 3 giây, nếu còn
+    đủ ít nhất 4 giây.
+  - Tổng thời gian chờ cho một ảnh: 20 giây với Lite, 30 giây với Flash.
+  - Đang dùng Flash mà vẫn lỗi thì app chuyển sang Lite, cũng được hỏi lại
+    như vậy trong thời gian còn lại. Flash được dùng tối đa 22 giây để ít
+    nhất 8 giây dành cho Lite.
+  - Màn kết quả ghi model thật sự đã trả lời. Đã chuyển sang Lite thì không
+    ghi là Flash.
+- **Khi không có câu trả lời:** mất mạng, hết lượt (HTTP 429), quá tải sau
+  khi đã thử lại, lỗi khác, hoặc JSON hỏng. App dùng đĩa của detector và báo
+  lý do bằng một dòng. HTTP 429, lỗi khác và mất mạng không được thử lại, và
+  cũng không chuyển sang model khác.

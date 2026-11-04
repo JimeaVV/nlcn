@@ -1721,6 +1721,7 @@ class AppLocalizationsEn extends AppLocalizations {
       {
         'offline': 'No network, so on-device recognition is used.',
         'timeout': 'Gemini took too long, so on-device recognition is used.',
+        'busy': 'Gemini is overloaded, so on-device recognition is used.',
         'quota':
             'No Gemini requests left today, so on-device recognition is used.',
         'other': 'Gemini failed, so on-device recognition is used.',
@@ -1730,18 +1731,31 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String scanOnlinePlate(int count) {
+  String scanOnlinePlate(int count, String model) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Gemini: $count foods',
-      one: 'Gemini: 1 food',
+      other: '$model: $count foods',
+      one: '$model: 1 food',
     );
     return '$_temp0';
   }
 
   @override
-  String get scanOnlineHint => 'Named by Gemini (dev test).';
+  String scanOnlineHint(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flash': 'Named by Gemini Flash 3.8 (dev test, not measured).',
+        'other': 'Named by Gemini Lite 3.5 (dev test).',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanOnlineFellBack =>
+      'Flash 3.8 could not answer, so Gemini Lite 3.5 (dev test) named these.';
 
   @override
   String scanOnlineOthers(String names) {
@@ -1795,7 +1809,8 @@ class AppLocalizationsEn extends AppLocalizations {
       {
         'flashLite':
             'Measured: found 76.5% of the foods, about 2.4 seconds a photo, 500 photos a day.',
-        'flash': 'Stronger but not measured yet, slower, only 20 photos a day.',
+        'flash':
+            'Stronger but not measured yet, slower, only 20 photos a day. When overloaded, the app uses Lite 3.5.',
         'other': '',
       },
     );

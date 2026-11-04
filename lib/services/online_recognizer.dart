@@ -23,18 +23,32 @@ const onlineSpecAsset = '$modelFolder/online_classes.json';
 /// this the detector's plate is used.
 const onlineTimeout = Duration(seconds: 8);
 
+/// How long to wait before asking an overloaded model again. Gemini's 503
+/// often comes back within a second, so a short wait can still find room.
+const onlineRetryDelays = [Duration(seconds: 1), Duration(seconds: 3)];
+
+/// A try with less time left than this is not started: Flash-Lite's median
+/// answer took 2.4 s.
+const onlineMinAttempt = Duration(seconds: 4);
+
 /// The Gemini models a dev test build can use. Only [flashLite] was
 /// measured on the test photos (docs/QUA_TRINH_THUC_HIEN.md, 2026-11-02);
 /// [flash] is stronger but slower, and its free tier allows 20 photos a day.
 enum OnlineModel {
-  flashLite('gemini-3.5-flash-lite', onlineTimeout),
+  flashLite('gemini-3.5-flash-lite', onlineTimeout, Duration(seconds: 20)),
   // It thinks before answering; low thinking keeps a scan to seconds.
-  flash('gemini-3.8-flash', Duration(seconds: 20), thinkingLevel: 'low');
+  flash('gemini-3.8-flash', Duration(seconds: 20), Duration(seconds: 30),
+      thinkingLevel: 'low');
 
-  const OnlineModel(this.id, this.timeout, {this.thinkingLevel});
+  const OnlineModel(this.id, this.timeout, this.totalWait, {this.thinkingLevel});
 
   final String id;
+
+  /// How long one try may take.
   final Duration timeout;
+
+  /// How long a scan may wait in all, retries and fallback included.
+  final Duration totalWait;
   final String? thinkingLevel;
 
   static OnlineModel byId(String? id) => values.firstWhere(
@@ -145,10 +159,24 @@ class OnlineFood {
 
 /// What Gemini saw on one photo.
 class OnlineScan {
-  const OnlineScan({required this.foods, required this.classes});
+  const OnlineScan({
+    required this.foods,
+    required this.classes,
+    this.model = OnlineModel.flashLite,
+    OnlineModel? asked,
+  }) : asked = asked ?? model;
 
   final List<OnlineFood> foods;
   final List<String> classes;
+
+  /// The model that answered. Only Flash-Lite's numbers were measured, so
+  /// the screen says which one this was.
+  final OnlineModel model;
+
+  /// The model the user picked, when overload made another one answer.
+  final OnlineModel asked;
+
+  bool get fellBack => model != asked;
 
   /// The detector classes named, each once, in Gemini's order.
   List<String> get codes => [
@@ -166,7 +194,12 @@ class OnlineScan {
 
   /// Reads Gemini's answer: the JSON text of its output, wherever the
   /// response keeps it. Unknown classes count as other food.
-  factory OnlineScan.fromResponse(String body, OnlineSpec spec) {
+  factory OnlineScan.fromResponse(
+    String body,
+    OnlineSpec spec, {
+    OnlineModel model = OnlineModel.flashLite,
+    OnlineModel? asked,
+  }) {
     String? answer(Object? node) {
       if (node is Map) {
         final text = node['text'];
@@ -186,6 +219,8 @@ class OnlineScan {
     if (text == null) throw const FormatException('No answer in the response');
     final foods = (jsonDecode(text) as Map<String, dynamic>)['foods'] as List;
     return OnlineScan(
+      model: model,
+      asked: asked,
       classes: spec.classes,
       foods: [
         for (final food in foods.whereType<Map<String, dynamic>>())
@@ -200,7 +235,20 @@ class OnlineScan {
 }
 
 /// Why no online answer came: the screen then uses the detector's plate.
-enum OnlineFailure { offline, timeout, quota, failed }
+enum OnlineFailure {
+  offline,
+  timeout,
+
+  /// HTTP 503: the model has no room right now.
+  busy,
+
+  /// HTTP 429: today's calls are used up, so asking again cannot help.
+  quota,
+  failed;
+
+  /// Overload passes, so these are worth another try or another model.
+  bool get mayPass => this == timeout || this == busy;
+}
 
 class OnlineScanException implements Exception {
   const OnlineScanException(this.kind, [this.detail = '']);
@@ -258,7 +306,10 @@ class OnlineRecognizer extends ChangeNotifier {
     OnlineSpec? spec,
     Future<Uint8List> Function(String imagePath)? readPhoto,
     Duration? timeout,
+    Duration? totalWait,
+    this.retryDelays = onlineRetryDelays,
   })  : _timeout = timeout,
+        _totalWait = totalWait,
         _post = post ?? _httpPost,
         _bundle = bundle,
         _spec = spec == null ? null : Future.value(spec),
@@ -278,10 +329,15 @@ class OnlineRecognizer extends ChangeNotifier {
 
   final String apiKey;
 
-  /// How long an answer may take before the detector's plate is used;
-  /// the model's own time unless set.
+  /// How long one try may take; the model's own time unless set.
   Duration get timeout => _timeout ?? _model.timeout;
   final Duration? _timeout;
+
+  /// Past this the detector's plate is used; the model's own time unless set.
+  final Duration? _totalWait;
+
+  /// The waits before each retry of an overloaded model.
+  final List<Duration> retryDelays;
   final OnlinePost _post;
   final AssetBundle? _bundle;
   final Future<Uint8List> Function(String) _readPhoto;
@@ -346,7 +402,12 @@ class OnlineRecognizer extends ChangeNotifier {
 
   /// What Gemini sees on the photo. Throws [OnlineScanException]; never
   /// called unless [enabled].
-  Future<OnlineScan> recognize(String imagePath) async {
+  ///
+  /// An overloaded model (503 or no answer in time) is asked again, then
+  /// Flash-Lite answers instead. The quota and other errors are not retried.
+  /// Once [cancelled] returns true nothing more is sent.
+  Future<OnlineScan> recognize(String imagePath,
+      {bool Function()? cancelled}) async {
     if (!enabled) throw const OnlineScanException(OnlineFailure.failed, 'off');
     final OnlineSpec spec;
     final Uint8List photo;
@@ -357,7 +418,53 @@ class OnlineRecognizer extends ChangeNotifier {
       _spec = null;
       throw OnlineScanException(OnlineFailure.failed, '$error');
     }
-    final model = _model;
+    final asked = _model;
+    final fallback = asked == OnlineModel.flashLite ? null : OnlineModel.flashLite;
+    final total = _totalWait ?? asked.totalWait;
+    final clock = Stopwatch()..start();
+    // The time Flash-Lite needs stays free for the fallback.
+    final askedUntil = fallback == null
+        ? total
+        : total - (_timeout ?? fallback.timeout);
+    Future<OnlineScan> askRetrying(OnlineModel model, Duration until) async {
+      for (var retries = 0;; retries++) {
+        try {
+          final left = until - clock.elapsed;
+          final wait = _timeout ?? model.timeout;
+          return await _ask(
+              model, asked, spec, photo, wait < left ? wait : left);
+        } on OnlineScanException catch (error) {
+          final delay =
+              retries < retryDelays.length ? retryDelays[retries] : null;
+          if (!error.kind.mayPass ||
+              delay == null ||
+              until - clock.elapsed - delay < onlineMinAttempt ||
+              (cancelled?.call() ?? false)) {
+            rethrow;
+          }
+          debugPrint('${model.id} overloaded (${error.kind.name}), retrying');
+          await Future<void>.delayed(delay);
+          if (cancelled?.call() ?? false) rethrow;
+        }
+      }
+    }
+
+    try {
+      return await askRetrying(asked, askedUntil);
+    } on OnlineScanException catch (error) {
+      if (fallback == null ||
+          !error.kind.mayPass ||
+          (cancelled?.call() ?? false)) {
+        rethrow;
+      }
+      debugPrint('${asked.id} overloaded, asking ${fallback.id}');
+      return askRetrying(fallback, total);
+    }
+  }
+
+  /// One request to [model]; [asked] is the model the user picked.
+  Future<OnlineScan> _ask(OnlineModel model, OnlineModel asked, OnlineSpec spec,
+      Uint8List photo, Duration wait) async {
     final body = utf8.encode(jsonEncode({
       'model': model.id,
       'input': [
@@ -379,7 +486,7 @@ class OnlineRecognizer extends ChangeNotifier {
     try {
       response = await _post(_endpoint,
               {'Content-Type': 'application/json', 'x-goog-api-key': apiKey}, body)
-          .timeout(timeout);
+          .timeout(wait);
     } on TimeoutException {
       throw const OnlineScanException(OnlineFailure.timeout);
     } on IOException catch (error) {
@@ -388,12 +495,16 @@ class OnlineRecognizer extends ChangeNotifier {
     if (response.status == 429) {
       throw OnlineScanException(OnlineFailure.quota, _short(response.body));
     }
+    if (response.status == 503) {
+      throw OnlineScanException(OnlineFailure.busy, _short(response.body));
+    }
     if (response.status != 200) {
       throw OnlineScanException(
           OnlineFailure.failed, 'HTTP ${response.status}: ${_short(response.body)}');
     }
     try {
-      return OnlineScan.fromResponse(response.body, spec);
+      return OnlineScan.fromResponse(response.body, spec,
+          model: model, asked: asked);
     } catch (error) {
       throw OnlineScanException(OnlineFailure.failed, '$error');
     }

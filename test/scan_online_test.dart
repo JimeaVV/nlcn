@@ -68,9 +68,12 @@ String _answer(List<Map<String, Object>> foods) => jsonEncode({
 
 /// Online recognition that answers [reply] (or never), counting requests.
 class _Online {
-  _Online(this.reply);
+  _Online(this.reply, {this.replyTo});
 
   final Future<({int status, String body})> Function() reply;
+
+  /// Answers by model, when set.
+  final ({int status, String body}) Function(String model)? replyTo;
   var requests = 0;
 
   late final recognizer = OnlineRecognizer(
@@ -82,21 +85,23 @@ class _Online {
         if (line.trim().isNotEmpty) line.trim(),
     ]),
     readPhoto: (_) async => Uint8List(4),
-    post: (_, __, ___) {
+    post: (_, __, sent) {
       requests++;
-      return reply();
+      final model = jsonDecode(utf8.decode(sent))['model'] as String;
+      return replyTo == null ? reply() : Future.value(replyTo!(model));
     },
   );
 }
 
 Future<void> _open(WidgetTester tester, _Online online, _Database database,
-    {bool agreed = true}) async {
+    {bool agreed = true, OnlineModel? model}) async {
   tester.view.physicalSize = const Size(420, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   SharedPreferences.setMockInitialValues({});
   await online.recognizer.setEnabled(true, consent: agreed);
+  if (model != null) await online.recognizer.setModel(model);
   await tester.pumpWidget(localizedApp(
     home: ScanResultScreen(
       imagePath: 'plate.jpg',
@@ -127,7 +132,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(online.requests, 1);
-    expect(find.text('Gemini thấy 2 món'), findsOneWidget);
+    expect(find.text('Lite 3.5 thấy 2 món'), findsOneWidget);
+    expect(find.textContaining('Gemini Lite 3.5 (dev test) nhận ra'),
+        findsOneWidget);
     expect(find.byKey(const ValueKey('scan-online-others')), findsOneWidget);
     expect(find.textContaining('mashed potatoes'), findsOneWidget);
     // Only the detector's rice box is drawn: Gemini saw no shrimp.
@@ -142,6 +149,64 @@ void main() {
     // The usual portion, not Gemini's 300 g, at the fixture's 130 kcal.
     expect(database.added.first.grams, 150);
     expect(database.added.first.calories, closeTo(195, 1e-9));
+  });
+
+  final twoFoods = (
+    status: 200,
+    body: _answer([
+      {'class': 'com', 'name': 'rice', 'grams': 300},
+      {'class': 'tom', 'name': 'shrimp', 'grams': 80},
+    ]),
+  );
+  const busy = (status: 503, body: '{"error":{"message":"high demand"}}');
+
+  testWidgets('a plate Flash named says it was Flash, which is not measured',
+      (tester) async {
+    final online = _Online(() async => twoFoods);
+    await _open(tester, online, _Database(), model: OnlineModel.flash);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Flash 3.8 thấy 2 món'), findsOneWidget);
+    expect(find.textContaining('Flash 3.8 (dev test, chưa đo)'), findsOneWidget);
+  });
+
+  testWidgets('Flash overloaded: the plate is named as Lite\'s, not Flash\'s',
+      (tester) async {
+    final online = _Online(() async => twoFoods,
+        replyTo: (model) => model == OnlineModel.flash.id ? busy : twoFoods);
+    await _open(tester, online, _Database(), model: OnlineModel.flash);
+    await tester.pumpAndSettle();
+
+    expect(online.requests, 4);
+    expect(find.text('Lite 3.5 thấy 2 món'), findsOneWidget);
+    expect(find.text('Flash 3.8 thấy 2 món'), findsNothing);
+    expect(find.textContaining('Flash 3.8 không trả lời được'), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('overloaded everywhere: the detector plate, and the user is told',
+      (tester) async {
+    final online = _Online(() async => busy);
+    await _open(tester, online, _Database(), model: OnlineModel.flash);
+    await tester.pumpAndSettle();
+
+    expect(online.requests, 6);
+    expect(find.text('Đĩa có 2 món'), findsOneWidget);
+    expect(find.textContaining('Gemini đang quá tải'), findsOneWidget);
+  });
+
+  testWidgets('stopping the wait also stops the retries', (tester) async {
+    final online = _Online(() async => busy);
+    await _open(tester, online, _Database(), model: OnlineModel.flash);
+    await tester.pump();
+    await tester.pump();
+    expect(online.requests, 1);
+
+    await tester.tap(find.byKey(const ValueKey('scan-use-offline')));
+    await tester.pumpAndSettle();
+    expect(find.text('Đĩa có 2 món'), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+    expect(online.requests, 1);
   });
 
   testWidgets('with no answer the detector plate is used and the user is told',
