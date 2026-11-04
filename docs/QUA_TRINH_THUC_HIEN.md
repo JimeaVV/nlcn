@@ -3309,6 +3309,8 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
     `check_vn_food.py` OK.
   - Ảnh `scan_online` và `settings_online` ở màn nhỏ 360 px, chữ lớn: không
     tràn.
+  - Đã cài lên điện thoại bản dev test build 160. Chưa quét thử bằng key thật
+    trên điện thoại.
 
 ---
 
