@@ -210,6 +210,30 @@ lần trên ảnh giả: lần đầu bị cắt sau 1 epoch, lần sau train ti
 Bản xuất LiteRT chỉ chạy trên Linux và macOS, nên trên Windows bước kiểm tra
 dùng bản ONNX.
 
+## Model phân loại thịt (contract 1.8)
+
+Notebook `train_meat_classifier.ipynb` (sinh từ `train_meat_classifier.py`)
+train một MobileNetV3 nhỏ nhìn lại từng khung thịt detector tìm ra và nói đó
+là thịt gì (7 loại thịt của detector) hay không phải thịt (`khac`). Dữ liệu
+là chính các khung detector train: VietFood67, FoodInsSeg, MyFood, cắt ra từ
+ảnh đã thu về cạnh dài 512 px như app.
+
+Trên Kaggle: *Add Input* `thomasnguyen6868/vietfood68`, GPU, Internet bật.
+Chạy `QUICK_TEST = True` trước, rồi `False` và *Save & Run All*. Lấy 3 file
+trong *Output*: `meat_classifier.tflite`, `meat_classes.txt`,
+`MEAT_CARD.md`.
+
+Trước khi đưa vào app, chỉnh ngưỡng trên khung của detector thật:
+```bash
+python tool/train/eval_meat_classifier.py <ảnh test> --tune <ảnh val> --models <thư mục có cả 6 file>
+```
+Script chạy detector như app, cắt khung như app, in số món tìm ra / báo sai
+trước và sau, rồi chọn ngưỡng trên val. Chép ngưỡng tốt nhất vào
+`MEAT_CARD.md`.
+
+Thử trên máy: `python tool/train/test/smoke_meat_classifier.py` (tensorflow
+2.18, pillow; 1–3 phút).
+
 ## Ảnh tự chụp
 
 Tạo một dataset Kaggle riêng gồm `labels.csv` (định dạng ở contract mục 5)

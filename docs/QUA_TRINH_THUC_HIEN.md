@@ -3373,6 +3373,172 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
 - **Lưu ý khi cài:** các nhắc đã xếp lịch từ trước vẫn giữ ngôn ngữ cũ. Phải đổi
   ngôn ngữ rồi đổi lại một lần thì app mới xếp lại.
 
+### 2026-11-02 · Notebook train model phân loại thịt, contract 1.8
+
+- **Vì sao:** trên 459 ảnh cơm phần FoodInsSeg (phần test), detector
+  `d3370a3` tìm ra 56,4% số món và báo sai 185 lần. Ở mức từng khung, nếu
+  mọi khung thịt bị gọi nhầm tên được đổi đúng thì tìm ra 67,0%, sai 95;
+  nếu giữ thêm cả các khung thịt điểm từ 0,2 (hiện bị bỏ) khi đoán đúng loại
+  thịt thì lên 74,3%. Đây là giới hạn trên, tính bằng nhãn thật.
+- **Đã làm:**
+  - `tool/train/train_meat_classifier.py` (sinh ra `.ipynb`): MobileNetV3Large
+    224×224, 8 lớp gồm 7 loại thịt của detector và `khac`. Crop lấy từ chính
+    các khung detector train trên (VietFood67, FoodInsSeg, MyFood), cắt từ
+    ảnh đã thu cạnh dài về 512 px như ảnh vào của detector, nới 10% mỗi bên.
+    Giữ cách chia train/val/test của từng bộ. Xuất TFLite float16.
+  - `tool/train/eval_meat_classifier.py`: chạy `detector.tflite` như app
+    (letterbox, ngưỡng từng lớp, NMS), cắt khung như app, cho classifier
+    đoán, rồi đếm món tìm ra / báo sai theo ảnh. Có lưới ngưỡng chọn trên
+    val và in sẵn các dòng cho `MEAT_CARD.md`.
+  - Contract 1.8, mục 9: lớp, cách cắt, định dạng, các dòng của card, cách
+    app sẽ dùng. Phần app **chưa làm**, chờ model train trên Kaggle.
+  - `tool/train/test/smoke_meat_classifier.py`: chạy notebook trên dữ liệu
+    giả, kiểm tra file xuất ra, và kiểm tra cách cắt của script đánh giá
+    trùng `tf.image.crop_and_resize` mà notebook dùng khi train.
+- **Thử trên máy (chỉ FoodInsSeg, không có VietFood67 và MyFood):** 3.479
+  crop train, 6 epoch fine-tune trên CPU trong 35 phút. Trên crop test, đoán
+  đúng 56% (gà 72%, tôm 80%, bò 51%, cá 45%, heo 23%). File 6,0 MB, 6,5 ms
+  mỗi khung trên CPU máy tính. Đo trên khung của detector, 459 ảnh test:
+
+  | Cách dùng | Tìm ra | Báo sai |
+  |---|---|---|
+  | Chỉ detector (bản float16 app đang dùng) | 437/778 = 56,2% | 183 |
+  | Đổi tên khi classifier chắc từ 0,7 | 56,7% | 179 |
+  | Hai model bỏ phiếu (điểm detector^0,5 × classifier) | 56,2% | 179 |
+  | Bỏ phiếu, giữ thêm khung thịt từ 0,15 khi classifier chắc từ 0,7 (ngưỡng chọn trên 470 ảnh val) | 459/778 = 59,0% | 190 |
+
+  - Trên val, cách cuối cùng tìm ra 63,1% (detector một mình 59,8%) với số
+    lần sai không tăng (168 so với 170). Trên test được +2,8 điểm nhưng sai
+    thêm 7 lần.
+  - Chỉ đổi tên thì gần như không được gì: model này còn yếu (heo chỉ đúng
+    23%), nên khi nó chắc, detector thường cũng đã đúng.
+  - Đây là ước lượng từ một model nhỏ train tại chỗ, thấp hơn mục tiêu
+    +3–6 điểm. Bản train trên Kaggle có thêm VietFood67 và MyFood, gồm cả
+    `thit_kho` và `thit_nuong`; phải đo lại bằng `eval_meat_classifier.py`
+    trước khi đưa vào app.
+- **Rà soát contract** (agent `model-contract-reviewer`), đã sửa:
+  - Các món không phải thịt của FoodInsSeg từng bị gộp chung thành một
+    khung `khac` (cơm sát rau thành một khung lớn). Nay gộp theo từng loại
+    món như detector, và không gộp trứng.
+  - Ảnh detector bỏ ra (có bánh mì, mì, xúc xích…) nay chỉ cho crop thịt.
+    Bỏ xôi khỏi `khac` (xôi mặn có thịt).
+  - Script đánh giá áp từng dòng của card độc lập, đúng như contract.
+  - Model thử ở trên train **trước** khi sửa hai điểm đầu, nên số `khac`
+    của nó hơi khác bản notebook hiện tại.
+- **Đã kiểm tra:** smoke test đạt sau khi sửa; script đánh giá cho số "chỉ
+  detector" khớp `DETECTOR_CARD.md` (56,2%, sai 183); `check_vn_food.py`
+  đạt. Không đổi code app nên không chạy `flutter test`.
+
+### 2026-11-02 · Chạy train model phân loại thịt trên Kaggle
+
+- **Vì sao:** người dùng nhờ Claude tự đặt và chạy lần train này qua Chrome
+  (tài khoản Kaggle đã đăng nhập sẵn), trong khi phiên khác chạy detector.
+- **Đã làm:** import notebook với `QUICK_TEST = False` (bản sinh từ commit
+  `9dbf828`), thêm dataset `thomasnguyen6868/vietfood68`, Internet bật
+  (FoodInsSeg tải từ Google Drive, MyFood từ Zenodo), GPU T4 x2. Notebook
+  `jimeav/macrorunner-meat-classifier`, *Save & Run All* bản 1, bắt đầu
+  khoảng 11:50 ngày 02/11. Ước tính xong sau 1–1,5 giờ. Không chạy bản
+  quick test trước; smoke test trên máy đã chạy đủ các bước.
+- **Kết quả:** chạy hết 62 phút: đọc nhãn VietFood67 5 phút, thu nhỏ
+  95.246 ảnh 16 phút (Kaggle đọc từng file chậm), train 37 phút (2 epoch đầu
+  ra, 12 epoch fine-tune, khoảng 132 giây mỗi epoch).
+  - Crop: 160.458 train (88.326 sau cân bằng), 3.057 val, 1.969 test.
+    157.845 crop là từ VietFood67.
+  - Đúng trên crop test: **80,2%** (val 87,1%), so với 56% của model thử chỉ
+    có FoodInsSeg. Theo lớp: `thit_kho` 100%, `thit_nuong` 94,5%, `tom` 90%,
+    `khac` 84,1%, `ca` 81,1%, `bo` 78,9%, `ga` 76,1%, `heo` 63,9%. Heo vẫn
+    hay bị nhầm thành bò (44/263) và gà (22/263).
+  - Khi chắc từ 0,8 (83% số khung val), đúng 94,4%.
+  - File 6,0 MB float16, 7,2 ms mỗi khung trên CPU của Kaggle.
+  - Người dùng đồng ý tải 3 file trong Output về (6,0 MB).
+
+### 2026-11-02 · Đưa model phân loại thịt vào app
+
+- **Vì sao:** kiểm tra model Kaggle trên khung của detector thật trước, rồi
+  đưa vào app với ngưỡng chọn trên val.
+- **Đo trên khung detector** (`eval_meat_classifier.py`, ngưỡng chọn trên
+  470 ảnh val, báo trên 459 ảnh test):
+
+  | Cách dùng | Val: tìm ra / sai | Test: tìm ra / sai |
+  |---|---|---|
+  | Chỉ detector | 59,8% / 170 | 56,2% (437/778) / 183 |
+  | Hai model bỏ phiếu (điểm detector^0,5 × classifier) | 61,4% / 148 | 56,8% / 173 |
+  | Bỏ phiếu + giữ khung thịt từ 0,20 khi classifier chắc từ 0,60 + bỏ khung classifier chắc 0,80 là không phải thịt (**đang dùng**) | 65,1% / 170 | **59,5% (463/778) / 200** |
+
+  - Trên test: tìm ra thêm 26 món (+3,3 điểm) nhưng báo sai thêm 17 lần;
+    trên val thì không sai thêm lần nào. Gộp cả hai (929 ảnh), F1 theo ảnh
+    tăng từ 0,643 lên 0,671. Chỉ bỏ phiếu thì sai giảm ở cả hai tập nhưng
+    tìm ra gần như không tăng.
+  - Vì sao đổi tên được ít: trên 246 khung thịt detector báo ở ảnh test có
+    thịt thật bên dưới, classifier một mình gọi đúng 148, detector đúng
+    155, bỏ phiếu đúng 161. Classifier học từ đúng dữ liệu của detector (95%
+    crop là VietFood67, chỉ 5.879 crop FoodInsSeg), nên trên đĩa cơm
+    FoodInsSeg nó không biết hơn detector; hay gọi cá thành gà (20 lần) và
+    heo thành bò (17 lần). Phần lợi chính là giữ lại các khung thịt detector
+    chấm điểm hơi thấp.
+- **Đã làm trong app:**
+  - `lib/models/plate_detection.dart`: `decodeDetections` có thể giữ khung
+    thịt từ `box_floor` (đánh dấu tạm) và điểm của 7 loại thịt ở mỗi khung;
+    NMS tách thành `keepBestBoxes` để dùng lại sau khi đổi tên.
+  - `lib/models/meat_classification.dart` (mới): đọc `meat_classes.txt` và
+    `MEAT_CARD.md`, cắt khung từ ảnh vào của detector đúng như
+    `tf.image.crop_and_resize`, và quy tắc của contract mục 9.3.
+  - `lib/services/meat_classifier.dart` (mới): chạy TFLite trên isolate,
+    từng khung một.
+  - `TfliteFoodDetector.detect` gọi classifier sau khi giải mã. Classifier
+    được tối đa 3 giây và phải xong trước giới hạn 8 giây của detector 1
+    giây; lỗi hoặc quá giờ thì giữ tên detector đặt, bỏ khung tạm, và không
+    gọi lại cho đến khi mở lại app. Log `Meat classifier timing` và dòng
+    tên trước → sau.
+  - `assets/models/`: `meat_classifier.tflite`, `meat_classes.txt`,
+    `MEAT_CARD.md` (ngưỡng ở trên).
+  - Contract mục 9.2, 9.3 cập nhật theo code; `CLAUDE.md`,
+    `assets/models/README.md`.
+- **Đã kiểm tra:**
+  - `test/meat_classification_test.dart` (12 test): đọc card, cắt khung
+    khớp số của TensorFlow ở cả hai thứ tự kênh, bỏ phiếu, giữ/bỏ khung
+    tạm, bỏ khung không phải thịt, đổi tên khi không bỏ phiếu, gộp khung
+    trùng sau khi đổi tên, giải mã có floor.
+  - `flutter analyze` sạch, `flutter test` đạt 262/262.
+  - Card trong `assets/models` cho đúng số ở bảng (59,5%, sai 200).
+  - Agent `model-contract-reviewer` rà app với contract và script đánh
+    giá: khớp. Đã sửa các chỗ lệch nhỏ trong câu chữ contract.
+- **Rủi ro:** app thu ảnh về 512 px bằng nội suy không làm mịn, còn lúc
+  train và đo dùng PIL có làm mịn. Với ảnh chụp 4000 px, số đo trên máy tính
+  có thể khác trên điện thoại, cho cả detector lẫn classifier.
+- **Đo trên điện thoại** (build 143, Xiaomi 8 nhân; người dùng quét 3 ảnh,
+  log qua adb): detector chuẩn bị ảnh 95–190 ms, chạy model 149–177 ms.
+  Ảnh có thịt (cơm, dưa leo cà chua, thịt nướng): classifier chạy 1 khung
+  trong **31 ms**, kể cả lần đầu mở model, và giữ tên `thit_nuong`. Hai ảnh
+  kia không có khung thịt nên classifier không chạy. Cả lần quét vẫn dưới
+  0,5 giây, rất xa giới hạn 8 giây. Mới đo một khung; đĩa nhiều miếng
+  thịt chưa đo.
+- **Build 143:** chép `android/key.properties` từ thư mục chính sang worktree
+  (không mở file, người dùng đồng ý), build arm64 release, chữ ký SHA-256
+  `e3b83ac4…` khớp, rồi xoá file đó khỏi worktree. APK 49 MB
+  (`MacroRunner-efficientnetb3-meat-arm64.apk`), đã cài lên điện thoại.
+
+### 2026-11-05 · Đưa classifier thịt và chế độ Gemini vào app
+
+- **Vì sao:** hai phần này nằm ở hai nhánh riêng, mỗi nhánh một bản build
+  thử, nên bản cài sau đè mất phần của bản trước: build 161 có Gemini nhưng
+  không có classifier thịt. Người dùng quyết định đưa cả hai vào app.
+- **Đã làm:** gộp `claude/gemini-compare-89d8c2` và
+  `claude/meat-crop-classifier-a296a9` vào `feature/contract-1.5`.
+  - Hợp đồng lên 1.9: mục 9 là classifier thịt (1.8), mục 10 là Gemini
+    (1.9). Nhánh Gemini đã chừa sẵn số 1.8 và mục 9 cho classifier, nên chỉ
+    cần ghép, không đổi quy định nào.
+  - Conflict chỉ có ở `docs/MODEL_CONTRACT.md` và nhật ký. Hai phần code
+    không sửa chung file nào.
+  - Detector v18 không gộp, vì không hơn v17 (55,8% so với 56,4%).
+  - Gemini vẫn chỉ chạy trong bản build có key. Bản không có key không có
+    chế độ này và không gọi mạng; key không nằm trong repo.
+- **Số đo của classifier khi báo cáo:** trên 459 ảnh test, số món tìm ra
+  tăng từ 56,2% lên 59,5%, nhưng báo sai cũng tăng từ 183 lên 200 lần. Đây
+  là số đo riêng từng phần, chưa đo lại sau khi gộp.
+- **Kiểm tra:** `flutter gen-l10n` không đổi file, `flutter analyze` không
+  báo lỗi, `check_vn_food.py` OK, `flutter test` qua hết 286 test.
+
 ---
 
 ## 3. Việc còn tồn đọng
