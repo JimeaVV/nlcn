@@ -22,6 +22,10 @@
          are inexact and may come a few minutes late. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Only for the optional online recognition of test builds that carry a
+         Gemini key (docs/CHE_DO_ONLINE.md); nothing else uses the network,
+         and builds without a key never connect. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="MacroRunner"

@@ -7,7 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
+import '../models/meat_classification.dart';
 import '../models/plate_detection.dart';
+import 'meat_classifier.dart';
 import 'tflite_food_recognizer.dart' show modelFolder;
 
 /// Where the optional plate detector ships (docs/MODEL_CONTRACT.md §7).
@@ -84,12 +86,19 @@ Future<DetectorInput> prepareDetectorInputInBackground(String imagePath,
     Isolate.run(() => prepareDetectorInput(File(imagePath).readAsBytesSync(),
         size: size, channelsFirst: channelsFirst));
 
+/// The most the meat classifier may take. It also stops a second before
+/// [detectorTimeout], so the detector's boxes are never lost to it.
+const meatClassifierBudget = Duration(seconds: 3);
+
 /// Runs the bundled detector; the interpreter opens on the first photo.
+/// With [meat], its meat boxes are looked at again (contract §9.3).
 class TfliteFoodDetector implements FoodDetector {
-  TfliteFoodDetector({required this.labels, required AssetBundle bundle})
+  TfliteFoodDetector(
+      {required this.labels, required AssetBundle bundle, this.meat})
       : _bundle = bundle;
 
   final DetectorLabels labels;
+  final MeatClassifier? meat;
   final AssetBundle _bundle;
   Future<_DetectorRunner>? _runner;
   Future<void> _previousRun = Future.value();
@@ -98,11 +107,16 @@ class TfliteFoodDetector implements FoodDetector {
   /// later photos skip the detector at once instead of waiting again.
   Object? _broken;
 
+  /// The same for the meat classifier; the detector goes on without it.
+  Object? _meatBroken;
+
   @override
   bool get isAvailable => true;
 
   @override
   Future<PlateDetection> detect(String imagePath) async {
+    // The scan's detectorTimeout counts from here, opening included.
+    final started = Stopwatch()..start();
     if (_broken case final error?) throw StateError('Detector broken: $error');
     final _DetectorRunner runner;
     try {
@@ -127,15 +141,82 @@ class TfliteFoodDetector implements FoodDetector {
       _broken = error;
       rethrow;
     }
-    final foods = decodeDetections(
-        raw, runner.outputShape, labels, prepared.letterbox);
+    final meat = _meatBroken == null ? this.meat : null;
+    final meats = meat?.labels.meats.toSet() ?? const <String>{};
+    var foods = decodeDetections(
+      raw,
+      runner.outputShape,
+      labels,
+      prepared.letterbox,
+      floors: {
+        if (meat?.labels.boxFloor case final floor?)
+          for (final code in meats) code: floor,
+      },
+      scoresOf: meats,
+    );
     debugPrint('Detector timing: photo ${photo.inMilliseconds} ms, model '
         '${(clock.elapsed - photo).inMilliseconds} ms, ${foods.length} foods');
+    if (meat != null) {
+      final left =
+          detectorTimeout - started.elapsed - const Duration(seconds: 1);
+      foods = await _refineMeat(
+        meat,
+        foods,
+        (
+          input: prepared.input,
+          letterbox: prepared.letterbox,
+          channelsFirst: channelsFirst,
+        ),
+        left < meatClassifierBudget ? left : meatClassifierBudget,
+      );
+    }
     return PlateDetection(
       foods: foods,
       width: prepared.letterbox.width,
       height: prepared.letterbox.height,
     );
+  }
+
+  /// [foods] after the meat classifier, or without its tentative boxes when
+  /// the classifier fails or runs out of time.
+  Future<List<DetectedFood>> _refineMeat(MeatClassifier meat,
+      List<DetectedFood> foods, CropSource source, Duration budget) async {
+    final meats = meat.labels.meats.toSet();
+    final looked = [
+      for (final (i, food) in foods.indexed)
+        if (meats.contains(food.code)) i,
+    ];
+    final probabilities = List<Map<String, double>?>.filled(foods.length, null);
+    if (looked.isNotEmpty && budget <= Duration.zero) {
+      debugPrint('Meat classifier skipped: no time left after the detector');
+    } else if (looked.isNotEmpty) {
+      final clock = Stopwatch()..start();
+      try {
+        final found = await meat
+            .classify(source, [for (final i in looked) foods[i].box])
+            .timeout(budget);
+        for (final (k, i) in looked.indexed) {
+          probabilities[i] = found[k];
+        }
+        debugPrint('Meat classifier timing: ${looked.length} boxes, '
+            '${clock.elapsedMilliseconds} ms '
+            '(${clock.elapsedMilliseconds ~/ looked.length} ms a box)');
+      } catch (error) {
+        _meatBroken = error;
+        debugPrint("Meat classifier failed, keeping the detector's names: "
+            '$error');
+      }
+    }
+    final refined = refineMeat(foods, probabilities, meat.labels,
+        iouLimit: labels.thresholdIou);
+    if (looked.isNotEmpty) {
+      String codes(Iterable<DetectedFood> list) =>
+          list.map((food) => food.code).join(', ');
+      debugPrint('Meat classifier: '
+          '${codes(foods.where((food) => !food.tentative))} -> '
+          '${codes(refined)}');
+    }
+    return refined;
   }
 }
 
@@ -216,7 +297,12 @@ Future<FoodDetector> loadFoodDetector({AssetBundle? bundle}) async {
       classesTxt: await assets.loadString('$modelFolder/detector_classes.txt'),
       card: listed.contains(card) ? await assets.loadString(card) : '',
     );
-    return TfliteFoodDetector(labels: labels, bundle: assets);
+    return TfliteFoodDetector(
+      labels: labels,
+      bundle: assets,
+      meat: await loadMeatClassifier(
+          bundle: assets, detectorClasses: labels.classes, listed: listed),
+    );
   } catch (error) {
     debugPrint('Plate detector not loaded: $error');
     return const NoFoodDetector();

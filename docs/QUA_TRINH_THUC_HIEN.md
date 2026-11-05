@@ -3065,6 +3065,253 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   - thêm ảnh cho các lớp yếu (gà, heo, bò, rau);
   - làm model phân loại thịt chạy trên từng khung.
 
+### 2026-11-02 · So detector với Gemini trên cùng 459 ảnh cơm phần
+
+- **Vì sao:** người dùng hỏi gửi ảnh lên Gemini (Google) có nhận món tốt
+  hơn model tự train không. Cần đo trên cùng bộ ảnh, chấm cùng cách, thay vì
+  đoán.
+- **Đã làm:**
+  - Viết `tool/eval/gemini_compare.py`:
+    - Gửi từng ảnh trong 459 ảnh FoodInsSeg test (cơm phần) lên Gemini API
+      (Interactions API, `store: false`).
+    - Bắt Gemini trả JSON, mỗi món chỉ được chọn một trong 21 lớp của
+      detector (mỗi lớp có mô tả ngắn tiếng Việt và tiếng Anh) hoặc
+      `other`, kèm số gam ước lượng.
+    - Chấm theo ảnh, giống hệt detector. Tìm được là các lớp có thật trên ảnh
+      mà Gemini có nêu. Báo sai là các lớp Gemini nêu mà ảnh không có.
+    - Mọi câu trả lời lưu trên ổ D (`D:\Temp\macrorunner_gemini_cache`), chạy
+      lại không tốn lần gọi nào. Script giãn nhịp gửi theo giới hạn và dừng
+      khi hết hạn mức ngày.
+    - Key đọc từ biến môi trường `GEMINI_API_KEY`, không in, không ghi ra
+      file.
+    - Cùng script chấm luôn detector `.pt` với ngưỡng trong
+      `DETECTOR_CARD.md`. Có thêm một dòng detector đã hạ mọi ngưỡng cho tới
+      khi số báo sai bằng Gemini, để so ở cùng mức báo sai.
+  - Câu lệnh hỏi Gemini viết một lần trước khi chạy, không sửa theo kết quả
+    test.
+  - Giá và tên model đọc trong tài liệu Google ngày 2026-11-02. Hai model
+    Flash mới nhất có gói miễn phí:
+    - `gemini-3.8-flash`: 0.75 / 3.75 USD cho 1 triệu token vào / ra.
+    - `gemini-3.5-flash-lite`: 0.30 / 2.50 USD cho 1 triệu token vào / ra.
+  - Gói miễn phí của tài khoản người dùng (xem trong AI Studio):
+    - `gemini-3.8-flash` chỉ 5 lần gọi một phút, 20 lần một ngày. Hôm đó
+      model này còn quá tải (lỗi 503, có ảnh mất 159 s), nên hết 20 lần mà
+      chỉ được 1 ảnh. Không đo được.
+    - `gemini-3.5-flash-lite`: 15 lần gọi một phút, 500 lần một ngày. Đủ cho
+      459 ảnh, chạy khoảng 35 phút.
+- **Kết quả** (459 ảnh, 778 món):
+
+  | | Tìm được | Báo sai (mỗi ảnh) | Gà | Gộp các loại heo | Thời gian mỗi ảnh |
+  |---|---|---|---|---|---|
+  | Detector `.pt`, ngưỡng card | 439/778 = 56.4% | 185 (0.40) | 62/144 | 56.4%, sai 185 | 0.13 s CPU máy tính, khoảng 0.2 s trên điện thoại |
+  | Detector, mọi ngưỡng × 0.45 (báo sai bằng Gemini) | 510/778 = 65.6% | 285 (0.62) | 81/144 | 65.6%, sai 284 | như trên |
+  | `gemini-3.5-flash-lite` | 595/778 = 76.5% | 282 (0.61) | 116/144 | 77.9%, sai 271 | 2.4 s (trung vị), 2.7 s (trung bình), cần mạng |
+
+  Theo lớp, tìm được / số ảnh có món (báo sai):
+
+  | Lớp | Detector | Detector × 0.45 | Gemini lite |
+  |---|---|---|---|
+  | com | 76/93 (15) | 80/93 (25) | 76/93 (6) |
+  | ga | 62/144 (43) | 81/144 (64) | 116/144 (28) |
+  | heo | 9/61 (30) | 13/61 (40) | 19/61 (18) |
+  | bo | 49/97 (26) | 63/97 (38) | 61/97 (20) |
+  | ca | 24/45 (12) | 27/45 (26) | 36/45 (20) |
+  | tom | 8/19 (2) | 9/19 (2) | 16/19 (2) |
+  | trung | 6/18 (5) | 7/18 (8) | 11/18 (8) |
+  | dau_hu | 1/5 (0) | 1/5 (1) | 3/5 (0) |
+  | rau | 101/148 (14) | 116/148 (26) | 144/148 (120) |
+  | dua_leo_ca_chua | 94/125 (25) | 102/125 (32) | 99/125 (3) |
+  | khoai_tay_chien | 9/23 (3) | 11/23 (5) | 14/23 (7) |
+  | thit_nuong (không có trong ảnh) | – (4) | – (6) | – (35) |
+  | lớp khác (không có trong ảnh) | – (6) | – (12) | – (15) |
+
+  - Chi phí: 459 lần gọi, 777 168 token vào và 58 384 token ra. Gói miễn
+    phí không mất tiền. Nếu trả tiền thì khoảng 0.38 USD, tức chưa tới 0.001
+    USD một ảnh.
+  - Trong 120 lần Gemini báo `rau` sai, phần lớn là rau thật mà nhãn
+    FoodInsSeg của bộ test không tính là `rau`, ít nhất: đậu que 25, măng
+    tây 16, rau mùi trang trí 11, cần tây 6, súp lơ trắng 6. Bỏ lớp `rau` ra thì
+    Gemini báo sai 162, detector 171.
+  - Trong 35 lần báo `thit_nuong` sai, 11 lần là heo nướng mà FoodInsSeg ghi
+    là `pork` (thành `heo`). Số còn lại là bò hoặc gà nướng bị gọi thành
+    sườn heo nướng.
+  - Gemini xếp vào `other` đúng những món ngoài 21 lớp: khoai tây nghiền
+    52, cà rốt (nhiều kiểu) khoảng 80, bắp 35, chanh 23.
+- **Kết luận:**
+  - Ở cùng mức báo sai, Gemini lite tìm được 76.5% món, detector 65.6%.
+    Gemini hơn khoảng 11 điểm, hơn rõ nhất ở gà (116 so với 81 trên 144
+    ảnh), cá và tôm.
+  - Detector vẫn có lợi thế:
+    - chạy offline;
+    - nhanh hơn khoảng 12 lần (0.2 s so với 2.4 s, chưa tính lúc mạng
+      chậm);
+    - không gửi ảnh đi đâu.
+  - Gói miễn phí giới hạn 500 ảnh một ngày cho cả project, mà gói này lại
+    dùng ảnh gửi lên để cải thiện sản phẩm của Google. Vì vậy Gemini chỉ hợp
+    làm chế độ online tùy chọn, không thay được detector.
+  - Bộ test là ảnh cơm phần FoodInsSeg. Detector đã học từ phần train của
+    chính bộ này, còn Gemini chưa từng thấy bộ này mà vẫn hơn.
+- **Đã kiểm tra:**
+  - Dòng detector của script ra đúng các mốc cũ: 56.4%, 185 báo sai, gà
+    62/144.
+  - Cả 459 câu trả lời của Gemini đều đọc được JSON.
+
+### 2026-11-02 · Thiết kế chế độ nhận diện online (Gemini, tùy chọn)
+
+- **Vì sao:** sau khi đo, Gemini 3.5 Flash-Lite tìm được nhiều món hơn
+  detector (76.5% so với 65.6% ở cùng mức báo sai). Người dùng muốn có chế
+  độ này trong app, nhưng app phải vẫn chạy offline và mọi số dinh dưỡng
+  phải có nguồn.
+- **Đã làm:** viết `docs/CHE_DO_ONLINE.md`, chưa sửa code app. Các điểm
+  chính:
+  - Offline vẫn là mặc định.
+  - Ảnh chỉ rời máy khi đủ ba điều kiện: công tắc đang bật, có key, người
+    dùng đã đồng ý.
+  - Lỗi mạng, quá 8 giây, hết lượt hoặc JSON hỏng thì dùng kết quả của
+    detector.
+  - Không có key trong APK. Người dùng tự nhập key của họ, key lưu trong
+    Android Keystore và không nằm trong file sao lưu.
+  - Gemini chỉ cho biết lớp và số gam. Kcal và macro vẫn lấy từ CSV qua
+    `detectorFoods`.
+  - Bản đầu chưa dùng số gam của Gemini, vì chưa so với số cân thật của
+    Nutrition5k.
+  - Ảnh gửi đi được thu về cạnh dài 1024 px và bỏ hết EXIF (có vị trí GPS).
+  - Bản release phải thêm quyền INTERNET; hiện nay app không có quyền này.
+  - Câu lệnh và mô tả lớp chuyển vào một file asset dùng chung cho app và
+    `gemini_compare.py`, để app hỏi đúng câu đã đo.
+  - Contract có thêm mục mới và tăng số phiên bản.
+- **Đã kiểm tra:** đọc lại luồng `ScanResultScreen._recognize()`,
+  `ScanPlate.detected`, `detectorFoods` và `AndroidManifest.xml` để thiết kế
+  khớp với code hiện có.
+
+### 2026-11-02 · Làm chế độ nhận diện online bằng Gemini (bản dev test)
+
+- **Vì sao:** người dùng muốn có chế độ online ngay trong app. Họ chọn dùng
+  key của nhóm, đưa vào lúc build, thay vì bắt người dùng tự nhập key, vì
+  người dùng thường không biết API key là gì. Chế độ này ghi rõ là "dev
+  test".
+- **Đã làm:**
+  - Key đưa vào lúc build bằng `--dart-define=GEMINI_API_KEY=...`, không
+    nằm trong repo.
+    - Build không có key (CI, release) thì không có chế độ này.
+    - Đã thêm hướng dẫn vào skill `build-apk`.
+  - `lib/services/online_recognizer.dart`:
+    - thu ảnh về cạnh dài 1024 px, bỏ EXIF;
+    - gọi `gemini-3.5-flash-lite` qua Interactions API với `store: false`,
+      chờ tối đa 8 giây;
+    - đọc JSON trả về, phân biệt mất mạng, quá giờ, hết lượt và lỗi khác;
+    - lưu công tắc và việc người dùng đã đồng ý.
+  - Câu lệnh và mô tả lớp chuyển vào `assets/models/online_classes.json`.
+    - `gemini_compare.py` đọc file này và ra đúng câu lệnh đã đo (mã
+      `4a0587f5` không đổi, các câu trả lời đã lưu vẫn dùng được).
+    - Lệnh `--print-request` của script xuất câu lệnh ra
+      `test/fixtures/gemini_request.json`; test so câu lệnh của app với file
+      đó.
+  - Màn kết quả quét:
+    - Gemini chạy cùng lúc với detector. Trong lúc chờ có nút "Dùng kết quả
+      trên máy".
+    - Đĩa dựng theo các lớp Gemini nêu (`ScanPlate.online`), qua
+      `detectorFoods`. Lượng ăn là khẩu phần thường, chưa dùng số gam của
+      Gemini. Kcal lấy từ CSV, `confidence` để trống.
+    - Món ngoài 21 lớp chỉ hiện tên trong một dòng, không có số.
+    - Không có câu trả lời thì dùng đĩa của detector và báo lý do bằng
+      snackbar.
+  - Cài đặt có thẻ "Gemini (dev test)", chỉ hiện ở bản có key. Lần đầu bật
+    sẽ có hộp thoại xin đồng ý gửi ảnh lên Google.
+  - Thêm quyền INTERNET vào `AndroidManifest.xml`. Đây là lần đầu bản release
+    xin quyền mạng.
+  - Contract lên 1.9 với mục 10 (số 1.8 và mục 9 để dành cho nhánh model
+    phân loại thịt). `docs/CHE_DO_ONLINE.md` cập nhật theo bản đã làm.
+- **Rủi ro:**
+  - Ai có file APK dev test cũng lấy được key ra.
+  - Key thuộc project miễn phí, chưa gắn thanh toán, nên tệ nhất là hết 500
+    lần gọi trong ngày. Bị lộ thì xoá key và tạo key mới.
+  - Chỉ gửi APK này cho người thử.
+- **Đã kiểm tra:**
+  - 9 test mới trong `test/online_recognizer_test.dart` và
+    `test/scan_online_test.dart`:
+    - câu lệnh trùng câu đã đo;
+    - không có key hoặc chưa đồng ý thì không gửi ảnh;
+    - ảnh gửi đi không còn EXIF;
+    - ra đúng đĩa, dinh dưỡng lấy từ CSV;
+    - hết lượt hoặc bỏ chờ thì dùng đĩa của detector.
+  - `flutter analyze` sạch, `flutter test` đạt 259/259, `check_vn_food.py`
+    OK.
+  - Ảnh `scan_online` và `settings_online` vẽ đủ bốn giao diện và màn nhỏ
+    360 px, không tràn.
+  - Agent `ui-reviewer` báo chữ dài và cách viết số. Đã sửa: rút gọn gợi ý,
+    viết "76,5%", dùng "trên máy" thay cho "offline".
+  - Agent `model-contract-reviewer` xác nhận code khớp contract. Đã sửa các
+    chỗ lệch trong tài liệu mà agent chỉ ra.
+  - Chưa thử với key thật trên điện thoại.
+
+### 2026-11-02 · Cho chọn model Gemini trong bản dev test
+
+- **Vì sao:** người dùng muốn thử `gemini-3.8-flash` trên điện thoại, vì
+  model này mạnh hơn Flash-Lite. Lần đo hôm nay không đo được model này:
+  gói miễn phí chỉ có 20 lần gọi một ngày, mà hôm đó model còn quá tải.
+- **Đã làm:**
+  - Thẻ "Gemini (dev test)" trong Cài đặt có thêm lựa chọn model:
+    "Lite 3.5" (mặc định) và "Flash 3.8".
+    - Bên dưới có một dòng nói rõ: Lite đã đo, nhận ra 76,5% món, khoảng
+      2,4 giây một ảnh, 500 ảnh một ngày. Flash chưa đo, chậm hơn, chỉ 20 ảnh
+      một ngày.
+    - Lựa chọn được lưu lại.
+  - Flash 3.8 chạy với `thinking_level: low` và được chờ tối đa 20 giây,
+    thay cho 8 giây của Lite.
+  - Hai model dùng chung câu lệnh và schema.
+  - Hết 20 lượt trong ngày thì app báo "Hết lượt Gemini hôm nay" và dùng
+    nhận diện trên máy.
+  - Contract mục 10 và `docs/CHE_DO_ONLINE.md` ghi thêm phần chọn model.
+- **Đã kiểm tra:**
+  - Test mới:
+    - mặc định là model đã đo;
+    - chọn Flash thì request gửi đúng tên model và `thinking_level`;
+    - lựa chọn được nhớ lại;
+    - thời gian chờ đổi theo model.
+  - `flutter analyze` sạch, `flutter test` đạt 260/260.
+  - Ảnh `settings_online` ở bốn giao diện và màn nhỏ 360 px không tràn.
+
+### 2026-11-04 · Flash 3.8 quá tải thì thử lại rồi tự chuyển sang Lite
+
+- **Vì sao:** người dùng chọn Flash 3.8 mà không gọi được.
+- **Nguyên nhân đo được (04/11, khoảng 15:40–16:00):**
+  - Gửi đúng request của app với một ảnh test: `gemini-3.8-flash` trả 503
+    `service_unavailable` "high demand" cả 12/12 lần, mỗi lần khoảng 0,9 giây,
+    trong 10 phút liền. Không có lần nào 429.
+  - Tham số của app không sai. Gửi `thinking_level: bogus` thì nhận 400 ngay,
+    còn `low` thì tới bước 503, nghĩa là request hợp lệ. Lỗi là do phía Google
+    quá tải.
+  - Cùng lúc đó `gemini-3.5-flash-lite` trả lời được, nhưng có một lần mất
+    8,6 giây, lâu hơn mức chờ 8 giây của app.
+  - Flash 3.8 chưa trả lời lần nào với `thinking_level: low`, nên chưa biết
+    nó mất bao lâu. Độ chính xác của Flash 3.8 vẫn chưa đo.
+- **Đã làm:**
+  - Gặp 503 hoặc quá thời gian chờ thì hỏi lại cùng model, tối đa 2 lần, cách
+    1 giây rồi 3 giây, nếu còn đủ ít nhất 4 giây.
+  - Đang dùng Flash mà vẫn lỗi thì tự chuyển sang Lite, cũng được hỏi lại như
+    vậy. Lựa chọn trong Cài đặt không đổi.
+  - Tổng thời gian chờ một ảnh: 20 giây với Lite, 30 giây với Flash. Flash dùng
+    tối đa 22 giây, còn ít nhất 8 giây dành cho Lite.
+  - HTTP 429, lỗi khác và mất mạng không thử lại, không đổi model.
+  - Bấm "Dùng kết quả trên máy" thì app ngừng thử lại, đỡ tốn lượt.
+  - Màn kết quả ghi model thật sự đã trả lời: "Flash 3.8 thấy 2 món" hoặc "Lite
+    3.5 thấy 2 món". Flash thì ghi thêm "chưa đo". Đã chuyển sang Lite thì ghi
+    rõ là Flash không trả lời được, không ghi nhãn Flash.
+  - Có thông báo riêng khi quá tải: "Gemini đang quá tải, đã dùng nhận diện
+    trên máy".
+  - Contract mục 10 và `docs/CHE_DO_ONLINE.md` mục 6 ghi lại quy tắc này.
+- **Đã kiểm tra:**
+  - Test mới: 503 rồi trả lời, 503 hết lượt thử rồi chuyển Lite, quá thời gian
+    chờ, 429 không thử lại, 400 và mất mạng không thử lại, hết thời gian thì
+    không thử nữa, bấm bỏ qua thì ngừng gửi, nhãn trên màn kết quả.
+  - `flutter analyze` sạch, `flutter test` đạt 273/273,
+    `check_vn_food.py` OK.
+  - Ảnh `scan_online` và `settings_online` ở màn nhỏ 360 px, chữ lớn: không
+    tràn.
+  - Đã cài lên điện thoại bản dev test build 160. Chưa quét thử bằng key thật
+    trên điện thoại.
+
 ### 2026-11-02 · Tổng hợp thay đổi từ NLCSN đến MacroRunner để báo cáo giảng viên
 
 - **Vì sao:** ngày 03/11 báo cáo tiến độ với giảng viên. Cần một tài liệu
@@ -3107,6 +3354,191 @@ ra giữ nguyên. File giảm từ 37.9 MB xuống 19.1 MB.
   in it`. Test bật cả hai loại nhắc bằng tiếng Việt, rồi đổi sang tiếng Anh
   và kiểm tra nội dung đã xếp lịch phải là tiếng Anh. `flutter analyze`
   không báo lỗi, `flutter test` qua hết 251 test.
+
+### 2026-11-04 · Gộp sửa thông báo vào nhánh Gemini để cài chung một bản
+
+- **Vì sao:** build 160 trên điện thoại có phần sửa Flash 3.8 nhưng chưa có
+  phần sửa thông báo lẫn ngôn ngữ (`f666e65`). Người dùng muốn gộp và cài lại.
+- **Đã làm:**
+  - Merge `origin/feature/contract-1.5` (tới `5bbc774`) vào nhánh
+    `claude/gemini-compare-89d8c2`. Chưa merge vào `main` hay
+    `feature/contract-1.5`, chưa push.
+  - Nhật ký bị conflict: giữ đủ các mục của cả hai nhánh.
+  - `lib/screens/settings_screen.dart` tự gộp được, còn cả `_setLanguage` và
+    thẻ Gemini.
+- **Đã kiểm tra:**
+  - `flutter gen-l10n` không đổi file nào. `flutter analyze` sạch, `flutter
+    test` đạt 274/274, `check_vn_food.py` OK.
+  - Build dev test 161 để cài lên điện thoại.
+- **Lưu ý khi cài:** các nhắc đã xếp lịch từ trước vẫn giữ ngôn ngữ cũ. Phải đổi
+  ngôn ngữ rồi đổi lại một lần thì app mới xếp lại.
+
+### 2026-11-02 · Notebook train model phân loại thịt, contract 1.8
+
+- **Vì sao:** trên 459 ảnh cơm phần FoodInsSeg (phần test), detector
+  `d3370a3` tìm ra 56,4% số món và báo sai 185 lần. Ở mức từng khung, nếu
+  mọi khung thịt bị gọi nhầm tên được đổi đúng thì tìm ra 67,0%, sai 95;
+  nếu giữ thêm cả các khung thịt điểm từ 0,2 (hiện bị bỏ) khi đoán đúng loại
+  thịt thì lên 74,3%. Đây là giới hạn trên, tính bằng nhãn thật.
+- **Đã làm:**
+  - `tool/train/train_meat_classifier.py` (sinh ra `.ipynb`): MobileNetV3Large
+    224×224, 8 lớp gồm 7 loại thịt của detector và `khac`. Crop lấy từ chính
+    các khung detector train trên (VietFood67, FoodInsSeg, MyFood), cắt từ
+    ảnh đã thu cạnh dài về 512 px như ảnh vào của detector, nới 10% mỗi bên.
+    Giữ cách chia train/val/test của từng bộ. Xuất TFLite float16.
+  - `tool/train/eval_meat_classifier.py`: chạy `detector.tflite` như app
+    (letterbox, ngưỡng từng lớp, NMS), cắt khung như app, cho classifier
+    đoán, rồi đếm món tìm ra / báo sai theo ảnh. Có lưới ngưỡng chọn trên
+    val và in sẵn các dòng cho `MEAT_CARD.md`.
+  - Contract 1.8, mục 9: lớp, cách cắt, định dạng, các dòng của card, cách
+    app sẽ dùng. Phần app **chưa làm**, chờ model train trên Kaggle.
+  - `tool/train/test/smoke_meat_classifier.py`: chạy notebook trên dữ liệu
+    giả, kiểm tra file xuất ra, và kiểm tra cách cắt của script đánh giá
+    trùng `tf.image.crop_and_resize` mà notebook dùng khi train.
+- **Thử trên máy (chỉ FoodInsSeg, không có VietFood67 và MyFood):** 3.479
+  crop train, 6 epoch fine-tune trên CPU trong 35 phút. Trên crop test, đoán
+  đúng 56% (gà 72%, tôm 80%, bò 51%, cá 45%, heo 23%). File 6,0 MB, 6,5 ms
+  mỗi khung trên CPU máy tính. Đo trên khung của detector, 459 ảnh test:
+
+  | Cách dùng | Tìm ra | Báo sai |
+  |---|---|---|
+  | Chỉ detector (bản float16 app đang dùng) | 437/778 = 56,2% | 183 |
+  | Đổi tên khi classifier chắc từ 0,7 | 56,7% | 179 |
+  | Hai model bỏ phiếu (điểm detector^0,5 × classifier) | 56,2% | 179 |
+  | Bỏ phiếu, giữ thêm khung thịt từ 0,15 khi classifier chắc từ 0,7 (ngưỡng chọn trên 470 ảnh val) | 459/778 = 59,0% | 190 |
+
+  - Trên val, cách cuối cùng tìm ra 63,1% (detector một mình 59,8%) với số
+    lần sai không tăng (168 so với 170). Trên test được +2,8 điểm nhưng sai
+    thêm 7 lần.
+  - Chỉ đổi tên thì gần như không được gì: model này còn yếu (heo chỉ đúng
+    23%), nên khi nó chắc, detector thường cũng đã đúng.
+  - Đây là ước lượng từ một model nhỏ train tại chỗ, thấp hơn mục tiêu
+    +3–6 điểm. Bản train trên Kaggle có thêm VietFood67 và MyFood, gồm cả
+    `thit_kho` và `thit_nuong`; phải đo lại bằng `eval_meat_classifier.py`
+    trước khi đưa vào app.
+- **Rà soát contract** (agent `model-contract-reviewer`), đã sửa:
+  - Các món không phải thịt của FoodInsSeg từng bị gộp chung thành một
+    khung `khac` (cơm sát rau thành một khung lớn). Nay gộp theo từng loại
+    món như detector, và không gộp trứng.
+  - Ảnh detector bỏ ra (có bánh mì, mì, xúc xích…) nay chỉ cho crop thịt.
+    Bỏ xôi khỏi `khac` (xôi mặn có thịt).
+  - Script đánh giá áp từng dòng của card độc lập, đúng như contract.
+  - Model thử ở trên train **trước** khi sửa hai điểm đầu, nên số `khac`
+    của nó hơi khác bản notebook hiện tại.
+- **Đã kiểm tra:** smoke test đạt sau khi sửa; script đánh giá cho số "chỉ
+  detector" khớp `DETECTOR_CARD.md` (56,2%, sai 183); `check_vn_food.py`
+  đạt. Không đổi code app nên không chạy `flutter test`.
+
+### 2026-11-02 · Chạy train model phân loại thịt trên Kaggle
+
+- **Vì sao:** người dùng nhờ Claude tự đặt và chạy lần train này qua Chrome
+  (tài khoản Kaggle đã đăng nhập sẵn), trong khi phiên khác chạy detector.
+- **Đã làm:** import notebook với `QUICK_TEST = False` (bản sinh từ commit
+  `9dbf828`), thêm dataset `thomasnguyen6868/vietfood68`, Internet bật
+  (FoodInsSeg tải từ Google Drive, MyFood từ Zenodo), GPU T4 x2. Notebook
+  `jimeav/macrorunner-meat-classifier`, *Save & Run All* bản 1, bắt đầu
+  khoảng 11:50 ngày 02/11. Ước tính xong sau 1–1,5 giờ. Không chạy bản
+  quick test trước; smoke test trên máy đã chạy đủ các bước.
+- **Kết quả:** chạy hết 62 phút: đọc nhãn VietFood67 5 phút, thu nhỏ
+  95.246 ảnh 16 phút (Kaggle đọc từng file chậm), train 37 phút (2 epoch đầu
+  ra, 12 epoch fine-tune, khoảng 132 giây mỗi epoch).
+  - Crop: 160.458 train (88.326 sau cân bằng), 3.057 val, 1.969 test.
+    157.845 crop là từ VietFood67.
+  - Đúng trên crop test: **80,2%** (val 87,1%), so với 56% của model thử chỉ
+    có FoodInsSeg. Theo lớp: `thit_kho` 100%, `thit_nuong` 94,5%, `tom` 90%,
+    `khac` 84,1%, `ca` 81,1%, `bo` 78,9%, `ga` 76,1%, `heo` 63,9%. Heo vẫn
+    hay bị nhầm thành bò (44/263) và gà (22/263).
+  - Khi chắc từ 0,8 (83% số khung val), đúng 94,4%.
+  - File 6,0 MB float16, 7,2 ms mỗi khung trên CPU của Kaggle.
+  - Người dùng đồng ý tải 3 file trong Output về (6,0 MB).
+
+### 2026-11-02 · Đưa model phân loại thịt vào app
+
+- **Vì sao:** kiểm tra model Kaggle trên khung của detector thật trước, rồi
+  đưa vào app với ngưỡng chọn trên val.
+- **Đo trên khung detector** (`eval_meat_classifier.py`, ngưỡng chọn trên
+  470 ảnh val, báo trên 459 ảnh test):
+
+  | Cách dùng | Val: tìm ra / sai | Test: tìm ra / sai |
+  |---|---|---|
+  | Chỉ detector | 59,8% / 170 | 56,2% (437/778) / 183 |
+  | Hai model bỏ phiếu (điểm detector^0,5 × classifier) | 61,4% / 148 | 56,8% / 173 |
+  | Bỏ phiếu + giữ khung thịt từ 0,20 khi classifier chắc từ 0,60 + bỏ khung classifier chắc 0,80 là không phải thịt (**đang dùng**) | 65,1% / 170 | **59,5% (463/778) / 200** |
+
+  - Trên test: tìm ra thêm 26 món (+3,3 điểm) nhưng báo sai thêm 17 lần;
+    trên val thì không sai thêm lần nào. Gộp cả hai (929 ảnh), F1 theo ảnh
+    tăng từ 0,643 lên 0,671. Chỉ bỏ phiếu thì sai giảm ở cả hai tập nhưng
+    tìm ra gần như không tăng.
+  - Vì sao đổi tên được ít: trên 246 khung thịt detector báo ở ảnh test có
+    thịt thật bên dưới, classifier một mình gọi đúng 148, detector đúng
+    155, bỏ phiếu đúng 161. Classifier học từ đúng dữ liệu của detector (95%
+    crop là VietFood67, chỉ 5.879 crop FoodInsSeg), nên trên đĩa cơm
+    FoodInsSeg nó không biết hơn detector; hay gọi cá thành gà (20 lần) và
+    heo thành bò (17 lần). Phần lợi chính là giữ lại các khung thịt detector
+    chấm điểm hơi thấp.
+- **Đã làm trong app:**
+  - `lib/models/plate_detection.dart`: `decodeDetections` có thể giữ khung
+    thịt từ `box_floor` (đánh dấu tạm) và điểm của 7 loại thịt ở mỗi khung;
+    NMS tách thành `keepBestBoxes` để dùng lại sau khi đổi tên.
+  - `lib/models/meat_classification.dart` (mới): đọc `meat_classes.txt` và
+    `MEAT_CARD.md`, cắt khung từ ảnh vào của detector đúng như
+    `tf.image.crop_and_resize`, và quy tắc của contract mục 9.3.
+  - `lib/services/meat_classifier.dart` (mới): chạy TFLite trên isolate,
+    từng khung một.
+  - `TfliteFoodDetector.detect` gọi classifier sau khi giải mã. Classifier
+    được tối đa 3 giây và phải xong trước giới hạn 8 giây của detector 1
+    giây; lỗi hoặc quá giờ thì giữ tên detector đặt, bỏ khung tạm, và không
+    gọi lại cho đến khi mở lại app. Log `Meat classifier timing` và dòng
+    tên trước → sau.
+  - `assets/models/`: `meat_classifier.tflite`, `meat_classes.txt`,
+    `MEAT_CARD.md` (ngưỡng ở trên).
+  - Contract mục 9.2, 9.3 cập nhật theo code; `CLAUDE.md`,
+    `assets/models/README.md`.
+- **Đã kiểm tra:**
+  - `test/meat_classification_test.dart` (12 test): đọc card, cắt khung
+    khớp số của TensorFlow ở cả hai thứ tự kênh, bỏ phiếu, giữ/bỏ khung
+    tạm, bỏ khung không phải thịt, đổi tên khi không bỏ phiếu, gộp khung
+    trùng sau khi đổi tên, giải mã có floor.
+  - `flutter analyze` sạch, `flutter test` đạt 262/262.
+  - Card trong `assets/models` cho đúng số ở bảng (59,5%, sai 200).
+  - Agent `model-contract-reviewer` rà app với contract và script đánh
+    giá: khớp. Đã sửa các chỗ lệch nhỏ trong câu chữ contract.
+- **Rủi ro:** app thu ảnh về 512 px bằng nội suy không làm mịn, còn lúc
+  train và đo dùng PIL có làm mịn. Với ảnh chụp 4000 px, số đo trên máy tính
+  có thể khác trên điện thoại, cho cả detector lẫn classifier.
+- **Đo trên điện thoại** (build 143, Xiaomi 8 nhân; người dùng quét 3 ảnh,
+  log qua adb): detector chuẩn bị ảnh 95–190 ms, chạy model 149–177 ms.
+  Ảnh có thịt (cơm, dưa leo cà chua, thịt nướng): classifier chạy 1 khung
+  trong **31 ms**, kể cả lần đầu mở model, và giữ tên `thit_nuong`. Hai ảnh
+  kia không có khung thịt nên classifier không chạy. Cả lần quét vẫn dưới
+  0,5 giây, rất xa giới hạn 8 giây. Mới đo một khung; đĩa nhiều miếng
+  thịt chưa đo.
+- **Build 143:** chép `android/key.properties` từ thư mục chính sang worktree
+  (không mở file, người dùng đồng ý), build arm64 release, chữ ký SHA-256
+  `e3b83ac4…` khớp, rồi xoá file đó khỏi worktree. APK 49 MB
+  (`MacroRunner-efficientnetb3-meat-arm64.apk`), đã cài lên điện thoại.
+
+### 2026-11-05 · Đưa classifier thịt và chế độ Gemini vào app
+
+- **Vì sao:** hai phần này nằm ở hai nhánh riêng, mỗi nhánh một bản build
+  thử, nên bản cài sau đè mất phần của bản trước: build 161 có Gemini nhưng
+  không có classifier thịt. Người dùng quyết định đưa cả hai vào app.
+- **Đã làm:** gộp `claude/gemini-compare-89d8c2` và
+  `claude/meat-crop-classifier-a296a9` vào `feature/contract-1.5`.
+  - Hợp đồng lên 1.9: mục 9 là classifier thịt (1.8), mục 10 là Gemini
+    (1.9). Nhánh Gemini đã chừa sẵn số 1.8 và mục 9 cho classifier, nên chỉ
+    cần ghép, không đổi quy định nào.
+  - Conflict chỉ có ở `docs/MODEL_CONTRACT.md` và nhật ký. Hai phần code
+    không sửa chung file nào.
+  - Detector v18 không gộp, vì không hơn v17 (55,8% so với 56,4%).
+  - Gemini vẫn chỉ chạy trong bản build có key. Bản không có key không có
+    chế độ này và không gọi mạng; key không nằm trong repo.
+- **Số đo của classifier khi báo cáo:** trên 459 ảnh test, số món tìm ra
+  tăng từ 56,2% lên 59,5%, nhưng báo sai cũng tăng từ 183 lên 200 lần. Đây
+  là số đo riêng từng phần, chưa đo lại sau khi gộp.
+- **Kiểm tra:** `flutter gen-l10n` không đổi file, `flutter analyze` không
+  báo lỗi, `check_vn_food.py` OK, `flutter test` qua hết 286 test.
+
 ---
 
 ## 3. Việc còn tồn đọng

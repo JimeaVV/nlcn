@@ -1707,4 +1707,113 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get scanAskingOnline => 'Asking Gemini (dev test)…';
+
+  @override
+  String get scanUseOffline => 'Use the on-device result';
+
+  @override
+  String scanOnlineFailed(String reason) {
+    String _temp0 = intl.Intl.selectLogic(
+      reason,
+      {
+        'offline': 'No network, so on-device recognition is used.',
+        'timeout': 'Gemini took too long, so on-device recognition is used.',
+        'busy': 'Gemini is overloaded, so on-device recognition is used.',
+        'quota':
+            'No Gemini requests left today, so on-device recognition is used.',
+        'other': 'Gemini failed, so on-device recognition is used.',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scanOnlinePlate(int count, String model) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$model: $count foods',
+      one: '$model: 1 food',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scanOnlineHint(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flash': 'Named by Gemini Flash 3.8 (dev test, not measured).',
+        'other': 'Named by Gemini Lite 3.5 (dev test).',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanOnlineFellBack =>
+      'Flash 3.8 could not answer, so Gemini Lite 3.5 (dev test) named these.';
+
+  @override
+  String scanOnlineOthers(String names) {
+    return 'Gemini also saw (no data in the app): $names';
+  }
+
+  @override
+  String get onlineTitle => 'Gemini (dev test)';
+
+  @override
+  String get onlineSwitch => 'Send scans to Gemini';
+
+  @override
+  String get onlineNote =>
+      'Without network, or if Gemini fails, the app uses on-device recognition.';
+
+  @override
+  String get onlineBody =>
+      'A test build with the team\'s API key. When on, each scan sends the food photo to Google\'s Gemini. Gemini only says which foods are on the plate; grams follow the usual portion, and kcal and macros still come from the app\'s sourced data. On the test photos Gemini found 76.5% of the foods, on-device recognition 56.4%.';
+
+  @override
+  String get onlineConsentTitle => 'Send photos to Google?';
+
+  @override
+  String get onlineConsentBody =>
+      'Each scan sends the food photo to Google\'s Gemini to name the foods. The photo is shrunk and stripped of location and camera data; nothing else is sent. This dev test uses the free tier, so Google may use the photos to improve its products. You can turn it off any time in Settings.';
+
+  @override
+  String get onlineConsentAccept => 'Send photos';
+
+  @override
+  String get onlineModelLabel => 'Model';
+
+  @override
+  String onlineModelName(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flashLite': 'Lite 3.5',
+        'flash': 'Flash 3.8',
+        'other': 'Gemini',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String onlineModelNote(String model) {
+    String _temp0 = intl.Intl.selectLogic(
+      model,
+      {
+        'flashLite':
+            'Measured: found 76.5% of the foods, about 2.4 seconds a photo, 500 photos a day.',
+        'flash':
+            'Stronger but not measured yet, slower, only 20 photos a day. When overloaded, the app uses Lite 3.5.',
+        'other': '',
+      },
+    );
+    return '$_temp0';
+  }
 }

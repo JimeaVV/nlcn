@@ -2934,6 +2934,108 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{code, select, com{Cơm} bun{Bún} mi{Mì} banh_mi_o{Bánh mì} ga{Gà} thit_kho{Thịt kho} thit_nuong{Thịt nướng} heo{Heo} bo{Bò} ca{Cá} tom{Tôm} muc{Mực} trung{Trứng} dau_hu{Đậu hũ} cha{Chả} cha_gio{Chả giò} rau{Rau} dua_leo_ca_chua{Dưa leo, cà chua} do_chua{Đồ chua} khoai_tay_chien{Khoai tây chiên} canh{Canh} other{Món}}'**
   String detectorClassName(String code);
+
+  /// Shown while only the online answer is awaited
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang hỏi Gemini (dev test)…'**
+  String get scanAskingOnline;
+
+  /// Button: stop waiting for Gemini and use the on-device result
+  ///
+  /// In vi, this message translates to:
+  /// **'Dùng kết quả trên máy'**
+  String get scanUseOffline;
+
+  /// Snackbar when online recognition gave no answer; reason is offline, timeout, busy, quota or failed
+  ///
+  /// In vi, this message translates to:
+  /// **'{reason, select, offline{Không có mạng, đã dùng nhận diện trên máy.} timeout{Gemini trả lời quá lâu, đã dùng nhận diện trên máy.} busy{Gemini đang quá tải, đã dùng nhận diện trên máy.} quota{Hết lượt Gemini hôm nay, đã dùng nhận diện trên máy.} other{Gemini bị lỗi, đã dùng nhận diện trên máy.}}'**
+  String scanOnlineFailed(String reason);
+
+  /// Chip for the plate built from what Gemini named; count is at least 1, model is the name that answered, from onlineModelName
+  ///
+  /// In vi, this message translates to:
+  /// **'{model} thấy {count} món'**
+  String scanOnlinePlate(int count, String model);
+
+  /// Hint above the plate Gemini named; model is the OnlineModel name that answered
+  ///
+  /// In vi, this message translates to:
+  /// **'{model, select, flash{Gemini Flash 3.8 (dev test, chưa đo) nhận ra các món này.} other{Gemini Lite 3.5 (dev test) nhận ra các món này.}}'**
+  String scanOnlineHint(String model);
+
+  /// Hint above the plate when the chosen Flash model was overloaded and Flash-Lite answered instead
+  ///
+  /// In vi, this message translates to:
+  /// **'Flash 3.8 không trả lời được, nên Gemini Lite 3.5 (dev test) nhận ra các món này.'**
+  String get scanOnlineFellBack;
+
+  /// Foods Gemini saw outside the app data, by the English names it gave
+  ///
+  /// In vi, this message translates to:
+  /// **'Gemini còn thấy (app chưa có dữ liệu): {names}'**
+  String scanOnlineOthers(String names);
+
+  /// Settings card title; only in test builds with a Gemini key
+  ///
+  /// In vi, this message translates to:
+  /// **'Gemini (dev test)'**
+  String get onlineTitle;
+
+  /// Settings switch
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi ảnh cho Gemini khi quét'**
+  String get onlineSwitch;
+
+  /// Note under the switch
+  ///
+  /// In vi, this message translates to:
+  /// **'Mất mạng hay Gemini lỗi thì app dùng nhận diện trên máy.'**
+  String get onlineNote;
+
+  /// Info dialog of the online recognition card
+  ///
+  /// In vi, this message translates to:
+  /// **'Bản thử nghiệm, dùng khoá API của nhóm. Khi bật, mỗi lần quét app gửi ảnh món ăn tới Gemini của Google. Gemini chỉ cho biết trên đĩa có món gì; số gam lấy theo khẩu phần thường, kcal và macro vẫn lấy từ dữ liệu có nguồn của app. Trên bộ ảnh thử, Gemini nhận ra 76,5% món, nhận diện trên máy 56,4%.'**
+  String get onlineBody;
+
+  /// Consent dialog title
+  ///
+  /// In vi, this message translates to:
+  /// **'Gửi ảnh lên Google?'**
+  String get onlineConsentTitle;
+
+  /// Consent dialog before online recognition is first turned on
+  ///
+  /// In vi, this message translates to:
+  /// **'Mỗi lần quét, ảnh món ăn được gửi tới Gemini của Google để nhận món. Ảnh đã được thu nhỏ và bỏ vị trí, thông tin máy chụp; app không gửi gì khác. Bản dev test dùng gói miễn phí, nên Google có thể dùng ảnh để cải thiện sản phẩm của họ. Tắt lúc nào cũng được trong Cài đặt.'**
+  String get onlineConsentBody;
+
+  /// Consent dialog: agree
+  ///
+  /// In vi, this message translates to:
+  /// **'Đồng ý gửi'**
+  String get onlineConsentAccept;
+
+  /// Label above the Gemini model choice
+  ///
+  /// In vi, this message translates to:
+  /// **'Model'**
+  String get onlineModelLabel;
+
+  /// Gemini model name on its segment; model is the OnlineModel name
+  ///
+  /// In vi, this message translates to:
+  /// **'{model, select, flashLite{Lite 3.5} flash{Flash 3.8} other{Gemini}}'**
+  String onlineModelName(String model);
+
+  /// What the chosen Gemini model is like; model is the OnlineModel name
+  ///
+  /// In vi, this message translates to:
+  /// **'{model, select, flashLite{Đã đo: nhận ra 76,5% món, khoảng 2,4 giây một ảnh, 500 ảnh mỗi ngày.} flash{Mạnh hơn nhưng chưa đo, chậm hơn, chỉ 20 ảnh mỗi ngày. Khi quá tải, app tự dùng Lite 3.5.} other{}}'**
+  String onlineModelNote(String model);
 }
 
 class _AppLocalizationsDelegate

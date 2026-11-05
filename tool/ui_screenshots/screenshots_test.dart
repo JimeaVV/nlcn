@@ -6,6 +6,7 @@
 // Images land in tool/ui_screenshots/out/ (not committed). Not part of the
 // normal test run: `flutter test` only reads test/. A layout overflow fails
 // the screen it happens on and names the widget.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ import 'package:optifit/services/database_service.dart';
 import 'package:optifit/services/dataset_repository.dart';
 import 'package:optifit/services/food_detector.dart';
 import 'package:optifit/services/food_recognizer.dart';
+import 'package:optifit/services/online_recognizer.dart';
 import 'package:optifit/services/reminder_service.dart';
 import 'package:optifit/services/water_reminder_service.dart';
 import 'package:optifit/models/vn_food.dart';
@@ -240,11 +242,54 @@ class _Detector implements FoodDetector {
       ], width: 1200, height: 900);
 }
 
+/// Online recognition in a test build, turned on, where Gemini names rice,
+/// chicken and egg and two foods the app has no data for.
+OnlineRecognizer _online() {
+  final online = OnlineRecognizer(
+    apiKey: 'screenshot',
+    spec: OnlineSpec.parse(
+        File('assets/models/online_classes.json').readAsStringSync(), [
+      for (final line
+          in File('assets/models/detector_classes.txt').readAsLinesSync())
+        if (line.trim().isNotEmpty) line.trim(),
+    ]),
+    readPhoto: (_) async => Uint8List(4),
+    post: (_, __, ___) async => (
+      status: 200,
+      body: jsonEncode({
+        'steps': [
+          {
+            'type': 'model_output',
+            'content': [
+              {
+                'type': 'text',
+                'text': jsonEncode({
+                  'foods': [
+                    {'class': 'com', 'name': 'white rice', 'grams': 200},
+                    {'class': 'ga', 'name': 'sliced chicken breast', 'grams': 120},
+                    {'class': 'trung', 'name': 'fried egg', 'grams': 50},
+                    {'class': 'other', 'name': 'mashed potatoes', 'grams': 80},
+                    {'class': 'other', 'name': 'sliced carrots', 'grams': 30},
+                  ],
+                }),
+              },
+            ],
+          },
+        ],
+      }),
+    ),
+  );
+  // The fields are set at once; saving them fails quietly in a test.
+  online.setEnabled(true, consent: true);
+  return online;
+}
+
 /// The scan result of a plate the dish model cannot name.
-Widget _scan() {
+Widget _scan({OnlineRecognizer? online}) {
   String read(String name) =>
       File('assets/data/vn_food/$name').readAsStringSync();
   return ScanResultScreen(
+    online: online,
     imagePath: 'missing.jpg',
     data: parseVnFoodData(
       componentsCsv: read('components.csv'),
@@ -262,6 +307,7 @@ final _screens = <String, (double, Widget Function())>{
   'gauge': (1900, _gauges),
   'picker': (700, _picker),
   'scan': (1500, _scan),
+  'scan_online': (1500, () => _scan(online: _online())),
   // Callbacks as in HomeScreen, so the card's links are drawn enabled.
   'today': (
     1250,
@@ -280,6 +326,18 @@ final _screens = <String, (double, Widget Function())>{
           reminders: ReminderController(),
           waterReminders: WaterReminderController(),
           database: _Database(),
+        )
+  ),
+  // A test build with a Gemini key shows one more card.
+  'settings_online': (
+    2500,
+    () => SettingsScreen(
+          themeController: ThemeController(),
+          localeController: LocaleController(),
+          reminders: ReminderController(),
+          waterReminders: WaterReminderController(),
+          database: _Database(),
+          online: _online(),
         )
   ),
 };

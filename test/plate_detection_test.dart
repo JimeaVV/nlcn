@@ -246,9 +246,8 @@ void main() {
 
     test('a dish that holds every food found keeps its recipe', () {
       final comTam = data.dish('com_tam')!;
-      expect(dishShowsAll(comTam, plate(['com', 'trung', 'thit_nuong'])),
-          isTrue);
-      expect(dishShowsAll(comTam, plate(['com', 'ga'])), isFalse);
+      expect(dishShowsAll(comTam, ['com', 'trung', 'thit_nuong']), isTrue);
+      expect(dishShowsAll(comTam, ['com', 'ga']), isFalse);
     });
   });
 }

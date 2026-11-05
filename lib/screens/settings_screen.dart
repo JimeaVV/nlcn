@@ -6,6 +6,7 @@ import '../l10n/l10n.dart';
 import '../models/food_log_entry.dart';
 import '../services/backup_service.dart';
 import '../services/database_service.dart';
+import '../services/online_recognizer.dart';
 import '../services/photo_collector.dart';
 import '../engine/daily_habits.dart';
 import '../services/reminder_service.dart';
@@ -28,11 +29,17 @@ class SettingsScreen extends StatelessWidget {
     this.backup = const BackupService(),
     this.onDataRestored,
     this.collector,
+    this.online,
   });
 
   /// Kept scan photos; [PhotoCollector.instance] by default.
   final PhotoCollector? collector;
   PhotoCollector get _photos => collector ?? PhotoCollector.instance;
+
+  /// Online recognition; [OnlineRecognizer.instance] by default. Its card
+  /// shows only in test builds with a Gemini key.
+  final OnlineRecognizer? online;
+  OnlineRecognizer get _online => online ?? OnlineRecognizer.instance;
 
   final ThemeController themeController;
   final LocaleController localeController;
@@ -288,6 +295,7 @@ class SettingsScreen extends StatelessWidget {
         if (reminders != null) reminders!,
         if (waterReminders != null) waterReminders!,
         _photos,
+        _online,
       ]),
       builder: (context, _) {
         final l10n = context.l10n;
@@ -349,6 +357,10 @@ class SettingsScreen extends StatelessWidget {
               ],
               const SizedBox(height: 18),
               _collectCard(context, l10n),
+              if (_online.available) ...[
+                const SizedBox(height: 18),
+                _onlineCard(context, l10n),
+              ],
               const SizedBox(height: 18),
               CyberCard(
                 key: const ValueKey('backup-card'),
@@ -404,6 +416,84 @@ class SettingsScreen extends StatelessWidget {
 }
 
 extension on SettingsScreen {
+  /// Turning online recognition on asks first, once, whether photos may be
+  /// sent to Google.
+  Future<void> _toggleOnline(BuildContext context, bool value) async {
+    final online = _online;
+    if (!value || online.consented) return online.setEnabled(value);
+    final l10n = context.l10n;
+    final agreed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.onlineConsentTitle),
+        content: Text(l10n.onlineConsentBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            key: const ValueKey('online-consent-accept'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.onlineConsentAccept),
+          ),
+        ],
+      ),
+    );
+    if (agreed == true) await online.setEnabled(true, consent: true);
+  }
+
+  Widget _onlineCard(BuildContext context, AppLocalizations l10n) {
+    return CyberCard(
+      key: const ValueKey('online-card'),
+      title: l10n.onlineTitle,
+      trailing: InfoButton(
+          key: const ValueKey('online-info'),
+          title: l10n.onlineTitle,
+          paragraphs: [l10n.onlineBody]),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile(
+              key: const ValueKey('online-switch'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.onlineSwitch),
+              value: _online.enabled,
+              onChanged: (value) => _toggleOnline(context, value),
+            ),
+            Text(l10n.onlineNote, style: TextStyle(color: CyberColors.muted)),
+            const SizedBox(height: 14),
+            Text(l10n.onlineModelLabel,
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<OnlineModel>(
+                showSelectedIcon: false,
+                segments: [
+                  for (final model in OnlineModel.values)
+                    ButtonSegment(
+                      value: model,
+                      label: Text(l10n.onlineModelName(model.name),
+                          key: ValueKey('online-model-${model.name}')),
+                    ),
+                ],
+                selected: {_online.model},
+                onSelectionChanged: (value) => _online.setModel(value.single),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(l10n.onlineModelNote(_online.model.name),
+                key: const ValueKey('online-model-note'),
+                style: TextStyle(color: CyberColors.muted)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _collectCard(BuildContext context, AppLocalizations l10n) {
     final photos = _photos;
     return CyberCard(

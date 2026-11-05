@@ -5,7 +5,7 @@ Hai bên làm song song, chỉ dựa vào những gì ghi ở đây. Muốn đ�
 nào thì phải báo người kia, tăng `contract_version` và ghi vào
 `docs/QUA_TRINH_THUC_HIEN.md`.
 
-- `contract_version`: **1.7**
+- `contract_version`: **1.9**
   - 1.0: hai người chốt 40 món ở mục 2 và các thành phần ở mục 3;
   - 1.1: thêm cách ghi ngưỡng trong `MODEL_CARD.md` và những gì app kiểm
     tra khi nạp model (mục 6);
@@ -29,7 +29,14 @@ nào thì phải báo người kia, tăng `contract_version` và ghi vào
     (`threshold_box_<lớp>`, mục 7.2). Khi train, các miếng cùng một món nằm
     sát nhau của FoodInsSeg và MyFood được gộp thành một khung (mục 7.4).
     Danh sách lớp, đầu vào và đầu ra không đổi; card 1.6 vẫn dùng được.
-- Cập nhật: 2026-10-29
+  - 1.8: thêm model thứ ba, **phân loại thịt** (mục 9): nhìn lại từng khung
+    thịt detector tìm ra và nói đó là thịt gì. Không bắt buộc; model mục 6
+    và mục 7 không đổi.
+  - 1.9: thêm **nhận diện online bằng Gemini** cho bản dev test (mục 10).
+    Gemini dùng đúng 21 lớp của detector. Câu lệnh và mô tả lớp nằm trong
+    `assets/models/online_classes.json`. Model, lớp và thành phần khác
+    không đổi.
+- Cập nhật: 2026-11-05
 
 ---
 
@@ -511,7 +518,189 @@ chỉ dùng model mục 6.
 ## 8. Ghi vào nhật ký ăn uống
 Mỗi thành phần người dùng xác nhận được ghi thành **một dòng `food_log`**:
 - `source = camera`;
-- `confidence` = xác suất model đưa ra cho thành phần đó;
+- `confidence` = xác suất model đưa ra cho thành phần đó (đĩa do Gemini nêu
+  thì để trống, mục 10);
 - `name` là tên thành phần, kèm tên món, ví dụ "Sườn nướng (cơm tấm)".
 
 Bảng `food_log` đã có sẵn từ commit `d4806b1`, không cần đổi database.
+
+## 9. Model phân loại thịt (từ v1.8)
+**Vì sao cần:** detector (mục 7) tìm ra miếng thịt khá tốt nhưng hay gọi sai
+tên. Trên 459 ảnh cơm phần FoodInsSeg (phần test), 87 lần bỏ sót một món là
+do một loại thịt bị gọi thành loại thịt khác trong cùng ảnh, ví dụ ức gà bị
+gọi là heo, cá hoặc bò. Model này chỉ nhìn phần ảnh trong khung, nên dành
+hết sức cho miếng thịt.
+
+Đặt trong `assets/models/`, **không bắt buộc**: thiếu hoặc hỏng thì app
+giữ tên detector đặt.
+```
+meat_classifier.tflite   model
+meat_classes.txt         mỗi dòng một mã lớp, đúng thứ tự đầu ra
+MEAT_CARD.md             ngày train, dữ liệu, kết quả, ngưỡng
+```
+
+### 9.1. Danh sách lớp
+| # | Mã lớp | Là |
+|---|---|---|
+| 0 | `ga` | lớp `ga` của detector |
+| 1 | `thit_kho` | lớp `thit_kho` |
+| 2 | `thit_nuong` | lớp `thit_nuong` |
+| 3 | `heo` | lớp `heo` |
+| 4 | `bo` | lớp `bo` |
+| 5 | `ca` | lớp `ca` |
+| 6 | `tom` | lớp `tom` |
+| 7 | `khac` | không phải thịt: cơm, rau, trứng, đậu hũ, mực, chỗ trống trên đĩa |
+
+- Bảy lớp thịt dùng đúng mã lớp detector (mục 7.1), nên đổi tên khung không
+  cần bảng chuyển nào. `khac` không có dinh dưỡng và không bao giờ thành
+  một dòng trên đĩa.
+- Mực (`muc`) không nằm trong nhóm thịt: detector ít nhầm mực với thịt.
+
+### 9.2. Định dạng model
+| Mục | Quy định |
+|---|---|
+| Đầu vào | `float32 [1, N, N, 3]`, RGB **0–255** như model mục 6 (chuẩn hoá nằm trong model). N do model quyết định (224 cho MobileNetV3), app đọc từ file |
+| Cắt ảnh | Từ **ảnh vào của detector** (ảnh đã thu cạnh dài về S, mục 7.2), chỉ phần ảnh, không lấy viền xám. Khung được nới `crop_pad` (mặc định 0.10) chiều rộng và chiều cao **mỗi bên**, cắt bớt phần ra ngoài ảnh, rồi lấy mẫu N×N bằng nội suy song tuyến như `tf.image.crop_and_resize`: điểm thứ i nằm ở `y0·(H−1) + i·(y1−y0)·(H−1)/(N−1)` (ảnh cao H pixel), tương tự cho x. Không giữ tỉ lệ khung |
+| Đầu ra | Một tensor `float32 [1, số_lớp]`, softmax |
+| Lượng tử hoá | Trọng số FP16 (converter của TensorFlow); đầu vào, đầu ra float32. Không dùng INT8 `w8a32` (lỗi ở tflite_flutter 0.12.1, mục 7.2) |
+| Kích thước | MobileNetV3Large: 6 MB (FP16) |
+| Tốc độ | Mục tiêu ≤ 30 ms mỗi khung trên điện thoại tầm trung. Đo được 31 ms cho một khung trên Xiaomi 8 nhân (kể cả lần đầu mở model, build 143); 7,2 ms trên CPU của Kaggle |
+
+**`MEAT_CARD.md`**, mỗi dòng `khoá: giá trị` (đang dùng, nhật ký
+2026-11-02):
+```
+contract_version: 1.8
+crop_pad: 0.10
+vote_power: 0.5
+box_floor: 0.20
+threshold_rescue: 0.60
+threshold_drop: 0.80
+```
+Có thêm `threshold_rename`, dùng khi không có `vote_power`.
+`box_floor` chỉ có tác dụng khi có `threshold_rescue`, và không thấp hơn
+0.10. Thiếu `crop_pad` thì app dùng 0.10; thiếu dòng ngưỡng nào thì việc đó
+không làm (mục 9.3). Ngưỡng chọn bằng
+`tool/train/eval_meat_classifier.py` trên phần val của FoodInsSeg, chạy
+trên khung của chính detector app đang dùng; detector đổi thì chọn lại.
+
+**App kiểm tra:** khi mở app, mọi mã trong `meat_classes.txt` trừ `khac`
+phải là lớp của detector, và phải có `khac`; ở khung đầu tiên (lúc mở
+model), đầu vào phải là `float32 [1, N, N, 3]` và đầu ra có đúng số dòng của
+`meat_classes.txt`. Sai thì app bỏ qua model này và giữ tên detector đặt.
+
+### 9.3. App dùng kết quả thế nào
+Chạy sau detector, trên mỗi khung có lớp là một trong 7 lớp thịt:
+- Khung từ ngưỡng của lớp đó trở lên:
+  - có `vote_power` (gọi là w): khung lấy loại thịt có
+    `điểm detector của loại đó ^ w × xác suất của classifier` cao nhất, tức
+    là hai model cùng bỏ phiếu;
+  - không có `vote_power` nhưng có `threshold_rename`: khung lấy loại thịt
+    classifier chọn, nếu khác tên cũ và xác suất từ ngưỡng đó trở lên;
+  - có `threshold_drop`: classifier nói `khac` với xác suất từ ngưỡng đó thì
+    bỏ khung.
+- Có `box_floor`: khung thịt có điểm từ `box_floor` đến dưới ngưỡng của
+  lớp (bình thường bị bỏ) vẫn được giữ, khi classifier chắc một loại thịt
+  từ `threshold_rescue` (và trùng kết quả bỏ phiếu nếu có `vote_power`).
+- Mỗi dòng của card có tác dụng riêng, không phụ thuộc dòng khác (trừ cặp
+  `box_floor` và `threshold_rescue`).
+- Sau khi đổi tên, app chạy lại NMS theo lớp như mục 7.2.
+- Để làm được hai việc trên, bước giải mã của detector
+  (`decodeDetections`) giữ thêm, cho mỗi khung thịt, điểm của cả 7 loại
+  thịt, và giữ cả khung thịt từ `box_floor` dù dưới ngưỡng lớp (đánh dấu
+  "tạm"). Khung tạm không bao giờ hiện ra nếu classifier không xác nhận.
+- Cả lần quét vẫn nằm trong giới hạn 8 giây của detector: classifier được
+  tối đa 3 giây và phải xong trước giới hạn đó 1 giây. Classifier lỗi hoặc
+  quá giờ thì app giữ tên detector đặt, bỏ các khung dưới ngưỡng, và không
+  gọi classifier nữa cho đến khi mở lại app.
+- Code: `lib/models/meat_classification.dart` (đọc card, cắt khung, quy tắc
+  trên), `lib/services/meat_classifier.dart` (chạy TFLite), gọi trong
+  `TfliteFoodDetector.detect` (`lib/services/food_detector.dart`). Log
+  `Meat classifier timing` ghi số khung và thời gian mỗi khung.
+
+### 9.4. Train
+- Notebook `tool/train/train_meat_classifier.ipynb`, sinh từ
+  `train_meat_classifier.py`. Người dùng tự chạy trên Kaggle hoặc Colab.
+- Dữ liệu: cùng các bộ ảnh detector train (mục 7.4), cắt như mục 9.2 từ ảnh
+  đã thu cạnh dài về 512 px. Số này (`PHOTO_SIDE`) phải bằng S của detector
+  app dùng; đổi detector khác cỡ thì train lại.
+  - Thịt: khung thịt của VietFood67 (cả trong ảnh có khung cả món, vì khung
+    thịt do người vẽ); khung FoodInsSeg, các miếng cùng một món sát nhau gộp
+    lại như detector (kể cả trong ảnh detector bỏ ra vì có món "không
+    chắc"); ức gà và bò bít tết của MyFood, mỗi loại một khung bao cả vùng
+    (detector tách từng vùng liền).
+  - `khac`: khung các món chắc chắn không phải thịt (cơm, rau, trứng, đậu
+    hũ, mực…, không có xôi và các khung cả món), lấy ngẫu nhiên từ mọi ảnh
+    của cùng phần chia, tối đa bằng nửa số khung thịt; 1/5 trong đó là chỗ
+    trống trên ảnh FoodInsSeg. Món FoodInsSeg gộp theo từng loại món, không
+    gộp trứng; ảnh detector bỏ ra không cho crop `khac`.
+- Giữ cách chia train/val/test của từng bộ, như detector, nên ảnh test
+  của cả hai model đều chưa từng được thấy khi train.
+- Khi train, khung được dịch tới 10% và co giãn tới 25% cho giống khung
+  detector đặt lệch.
+- Model: MobileNetV3Large, trọng số ImageNet, 2 epoch chỉ train đầu ra rồi
+  12 epoch toàn bộ.
+
+## 10. Nhận diện online bằng Gemini (tùy chọn, bản dev test, từ v1.9)
+Thiết kế và lý do nằm ở `docs/CHE_DO_ONLINE.md`. Số đo nằm trong
+`docs/QUA_TRINH_THUC_HIEN.md` (2026-11-02), trên 459 ảnh cơm phần:
+
+- `gemini-3.5-flash-lite` tìm được 76.5% món, báo sai 282 lần;
+- detector ở ngưỡng trong card tìm được 56.4%, báo sai 185 lần;
+- detector hạ ngưỡng cho số báo sai bằng Gemini thì tìm được 65.6%.
+
+- **Khi nào chạy:**
+  - Chỉ trong bản build có key, tức build bằng
+    `--dart-define=GEMINI_API_KEY=...`. Key không nằm trong repo.
+  - Người dùng phải bật công tắc trong Cài đặt, sau khi đã đồng ý gửi ảnh.
+  - Bản không có key (CI, release) không có chế độ này và không gọi mạng.
+- **Đầu vào:**
+  - Ảnh chụp, xoay đúng chiều, thu về cạnh dài tối đa 1024 px, lưu lại
+    thành JPEG không có EXIF.
+  - Câu lệnh dựng từ `assets/models/online_classes.json` cùng
+    `detector_classes.txt`: câu hướng dẫn, mỗi lớp một dòng
+    `- <lớp>: <mô tả tiếng Việt> / <mô tả tiếng Anh>`, rồi lớp `other`.
+  - App và `tool/eval/gemini_compare.py` dựng cùng một câu lệnh. Test
+    `test/online_recognizer_test.dart` so câu lệnh của app với
+    `test/fixtures/gemini_request.json`, file do script xuất ra.
+  - Đổi file JSON thì phải chạy lại phép đo, xuất lại fixture và tăng
+    `contract_version`.
+- **Đầu ra:** JSON theo schema
+  `{"foods": [{"class", "name", "grams"}]}`.
+  - `class` là một lớp của detector hoặc `other`.
+  - Gọi qua Interactions API với `store: false`.
+- **Model:** người dùng chọn trong Cài đặt.
+  - Mặc định `gemini-3.5-flash-lite`, model đã đo và ghi trong
+    `online_classes.json`. Chờ tối đa 8 giây.
+  - Có thể chọn `gemini-3.8-flash`, model mạnh hơn nhưng **chưa đo**. Model
+    này chạy với `thinking_level: low` và chờ tối đa 20 giây. Gói miễn phí
+    chỉ cho 20 ảnh mỗi ngày.
+  - Câu lệnh và schema của hai model giống nhau.
+- **App dùng câu trả lời thế nào:**
+  - Mỗi lớp xuất hiện một lần, đổi sang thành phần bằng bảng ở mục 7.1,
+    giống detector.
+  - Lượng ăn là khẩu phần thường (mục 7.3). Món đếm theo cái lấy số khung
+    của detector nếu detector cũng thấy món đó.
+  - **Chưa dùng `grams`**: số gam Gemini đoán chưa được so với khối lượng
+    cân thật.
+  - Kcal và macro chỉ lấy từ CSV ở mục 4.
+  - Món `other` và lớp lạ chỉ hiện tên, không có số dinh dưỡng.
+  - Gemini không trả xác suất, nên dòng `food_log` có `confidence` trống
+    (khác mục 8).
+  - Khung trên ảnh là khung của detector, chỉ vẽ cho các lớp Gemini cũng
+    nêu.
+  - Gemini trả lời mà không nêu lớp nào trong 21 lớp (chỉ `other`, hoặc
+    rỗng) thì app dùng đĩa của detector, không báo gì.
+  - Model phân loại thịt (mục 9, nếu có) không chạy trên đĩa do Gemini nêu.
+- **Khi model quá tải** (HTTP 503 hoặc quá thời gian chờ):
+  - App hỏi lại cùng model, tối đa 2 lần, cách 1 giây rồi 3 giây, nếu còn
+    đủ ít nhất 4 giây.
+  - Tổng thời gian chờ cho một ảnh: 20 giây với Lite, 30 giây với Flash.
+  - Đang dùng Flash mà vẫn lỗi thì app chuyển sang Lite, cũng được hỏi lại
+    như vậy trong thời gian còn lại. Flash được dùng tối đa 22 giây để ít
+    nhất 8 giây dành cho Lite.
+  - Màn kết quả ghi model thật sự đã trả lời. Đã chuyển sang Lite thì không
+    ghi là Flash.
+- **Khi không có câu trả lời:** mất mạng, hết lượt (HTTP 429), quá tải sau
+  khi đã thử lại, lỗi khác, hoặc JSON hỏng. App dùng đĩa của detector và báo
+  lý do bằng một dòng. HTTP 429, lỗi khác và mất mạng không được thử lại, và
+  cũng không chuyển sang model khác.

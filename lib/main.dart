@@ -6,6 +6,7 @@ import 'core/cyber_theme.dart';
 import 'core/locale_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/home_screen.dart';
+import 'services/online_recognizer.dart';
 import 'services/photo_collector.dart';
 import 'services/reminder_service.dart';
 import 'services/water_reminder_service.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
     reminders.load(),
     waterReminders.load(),
     PhotoCollector.instance.load(),
+    OnlineRecognizer.instance.load(),
   ]);
   runApp(OptiFitApp(
     themeController: themeController,

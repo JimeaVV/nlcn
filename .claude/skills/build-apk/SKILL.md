@@ -31,6 +31,14 @@ export ANDROID_HOME='<Android SDK trong CLAUDE.local.md>'
 
 - Chỉ build arm64: điện thoại hiện nay đều là arm64, và file nhỏ hơn bản
   universal nhiều.
+- **Bản dev test có nhận diện online (Gemini):** thêm
+  `--dart-define=GEMINI_API_KEY=<key>` (docs/CHE_DO_ONLINE.md mục 4).
+  - Key lấy từ biến `GEMINI_API_KEY` của tài khoản người dùng, đọc trong
+    PowerShell bằng `[Environment]::GetEnvironmentVariable('GEMINI_API_KEY','User')`
+    rồi đưa thẳng vào lệnh build.
+  - Không in key ra, không ghi key vào file nào trong repo hay vào log.
+  - Thêm `-devtest` vào tên file ở bước 4.
+  - Chỉ gửi bản này cho người thử, vì ai có APK cũng lấy được key.
 - Build mất vài phút; chạy nền nếu cần.
 - File ra ở `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`.
 
